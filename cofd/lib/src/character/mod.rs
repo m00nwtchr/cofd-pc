@@ -496,6 +496,23 @@ pub enum ModifierOp {
 	Set,
 }
 
+pub enum TraitCategory {
+	Mental,
+	Physical,
+	Social,
+}
+
+pub enum AttributeType {
+	Power,
+	Finesse,
+	Resistance,
+}
+
+pub enum AttributeCategory {
+	Type(AttributeType),
+	Trait(TraitCategory),
+}
+
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum Attribute {
 	Intelligence,
@@ -509,6 +526,83 @@ pub enum Attribute {
 	Presence,
 	Manipulation,
 	Composure,
+}
+
+impl Attribute {
+	pub fn all() -> [Attribute; 9] {
+		[
+			Self::Intelligence,
+			Self::Wits,
+			Self::Resolve,
+			//
+			Self::Strength,
+			Self::Dexterity,
+			Self::Stamina,
+			//
+			Self::Presence,
+			Self::Manipulation,
+			Self::Composure,
+		]
+	}
+
+	pub fn mental() -> [Attribute; 3] {
+		[Self::Intelligence, Self::Wits, Self::Resolve]
+	}
+
+	pub fn physical() -> [Attribute; 3] {
+		[Self::Strength, Self::Dexterity, Self::Stamina]
+	}
+
+	pub fn social() -> [Attribute; 3] {
+		[Self::Presence, Self::Manipulation, Self::Composure]
+	}
+
+	pub fn power() -> [Attribute; 3] {
+		[Self::Intelligence, Self::Strength, Self::Presence]
+	}
+
+	pub fn finesse() -> [Attribute; 3] {
+		[Self::Wits, Self::Dexterity, Self::Manipulation]
+	}
+
+	pub fn resistance() -> [Attribute; 3] {
+		[Self::Resolve, Self::Stamina, Self::Composure]
+	}
+
+	pub fn get(cat: AttributeCategory) -> [Attribute; 3] {
+		match cat {
+			AttributeCategory::Type(_type) => match _type {
+				AttributeType::Power => Self::power(),
+				AttributeType::Finesse => Self::finesse(),
+				AttributeType::Resistance => Self::resistance(),
+			},
+			AttributeCategory::Trait(_trait) => match _trait {
+				TraitCategory::Mental => Self::mental(),
+				TraitCategory::Physical => Self::physical(),
+				TraitCategory::Social => Self::social(),
+			},
+		}
+	}
+
+	pub fn get_attr(_trait: TraitCategory, _type: AttributeType) -> Attribute {
+		match _trait {
+			TraitCategory::Mental => match _type {
+				AttributeType::Power => Self::Intelligence,
+				AttributeType::Finesse => Self::Wits,
+				AttributeType::Resistance => Self::Resolve,
+			},
+			TraitCategory::Physical => match _type {
+				AttributeType::Power => Self::Strength,
+				AttributeType::Finesse => Self::Dexterity,
+				AttributeType::Resistance => Self::Stamina,
+			},
+			TraitCategory::Social => match _type {
+				AttributeType::Power => Self::Presence,
+				AttributeType::Finesse => Self::Manipulation,
+				AttributeType::Resistance => Self::Composure,
+			},
+		}
+	}
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, Hash, PartialEq, Eq)]
@@ -539,6 +633,86 @@ pub enum Skill {
 	Socialize,
 	Streetwise,
 	Subterfuge,
+}
+
+impl Skill {
+	fn all() -> [Skill; 24] {
+		[
+			Self::Academics,
+			Self::Computer,
+			Self::Crafts,
+			Self::Investigation,
+			Self::Medicine,
+			Self::Occult,
+			Self::Politics,
+			Self::Science,
+			//
+			Self::Athletics,
+			Self::Brawl,
+			Self::Drive,
+			Self::Firearms,
+			Self::Larceny,
+			Self::Stealth,
+			Self::Survival,
+			Self::Weaponry,
+			//
+			Self::AnimalKen,
+			Self::Empathy,
+			Self::Expression,
+			Self::Intimidation,
+			Self::Persuasion,
+			Self::Socialize,
+			Self::Streetwise,
+			Self::Subterfuge,
+		]
+	}
+
+	fn mental() -> [Skill; 8] {
+		[
+			Self::Academics,
+			Self::Computer,
+			Self::Crafts,
+			Self::Investigation,
+			Self::Medicine,
+			Self::Occult,
+			Self::Politics,
+			Self::Science,
+		]
+	}
+
+	fn physical() -> [Skill; 8] {
+		[
+			Self::Athletics,
+			Self::Brawl,
+			Self::Drive,
+			Self::Firearms,
+			Self::Larceny,
+			Self::Stealth,
+			Self::Survival,
+			Self::Weaponry,
+		]
+	}
+
+	fn social() -> [Skill; 8] {
+		[
+			Self::AnimalKen,
+			Self::Empathy,
+			Self::Expression,
+			Self::Intimidation,
+			Self::Persuasion,
+			Self::Socialize,
+			Self::Streetwise,
+			Self::Subterfuge,
+		]
+	}
+
+	pub fn get(cat: TraitCategory) -> [Skill; 8] {
+		match cat {
+			TraitCategory::Mental => Self::mental(),
+			TraitCategory::Physical => Self::physical(),
+			TraitCategory::Social => Self::social(),
+		}
+	}
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize)]

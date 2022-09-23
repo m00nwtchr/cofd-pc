@@ -1,4 +1,4 @@
-mod character;
+pub mod character;
 pub mod splat;
 
 pub mod prelude {
