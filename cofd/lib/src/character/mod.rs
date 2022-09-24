@@ -262,6 +262,9 @@ impl Character {
 	pub fn base_attributes_mut(&mut self) -> &mut Attributes {
 		&mut self._attributes
 	}
+	pub fn base_attributes(&self) -> &Attributes {
+		&self._attributes
+	}
 
 	pub fn skills(&self) -> &Skills {
 		&self.skills
@@ -356,6 +359,40 @@ pub struct Attributes {
 	pub presence: i8,
 	pub manipulation: i8,
 	pub composure: i8,
+}
+
+impl Attributes {
+	pub fn get(&self, attr: &Attribute) -> i8 {
+		match attr {
+			Attribute::Intelligence => self.intelligence,
+			Attribute::Wits => self.wits,
+			Attribute::Resolve => self.resolve,
+			//
+			Attribute::Strength => self.strength,
+			Attribute::Dexterity => self.dexterity,
+			Attribute::Stamina => self.stamina,
+			//
+			Attribute::Presence => self.presence,
+			Attribute::Manipulation => self.manipulation,
+			Attribute::Composure => self.composure,
+		}
+	}
+
+	pub fn get_mut(&mut self, attr: &Attribute) -> &mut i8 {
+		match attr {
+			Attribute::Intelligence => &mut self.intelligence,
+			Attribute::Wits => &mut self.wits,
+			Attribute::Resolve => &mut self.resolve,
+			//
+			Attribute::Strength => &mut self.strength,
+			Attribute::Dexterity => &mut self.dexterity,
+			Attribute::Stamina => &mut self.stamina,
+			//
+			Attribute::Presence => &mut self.presence,
+			Attribute::Manipulation => &mut self.manipulation,
+			Attribute::Composure => &mut self.composure,
+		}
+	}
 }
 
 impl Default for Attributes {
@@ -601,6 +638,22 @@ impl Attribute {
 				AttributeType::Finesse => Self::Manipulation,
 				AttributeType::Resistance => Self::Composure,
 			},
+		}
+	}
+
+	pub fn name(&self) -> &str {
+		match self {
+			Attribute::Intelligence => "intelligence",
+			Attribute::Wits => "wits",
+			Attribute::Resolve => "resolve",
+			//
+			Attribute::Strength => "strength",
+			Attribute::Dexterity => "dexterity",
+			Attribute::Stamina => "stamina",
+			//
+			Attribute::Presence => "presence",
+			Attribute::Manipulation => "manipulation",
+			Attribute::Composure => "composure",
 		}
 	}
 }

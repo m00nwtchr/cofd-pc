@@ -1,4 +1,6 @@
-fallback_language = "en-US"
+# fallback_language = "en-US"
+
+fallback_language = "pl-PL"
 
 [fluent]
 assets_dir = "i18n"

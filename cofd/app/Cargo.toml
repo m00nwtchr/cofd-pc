@@ -6,14 +6,19 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-iced = {version = "0.4", features = ["pure"]}
-iced_aw = {version = "0.2", default-features = false, features = ["pure", "tabs"]}
+iced = {git = "https://github.com/iced-rs/iced"}
+iced_native = {git = "https://github.com/iced-rs/iced"}
+# iced_aw = {version = "0.2", default-features = false, features = ["pure", "tabs"]}
+iced_aw = {git = "https://github.com/iced-rs/iced_aw", features = ["pure", "tabs"]}
 
 cfg-if = "1"
 
 # i18n-embed = { version = "0.13", features = ["fluent-system", "desktop-requester"]}
 i18n-embed-fl = "0.6"
 rust-embed = "6"
+fluent = "0.16"
+
+once_cell = "1.4"
 
 anyhow = "1"
 
