@@ -318,6 +318,8 @@
 #   }
 # }
 
+app-name = Chronicles of Darkness Player Companion
+
 attributes = Attributes
 attribute = Attribute
     .power = Power
@@ -344,14 +346,31 @@ chronicle = Chronicle
 virtue = Virtue
 vice = Vice
 
+faction = Faction
+group_name = Group Name
+
+age = Age
+
 vampire = Vampire
     .mask = Mask
     .dirge = Dirge
+
+    .clan = Clan
+    .covenant = Covenant
+    .bloodline = Bloodline
 
 werewolf = Werewolf
     .blood = Blood
     .bone = Bone
 
+    .auspice = Auspice
+    .tribe = Tribe
+    .lodge = Lodge
+
 changeling = Changeling
     .needle = Needle
     .thread = Thread
+
+    .seeming = Seeming
+    .court = Court
+    .kith = Kith

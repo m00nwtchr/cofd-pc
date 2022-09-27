@@ -1,4 +1,4 @@
-use std::{rc::Rc, sync::Arc};
+use std::{fmt::Display, rc::Rc, sync::Arc};
 
 use i18n_embed::{
 	fluent::{fluent_language_loader, FluentLanguageLoader},
@@ -15,6 +15,7 @@ cfg_if! {
 use cfg_if::cfg_if;
 use once_cell::sync::{Lazy, OnceCell};
 use rust_embed::RustEmbed;
+use unic_langid::langid;
 
 #[derive(RustEmbed)]
 #[folder = "i18n"] // path to the compiled localization resources
@@ -38,31 +39,53 @@ pub fn fl(message_id: &str, attribute: Option<&str>) -> String {
 	let message_clone = message.clone();
 	LANGUAGE_LOADER.with_bundles_mut(|bundle| {
 		if let None = message.get() {
-			let msg = bundle.get_message(message_id).unwrap();
-
-			let pattern = if let Some(attribute) = attribute {
-				msg.get_attribute(attribute).unwrap().value()
-			} else {
-				msg.value().unwrap()
-			};
-
-			message
-				.set(
-					bundle
-						.format_pattern(pattern, None, &mut vec![])
-						.to_string(),
-				)
-				.unwrap();
+			// println!("{}", message_id);
+			if let Some(msg) = bundle.get_message(message_id) {
+				if let Some(pattern) = if let Some(attribute) = attribute {
+					msg.get_attribute(attribute).map(|v| v.value())
+				} else {
+					msg.value()
+				} {
+					message
+						.set(
+							bundle
+								.format_pattern(pattern, None, &mut vec![])
+								.to_string(),
+						)
+						.unwrap();
+				}
+			}
 		}
 	});
 	message_clone.get().unwrap().clone()
 }
 
-pub fn setup() {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Locale {
+	System,
+	Lang(LanguageIdentifier),
+}
+
+impl Default for Locale {
+	fn default() -> Self {
+		Self::Lang(langid!("en-US"))
+	}
+}
+
+impl Display for Locale {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Locale::System => f.write_str("System"),
+			Locale::Lang(id) => f.write_str(&id.to_string()),
+		}
+	}
+}
+
+pub fn setup() -> Box<dyn LanguageRequester<'static>> {
 	let localizer = DefaultLocalizer::new(&*LANGUAGE_LOADER, &Localizations);
 	let localizer_arc: Arc<dyn Localizer> = Arc::new(localizer);
 
-	let mut language_requester = {
+	let mut language_requester = Box::new({
 		cfg_if! {
 			if #[cfg(target_arch = "wasm32")] {
 				WebLanguageRequester::new()
@@ -70,21 +93,10 @@ pub fn setup() {
 				DesktopLanguageRequester::new()
 			}
 		}
-	};
-
-	// language_requester.set_language_override(Some(LanguageIdentifier::from_parts(
-	// 	"en".parse().expect("msg"),
-	// 	None,
-	// 	None,
-	// 	&[],
-	// )));
+	});
 
 	language_requester.add_listener(Arc::downgrade(&localizer_arc));
 	language_requester.poll().unwrap();
 
-	// localizer.select(requested_languages)
-
-	// i18n_embed::select(&language_loader, &Localizations, &requested_languages).unwrap();
-	// localizer.select(requested_languages)
-	// language_loader
+	language_requester
 }

@@ -1,10 +1,10 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, fmt::Display, rc::Rc};
 
-use i18n_embed::fluent::FluentLanguageLoader;
+use i18n_embed::{fluent::FluentLanguageLoader, LanguageRequester};
 use iced::{
 	alignment::Vertical,
 	executor,
-	widget::{column, container, row, text, text_input},
+	widget::{column, container, pick_list, row, text, text_input},
 	widget::{Column, Row},
 	Alignment, Application, Command, Element, Length, Sandbox, Settings, Theme,
 };
@@ -13,35 +13,54 @@ use iced_aw::pure::{TabLabel, Tabs};
 use cofd::{
 	character::{AttributeCategory, InfoTrait, TraitCategory},
 	prelude::*,
+	splat::{vampire::Clan, Splat},
 };
 
 mod i18n;
 mod widget;
 
-use i18n::fl;
+use i18n::{fl, Locale};
+use unic_langid::langid;
 use widget::SheetDots;
 
 struct PlayerCompanionApp {
 	active_tab: usize,
 	character: Character,
-	// lang_loader: FluentLanguageLoader,
+	locale: Locale,
+	language_requester: Box<dyn LanguageRequester<'static>>,
 }
+
+const LANGS: [Locale; 4] = [
+	Locale::System,
+	Locale::Lang(langid!("en-GB")),
+	Locale::Lang(langid!("en-US")),
+	Locale::Lang(langid!("pl-PL")),
+];
 
 #[derive(Debug, Clone)]
 enum Message {
 	TabSelected(usize),
+	LocaleChanged(Locale),
 	AttrChanged(u8, Attribute),
 	InfoTraitChanged(String, InfoTrait),
 }
 
 impl PlayerCompanionApp {
 	fn overview_tab(&self) -> Element<'static, Message> {
-		column![self.info(), self.attributes()]
-			.padding(10)
-			.width(Length::Fill)
-			.align_items(Alignment::Center)
-			// .align_y(Vertical::Center)
-			.into()
+		column![
+			self.info(),
+			self.attributes(),
+			pick_list(
+				Vec::from(LANGS),
+				Some(self.locale.clone()),
+				Message::LocaleChanged
+			)
+		]
+		.padding(10)
+		.width(Length::Fill)
+		.align_items(Alignment::Center)
+		// .align_y(Vertical::Center)
+		.into()
 	}
 
 	fn attributes(&self) -> Element<'static, Message> {
@@ -80,21 +99,24 @@ impl PlayerCompanionApp {
 
 			for _trait in info {
 				let (msg, attribute) = match _trait {
-					InfoTrait::VirtueAnchor => {
+					InfoTrait::VirtueAnchor | InfoTrait::ViceAnchor => {
 						if app.character.splat.virtue_anchor() == "virtue" {
-							("virtue", None)
+							(_trait.name(), None)
 						} else {
-							(app.character.splat.name(), Some(app.character.splat.virtue_anchor()))
+							match _trait {
+								InfoTrait::VirtueAnchor => (
+									app.character.splat.name(),
+									Some(app.character.splat.virtue_anchor()),
+								),
+								InfoTrait::ViceAnchor => (
+									app.character.splat.name(),
+									Some(app.character.splat.vice_anchor()),
+								),
+								_ => unreachable!(),
+							}
 						}
-					},
-					InfoTrait::ViceAnchor => {
-						if app.character.splat.vice_anchor() == "vice" {
-							("vice", None)
-						} else {
-							(app.character.splat.name(), Some(app.character.splat.vice_anchor()))
-						}
-					},
-					_ => (_trait.name(), None)
+					}
+					_ => (_trait.name(), None),
 				};
 
 				col1 = col1.push(text(format!("{}:", fl(msg, attribute))));
@@ -116,12 +138,28 @@ impl PlayerCompanionApp {
 			),
 			mk(
 				self,
-				vec![InfoTrait::VirtueAnchor, InfoTrait::ViceAnchor, InfoTrait::Concept]
+				vec![
+					InfoTrait::VirtueAnchor,
+					InfoTrait::ViceAnchor,
+					InfoTrait::Concept
+				]
 			),
-			mk(
-				self,
-				vec![InfoTrait::Chronicle, InfoTrait::Name, InfoTrait::Name]
-			)
+			match self.character.splat {
+				Splat::Mortal => mk(
+					self,
+					vec![InfoTrait::Age, InfoTrait::Faction, InfoTrait::GroupName]
+				),
+				_ => row![
+					column![text(fl(
+						self.character.splat.name(),
+						Some(self.character.splat.xsplat_name())
+					))]
+					.spacing(3),
+					column![].spacing(3)
+				]
+				.spacing(5)
+				.into(),
+			},
 		]
 		.spacing(10)
 		// ]
@@ -137,7 +175,10 @@ impl Application for PlayerCompanionApp {
 	type Theme = Theme;
 
 	fn new(_flags: ()) -> (Self, Command<Self::Message>) {
+		let language_requester = i18n::setup();
+
 		let character = Character::builder()
+			// .with_splat(Splat::Vampire(Clan::Ventrue, None, None))
 			.with_attributes(Attributes {
 				intelligence: 1,
 				wits: 3,
@@ -157,14 +198,15 @@ impl Application for PlayerCompanionApp {
 			Self {
 				active_tab: 0,
 				character,
-				// lang_loader,
+				locale: Default::default(), // lang_loader,
+				language_requester,
 			},
 			Command::none(),
 		)
 	}
 
 	fn title(&self) -> String {
-		"Chronicles of Darkness Player Companion".to_string()
+		fl!("app-name")
 	}
 
 	fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
@@ -174,6 +216,17 @@ impl Application for PlayerCompanionApp {
 				*self.character.base_attributes_mut().get_mut(&attr) = val as i8;
 			}
 			Message::InfoTraitChanged(val, _trait) => *self.character.info.get_mut(&_trait) = val,
+			Message::LocaleChanged(locale) => {
+				self.locale = locale;
+				self.language_requester
+					.set_language_override(match &self.locale {
+						Locale::System => None,
+						Locale::Lang(id) => Some(id.clone()),
+					})
+					.unwrap();
+				self.language_requester.poll().unwrap();
+				println!("{}, {}", fl!("attribute"), fl("attribute", None))
+			}
 		}
 
 		Command::none()
@@ -182,18 +235,17 @@ impl Application for PlayerCompanionApp {
 	fn view(&self) -> Element<'_, Self::Message> {
 		self.overview_tab().into()
 		// Tabs::new(self.active_tab, Message::TabSelected)
-		// 	.push(
-		// 		TabLabel::Text(String::from("Overview")),
-		// 		self.overview_tab(),
-		// 	)
-		// 	.push(TabLabel::Text("UwU".to_string()), self.overview_tab())
-		// 	.into()
+		// .push(
+		// 	TabLabel::Text(String::from("Overview")),
+		// 	self.overview_tab(),
+		// )
+		// .push(TabLabel::Text("UwU".to_string()), self.overview_tab())
+		// .into()
 	}
 }
 
 fn main() -> iced::Result {
 	env_logger::init();
-	i18n::setup();
 
 	PlayerCompanionApp::run(Settings {
 		..Default::default()

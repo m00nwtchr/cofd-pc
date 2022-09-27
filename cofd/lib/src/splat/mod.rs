@@ -61,7 +61,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => "mask",
 			Splat::Werewolf(_, _, _, _) => "blood",
 			Splat::Changeling(_, _, _) => "thread",
-			_ => "virtue"
+			_ => "virtue",
 		}
 	}
 
@@ -70,7 +70,37 @@ impl Splat {
 			Splat::Vampire(_, _, _) => "dirge",
 			Splat::Werewolf(_, _, _, _) => "bone",
 			Splat::Changeling(_, _, _) => "needle",
-			_ => "vice"
+			_ => "vice",
+		}
+	}
+
+	pub fn xsplat_name(&self) -> &str {
+		match self {
+			Splat::Mortal => "",
+			Splat::Vampire(_, _, _) => "clan",
+			Splat::Werewolf(_, _, _, _) => "auspice",
+			Splat::Mage(_, _, _) => "path",
+			Splat::Changeling(_, _, _) => "seeming",
+		}
+	}
+
+	pub fn ysplat_name(&self) -> &str {
+		match self {
+			Splat::Mortal => "faction",
+			Splat::Vampire(_, _, _) => "covenant",
+			Splat::Werewolf(_, _, _, _) => "tribe",
+			Splat::Mage(_, _, _) => "order",
+			Splat::Changeling(_, _, _) => "court",
+		}
+	}
+
+	pub fn zsplat_name(&self) -> &str {
+		match self {
+			Splat::Mortal => "",
+			Splat::Vampire(_, _, _) => "bloodline",
+			Splat::Werewolf(_, _, _, _) => "lodge",
+			Splat::Mage(_, _, _) => "legacy",
+			Splat::Changeling(_, _, _) => "kith",
 		}
 	}
 }

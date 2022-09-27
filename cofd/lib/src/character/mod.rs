@@ -344,6 +344,9 @@ pub struct CharacterInfo {
 	virtue_anchor: String,
 	vice_anchor: String,
 
+	faction: String,
+	group_name: String,
+
 	concept: String,
 	chronicle: String,
 
@@ -369,6 +372,14 @@ pub enum InfoTrait {
 	ViceAnchor,
 	Concept,
 	Chronicle,
+
+	Faction,
+	GroupName,
+
+	XSplat,
+	YSplat,
+	ZSplat,
+
 	DateOfBirth,
 	Hair,
 	Eyes,
@@ -395,8 +406,13 @@ impl InfoTrait {
 			InfoTrait::Height => "height",
 			InfoTrait::Weight => "weight",
 			InfoTrait::Sex => "sex",
-			InfoTrait::VirtueAnchor => "virtue_anchor",
-			InfoTrait::ViceAnchor => "vice_anchor",
+			InfoTrait::VirtueAnchor => "virtue",
+			InfoTrait::ViceAnchor => "vice",
+			InfoTrait::YSplat => "",
+			InfoTrait::ZSplat => "",
+			InfoTrait::XSplat => "",
+			InfoTrait::Faction => "faction",
+			InfoTrait::GroupName => "group_name",
 		}
 	}
 }
@@ -419,6 +435,11 @@ impl CharacterInfo {
 			InfoTrait::Sex => &self.sex,
 			InfoTrait::VirtueAnchor => &self.virtue_anchor,
 			InfoTrait::ViceAnchor => &self.vice_anchor,
+			InfoTrait::YSplat => unreachable!(),
+			InfoTrait::ZSplat => unreachable!(),
+			InfoTrait::XSplat => unreachable!(),
+			InfoTrait::Faction => &self.faction,
+			InfoTrait::GroupName => &self.group_name,
 		}
 	}
 
@@ -439,6 +460,11 @@ impl CharacterInfo {
 			InfoTrait::Sex => &mut self.sex,
 			InfoTrait::VirtueAnchor => &mut self.virtue_anchor,
 			InfoTrait::ViceAnchor => &mut self.vice_anchor,
+			InfoTrait::YSplat => unreachable!(),
+			InfoTrait::ZSplat => unreachable!(),
+			InfoTrait::XSplat => unreachable!(),
+			InfoTrait::Faction => &mut self.faction,
+			InfoTrait::GroupName => &mut self.group_name,
 		}
 	}
 }
