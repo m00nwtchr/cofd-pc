@@ -318,6 +318,7 @@
 #   }
 # }
 
+attributes = Attributes
 attribute = Attribute
     .power = Power
     .finesse = Finesse
@@ -334,3 +335,23 @@ attribute = Attribute
     .presence = Presence
     .manipulation = Manipulation
     .composure = Composure
+
+name = Name
+player = Player
+concept = Concept
+chronicle = Chronicle
+
+virtue = Virtue
+vice = Vice
+
+vampire = Vampire
+    .mask = Mask
+    .dirge = Dirge
+
+werewolf = Werewolf
+    .blood = Blood
+    .bone = Bone
+
+changeling = Changeling
+    .needle = Needle
+    .thread = Thread

@@ -42,7 +42,7 @@ where
 			value,
 			min,
 			max,
-			on_click: (0..max+1).map(f).collect(),
+			on_click: (0..max + 1).map(f).collect(),
 			size: Self::DEFAULT_SIZE,
 			spacing: Self::DEFAULT_SPACING, //15
 			style: Default::default(),
@@ -95,15 +95,13 @@ where
 			| Event::Touch(touch::Event::FingerPressed { .. }) => {
 				for (i, layout) in layout.children().enumerate() {
 					if layout.bounds().contains(cursor_position) {
-						let i = if (self.value as isize - 1) == i as isize {
-							i
-						} else {
-							i+1
-						};
-
-						println!("{}", i);
-
-						if let Some(message) = self.on_click.get(i) {
+						if let Some(message) =
+							self.on_click
+								.get(if (self.value as isize - 1) == i as isize {
+									i
+								} else {
+									i + 1
+								}) {
 							shell.publish(message.clone());
 						}
 

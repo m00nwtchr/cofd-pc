@@ -45,7 +45,35 @@ pub enum Splat {
 	// Deviant,
 }
 
-impl Splat {}
+impl Splat {
+	pub fn name(&self) -> &str {
+		match self {
+			Splat::Mortal => "mortal",
+			Splat::Vampire(_, _, _) => "vampire",
+			Splat::Werewolf(_, _, _, _) => "werewolf",
+			Splat::Mage(_, _, _) => "mage",
+			Splat::Changeling(_, _, _) => "changeling",
+		}
+	}
+
+	pub fn virtue_anchor(&self) -> &str {
+		match self {
+			Splat::Vampire(_, _, _) => "mask",
+			Splat::Werewolf(_, _, _, _) => "blood",
+			Splat::Changeling(_, _, _) => "thread",
+			_ => "virtue"
+		}
+	}
+
+	pub fn vice_anchor(&self) -> &str {
+		match self {
+			Splat::Vampire(_, _, _) => "dirge",
+			Splat::Werewolf(_, _, _, _) => "bone",
+			Splat::Changeling(_, _, _) => "needle",
+			_ => "vice"
+		}
+	}
+}
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
 pub enum AbilityKey {

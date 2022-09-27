@@ -4,23 +4,21 @@ use i18n_embed::fluent::FluentLanguageLoader;
 use iced::{
 	alignment::Vertical,
 	executor,
-	widget::{column, container, row, text},
+	widget::{column, container, row, text, text_input},
 	widget::{Column, Row},
-	Alignment, Application, Command, Element, Sandbox, Settings, Theme, Length,
+	Alignment, Application, Command, Element, Length, Sandbox, Settings, Theme,
 };
 use iced_aw::pure::{TabLabel, Tabs};
 
-use i18n_embed_fl::fl;
-
 use cofd::{
-	character::{AttributeCategory, TraitCategory},
+	character::{AttributeCategory, InfoTrait, TraitCategory},
 	prelude::*,
 };
 
 mod i18n;
 mod widget;
 
-use i18n::LANGUAGE_LOADER;
+use i18n::fl;
 use widget::SheetDots;
 
 struct PlayerCompanionApp {
@@ -29,35 +27,16 @@ struct PlayerCompanionApp {
 	// lang_loader: FluentLanguageLoader,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 enum Message {
 	TabSelected(usize),
 	AttrChanged(u8, Attribute),
-}
-
-pub fn fl(loader: &FluentLanguageLoader, message_id: &str, attribute: &str) -> String {
-	let message = Rc::new(RefCell::new(None));
-	let message_clone = message.clone();
-	loader.with_bundles_mut(|bundle| {
-		let pattern = bundle
-			.get_message(message_id)
-			.unwrap()
-			.get_attribute(attribute)
-			.unwrap()
-			.value();
-
-		message.replace(Some(
-			bundle
-				.format_pattern(pattern, None, &mut vec![])
-				.to_string(),
-		));
-	});
-	message_clone.take().unwrap()
+	InfoTraitChanged(String, InfoTrait),
 }
 
 impl PlayerCompanionApp {
 	fn overview_tab(&self) -> Element<'static, Message> {
-		column![self.attributes()]
+		column![self.info(), self.attributes()]
 			.padding(10)
 			.width(Length::Fill)
 			.align_items(Alignment::Center)
@@ -69,25 +48,84 @@ impl PlayerCompanionApp {
 		fn mk_col(app: &PlayerCompanionApp, cat: TraitCategory) -> Element<'static, Message> {
 			let mut col1 = Column::new().spacing(3);
 			let mut col2 = Column::new().spacing(3);
-	
+
 			for attr in Attribute::get(AttributeCategory::Trait(cat)) {
-				col1 = col1.push(text(format!(
-					"{}",
-					fl(&LANGUAGE_LOADER, "attribute", &attr.name())
-				)));
-	
+				col1 = col1.push(text(format!("{}", fl("attribute", Some(attr.name())))));
+
 				let v = app.character.base_attributes().get(&attr) as u8;
-				col2 = col2.push(SheetDots::new(v, 1, 5, |val| Message::AttrChanged(val, attr)));
+				col2 = col2.push(SheetDots::new(v, 1, 5, |val| {
+					Message::AttrChanged(val, attr)
+				}));
 			}
-	
+
+			row![col1, col2].spacing(5).into()
+		}
+		column![
+			text(fl!("attributes")).size(25),
+			row![
+				mk_col(self, TraitCategory::Mental),
+				mk_col(self, TraitCategory::Physical),
+				mk_col(self, TraitCategory::Social)
+			]
+			.spacing(10)
+		]
+		.align_items(Alignment::Center)
+		.into()
+	}
+
+	fn info(&self) -> Element<'static, Message> {
+		fn mk(app: &PlayerCompanionApp, info: Vec<InfoTrait>) -> Element<'static, Message> {
+			let mut col1 = Column::new().spacing(3);
+			let mut col2 = Column::new().spacing(3).max_width(120);
+
+			for _trait in info {
+				let (msg, attribute) = match _trait {
+					InfoTrait::VirtueAnchor => {
+						if app.character.splat.virtue_anchor() == "virtue" {
+							("virtue", None)
+						} else {
+							(app.character.splat.name(), Some(app.character.splat.virtue_anchor()))
+						}
+					},
+					InfoTrait::ViceAnchor => {
+						if app.character.splat.vice_anchor() == "vice" {
+							("vice", None)
+						} else {
+							(app.character.splat.name(), Some(app.character.splat.vice_anchor()))
+						}
+					},
+					_ => (_trait.name(), None)
+				};
+
+				col1 = col1.push(text(format!("{}:", fl(msg, attribute))));
+				col2 = col2.push(text_input(
+					"",
+					app.character.info.get(&_trait),
+					move |val| Message::InfoTraitChanged(val, _trait),
+				))
+			}
+
 			row![col1, col2].spacing(5).into()
 		}
 
+		// column![
 		row![
-			mk_col(self, TraitCategory::Mental),
-			mk_col(self, TraitCategory::Physical),
-			mk_col(self, TraitCategory::Social)
-		].spacing(10)
+			mk(
+				self,
+				vec![InfoTrait::Name, InfoTrait::Player, InfoTrait::Chronicle]
+			),
+			mk(
+				self,
+				vec![InfoTrait::VirtueAnchor, InfoTrait::ViceAnchor, InfoTrait::Concept]
+			),
+			mk(
+				self,
+				vec![InfoTrait::Chronicle, InfoTrait::Name, InfoTrait::Name]
+			)
+		]
+		.spacing(10)
+		// ]
+		// .align_items(Alignment::Center)
 		.into()
 	}
 }
@@ -99,10 +137,6 @@ impl Application for PlayerCompanionApp {
 	type Theme = Theme;
 
 	fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-		// let lang_loader = i18n::setup();
-
-		// println!("{}", fl!(lang_loader, "attribute.wits"));
-
 		let character = Character::builder()
 			.with_attributes(Attributes {
 				intelligence: 1,
@@ -139,6 +173,7 @@ impl Application for PlayerCompanionApp {
 			Message::AttrChanged(val, attr) => {
 				*self.character.base_attributes_mut().get_mut(&attr) = val as i8;
 			}
+			Message::InfoTraitChanged(val, _trait) => *self.character.info.get_mut(&_trait) = val,
 		}
 
 		Command::none()
@@ -157,6 +192,7 @@ impl Application for PlayerCompanionApp {
 }
 
 fn main() -> iced::Result {
+	env_logger::init();
 	i18n::setup();
 
 	PlayerCompanionApp::run(Settings {

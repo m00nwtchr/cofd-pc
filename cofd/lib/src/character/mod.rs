@@ -115,15 +115,9 @@ pub fn athletics() -> Skill {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Character {
-	splat: Splat,
+	pub splat: Splat,
 
-	name: String,
-	player: String,
-
-	concept: String,
-	chronicle: String,
-
-	age: u8,
+	pub info: CharacterInfo,
 
 	virtue_anchor: String,
 	vice_anchor: String,
@@ -323,10 +317,7 @@ impl Default for Character {
 	fn default() -> Self {
 		Self {
 			splat: Default::default(),
-			name: Default::default(),
-			concept: Default::default(),
-			chronicle: Default::default(),
-			age: Default::default(),
+			info: Default::default(),
 			virtue_anchor: Default::default(),
 			vice_anchor: Default::default(),
 			_attributes: Default::default(),
@@ -337,10 +328,117 @@ impl Default for Character {
 			health_track: Default::default(),
 			_mod_map: Default::default(),
 			power: Default::default(),
-			player: Default::default(),
 			integrity: 7,
 			fuel: Default::default(),
 			_defense_skill: Skill::Athletics,
+		}
+	}
+}
+
+#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
+#[serde(default)]
+pub struct CharacterInfo {
+	name: String,
+	player: String,
+
+	virtue_anchor: String,
+	vice_anchor: String,
+
+	concept: String,
+	chronicle: String,
+
+	age: String,
+	date_of_birth: String,
+	hair: String,
+	eyes: String,
+	race: String,
+	nationality: String,
+	height: String,
+	weight: String,
+	sex: String,
+
+	other: String,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum InfoTrait {
+	Name,
+	Age,
+	Player,
+	VirtueAnchor,
+	ViceAnchor,
+	Concept,
+	Chronicle,
+	DateOfBirth,
+	Hair,
+	Eyes,
+	Race,
+	Nationality,
+	Height,
+	Weight,
+	Sex,
+}
+
+impl InfoTrait {
+	pub fn name(&self) -> &str {
+		match self {
+			InfoTrait::Name => "name",
+			InfoTrait::Age => "age",
+			InfoTrait::Player => "player",
+			InfoTrait::Concept => "concept",
+			InfoTrait::Chronicle => "chronicle",
+			InfoTrait::DateOfBirth => "dob",
+			InfoTrait::Hair => "hair",
+			InfoTrait::Eyes => "eyes",
+			InfoTrait::Race => "race",
+			InfoTrait::Nationality => "nationality",
+			InfoTrait::Height => "height",
+			InfoTrait::Weight => "weight",
+			InfoTrait::Sex => "sex",
+			InfoTrait::VirtueAnchor => "virtue_anchor",
+			InfoTrait::ViceAnchor => "vice_anchor",
+		}
+	}
+}
+
+impl CharacterInfo {
+	pub fn get(&self, info: &InfoTrait) -> &String {
+		match info {
+			InfoTrait::Name => &self.name,
+			InfoTrait::Age => &self.age,
+			InfoTrait::Player => &self.player,
+			InfoTrait::Concept => &self.concept,
+			InfoTrait::Chronicle => &self.chronicle,
+			InfoTrait::DateOfBirth => &self.date_of_birth,
+			InfoTrait::Hair => &self.hair,
+			InfoTrait::Eyes => &self.eyes,
+			InfoTrait::Race => &self.race,
+			InfoTrait::Nationality => &self.nationality,
+			InfoTrait::Height => &self.height,
+			InfoTrait::Weight => &self.weight,
+			InfoTrait::Sex => &self.sex,
+			InfoTrait::VirtueAnchor => &self.virtue_anchor,
+			InfoTrait::ViceAnchor => &self.vice_anchor,
+		}
+	}
+
+	pub fn get_mut(&mut self, info: &InfoTrait) -> &mut String {
+		match info {
+			InfoTrait::Name => &mut self.name,
+			InfoTrait::Age => &mut self.age,
+			InfoTrait::Player => &mut self.player,
+			InfoTrait::Concept => &mut self.concept,
+			InfoTrait::Chronicle => &mut self.chronicle,
+			InfoTrait::DateOfBirth => &mut self.date_of_birth,
+			InfoTrait::Hair => &mut self.hair,
+			InfoTrait::Eyes => &mut self.eyes,
+			InfoTrait::Race => &mut self.race,
+			InfoTrait::Nationality => &mut self.nationality,
+			InfoTrait::Height => &mut self.height,
+			InfoTrait::Weight => &mut self.weight,
+			InfoTrait::Sex => &mut self.sex,
+			InfoTrait::VirtueAnchor => &mut self.virtue_anchor,
+			InfoTrait::ViceAnchor => &mut self.vice_anchor,
 		}
 	}
 }
@@ -481,6 +579,7 @@ impl Skills {
 			Skill::Occult => self.occult,
 			Skill::Politics => self.politics,
 			Skill::Science => self.science,
+			//
 			Skill::Athletics => self.athletics,
 			Skill::Brawl => self.brawl,
 			Skill::Drive => self.drive,
@@ -489,6 +588,7 @@ impl Skills {
 			Skill::Stealth => self.stealth,
 			Skill::Survival => self.survival,
 			Skill::Weaponry => self.weaponry,
+			//
 			Skill::AnimalKen => self.animal_ken,
 			Skill::Empathy => self.empathy,
 			Skill::Expression => self.expression,
