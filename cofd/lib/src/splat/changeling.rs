@@ -1,10 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use crate::character::{
-	ability::Ability, Attribute, Modifier, ModifierTarget, ModifierValue, Trait,
-};
+use super::XSplat;
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Seeming {
 	Beast,
 	Darkling,
@@ -16,6 +14,29 @@ pub enum Seeming {
 }
 
 impl Seeming {
+	pub fn all() -> [Seeming; 6] {
+		[
+			Seeming::Beast,
+			Seeming::Darkling,
+			Seeming::Elemental,
+			Seeming::Fairest,
+			Seeming::Ogre,
+			Seeming::Wizened,
+		]
+	}
+
+	pub fn name(&self) -> &str {
+		match self {
+			Seeming::Beast => "beast",
+			Seeming::Darkling => "darkling",
+			Seeming::Elemental => "elemental",
+			Seeming::Fairest => "fairest",
+			Seeming::Ogre => "ogre",
+			Seeming::Wizened => "wizened",
+			Seeming::_Custom(name, _) => name,
+		}
+	}
+
 	pub fn get_favored_regalia(&self) -> &Regalia {
 		match self {
 			Seeming::Beast => &Regalia::Steed,
@@ -26,6 +47,12 @@ impl Seeming {
 			Seeming::Wizened => &Regalia::Jewels,
 			Seeming::_Custom(_, regalia) => regalia,
 		}
+	}
+}
+
+impl Into<XSplat> for Seeming {
+	fn into(self) -> XSplat {
+		XSplat::Changeling(self)
 	}
 }
 
@@ -55,7 +82,7 @@ pub enum Kith {
 	_Custom(String),
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Regalia {
 	Crown,
 	Jewels,

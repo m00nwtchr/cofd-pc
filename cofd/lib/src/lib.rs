@@ -10,15 +10,15 @@ mod tests {
 	use crate::{
 		character::{Attributes, Character, Skill, Skills},
 		splat::{
-			vampire::{self, Bloodline, Clan, Covenant, Discipline, DisciplineAbility},
-			werewolf::{Auspice, Renown, RenownAbility, Tribe},
-			AbilityKey, Merit, MeritAbility, Splat,
+			ability::{Ability, AbilityVal},
+			vampire::{self, Bloodline, Clan, Covenant, Discipline},
+			werewolf::{Auspice, Form, Renown, Tribe},
+			Merit, Splat,
 		},
 	};
 
 	#[test]
 	fn it_works() {
-		let voivode = Discipline::_Custom("Coil of the Voivode".to_string());
 		let vampire_character = Character::builder()
 			.with_splat(Splat::Vampire(
 				Clan::Ventrue,
@@ -57,68 +57,31 @@ mod tests {
 				subterfuge: 4,
 				..Default::default()
 			})
-			// .with_abilities([
-			// 	(
-			// 		AbilityKey::Discipline(Discipline::Animalism),
-			// 		Box::new(DisciplineAbility(1, Discipline::Animalism)),
-			// 	),
-			// 	(
-			// 		AbilityKey::Discipline(Discipline::Dominate),
-			// 		Box::new(DisciplineAbility(2, Discipline::Dominate)),
-			// 	),
-			// 	(
-			// 		AbilityKey::Discipline(voivode.clone()),
-			// 		Box::new(DisciplineAbility(1, voivode)),
-			// 	),
-			// ])
+			.with_abilities([
+				AbilityVal(Ability::Discipline(Discipline::Animalism), 1),
+				AbilityVal(Ability::Discipline(Discipline::Dominate), 2),
+				AbilityVal(
+					Ability::Discipline(Discipline::_Custom("Coil of the Voivode".to_string())),
+					2,
+				),
+			])
 			.with_merits([
-				(
-					AbilityKey::Merit(Merit::Status("Ordo Dracul".to_string())),
-					MeritAbility(1, Merit::Status("Ordo Dracul".to_string())),
-				),
-				(
-					AbilityKey::Merit(Merit::Status("City".to_string())),
-					MeritAbility(1, Merit::Status("City".to_string())),
-				),
-				(
-					AbilityKey::Merit(Merit::CacophonySavvy),
-					MeritAbility(3, Merit::CacophonySavvy),
-				),
-				(
-					AbilityKey::Merit(Merit::FastTalking),
-					MeritAbility(1, Merit::FastTalking),
-				),
-				(
-					AbilityKey::Merit(Merit::ProfessionalTraining(
+				AbilityVal(Ability::Merit(Merit::Status("Ordo Dracul".to_string())), 1),
+				AbilityVal(Ability::Merit(Merit::Status("City".to_string())), 1),
+				AbilityVal(Ability::Merit(Merit::CacophonySavvy), 3),
+				AbilityVal(Ability::Merit(Merit::FastTalking), 1),
+				AbilityVal(
+					Ability::Merit(Merit::ProfessionalTraining(
 						"".to_string(),
 						[Skill::Expression, Skill::Occult],
 						None,
 					)),
-					MeritAbility(
-						2,
-						Merit::ProfessionalTraining(
-							"".to_string(),
-							[Skill::Expression, Skill::Occult],
-							None,
-						),
-					),
+					2,
 				),
-				// (
-				// 	AbilityKey::Merit(Merit::Contacts("".to_string())),
-				// 	MeritAbility(2, Merit::Contacts("".to_string())),
-				// ),
-				(
-					AbilityKey::Merit(Merit::SafePlace("".to_string())),
-					MeritAbility(3, Merit::SafePlace("".to_string())),
-				),
-				(
-					AbilityKey::Merit(Merit::Resources),
-					MeritAbility(3, Merit::Resources),
-				),
-				(
-					AbilityKey::Merit(Merit::NestGuardian),
-					MeritAbility(1, Merit::NestGuardian),
-				),
+				// AbilityVal(Ability::Merit(Merit::Contacts("".to_string())), 2),
+				AbilityVal(Ability::Merit(Merit::SafePlace(None)), 3),
+				AbilityVal(Ability::Merit(Merit::Resources), 3),
+				AbilityVal(Ability::Merit(Merit::NestGuardian), 1),
 			])
 			.build();
 
@@ -153,27 +116,54 @@ mod tests {
 				investigation: 2,
 				medicine: 2,
 				athletics: 2,
-				brawl: 3,
+				brawl: 4,
 				stealth: 2,
 				survival: 3,
-				intimidation: 3,
-				persuasion: 4,
+				expression: 3,
+				intimidation: 4,
 				..Default::default()
 			})
-			// .with_abilities([
-			// 	(
-			// 		AbilityKey::Renown(Renown::Glory),
-			// 		Box::new(RenownAbility(1)),
-			// 	),
-			// 	(
-			// 		AbilityKey::Renown(Renown::Purity),
-			// 		Box::new(RenownAbility(3)),
-			// 	),
-			// ])
+			.with_abilities([
+				AbilityVal(Ability::Renown(Renown::Glory), 1),
+				AbilityVal(Ability::Renown(Renown::Purity), 3),
+			])
+			.with_merits([
+				AbilityVal(Ability::Merit(Merit::Giant), 3),
+				AbilityVal(Ability::Merit(Merit::TrainedObserver), 1),
+				AbilityVal(
+					Ability::Merit(Merit::DefensiveCombat(true, Skill::Brawl)),
+					1,
+				),
+				AbilityVal(Ability::Merit(Merit::FavoredForm(Form::Gauru)), 2),
+				AbilityVal(Ability::Merit(Merit::EfficientKiller), 2),
+				AbilityVal(Ability::Merit(Merit::RelentlessAssault), 2),
+				AbilityVal(
+					Ability::Merit(Merit::Language("First Tongue".to_owned())),
+					1,
+				),
+				AbilityVal(Ability::Merit(Merit::Totem), 1),
+			])
 			.build();
 
 		werewolf_character.power = 3;
 
+		println!("{:?}", werewolf_character);
+
 		assert_eq!(werewolf_character.max_fuel(), 12);
+		assert_eq!(werewolf_character.defense(), 6);
+		assert_eq!(werewolf_character.perception(), 7);
+		assert_eq!(werewolf_character.max_health(), 12);
+
+		if let Splat::Werewolf(_, _, _, ww) = &mut werewolf_character.splat {
+			ww.form = Form::Gauru;
+		}
+
+		assert_eq!(werewolf_character.perception(), 7);
+
+		let t = std::time::Instant::now();
+		werewolf_character.calc_mod_map();
+		println!("{:?}", std::time::Instant::now().duration_since(t));
+
+		assert_eq!(werewolf_character.perception(), 9);
 	}
 }

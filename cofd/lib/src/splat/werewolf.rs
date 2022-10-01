@@ -1,17 +1,23 @@
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 
 use crate::character::{
-	ability::Ability, Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait,
+	Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait,
 };
 
-use super::AbilityKey;
+use super::{
+	ability::{Ability, AbilityVal},
+	XSplat,
+};
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq)]
 pub struct WerewolfData {
-	form: Form,
+	pub form: Form,
+	// pub moon_gifts: BTreeMap<MoonGift, AbilityVal>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Auspice {
 	Cahalith,
 	Elodoth,
@@ -22,6 +28,27 @@ pub enum Auspice {
 }
 
 impl Auspice {
+	pub fn all() -> [Auspice; 5] {
+		[
+			Auspice::Cahalith,
+			Auspice::Elodoth,
+			Auspice::Irraka,
+			Auspice::Ithaeur,
+			Auspice::Rahu,
+		]
+	}
+
+	pub fn name(&self) -> &str {
+		match self {
+			Auspice::Cahalith => "cahalith",
+			Auspice::Elodoth => "elodoth",
+			Auspice::Irraka => "irraka",
+			Auspice::Ithaeur => "ithaeur",
+			Auspice::Rahu => "rahu",
+			Auspice::_Custom(name, _, _, _, _) => name,
+		}
+	}
+
 	pub fn get_skills(&self) -> &[Skill; 3] {
 		match self {
 			Auspice::Cahalith => &[Skill::Crafts, Skill::Expression, Skill::Persuasion],
@@ -64,6 +91,12 @@ impl Auspice {
 			Auspice::Rahu => &MoonGift::Full,
 			Auspice::_Custom(_, _, _, moon_gift, _) => moon_gift,
 		}
+	}
+}
+
+impl Into<XSplat> for Auspice {
+	fn into(self) -> XSplat {
+		XSplat::Werewolf(self)
 	}
 }
 
@@ -121,74 +154,51 @@ impl Tribe {
 	}
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Renown {
-	Cunning,
+	Purity,
 	Glory,
 	Honor,
-	Purity,
 	Wisdom,
+	Cunning,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-pub struct RenownAbility(pub u8);
-
-impl Ability for RenownAbility {
-	fn value(&self) -> &u8 {
-		&self.0
+impl Renown {
+	pub fn all() -> [Renown; 5] {
+		[
+			Renown::Purity,
+			Renown::Glory,
+			Renown::Honor,
+			Renown::Wisdom,
+			Renown::Cunning,
+		]
 	}
 
-	fn value_mut(&mut self) -> &mut u8 {
-		&mut self.0
-	}
-
-	fn get_modifiers(&self) -> Vec<crate::character::Modifier> {
-		vec![]
+	pub fn name(&self) -> &str {
+		match self {
+			Renown::Purity => "purity",
+			Renown::Glory => "glory",
+			Renown::Honor => "honor",
+			Renown::Wisdom => "wisdom",
+			Renown::Cunning => "cunning",
+		}
 	}
 }
 
-#[derive(PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
+impl Into<Ability> for Renown {
+	fn into(self) -> Ability {
+		Ability::Renown(self)
+	}
+}
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Gift {
 	Moon(MoonGift),
 	Shadow(ShadowGift),
 	Wolf(WolfGift),
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-struct MoonGiftAbility(u8, MoonGift);
-
-impl Ability for MoonGiftAbility {
-	fn value(&self) -> &u8 {
-		&self.0
-	}
-
-	fn value_mut(&mut self) -> &mut u8 {
-		&mut self.0
-	}
-
-	fn get_modifiers(&self) -> Vec<crate::character::Modifier> {
-		match &self.1 {
-			MoonGift::Crescent => vec![],
-			MoonGift::Full => {
-				if self.0 > 2 {
-					vec![Modifier::new(
-						ModifierTarget::Trait(Trait::Health),
-						ModifierValue::Ability(AbilityKey::Renown(Renown::Purity)),
-						ModifierOp::Add,
-					)]
-				} else {
-					vec![]
-				}
-			}
-			MoonGift::Gibbous => vec![],
-			MoonGift::Half => vec![],
-			MoonGift::New => vec![],
-			MoonGift::_Custom(_) => todo!(),
-		}
-	}
-}
-
-#[derive(Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum MoonGift {
 	Crescent,
 	Full,
@@ -198,7 +208,47 @@ pub enum MoonGift {
 	_Custom(String),
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
+impl MoonGift {
+	pub fn get_modifiers(&self, value: u8) -> Vec<crate::character::Modifier> {
+		match self {
+			// MoonGift::Crescent => vec![],
+			MoonGift::Full => {
+				println!("Full {}", value);
+				if value > 2 {
+					vec![Modifier::new(
+						ModifierTarget::Trait(Trait::Health),
+						ModifierValue::Ability(Ability::Renown(Renown::Purity)),
+						ModifierOp::Add,
+					)]
+				} else {
+					vec![]
+				}
+			}
+			// MoonGift::Gibbous => vec![],
+			// MoonGift::Half => vec![],
+			// MoonGift::New => vec![],
+			// MoonGift::_Custom(_) => todo!(),
+			_ => vec![],
+		}
+	}
+
+	pub fn name(&self) -> &str {
+		match self {
+			MoonGift::Crescent => "crescent",
+			MoonGift::Full => "full",
+			MoonGift::Gibbous => "gibbous",
+			MoonGift::Half => "half",
+			MoonGift::New => "new",
+			MoonGift::_Custom(name) => name,
+		}
+	}
+
+	pub fn custom(str: String) -> MoonGift {
+		MoonGift::_Custom(str)
+	}
+}
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum ShadowGift {
 	Death,
 	Dominance,
@@ -218,7 +268,7 @@ pub enum ShadowGift {
 	_Custom(String),
 }
 
-#[derive(PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum WolfGift {
 	Change,
 	Hunting,
@@ -226,7 +276,7 @@ pub enum WolfGift {
 	_Custom(String),
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Form {
 	#[default]
 	Hishu,
@@ -236,16 +286,8 @@ pub enum Form {
 	Urhan,
 }
 
-impl Ability for Form {
-	fn value(&self) -> &u8 {
-		&0
-	}
-
-	fn value_mut(&mut self) -> &mut u8 {
-		panic!()
-	}
-
-	fn get_modifiers(&self) -> Vec<Modifier> {
+impl Form {
+	pub fn get_modifiers(&self) -> Vec<Modifier> {
 		match self {
 			Form::Hishu => vec![Modifier::new(
 				ModifierTarget::Trait(Trait::Preception),

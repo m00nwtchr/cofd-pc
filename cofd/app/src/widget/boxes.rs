@@ -8,13 +8,13 @@ use iced_native::{
 	Clipboard, Layout, Shell, Widget,
 };
 
-pub struct SheetDots<Message, Renderer: text::Renderer>
+pub struct SheetBoxes<Message, Renderer: text::Renderer>
 where
 	Renderer: text::Renderer,
 	Renderer::Theme: StyleSheet,
 {
 	value: u8,
-	min: u8,
+	// min: u8,
 	max: u8,
 	on_click: Vec<Message>,
 	size: u16,
@@ -22,7 +22,7 @@ where
 	style: <Renderer::Theme as StyleSheet>::Style,
 }
 
-impl<'a, Message, Renderer: text::Renderer> SheetDots<Message, Renderer>
+impl<'a, Message, Renderer: text::Renderer> SheetBoxes<Message, Renderer>
 where
 	Message: Clone,
 	Renderer: text::Renderer,
@@ -40,7 +40,7 @@ where
 	{
 		Self {
 			value,
-			min,
+			// min,
 			max,
 			on_click: (0..max + 1).map(f).collect(),
 			size: Self::DEFAULT_SIZE,
@@ -50,7 +50,7 @@ where
 	}
 }
 
-impl<Message, Renderer: text::Renderer> Widget<Message, Renderer> for SheetDots<Message, Renderer>
+impl<Message, Renderer: text::Renderer> Widget<Message, Renderer> for SheetBoxes<Message, Renderer>
 where
 	Message: Clone,
 	Renderer: text::Renderer,
@@ -101,11 +101,11 @@ where
 							i + 1
 						};
 
-						if i + 1 > self.min as usize {
-							if let Some(message) = self.on_click.get(i) {
-								shell.publish(message.clone());
-							}
+						// if i + 1 > self.min as usize {
+						if let Some(message) = self.on_click.get(i) {
+							shell.publish(message.clone());
 						}
+						// }
 
 						return event::Status::Captured;
 					}
@@ -189,13 +189,13 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> From<SheetDots<Message, Renderer>> for Element<'a, Message, Renderer>
+impl<'a, Message, Renderer> From<SheetBoxes<Message, Renderer>> for Element<'a, Message, Renderer>
 where
 	Message: 'a + Clone,
 	Renderer: 'a + text::Renderer,
 	Renderer::Theme: StyleSheet + widget::text::StyleSheet,
 {
-	fn from(radio: SheetDots<Message, Renderer>) -> Element<'a, Message, Renderer> {
+	fn from(radio: SheetBoxes<Message, Renderer>) -> Element<'a, Message, Renderer> {
 		Element::new(radio)
 	}
 }

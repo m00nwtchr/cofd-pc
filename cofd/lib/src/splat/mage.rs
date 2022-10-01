@@ -1,8 +1,10 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::character::Skill;
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+use super::{ability::Ability, XSplat};
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Path {
 	Acanthus,
 	Mastigos,
@@ -13,6 +15,27 @@ pub enum Path {
 }
 
 impl Path {
+	pub fn all() -> [Path; 5] {
+		[
+			Path::Acanthus,
+			Path::Mastigos,
+			Path::Moros,
+			Path::Obrimos,
+			Path::Thyrsus,
+		]
+	}
+
+	pub fn name(&self) -> &str {
+		match self {
+			Path::Acanthus => "acanthus",
+			Path::Mastigos => "mastigos",
+			Path::Moros => "moros",
+			Path::Obrimos => "obrimos",
+			Path::Thyrsus => "thyrsus",
+			Path::_Custom(name, _, _) => name,
+		}
+	}
+
 	fn get_ruling_arcana(&self) -> &[Arcanum; 2] {
 		match self {
 			Path::Acanthus => &[Arcanum::Time, Arcanum::Fate],
@@ -32,7 +55,13 @@ impl Path {
 			Path::Thyrsus => &Arcanum::Mind,
 			Path::_Custom(_, _, inferior) => inferior,
 		}
-	}	
+	}
+}
+
+impl Into<XSplat> for Path {
+	fn into(self) -> XSplat {
+		XSplat::Mage(self)
+	}
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
@@ -84,10 +113,10 @@ impl Order {
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub enum Legacy {
-	_Custom(String, Arcanum)
+	_Custom(String, Arcanum),
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Arcanum {
 	Death,
 	Fate,
@@ -99,4 +128,41 @@ pub enum Arcanum {
 	Space,
 	Spirit,
 	Time,
+}
+impl Arcanum {
+	pub fn all() -> [Arcanum; 10] {
+		[
+			Arcanum::Death,
+			Arcanum::Fate,
+			Arcanum::Forces,
+			Arcanum::Life,
+			Arcanum::Matter,
+			Arcanum::Mind,
+			Arcanum::Prime,
+			Arcanum::Space,
+			Arcanum::Spirit,
+			Arcanum::Time,
+		]
+	}
+
+	pub fn name(&self) -> &str {
+		match self {
+			Arcanum::Death => "death",
+			Arcanum::Fate => "fate",
+			Arcanum::Forces => "forces",
+			Arcanum::Life => "life",
+			Arcanum::Matter => "matter",
+			Arcanum::Mind => "mind",
+			Arcanum::Prime => "prime",
+			Arcanum::Space => "space",
+			Arcanum::Spirit => "spirit",
+			Arcanum::Time => "time",
+		}
+	}
+}
+
+impl Into<Ability> for Arcanum {
+	fn into(self) -> Ability {
+		Ability::Arcanum(self)
+	}
 }

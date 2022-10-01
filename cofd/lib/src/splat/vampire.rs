@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-use crate::character::{
-	ability::Ability, Attribute, Modifier, ModifierTarget, ModifierValue, Trait, ModifierOp,
-};
+use crate::character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Trait};
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+use super::{XSplat, ability::Ability};
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Clan {
 	Daeva,
 	Gangrel,
@@ -15,6 +15,27 @@ pub enum Clan {
 }
 
 impl Clan {
+	pub fn name(&self) -> &str {
+		match self {
+			Clan::Daeva => "daeva",
+			Clan::Gangrel => "gangrel",
+			Clan::Mekhet => "mekhet",
+			Clan::Nosferatu => "nosferatu",
+			Clan::Ventrue => "ventrue",
+			Clan::_Custom(name, _, _) => name,
+		}
+	}
+
+	pub fn all() -> [Clan; 5] {
+		[
+			Clan::Daeva,
+			Clan::Gangrel,
+			Clan::Mekhet,
+			Clan::Nosferatu,
+			Clan::Ventrue,
+		]
+	}
+
 	pub fn get_disciplines(&self) -> &[Discipline; 3] {
 		match self {
 			Clan::Daeva => &[Discipline::Celerity, Discipline::Majesty, Discipline::Vigor],
@@ -53,6 +74,12 @@ impl Clan {
 	}
 }
 
+impl Into<XSplat> for Clan {
+	fn into(self) -> XSplat {
+		XSplat::Vampire(self)
+	}
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub enum Covenant {
 	CarthianMovement,
@@ -65,10 +92,10 @@ pub enum Covenant {
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub enum Bloodline {
-	_Custom(String, [Discipline; 4])
+	_Custom(String, [Discipline; 4]),
 }
 
-#[derive(PartialEq, Eq, Hash, Debug, Serialize, Deserialize, Clone)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Discipline {
 	Animalism,
 	Auspex,
@@ -83,39 +110,69 @@ pub enum Discipline {
 	_Custom(String),
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
-pub struct DisciplineAbility(pub u8, pub Discipline);
-
-impl Ability for DisciplineAbility {
-	fn value(&self) -> &u8 {
-		&self.0
+impl Discipline {
+	pub fn all() -> [Discipline; 10] {
+		[
+			Discipline::Animalism,
+			Discipline::Auspex,
+			Discipline::Celerity,
+			Discipline::Dominate,
+			Discipline::Majesty,
+			Discipline::Nightmare,
+			Discipline::Obfuscate,
+			Discipline::Protean,
+			Discipline::Resilience,
+			Discipline::Vigor,
+		]
 	}
 
-	fn value_mut(&mut self) -> &mut u8 {
-		&mut self.0
+	pub fn name(&self) -> &str {
+		match self {
+			Discipline::Animalism => "animalism",
+			Discipline::Auspex => "auspex",
+			Discipline::Celerity => "celerity",
+			Discipline::Dominate => "dominate",
+			Discipline::Majesty => "majesty",
+			Discipline::Nightmare => "nightmare",
+			Discipline::Obfuscate => "obfuscate",
+			Discipline::Protean => "protean",
+			Discipline::Resilience => "resilience",
+			Discipline::Vigor => "vigor",
+			Discipline::_Custom(name) => name,
+		}
 	}
 
-	fn get_modifiers(&self) -> Vec<crate::character::Modifier> {
-		match self.1 {
+	pub fn custom(str: String) -> Discipline {
+		Discipline::_Custom(str)
+	}
+
+	pub fn get_modifiers(&self, value: u8) -> Vec<crate::character::Modifier> {
+		match self {
 			Discipline::Celerity => {
 				vec![Modifier::new(
 					ModifierTarget::Trait(Trait::Defense),
-					ModifierValue::Num(self.0 as i8),
+					ModifierValue::Num(value as i8),
 					ModifierOp::Add,
 				)]
 			}
 			Discipline::Resilience => vec![Modifier::new(
 				ModifierTarget::Attribute(Attribute::Stamina),
-				ModifierValue::Num(self.0 as i8),
+				ModifierValue::Num(value as i8),
 				ModifierOp::Add,
 			)],
 			Discipline::Vigor => vec![Modifier::new(
 				ModifierTarget::Attribute(Attribute::Strength),
-				ModifierValue::Num(self.0 as i8),
-				ModifierOp::Add
+				ModifierValue::Num(value as i8),
+				ModifierOp::Add,
 			)],
 			_ => vec![],
 		}
+	}
+}
+
+impl Into<Ability> for Discipline {
+	fn into(self) -> Ability {
+		Ability::Discipline(self)
 	}
 }
 

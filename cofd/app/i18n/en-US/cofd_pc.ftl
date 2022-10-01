@@ -320,12 +320,18 @@
 
 app-name = Chronicles of Darkness Player Companion
 
+mental = Mental
+physical = Physical
+social = Social
+
+unskilled = (-{ $num } unskilled)
+
 attributes = Attributes
 attribute = Attribute
     .power = Power
     .finesse = Finesse
     .resistance = Resistance
-    
+
     .intelligence = Intelligence
     .wits = Wits
     .resolve = Resolve
@@ -338,6 +344,35 @@ attribute = Attribute
     .manipulation = Manipulation
     .composure = Composure
 
+skills = Skills
+skill = Skill
+    .academics = Academics
+    .computer = Computer
+    .crafts = Crafts
+    .investigation = Investigation
+    .medicine = Medicine
+    .occult = Occult
+    .politics = Politics
+    .science = Science
+
+    .athletics = Athletics
+    .brawl = Brawl
+    .drive = Drive
+    .firearms = Firearms
+    .larceny = Larceny
+    .stealth = Stealth
+    .survival = Survival
+    .weaponry = Weaponry
+    
+    .animal_ken = Animal Ken
+    .empathy = Empathy
+    .expression = Expression
+    .intimidation = Intimidation
+    .persuasion = Persuasion
+    .socialize = Socialize
+    .streetwise = Streetwise
+    .subterfuge = Subterfuge
+
 name = Name
 player = Player
 concept = Concept
@@ -349,7 +384,11 @@ vice = Vice
 faction = Faction
 group_name = Group Name
 
-age = Age
+health = Health
+willpower = Willpower
+
+mortal = Mortal
+    .integrity = Integrity
 
 vampire = Vampire
     .mask = Mask
@@ -359,6 +398,47 @@ vampire = Vampire
     .covenant = Covenant
     .bloodline = Bloodline
 
+    .blood_potency = Blood Potency
+    .vitae = Vitae
+    .humanity = Humanity
+
+    .disciplines = Disciplines
+
+    .animalism = Animalism
+    .auspex = Auspex
+    .celerity = Celerity
+    .dominate = Dominate
+    .majesty = Majesty
+    .nightmare = Nightmare
+    .obfuscate = Obfuscate
+    .protean = Protean
+    .resilience = Resilience
+    .vigor = Vigor    
+
+mage = Mage
+    .shadow_name = Shadow Name
+    .path = Path
+    .order = Order
+    .legacy = Legacy
+
+    .gnosis = Gnosis
+    .mana = Mana
+    .wisdom = Wisdom
+    .obsessions = Obsessions
+
+    .arcana = Arcana
+
+    .death = Death
+    .fate = Fate
+    .forces = Forces
+    .life = Life
+    .matter = Matter
+    .mind = Mind
+    .prime = Prime
+    .space = Space
+    .spirit = Spirit
+    .time = Time
+
 werewolf = Werewolf
     .blood = Blood
     .bone = Bone
@@ -367,6 +447,18 @@ werewolf = Werewolf
     .tribe = Tribe
     .lodge = Lodge
 
+    .primal_urge = Primal Urge
+    .essence = Essence
+    .harmony = Harmony
+
+    .renown = Renown
+
+    .cunning = Cunning
+    .glory = Glory
+    .honor = Honor
+    .purity = Purity
+    .wisdom = Wisdom
+
 changeling = Changeling
     .needle = Needle
     .thread = Thread
@@ -374,3 +466,17 @@ changeling = Changeling
     .seeming = Seeming
     .court = Court
     .kith = Kith
+
+    .wyrd = Wyrd
+    .glamour = Glamour
+    .clarity = Clarity
+
+age = Age
+dob = Date of Birth
+hair = Hair
+eyes = Eyes
+race = Race
+nationality = Nationality
+height = Height
+weight = Weight
+sex = Sex
