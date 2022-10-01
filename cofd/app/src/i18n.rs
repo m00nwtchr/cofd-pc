@@ -38,7 +38,7 @@ pub fn fl(message_id: &str, attribute: Option<&str>) -> String {
 	let message = Rc::new(OnceCell::new());
 	let message_clone = message.clone();
 	LANGUAGE_LOADER.with_bundles_mut(|bundle| {
-		if let None = message.get() {
+		if message.get().is_none() {
 			if let Some(msg) = bundle.get_message(message_id) {
 				if let Some(pattern) = if let Some(attribute) = attribute {
 					msg.get_attribute(attribute).map(|v| v.value())

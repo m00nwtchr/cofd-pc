@@ -56,7 +56,7 @@ impl Into<XSplat> for Seeming {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Court {
 	Spring,
 	Summer,
@@ -65,7 +65,7 @@ pub enum Court {
 	_Custom(String),
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Kith {
 	Artist,
 	BrightOne,

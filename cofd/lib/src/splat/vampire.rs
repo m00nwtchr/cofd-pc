@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Trait};
 
-use super::{XSplat, ability::Ability};
+use super::{ability::Ability, XSplat};
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Clan {
@@ -80,7 +80,7 @@ impl Into<XSplat> for Clan {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Covenant {
 	CarthianMovement,
 	CircleOfTheCrone,
@@ -90,7 +90,7 @@ pub enum Covenant {
 	_Custom(String),
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Bloodline {
 	_Custom(String, [Discipline; 4]),
 }

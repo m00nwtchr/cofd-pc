@@ -1,10 +1,9 @@
 use iced::{
-	alignment, event, mouse, Alignment, Background, Color, Element, Event, Length, Point,
-	Rectangle, Theme,
+	event, mouse, Alignment, Background, Color, Element, Event, Length, Point, Rectangle, Theme,
 };
 use iced_native::{
 	layout, renderer, text, touch,
-	widget::{self, Column, Row, Text, Tree},
+	widget::{self, Row, Tree},
 	Clipboard, Layout, Shell, Widget,
 };
 
@@ -34,7 +33,7 @@ where
 	/// The default spacing of a [`Radio`] button.
 	pub const DEFAULT_SPACING: u16 = 2;
 
-	pub fn new<F>(value: u8, min: u8, max: u8, f: F) -> Self
+	pub fn new<F>(value: u8, _min: u8, max: u8, f: F) -> Self
 	where
 		F: FnMut(u8) -> Message,
 	{
@@ -122,8 +121,8 @@ where
 		_state: &Tree,
 		layout: Layout<'_>,
 		cursor_position: Point,
-		viewport: &Rectangle,
-		renderer: &Renderer,
+		_viewport: &Rectangle,
+		_renderer: &Renderer,
 	) -> mouse::Interaction {
 		if layout.bounds().contains(cursor_position) {
 			mouse::Interaction::Pointer
@@ -134,13 +133,13 @@ where
 
 	fn draw(
 		&self,
-		state: &Tree,
+		_state: &Tree,
 		renderer: &mut Renderer,
 		theme: &Renderer::Theme,
-		style: &renderer::Style,
+		_style: &renderer::Style,
 		layout: Layout<'_>,
 		cursor_position: Point,
-		viewport: &Rectangle,
+		_viewport: &Rectangle,
 	) {
 		// for i in self.min..self.max {
 		let mut mouse_i = None;

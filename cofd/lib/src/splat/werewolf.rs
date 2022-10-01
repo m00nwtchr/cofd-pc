@@ -1,17 +1,12 @@
-use std::collections::BTreeMap;
-
 use serde::{Deserialize, Serialize};
 
 use crate::character::{
 	Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait,
 };
 
-use super::{
-	ability::{Ability, AbilityVal},
-	XSplat,
-};
+use super::{ability::Ability, XSplat};
 
-#[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct WerewolfData {
 	pub form: Form,
 	// pub moon_gifts: BTreeMap<MoonGift, AbilityVal>,
@@ -100,7 +95,7 @@ impl Into<XSplat> for Auspice {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Tribe {
 	BloodTalons,
 	BoneShadows,
@@ -149,7 +144,7 @@ impl Tribe {
 				ShadowGift::Weather,
 			],
 			// Tribe::GhostWolves => &None,
-			Tribe::_Custom(_, _, gifts) => &gifts,
+			Tribe::_Custom(_, _, gifts) => gifts,
 		}
 	}
 }

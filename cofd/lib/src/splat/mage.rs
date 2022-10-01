@@ -64,7 +64,7 @@ impl Into<XSplat> for Path {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Order {
 	AdamantineArrow,
 	GuardiansOfTheVeil,
@@ -75,7 +75,7 @@ pub enum Order {
 	_Custom(String, [Skill; 3]),
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Ministry {
 	Hegemony,
 	Panopticon,
@@ -111,7 +111,7 @@ impl Order {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Legacy {
 	_Custom(String, Arcanum),
 }

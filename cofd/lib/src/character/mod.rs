@@ -1,7 +1,6 @@
 use std::{
 	cmp::min,
-	collections::{BTreeMap, BTreeSet, HashMap, HashSet},
-	default,
+	collections::{BTreeMap, HashMap},
 };
 
 use crate::splat::{
@@ -87,7 +86,7 @@ impl CharacterBuilder {
 	}
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize_repr, Deserialize_repr)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
 pub enum Wound {
 	#[default]
@@ -160,10 +159,10 @@ fn _mod(attr: ModifierTarget, character: &Character) -> i8 {
 			count += match value {
 				ModifierValue::Num(value) => *value,
 				ModifierValue::Ability(ability) => character
-					.get_ability(&ability)
+					.get_ability(ability)
 					.map(|a| a.1 as i8)
 					.unwrap_or_default(),
-				ModifierValue::Skill(skill) => character.skills.get(skill).clone() as i8,
+				ModifierValue::Skill(skill) => *character.skills.get(skill) as i8,
 				_ => 0,
 			}
 		}
@@ -225,6 +224,7 @@ impl Character {
 		modifiers.extend(self.abilities.values().flat_map(|f| f.get_modifiers()));
 		modifiers.extend(self.merits.iter().flat_map(|m| m.get_modifiers()));
 
+		#[allow(clippy::single_match)]
 		match &self.splat {
 			Splat::Werewolf(auspice, _, _, data) => {
 				modifiers.extend(data.form.get_modifiers());
@@ -247,21 +247,17 @@ impl Character {
 		for modifier in modifiers {
 			match modifier.op {
 				ModifierOp::Add => {
-					let mut vecc = self._mod_map.remove(&modifier.target).unwrap_or(Vec::new());
+					let mut vecc = self._mod_map.remove(&modifier.target).unwrap_or_default();
 					vecc.push(modifier.value);
 					self._mod_map.insert(modifier.target, vecc);
 				}
-				ModifierOp::Set => match modifier.target {
-					ModifierTarget::Trait(_trait) => match _trait {
-						Trait::DefenseSkill => {
-							if let ModifierValue::Skill(skill) = modifier.value {
-								self._defense_skill = skill
-							}
+				ModifierOp::Set => {
+					if let ModifierTarget::Trait(Trait::DefenseSkill) = modifier.target {
+						if let ModifierValue::Skill(skill) = modifier.value {
+							self._defense_skill = skill
 						}
-						_ => {}
-					},
-					_ => {}
-				},
+					}
+				}
 			}
 		}
 		// }
@@ -269,15 +265,15 @@ impl Character {
 
 	pub fn attributes(&self) -> Attributes {
 		Attributes {
-			intelligence: self._attributes.intelligence + attr_mod(Attribute::Intelligence, &self),
-			wits: self._attributes.wits + attr_mod(Attribute::Wits, &self),
-			resolve: self._attributes.resolve + attr_mod(Attribute::Resolve, &self),
-			strength: self._attributes.strength + attr_mod(Attribute::Strength, &self),
-			dexterity: self._attributes.dexterity + attr_mod(Attribute::Dexterity, &self),
-			stamina: self._attributes.stamina + attr_mod(Attribute::Stamina, &self),
-			presence: self._attributes.presence + attr_mod(Attribute::Presence, &self),
-			manipulation: self._attributes.manipulation + attr_mod(Attribute::Manipulation, &self),
-			composure: self._attributes.composure + attr_mod(Attribute::Composure, &self),
+			intelligence: self._attributes.intelligence + attr_mod(Attribute::Intelligence, self),
+			wits: self._attributes.wits + attr_mod(Attribute::Wits, self),
+			resolve: self._attributes.resolve + attr_mod(Attribute::Resolve, self),
+			strength: self._attributes.strength + attr_mod(Attribute::Strength, self),
+			dexterity: self._attributes.dexterity + attr_mod(Attribute::Dexterity, self),
+			stamina: self._attributes.stamina + attr_mod(Attribute::Stamina, self),
+			presence: self._attributes.presence + attr_mod(Attribute::Presence, self),
+			manipulation: self._attributes.manipulation + attr_mod(Attribute::Manipulation, self),
+			composure: self._attributes.composure + attr_mod(Attribute::Composure, self),
 		}
 	}
 	pub fn base_attributes_mut(&mut self) -> &mut Attributes {
@@ -297,7 +293,7 @@ impl Character {
 	pub fn max_health(&self) -> i8 {
 		let attributes = self.attributes();
 
-		self.size() + attributes.stamina + _mod(ModifierTarget::Trait(Trait::Health), &self)
+		self.size() + attributes.stamina + _mod(ModifierTarget::Trait(Trait::Health), self)
 	}
 
 	pub fn max_willpower(&self) -> u8 {
@@ -307,35 +303,35 @@ impl Character {
 	}
 
 	pub fn size(&self) -> i8 {
-		self.base_size as i8 + _mod(ModifierTarget::Trait(Trait::Size), &self)
+		self.base_size as i8 + _mod(ModifierTarget::Trait(Trait::Size), self)
 	}
 	pub fn speed(&self) -> i8 {
 		let attributes = self.attributes();
 
 		5 + attributes.dexterity
 			+ attributes.strength
-			+ _mod(ModifierTarget::Trait(Trait::Speed), &self)
+			+ _mod(ModifierTarget::Trait(Trait::Speed), self)
 	}
 	pub fn defense(&self) -> i8 {
 		let attributes = self.attributes();
 
 		min(attributes.wits, attributes.dexterity)
-			+ self.skills.get(&self._defense_skill).clone() as i8
-			+ _mod(ModifierTarget::Trait(Trait::Defense), &self)
+			+ *self.skills.get(&self._defense_skill) as i8
+			+ _mod(ModifierTarget::Trait(Trait::Defense), self)
 	}
 	pub fn initative(&self) -> i8 {
 		let attributes = self.attributes();
 
 		attributes.dexterity
 			+ attributes.composure
-			+ _mod(ModifierTarget::Trait(Trait::Initative), &self)
+			+ _mod(ModifierTarget::Trait(Trait::Initative), self)
 	}
 	pub fn perception(&self) -> i8 {
 		let attributes = self.attributes();
 
 		attributes.wits
 			+ attributes.composure
-			+ _mod(ModifierTarget::Trait(Trait::Preception), &self)
+			+ _mod(ModifierTarget::Trait(Trait::Preception), self)
 	}
 
 	pub fn max_fuel(&self) -> i8 {
@@ -377,7 +373,7 @@ impl Default for Character {
 	}
 }
 
-#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(default)]
 pub struct CharacterInfo {
 	name: String,
@@ -498,7 +494,7 @@ impl CharacterInfo {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(default)]
 pub struct Attributes {
 	pub intelligence: i8,
@@ -568,7 +564,7 @@ fn is_zero(n: &u8) -> bool {
 	*n == 0
 }
 
-#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(default)]
 pub struct Skills {
 	#[serde(skip_serializing_if = "is_zero")]
@@ -706,14 +702,14 @@ pub enum ModifierTarget {
 	Trait(Trait),
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ModifierValue {
 	Num(i8),
 	Ability(Ability),
 	Skill(Skill),
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ModifierOp {
 	Add,
 	Set,

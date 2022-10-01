@@ -1,7 +1,5 @@
 #![feature(is_some_with)]
 
-use log::{info, warn, debug, Level};
-
 use i18n_embed::LanguageRequester;
 
 use iced::{
@@ -17,11 +15,9 @@ use cofd::{
 	prelude::*,
 	splat::{
 		ability::{Ability, AbilityVal},
-		changeling::{Regalia, Seeming},
 		mage::{Order, Path},
-		vampire::{Bloodline, Clan, Covenant, Discipline},
-		werewolf::{Auspice, MoonGift, Renown, Tribe},
-		Merit, Splat, XSplat,
+		vampire::Discipline,
+		Splat, XSplat,
 	},
 };
 
@@ -29,7 +25,7 @@ mod i18n;
 mod widget;
 
 use i18n::{fl, Locale};
-use widget::{SheetDots, SheetBoxes};
+use widget::SheetDots;
 
 struct PlayerCompanionApp {
 	active_tab: usize,
@@ -270,7 +266,7 @@ impl PlayerCompanionApp {
 		for attr in Attribute::get(AttributeCategory::Trait(cat)) {
 			let v = self.character.base_attributes().get(&attr) as u8;
 
-			col1 = col1.push(text(format!("{}", fl("attribute", Some(attr.name())))));
+			col1 = col1.push(text(fl("attribute", Some(attr.name()))));
 			col2 = col2.push(SheetDots::new(v, 1, 5, |val| {
 				Message::AttrChanged(val, attr)
 			}));
@@ -313,10 +309,10 @@ impl PlayerCompanionApp {
 			.align_items(Alignment::End);
 
 		for skill in Skill::get(&cat) {
-			col1 = col1.push(text(format!("{}", fl("skill", Some(skill.name())))));
+			col1 = col1.push(text(fl("skill", Some(skill.name()))));
 
 			let v = self.character.skills().get(&skill);
-			col2 = col2.push(SheetDots::new(v.clone(), 0, 5, |val| {
+			col2 = col2.push(SheetDots::new(*v, 0, 5, |val| {
 				Message::SkillChanged(val, skill.clone())
 			}));
 		}
@@ -360,7 +356,7 @@ impl PlayerCompanionApp {
 						None => 0,
 					};
 
-					col1 = col1.push(text(format!("{}", fl(splat_name, Some(ability.name())))));
+					col1 = col1.push(text(fl(splat_name, Some(ability.name()))));
 					col2 = col2.push(SheetDots::new(val, 0, 5, |val| {
 						Message::AbilityChanged(ability.clone(), AbilityVal(ability.clone(), val))
 					}));
@@ -376,7 +372,7 @@ impl PlayerCompanionApp {
 						.unwrap()
 						.iter()
 						.filter(|e| !self.character.has_ability(e))
-						.map(|a| a.clone())
+						.cloned()
 						.collect();
 
 					if let Some(ability) = self.character.splat.custom_ability("Custom".to_string())
@@ -388,10 +384,7 @@ impl PlayerCompanionApp {
 						pick_list(e, Some(ability.0.clone()), {
 							let val = ability.clone();
 							move |key| {
-								Message::AbilityChanged(
-									val.0.clone(),
-									AbilityVal(key, val.1.clone()),
-								)
+								Message::AbilityChanged(val.0.clone(), AbilityVal(key, val.1))
 							}
 						})
 						.text_size(20),
@@ -410,20 +403,17 @@ impl PlayerCompanionApp {
 					// }
 				}
 
-				col2 = col2.push(SheetDots::new(ability.1.clone(), 0, 5, |val| {
+				col2 = col2.push(SheetDots::new(ability.1, 0, 5, |val| {
 					Message::AbilityChanged(ability.0.clone(), AbilityVal(ability.0.clone(), val))
 				}));
 			}
 		}
 
 		let mut col = Column::new().align_items(Alignment::Center);
-		match self.character.splat.ability_name() {
-			Some(name) => {
-				col = col
-					.push(text(fl(splat_name, Some(name))).size(H3_SIZE))
-					.push(column![row![col1, col2]]);
-			}
-			None => {}
+		if let Some(name) = self.character.splat.ability_name() {
+			col = col
+				.push(text(fl(splat_name, Some(name))).size(H3_SIZE))
+				.push(column![row![col1, col2]]);
 		}
 
 		col.into()
@@ -575,7 +565,7 @@ impl Application for PlayerCompanionApp {
 	}
 
 	fn view(&self) -> Element<'_, Self::Message> {
-		self.overview_tab().into()
+		self.overview_tab()
 		// Tabs::new(self.active_tab, Message::TabSelected)
 		// .push(
 		// 	TabLabel::Text(String::from("Overview")),
@@ -591,7 +581,7 @@ fn main() -> iced::Result {
 	env_logger::init();
 	#[cfg(target_arch = "wasm32")]
 	console_log::init_with_level(Level::Info);
-	
+
 	PlayerCompanionApp::run(Settings {
 		..Default::default()
 	})

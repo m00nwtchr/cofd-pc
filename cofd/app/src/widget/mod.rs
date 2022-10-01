@@ -1,5 +1,5 @@
-mod dots;
 mod boxes;
+mod dots;
 
-pub use dots::*;
 pub use boxes::*;
+pub use dots::*;

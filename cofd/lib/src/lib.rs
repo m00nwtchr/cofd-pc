@@ -11,7 +11,7 @@ mod tests {
 		character::{Attributes, Character, Skill, Skills},
 		splat::{
 			ability::{Ability, AbilityVal},
-			vampire::{self, Bloodline, Clan, Covenant, Discipline},
+			vampire::{Bloodline, Clan, Covenant, Discipline},
 			werewolf::{Auspice, Form, Renown, Tribe},
 			Merit, Splat,
 		},

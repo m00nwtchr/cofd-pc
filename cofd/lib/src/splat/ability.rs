@@ -36,7 +36,7 @@ impl Ability {
 			Ability::Merit(Merit::_Custom(name))
 			| Ability::Discipline(Discipline::_Custom(name))
 			| Ability::MoonGift(MoonGift::_Custom(name)) => Some(name),
-			_ => None
+			_ => None,
 		}
 	}
 
