@@ -17,10 +17,10 @@ use std::{cell::RefCell, mem, rc::Rc};
 
 use iced::{
 	executor,
-	widget::{container, text},
-	Application, Command, Element, Settings, Theme,
+	widget::{button, container, row, text, Column},
+	Application, Command, Element, Length, Settings, Theme,
 };
-// use iced_aw::pure::{TabLabel, Tabs};
+use iced_aw::{TabLabel, Tabs};
 
 // use i18n_embed::LanguageRequester;
 
@@ -44,11 +44,17 @@ mod widget;
 
 use i18n::fl;
 
+#[derive(Debug, Clone)]
+pub enum Tab {
+	Overview,
+	Equipment,
+}
+
 // #[derive(Clone)]
 pub enum State {
 	CharacterList,
 	Sheet {
-		active_tab: usize,
+		active_tab: Tab,
 		character: Rc<RefCell<Character>>,
 	},
 }
@@ -75,7 +81,7 @@ const H3_SIZE: u16 = 20;
 
 #[derive(Debug, Clone)]
 enum Message {
-	TabSelected(usize),
+	TabSelected(Tab),
 	PickCharacter(usize),
 	Previous,
 }
@@ -350,7 +356,7 @@ impl Application for PlayerCompanionApp {
 			}
 			Message::PickCharacter(i) => {
 				self.next(State::Sheet {
-					active_tab: 0,
+					active_tab: Tab::Overview,
 					character: self.characters.get(i).unwrap().clone(),
 				});
 			}
@@ -361,6 +367,7 @@ impl Application for PlayerCompanionApp {
 	}
 
 	fn view(&self) -> Element<Self::Message> {
+		// view::overview_tab(character.clone(), Message::Previous)
 		match &self.state {
 			State::CharacterList => {
 				view::character_list(self.characters.clone(), Message::PickCharacter).into()
@@ -368,7 +375,21 @@ impl Application for PlayerCompanionApp {
 			State::Sheet {
 				active_tab,
 				character,
-			} => container(view::overview_tab(character.clone(), Message::Previous)).into(),
+			} => {
+				let tab: Element<Self::Message> = match active_tab {
+					Tab::Overview => view::overview_tab(character.clone()).into(),
+					Tab::Equipment => view::equipment_tab(character.clone()).into(),
+				};
+
+				Column::new()
+					.push(row![
+						button("Back").on_press(Message::Previous),
+						button("Home").on_press(Message::TabSelected(Tab::Overview)),
+						button("Equipment").on_press(Message::TabSelected(Tab::Equipment))
+					]).spacing(1)
+					.push(tab)
+					.into()
+			}
 		}
 	}
 }

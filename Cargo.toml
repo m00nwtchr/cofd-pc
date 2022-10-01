@@ -13,3 +13,9 @@ resolver = "2"
 # opt-level = 's'
 # link time optimization using using whole-program analysis
 lto = true
+
+[patch.'https://github.com/iced-rs/iced']
+iced = { git = "https://github.com/iced-rs/iced?rev=77c8380" }
+iced_native = { git = "https://github.com/iced-rs/iced?rev=77c8380" }
+iced_graphics = { git = "https://github.com/iced-rs/iced?rev=77c8380" }
+iced_style = { git = "https://github.com/iced-rs/iced?rev=77c8380" }

@@ -1,7 +1,7 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, marker::PhantomData};
 
 use iced::{
-	widget::{button, column, pick_list, row, text, text_input, Column},
+	widget::{column, pick_list, row, text, text_input, Column},
 	Alignment, Element, Length,
 };
 use iced_lazy::Component;
@@ -30,15 +30,11 @@ use crate::{
 
 pub struct OverviewTab<Message> {
 	character: Rc<RefCell<Character>>,
-	back: Message,
-	_c: Option<Message>,
+	phantom: PhantomData<Message>,
 }
 
-pub fn overview_tab<Message>(
-	character: Rc<RefCell<Character>>,
-	back: Message,
-) -> OverviewTab<Message> {
-	OverviewTab::new(character, back)
+pub fn overview_tab<Message>(character: Rc<RefCell<Character>>) -> OverviewTab<Message> {
+	OverviewTab::new(character)
 }
 
 #[derive(Clone)]
@@ -59,15 +55,13 @@ pub enum Event {
 	RegaliaChanged(Regalia),
 
 	Msg,
-	Back,
 }
 
 impl<Message> OverviewTab<Message> {
-	pub fn new(character: Rc<RefCell<Character>>, back: Message) -> Self {
+	pub fn new(character: Rc<RefCell<Character>>) -> Self {
 		Self {
 			character,
-			_c: None,
-			back,
+			phantom: PhantomData,
 		}
 	}
 
@@ -262,12 +256,11 @@ where
 				}
 			}
 			Event::Msg => {}
-			Event::Back => res = Some(self.back.clone()),
 			Event::TouchstoneChanged(i, str) => {
 				if let Some(touchstone) = character.touchstones.get_mut(i) {
 					*touchstone = str;
 				} else {
-					character.touchstones.resize(i+1, String::new());
+					character.touchstones.resize(i + 1, String::new());
 					*character.touchstones.get_mut(i).unwrap() = str;
 				}
 			}
@@ -512,45 +505,41 @@ where
 
 		// let margin_col = || Column::new();
 
-		// container(
-		row![
-			// (margin_col)(),
+		// row![
+		// (margin_col)(),
+		column![
 			column![
-				button("Back").on_press(Event::Back),
+				info_bar(self.character.clone(), || Event::Msg),
+				attribute_bar(character.base_attributes().clone(), Event::AttrChanged)
+			]
+			.align_items(Alignment::Center)
+			.width(Length::Fill),
+			row![
+				skills_component(character.skills().clone(), Event::SkillChanged),
 				column![
-					info_bar(self.character.clone(), || Event::Msg),
-					attribute_bar(character.base_attributes().clone(), Event::AttrChanged)
+					text("Other Traits".to_uppercase()).size(H2_SIZE),
+					row![
+						col1,
+						column![health, willpower, st, fuel, integrity]
+							.align_items(Alignment::Center)
+							.width(Length::Fill)
+					]
 				]
 				.align_items(Alignment::Center)
-				.width(Length::Fill),
-				row![
-					skills_component(character.skills().clone(), Event::SkillChanged),
-					column![
-						text("Other Traits".to_uppercase()).size(H2_SIZE),
-						row![
-							col1,
-							column![health, willpower, st, fuel, integrity]
-								.align_items(Alignment::Center)
-								.width(Length::Fill)
-						]
-					]
-					.align_items(Alignment::Center)
-					.padding(15)
-					.width(Length::FillPortion(3))
-				],
-				// pick_list(
-				// 	Vec::from(LANGS),
-				// 	Some(self.locale.clone()),
-				// 	Event::LocaleChanged
-				// )
-			]
-			.width(Length::Fill),
-			// (margin_col)()
+				.padding(15)
+				.width(Length::FillPortion(3))
+			],
+			// pick_list(
+			// 	Vec::from(LANGS),
+			// 	Some(self.locale.clone()),
+			// 	Event::LocaleChanged
+			// )
 		]
 		.width(Length::Fill)
-		// )
-		.padding(10)
-		// .center_x()
+		// (margin_col)()
+		// ]
+		// .width(Length::Fill)
+		// .padding(10)
 		.into()
 	}
 }
