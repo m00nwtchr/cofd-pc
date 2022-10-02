@@ -89,9 +89,9 @@ impl Auspice {
 	}
 }
 
-impl Into<XSplat> for Auspice {
-	fn into(self) -> XSplat {
-		XSplat::Werewolf(self)
+impl From<Auspice> for XSplat {
+	fn from(val: Auspice) -> Self {
+		XSplat::Werewolf(val)
 	}
 }
 
@@ -180,9 +180,9 @@ impl Renown {
 	}
 }
 
-impl Into<Ability> for Renown {
-	fn into(self) -> Ability {
-		Ability::Renown(self)
+impl From<Renown> for Ability {
+	fn from(val: Renown) -> Self {
+		Ability::Renown(val)
 	}
 }
 
@@ -282,6 +282,7 @@ pub enum Form {
 }
 
 impl Form {
+	#[allow(clippy::too_many_lines)]
 	pub fn get_modifiers(&self) -> Vec<Modifier> {
 		match self {
 			Form::Hishu => vec![Modifier::new(

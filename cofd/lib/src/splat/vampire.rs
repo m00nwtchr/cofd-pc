@@ -74,9 +74,9 @@ impl Clan {
 	}
 }
 
-impl Into<XSplat> for Clan {
-	fn into(self) -> XSplat {
-		XSplat::Vampire(self)
+impl From<Clan> for XSplat {
+	fn from(val: Clan) -> Self {
+		XSplat::Vampire(val)
 	}
 }
 
@@ -146,6 +146,7 @@ impl Discipline {
 		Discipline::_Custom(str)
 	}
 
+	#[warn(clippy::cast_possible_wrap)]
 	pub fn get_modifiers(&self, value: u8) -> Vec<crate::character::Modifier> {
 		match self {
 			Discipline::Celerity => {
@@ -170,9 +171,9 @@ impl Discipline {
 	}
 }
 
-impl Into<Ability> for Discipline {
-	fn into(self) -> Ability {
-		Ability::Discipline(self)
+impl From<Discipline> for Ability {
+	fn from(val: Discipline) -> Self {
+		Ability::Discipline(val)
 	}
 }
 

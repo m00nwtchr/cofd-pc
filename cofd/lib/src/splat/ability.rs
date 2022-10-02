@@ -51,12 +51,12 @@ impl Ability {
 	}
 
 	pub fn is_custom(&self) -> bool {
-		match self {
+		matches!(
+			self,
 			Ability::Merit(Merit::_Custom(_))
-			| Ability::Discipline(Discipline::_Custom(_))
-			| Ability::MoonGift(MoonGift::_Custom(_)) => true,
-			_ => false,
-		}
+				| Ability::Discipline(Discipline::_Custom(_))
+				| Ability::MoonGift(MoonGift::_Custom(_))
+		)
 	}
 }
 

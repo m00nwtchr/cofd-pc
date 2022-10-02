@@ -58,9 +58,9 @@ impl Path {
 	}
 }
 
-impl Into<XSplat> for Path {
-	fn into(self) -> XSplat {
-		XSplat::Mage(self)
+impl From<Path> for XSplat {
+	fn from(val: Path) -> Self {
+		XSplat::Mage(val)
 	}
 }
 
@@ -161,8 +161,8 @@ impl Arcanum {
 	}
 }
 
-impl Into<Ability> for Arcanum {
-	fn into(self) -> Ability {
-		Ability::Arcanum(self)
+impl From<Arcanum> for Ability {
+	fn from(val: Arcanum) -> Self {
+		Ability::Arcanum(val)
 	}
 }

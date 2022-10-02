@@ -50,9 +50,9 @@ impl Seeming {
 	}
 }
 
-impl Into<XSplat> for Seeming {
-	fn into(self) -> XSplat {
-		XSplat::Changeling(self)
+impl From<Seeming> for XSplat {
+	fn from(val: Seeming) -> Self {
+		XSplat::Changeling(val)
 	}
 }
 

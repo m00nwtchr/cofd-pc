@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-log = "*"
+log = "0.4"
 iced = {git = "https://github.com/iced-rs/iced"}
 iced_native = {git = "https://github.com/iced-rs/iced"}
 # iced_aw = {version = "0.2", default-features = false, features = ["pure", "tabs"]}

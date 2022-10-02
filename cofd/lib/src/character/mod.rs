@@ -4,12 +4,26 @@ use std::{
 };
 
 use crate::splat::{
+	self,
 	ability::{Ability, AbilityVal},
 	vampire::MaskDirge,
 	Splat,
 };
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+pub fn add(a: u8, b: i8) -> u8 {
+	let res = i16::from(a) + i16::from(b);
+
+	if res >= 255 {
+		u8::MAX
+	} else if res <= 0 {
+		u8::MIN
+	} else {
+		res as u8
+	}
+}
 
 #[derive(Default)]
 pub struct CharacterBuilder {
@@ -24,21 +38,25 @@ pub struct CharacterBuilder {
 }
 
 impl CharacterBuilder {
+	#[must_use]
 	pub fn with_splat(mut self, splat: Splat) -> Self {
 		self.splat = splat;
 		self
 	}
 
+	#[must_use]
 	pub fn with_attributes(mut self, attributes: Attributes) -> Self {
 		self.attributes = attributes;
 		self
 	}
 
+	#[must_use]
 	pub fn with_skills(mut self, skills: Skills) -> Self {
 		self.skills = skills;
 		self
 	}
 
+	#[must_use]
 	pub fn with_abilities<const N: usize>(mut self, abilities: [AbilityVal; N]) -> Self {
 		self.abilities = BTreeMap::new();
 
@@ -50,12 +68,14 @@ impl CharacterBuilder {
 		self
 	}
 
+	#[must_use]
 	pub fn with_merits<const N: usize>(mut self, merits: [AbilityVal; N]) -> Self {
 		self.merits = Vec::from(merits);
 		self.flag = true;
 		self
 	}
 
+	#[must_use]
 	pub fn build(self) -> Character {
 		let power = if let Splat::Mortal = &self.splat {
 			0
@@ -80,7 +100,7 @@ impl CharacterBuilder {
 			.health_track
 			.resize((character.max_health() as u8).into(), Wound::None);
 
-		character.health_track.get_mut(0).unwrap().poke();
+		// character.health_track.get_mut(0).unwrap().poke();
 
 		character
 	}
@@ -152,6 +172,7 @@ pub struct Character {
 	_defense_skill: Skill,
 }
 
+#[warn(clippy::cast_possible_wrap)]
 fn _mod(attr: ModifierTarget, character: &Character) -> i8 {
 	let mut count = 0;
 	if let Some(vec) = character._mod_map.get(&attr) {
@@ -163,7 +184,6 @@ fn _mod(attr: ModifierTarget, character: &Character) -> i8 {
 					.map(|a| a.1 as i8)
 					.unwrap_or_default(),
 				ModifierValue::Skill(skill) => *character.skills.get(skill) as i8,
-				_ => 0,
 			}
 		}
 	}
@@ -201,7 +221,7 @@ impl Character {
 	}
 
 	pub fn add_merit(&mut self, key: AbilityVal) {
-		self.merits.push(key)
+		self.merits.push(key);
 	}
 
 	pub fn remove_merit(&mut self, i: usize) -> AbilityVal {
@@ -221,8 +241,8 @@ impl Character {
 
 		let mut modifiers: Vec<Modifier> = Vec::new();
 
-		modifiers.extend(self.abilities.values().flat_map(|f| f.get_modifiers()));
-		modifiers.extend(self.merits.iter().flat_map(|m| m.get_modifiers()));
+		modifiers.extend(self.abilities.values().flat_map(AbilityVal::get_modifiers));
+		modifiers.extend(self.merits.iter().flat_map(AbilityVal::get_modifiers));
 
 		#[allow(clippy::single_match)]
 		match &self.splat {
@@ -233,7 +253,7 @@ impl Character {
 						auspice.get_moon_gift().get_modifiers(
 							self.get_ability(&Ability::Renown(auspice.get_renown().clone()))
 								.map(|f| f.1)
-								.unwrap_or(0),
+								.unwrap_or_default(),
 						),
 					);
 				}
@@ -254,7 +274,7 @@ impl Character {
 				ModifierOp::Set => {
 					if let ModifierTarget::Trait(Trait::DefenseSkill) = modifier.target {
 						if let ModifierValue::Skill(skill) = modifier.value {
-							self._defense_skill = skill
+							self._defense_skill = skill;
 						}
 					}
 				}
@@ -265,15 +285,33 @@ impl Character {
 
 	pub fn attributes(&self) -> Attributes {
 		Attributes {
-			intelligence: self._attributes.intelligence + attr_mod(Attribute::Intelligence, self),
-			wits: self._attributes.wits + attr_mod(Attribute::Wits, self),
-			resolve: self._attributes.resolve + attr_mod(Attribute::Resolve, self),
-			strength: self._attributes.strength + attr_mod(Attribute::Strength, self),
-			dexterity: self._attributes.dexterity + attr_mod(Attribute::Dexterity, self),
-			stamina: self._attributes.stamina + attr_mod(Attribute::Stamina, self),
-			presence: self._attributes.presence + attr_mod(Attribute::Presence, self),
-			manipulation: self._attributes.manipulation + attr_mod(Attribute::Manipulation, self),
-			composure: self._attributes.composure + attr_mod(Attribute::Composure, self),
+			intelligence: add(
+				self._attributes.intelligence,
+				attr_mod(Attribute::Intelligence, self),
+			),
+			wits: add(self._attributes.wits, attr_mod(Attribute::Wits, self)),
+			resolve: add(self._attributes.resolve, attr_mod(Attribute::Resolve, self)),
+			strength: add(
+				self._attributes.strength,
+				attr_mod(Attribute::Strength, self),
+			),
+			dexterity: add(
+				self._attributes.dexterity,
+				attr_mod(Attribute::Dexterity, self),
+			),
+			stamina: add(self._attributes.stamina, attr_mod(Attribute::Stamina, self)),
+			presence: add(
+				self._attributes.presence,
+				attr_mod(Attribute::Presence, self),
+			),
+			manipulation: add(
+				self._attributes.manipulation,
+				attr_mod(Attribute::Manipulation, self),
+			),
+			composure: add(
+				self._attributes.composure,
+				attr_mod(Attribute::Composure, self),
+			),
 		}
 	}
 	pub fn base_attributes_mut(&mut self) -> &mut Attributes {
@@ -290,55 +328,65 @@ impl Character {
 		&mut self.skills
 	}
 
-	pub fn max_health(&self) -> i8 {
+	pub fn max_health(&self) -> u8 {
 		let attributes = self.attributes();
 
-		self.size() + attributes.stamina + _mod(ModifierTarget::Trait(Trait::Health), self)
+		add(
+			self.size() + attributes.stamina,
+			_mod(ModifierTarget::Trait(Trait::Health), self),
+		)
 	}
 
 	pub fn max_willpower(&self) -> u8 {
 		let attributes = self.attributes();
 
-		attributes.resolve as u8 + attributes.composure as u8
+		attributes.resolve + attributes.composure
 	}
 
-	pub fn size(&self) -> i8 {
-		self.base_size as i8 + _mod(ModifierTarget::Trait(Trait::Size), self)
+	pub fn size(&self) -> u8 {
+		add(
+			self.base_size,
+			_mod(ModifierTarget::Trait(Trait::Size), self),
+		)
 	}
-	pub fn speed(&self) -> i8 {
+	pub fn speed(&self) -> u8 {
 		let attributes = self.attributes();
 
-		5 + attributes.dexterity
-			+ attributes.strength
-			+ _mod(ModifierTarget::Trait(Trait::Speed), self)
+		add(
+			5 + attributes.dexterity + attributes.strength,
+			_mod(ModifierTarget::Trait(Trait::Speed), self),
+		)
 	}
-	pub fn defense(&self) -> i8 {
+	pub fn defense(&self) -> u8 {
 		let attributes = self.attributes();
 
-		min(attributes.wits, attributes.dexterity)
-			+ *self.skills.get(&self._defense_skill) as i8
-			+ _mod(ModifierTarget::Trait(Trait::Defense), self)
+		add(
+			min(attributes.wits, attributes.dexterity) + *self.skills.get(&self._defense_skill),
+			_mod(ModifierTarget::Trait(Trait::Defense), self),
+		)
 	}
-	pub fn initative(&self) -> i8 {
+	pub fn initative(&self) -> u8 {
 		let attributes = self.attributes();
 
-		attributes.dexterity
-			+ attributes.composure
-			+ _mod(ModifierTarget::Trait(Trait::Initative), self)
+		add(
+			attributes.dexterity + attributes.composure,
+			_mod(ModifierTarget::Trait(Trait::Initative), self),
+		)
 	}
-	pub fn perception(&self) -> i8 {
+	pub fn perception(&self) -> u8 {
 		let attributes = self.attributes();
 
-		attributes.wits
-			+ attributes.composure
-			+ _mod(ModifierTarget::Trait(Trait::Preception), self)
+		add(
+			attributes.wits + attributes.composure,
+			_mod(ModifierTarget::Trait(Trait::Preception), self),
+		)
 	}
 
-	pub fn max_fuel(&self) -> i8 {
+	pub fn max_fuel(&self) -> u8 {
 		match self.power {
 			0 => self.attributes().stamina,
-			1..=4 => 10 + self.power as i8 - 1,
-			5..=8 => 10 + (self.power as i8 - 4) * 5,
+			1..=4 => 10 + self.power - 1,
+			5..=8 => 10 + (self.power - 4) * 5,
 			9 => 50,
 			10 => 75,
 			_ => 0,
@@ -497,21 +545,21 @@ impl CharacterInfo {
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(default)]
 pub struct Attributes {
-	pub intelligence: i8,
-	pub wits: i8,
-	pub resolve: i8,
+	pub intelligence: u8,
+	pub wits: u8,
+	pub resolve: u8,
 
-	pub strength: i8,
-	pub dexterity: i8,
-	pub stamina: i8,
+	pub strength: u8,
+	pub dexterity: u8,
+	pub stamina: u8,
 
-	pub presence: i8,
-	pub manipulation: i8,
-	pub composure: i8,
+	pub presence: u8,
+	pub manipulation: u8,
+	pub composure: u8,
 }
 
 impl Attributes {
-	pub fn get(&self, attr: &Attribute) -> i8 {
+	pub fn get(&self, attr: &Attribute) -> u8 {
 		match attr {
 			Attribute::Intelligence => self.intelligence,
 			Attribute::Wits => self.wits,
@@ -527,7 +575,7 @@ impl Attributes {
 		}
 	}
 
-	pub fn get_mut(&mut self, attr: &Attribute) -> &mut i8 {
+	pub fn get_mut(&mut self, attr: &Attribute) -> &mut u8 {
 		match attr {
 			Attribute::Intelligence => &mut self.intelligence,
 			Attribute::Wits => &mut self.wits,
@@ -560,6 +608,7 @@ impl Default for Attributes {
 	}
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn is_zero(n: &u8) -> bool {
 	*n == 0
 }
@@ -821,7 +870,7 @@ impl Attribute {
 		}
 	}
 
-	pub fn get_attr(_trait: TraitCategory, _type: AttributeType) -> Attribute {
+	pub fn get_attr(_trait: &TraitCategory, _type: &AttributeType) -> Attribute {
 		match _trait {
 			TraitCategory::Mental => match _type {
 				AttributeType::Power => Self::Intelligence,

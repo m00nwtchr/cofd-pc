@@ -1,3 +1,15 @@
+#![deny(clippy::pedantic)]
+#![allow(
+	clippy::must_use_candidate,
+	clippy::used_underscore_binding,
+	clippy::unused_self,
+	clippy::match_wildcard_for_single_variants,
+	clippy::module_name_repetitions,
+	clippy::wildcard_imports,
+	clippy::match_same_arms,
+	clippy::default_trait_access
+)]
+
 pub mod character;
 pub mod splat;
 
@@ -18,6 +30,7 @@ mod tests {
 	};
 
 	#[test]
+	#[allow(clippy::too_many_lines)]
 	fn it_works() {
 		let vampire_character = Character::builder()
 			.with_splat(Splat::Vampire(
@@ -72,13 +85,13 @@ mod tests {
 				AbilityVal(Ability::Merit(Merit::FastTalking), 1),
 				AbilityVal(
 					Ability::Merit(Merit::ProfessionalTraining(
-						"".to_string(),
+						String::new(),
 						[Skill::Expression, Skill::Occult],
 						None,
 					)),
 					2,
 				),
-				// AbilityVal(Ability::Merit(Merit::Contacts("".to_string())), 2),
+				// AbilityVal(Ability::Merit(Merit::Contacts(String::new())), 2),
 				AbilityVal(Ability::Merit(Merit::SafePlace(None)), 3),
 				AbilityVal(Ability::Merit(Merit::Resources), 3),
 				AbilityVal(Ability::Merit(Merit::NestGuardian), 1),

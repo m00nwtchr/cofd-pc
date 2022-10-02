@@ -110,7 +110,7 @@ impl Splat {
 		match self.clone() {
 			Splat::Mortal => None,
 			Splat::Vampire(clan, _, _) => Some(clan.into()),
-			Splat::Werewolf(auspice, _, _, _) => auspice.map(|a| a.into()),
+			Splat::Werewolf(auspice, _, _, _) => auspice.map(Into::into),
 			Splat::Mage(path, _, _) => Some(path.into()),
 			Splat::Changeling(seeming, _, _) => Some(seeming.into()),
 		}
@@ -121,28 +121,28 @@ impl Splat {
 			Some(xsplat) => match xsplat {
 				XSplat::Vampire(clan) => {
 					if let Splat::Vampire(_clan, _, _) = self {
-						*_clan = clan
+						*_clan = clan;
 					}
 				}
 				XSplat::Werewolf(ausipce) => {
 					if let Splat::Werewolf(_auspice, _, _, _) = self {
-						*_auspice = Some(ausipce)
+						*_auspice = Some(ausipce);
 					}
 				}
 				XSplat::Mage(path) => {
 					if let Splat::Mage(_path, _, _) = self {
-						*_path = path
+						*_path = path;
 					}
 				}
 				XSplat::Changeling(seeming) => {
 					if let Splat::Changeling(_seeming, _, _) = self {
-						*_seeming = seeming
+						*_seeming = seeming;
 					}
 				}
 			},
 			None => {
 				if let Splat::Werewolf(auspice, _, _, _) = self {
-					*auspice = None
+					*auspice = None;
 				}
 			}
 		}
@@ -191,9 +191,9 @@ impl Splat {
 	pub fn all_abilities(&self) -> Option<Vec<Ability>> {
 		match self {
 			Splat::Mortal => None,
-			Splat::Vampire(_, _, _) => Some(Vec::from(Discipline::all().map(|r| r.into()))),
-			Splat::Werewolf(_, _, _, _) => Some(Vec::from(Renown::all().map(|r| r.into()))),
-			Splat::Mage(_, _, _) => Some(Vec::from(Arcanum::all().map(|r| r.into()))),
+			Splat::Vampire(_, _, _) => Some(Vec::from(Discipline::all().map(Into::into))),
+			Splat::Werewolf(_, _, _, _) => Some(Vec::from(Renown::all().map(Into::into))),
+			Splat::Mage(_, _, _) => Some(Vec::from(Arcanum::all().map(Into::into))),
 			Splat::Changeling(_, _, _) => None,
 		}
 	}
@@ -263,12 +263,12 @@ impl XSplat {
 		}
 	}
 
-	pub fn all(_type: SplatType) -> Vec<XSplat> {
+	pub fn all(_type: &SplatType) -> Vec<XSplat> {
 		match _type {
-			SplatType::Vampire => Clan::all().map(|c| c.into()).to_vec(),
-			SplatType::Werewolf => Auspice::all().map(|c| c.into()).to_vec(),
-			SplatType::Mage => Path::all().map(|c| c.into()).to_vec(),
-			SplatType::Changeling => Seeming::all().map(|c| c.into()).to_vec(),
+			SplatType::Vampire => Clan::all().map(Into::into).to_vec(),
+			SplatType::Werewolf => Auspice::all().map(Into::into).to_vec(),
+			SplatType::Mage => Path::all().map(Into::into).to_vec(),
+			SplatType::Changeling => Seeming::all().map(Into::into).to_vec(),
 			_ => vec![],
 		}
 	}
@@ -310,8 +310,8 @@ pub enum Merit {
 }
 
 impl Merit {
-	pub fn custom() -> Merit {
-		Merit::_Custom("".to_string())
+	pub fn custom(str: String) -> Merit {
+		Merit::_Custom(str)
 	}
 
 	fn name(&self) -> &str {

@@ -7,7 +7,7 @@ use iced_native::{
 	Clipboard, Layout, Shell, Widget,
 };
 
-pub struct SheetBoxes<Message, Renderer: text::Renderer>
+pub struct SheetBoxes<Message, Renderer>
 where
 	Renderer: text::Renderer,
 	Renderer::Theme: StyleSheet,
@@ -21,7 +21,7 @@ where
 	style: <Renderer::Theme as StyleSheet>::Style,
 }
 
-impl<'a, Message, Renderer: text::Renderer> SheetBoxes<Message, Renderer>
+impl<'a, Message, Renderer> SheetBoxes<Message, Renderer>
 where
 	Message: Clone,
 	Renderer: text::Renderer,
@@ -41,7 +41,7 @@ where
 			value,
 			// min,
 			max,
-			on_click: (0..max + 1).map(f).collect(),
+			on_click: (0..=max).map(f).collect(),
 			size: Self::DEFAULT_SIZE,
 			spacing: Self::DEFAULT_SPACING, //15
 			style: Default::default(),
@@ -49,7 +49,7 @@ where
 	}
 }
 
-impl<Message, Renderer: text::Renderer> Widget<Message, Renderer> for SheetBoxes<Message, Renderer>
+impl<Message, Renderer> Widget<Message, Renderer> for SheetBoxes<Message, Renderer>
 where
 	Message: Clone,
 	Renderer: text::Renderer,
@@ -94,7 +94,7 @@ where
 			| Event::Touch(touch::Event::FingerPressed { .. }) => {
 				for (i, layout) in layout.children().enumerate() {
 					if layout.bounds().contains(cursor_position) {
-						let i = if (self.value as isize - 1) == i as isize {
+						let i = if (self.value as usize - 1) == i {
 							i
 						} else {
 							i + 1
@@ -173,7 +173,7 @@ where
 				custom_style.background,
 			);
 
-			if (self.value as isize - 1) >= i as isize {
+			if (self.value as usize - 1) >= i {
 				renderer.fill_quad(
 					renderer::Quad {
 						bounds,

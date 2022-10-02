@@ -1,4 +1,15 @@
 #![feature(is_some_with)]
+#![deny(clippy::pedantic)]
+#![allow(
+	clippy::must_use_candidate,
+	clippy::used_underscore_binding,
+	clippy::unused_self,
+	clippy::match_wildcard_for_single_variants,
+	clippy::module_name_repetitions,
+	clippy::wildcard_imports,
+	clippy::match_same_arms,
+	clippy::default_trait_access
+)]
 
 use i18n_embed::LanguageRequester;
 
@@ -192,12 +203,13 @@ impl PlayerCompanionApp {
 				"",
 				self.character.info.get(&_trait),
 				move |val| Message::InfoTraitChanged(val, _trait),
-			))
+			));
 		}
 
 		row![col1, col2].width(Length::Fill).spacing(5).into()
 	}
 
+	#[allow(clippy::single_match_else)]
 	fn info(&self) -> Element<'static, Message> {
 		let col3 = match self.character.splat {
 			Splat::Mortal => self.mk_info_col(vec![
@@ -206,7 +218,7 @@ impl PlayerCompanionApp {
 				InfoTrait::GroupName,
 			]),
 			_ => {
-				let mut all = XSplat::all(self.character.splat._type());
+				let mut all = XSplat::all(&self.character.splat._type());
 
 				all.extend(self.custom_xsplats.iter().filter_map(|xsplat| {
 					match (xsplat, &self.character.splat) {
@@ -301,14 +313,14 @@ impl PlayerCompanionApp {
 		.into()
 	}
 
-	fn mk_skill_col(&self, cat: TraitCategory) -> Element<'static, Message> {
+	fn mk_skill_col(&self, cat: &TraitCategory) -> Element<'static, Message> {
 		let mut col1 = Column::new().spacing(3);
 		let mut col2 = Column::new()
 			.spacing(4)
 			.width(Length::Fill)
 			.align_items(Alignment::End);
 
-		for skill in Skill::get(&cat) {
+		for skill in Skill::get(cat) {
 			col1 = col1.push(text(fl("skill", Some(skill.name()))));
 
 			let v = self.character.skills().get(&skill);
@@ -329,9 +341,9 @@ impl PlayerCompanionApp {
 	fn skills(&self) -> Element<'static, Message> {
 		column![
 			text(fl!("skills").to_uppercase()).size(H2_SIZE),
-			self.mk_skill_col(TraitCategory::Mental),
-			self.mk_skill_col(TraitCategory::Physical),
-			self.mk_skill_col(TraitCategory::Social),
+			self.mk_skill_col(&TraitCategory::Mental),
+			self.mk_skill_col(&TraitCategory::Physical),
+			self.mk_skill_col(&TraitCategory::Social),
 		]
 		.spacing(10)
 		.padding(15)
@@ -364,7 +376,19 @@ impl PlayerCompanionApp {
 			}
 		} else {
 			for ability in self.character.abilities.values() {
-				if !ability.0.is_custom() {
+				if ability.0.is_custom() {
+					// if let
+					// 	Ability::Merit(Merit::_Custom(str))
+					// 	| Ability::Discipline(Discipline::_Custom(str))
+					// 	| Ability::MoonGift(MoonGift::_Custom(str)) = ability.0 {
+
+					col1 = col1.push(text_input("", ability.0.name(), {
+						let ab = ability.0.clone();
+						move |val| Message::CustomAbilityChanged(ab.clone(), val)
+					}));
+
+				// }
+				} else {
 					let mut e: Vec<Ability> = self
 						.character
 						.splat
@@ -389,18 +413,6 @@ impl PlayerCompanionApp {
 						})
 						.text_size(20),
 					);
-				} else {
-					// if let
-					// 	Ability::Merit(Merit::_Custom(str))
-					// 	| Ability::Discipline(Discipline::_Custom(str))
-					// 	| Ability::MoonGift(MoonGift::_Custom(str)) = ability.0 {
-
-					col1 = col1.push(text_input("", ability.0.name(), {
-						let ab = ability.0.clone();
-						move |val| Message::CustomAbilityChanged(ab.clone(), val)
-					}));
-
-					// }
 				}
 
 				col2 = col2.push(SheetDots::new(ability.1, 0, 5, |val| {
@@ -515,7 +527,7 @@ impl Application for PlayerCompanionApp {
 		match message {
 			Message::TabSelected(tab) => self.active_tab = tab,
 			Message::AttrChanged(val, attr) => {
-				*self.character.base_attributes_mut().get_mut(&attr) = val as i8;
+				*self.character.base_attributes_mut().get_mut(&attr) = val;
 			}
 			Message::SkillChanged(val, skill) => *self.character.skills_mut().get_mut(&skill) = val,
 			Message::InfoTraitChanged(val, _trait) => *self.character.info.get_mut(&_trait) = val,
@@ -528,7 +540,7 @@ impl Application for PlayerCompanionApp {
 					})
 					.unwrap();
 				self.language_requester.poll().unwrap();
-				println!("{}, {}", fl!("attribute"), fl("attribute", None))
+				println!("{}, {}", fl!("attribute"), fl("attribute", None));
 			}
 			Message::XSplatChanged(xsplat) => self.character.splat.set_xsplat(Some(xsplat)),
 			Message::AbilityChanged(ability, val) => {
