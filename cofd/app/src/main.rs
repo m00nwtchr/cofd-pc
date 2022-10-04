@@ -19,16 +19,18 @@ use iced::{
 	widget::{column, container, pick_list, row, text, text_input},
 	Alignment, Application, Command, Element, Length, Settings, Theme,
 };
+use iced_lazy::responsive;
 // use iced_aw::pure::{TabLabel, Tabs};
 
 use cofd::{
-	character::{AttributeCategory, InfoTrait, Trait, TraitCategory},
+	character::{AttributeCategory, InfoTrait, Trait, TraitCategory, Wound},
 	prelude::*,
 	splat::{
 		ability::{Ability, AbilityVal},
+		changeling::{Court, Regalia, Seeming},
 		mage::{Order, Path},
-		vampire::Discipline,
-		Splat, XSplat,
+		vampire::{Bloodline, Clan, Covenant, Discipline},
+		Splat, SplatType, XSplat, YSplat,
 	},
 };
 
@@ -36,7 +38,7 @@ mod i18n;
 mod widget;
 
 use i18n::{fl, Locale};
-use widget::SheetDots;
+use widget::{HealthTrack, SheetDots};
 
 struct PlayerCompanionApp {
 	active_tab: usize,
@@ -65,18 +67,34 @@ enum Message {
 	InfoTraitChanged(String, InfoTrait),
 	TraitChanged(u8, Trait),
 	XSplatChanged(XSplat),
+	YSplatChanged(YSplat),
 	AbilityChanged(Ability, AbilityVal),
 	CustomAbilityChanged(Ability, String),
+	HealthChanged(Wound),
+	IntegrityDamage(SplatType, Wound),
+
+	RegaliaChanged(Regalia),
 }
 
 impl PlayerCompanionApp {
+	#[allow(clippy::too_many_lines)]
 	fn overview_tab(&self) -> Element<'static, Message> {
 		let health = {
-			// let boxes = SheetBoxes::new();
+			let track = HealthTrack::new(
+				self.character.health().clone(),
+				self.character.max_health() as usize,
+				Message::HealthChanged,
+			);
 
+			let wp = self.character.wound_penalty();
+			let mut label = fl!("health");
+
+			if wp > 0 {
+				label += &format!(" (-{wp})");
+			}
 			column![
-				text(fl!("health")).size(H3_SIZE),
-				text(format!("{:?}", self.character.health_track))
+				text(label).size(H3_SIZE),
+				track // text(format!("{:?}", self.character.health_track))
 			]
 			.align_items(Alignment::Center)
 		};
@@ -86,16 +104,23 @@ impl PlayerCompanionApp {
 				self.character.willpower,
 				0,
 				self.character.max_willpower() as u8,
-				|val| Message::TraitChanged(val, Trait::Integrity),
+				widget::Shape::Dots,
+				None,
+				|val| Message::TraitChanged(val, Trait::Willpower),
 			);
 
 			column![text(fl!("willpower")).size(H3_SIZE), dots].align_items(Alignment::Center)
 		};
 
 		let st = if let Some(st) = self.character.splat.supernatural_tolerance() {
-			let dots = SheetDots::new(self.character.power, 0, 10, |val| {
-				Message::TraitChanged(val, Trait::Power)
-			});
+			let dots = SheetDots::new(
+				self.character.power,
+				1,
+				10,
+				widget::Shape::Dots,
+				None,
+				|val| Message::TraitChanged(val, Trait::Power),
+			);
 
 			column![
 				text(fl(self.character.splat.name(), Some(st))).size(H3_SIZE),
@@ -107,64 +132,165 @@ impl PlayerCompanionApp {
 		};
 
 		let fuel = if let Some(fuel) = self.character.splat.fuel() {
-			column![text(fl(self.character.splat.name(), Some(fuel))).size(H3_SIZE)]
-				.align_items(Alignment::Center)
+			let boxes = SheetDots::new(
+				self.character.fuel,
+				0,
+				self.character.max_fuel(),
+				widget::Shape::Boxes,
+				Some(10),
+				|val| Message::TraitChanged(val, Trait::Fuel),
+			);
+
+			column![
+				text(fl(self.character.splat.name(), Some(fuel))).size(H3_SIZE),
+				boxes
+			]
+			.align_items(Alignment::Center)
 		} else {
 			column![]
 		};
 
 		let integrity = {
-			let dots = SheetDots::new(self.character.integrity, 0, 10, |val| {
-				Message::TraitChanged(val, Trait::Integrity)
-			});
+			let dots: Element<'static, Message> =
+				if let Splat::Changeling(_, _, _, data) = &self.character.splat {
+					HealthTrack::new(
+						data.clarity.clone(),
+						data.max_clarity(&self.character) as usize,
+						|w| Message::IntegrityDamage(SplatType::Changeling, w),
+					)
+					.into()
+				} else {
+					SheetDots::new(
+						self.character.integrity,
+						0,
+						10,
+						widget::Shape::Dots,
+						None,
+						|val| Message::TraitChanged(val, Trait::Integrity),
+					)
+					.into()
+				};
 
-			match self.character.splat {
-				Splat::Vampire(_, _, _) => todo!(),
-				Splat::Werewolf(_, _, _, _) => todo!(),
-				Splat::Changeling(_, _, _) => todo!(),
-				_ => column![
-					text(fl(
-						self.character.splat.name(),
-						Some(self.character.splat.integrity())
-					))
-					.size(H3_SIZE),
-					dots
-				]
-				.align_items(Alignment::Center),
-			}
+			let label = text(fl(
+				self.character.splat.name(),
+				Some(self.character.splat.integrity()),
+			))
+			.size(H3_SIZE);
+
+			let mut col = Column::new().align_items(Alignment::Center);
+
+			// match self.character.splat {
+			// 	// Splat::Vampire(_, _, _) => todo!(),
+			// 	Splat::Werewolf(_, _, _, _) => todo!(),
+			// 	_ => ,
+			// }
+
+			col = col.push(label).push(dots);
+
+			col
 		};
 
-		container(
-			column![
-				column![self.info(), self.attributes(),]
-					.align_items(Alignment::Center)
-					.width(Length::Fill),
-				row![
-					self.skills(),
+		let mut col1 = Column::new()
+			.align_items(Alignment::Center)
+			.width(Length::Fill);
+
+		match &self.character.splat {
+			Splat::Mortal => {}
+			Splat::Changeling(seeming, _, _, data) => {
+				let sg = seeming.get_favored_regalia();
+				let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
+
+				let seeming_regalia = text(fl(self.character.splat.name(), Some(sg.name())));
+				// if let Seeming::_Custom(_, sg) = seeming {
+				// 	let reg: Vec<Regalia> = all_regalia
+				// 		.iter()
+				// 		.cloned()
+				// 		.filter(|reg| {
+				// 			if let Some(regalia) = &data.regalia {
+				// 				*reg != *regalia
+				// 			} else {
+				// 				true
+				// 			}
+				// 		})
+				// 		.collect();
+
+				// 	pick_list(reg, Some(sg.clone()), |val| {
+				// 		Message::RegaliaChanged(val, true)
+				// 	})
+				// 	.into()
+				// } else {
+				// text(fl(self.character.splat.name(), Some(sg.name()))).into()
+				// };
+
+				let regalia: Element<'static, Message> =
+					if let Some(Regalia::_Custom(name)) = &data.regalia {
+						text_input("", name, |val| {
+							Message::RegaliaChanged(Regalia::_Custom(val))
+						})
+						.width(Length::Fill)
+						.into()
+					} else {
+						let reg: Vec<Regalia> = all_regalia
+							.iter()
+							.cloned()
+							.filter(|reg| reg != sg)
+							.collect();
+
+						pick_list(reg, data.regalia.clone(), Message::RegaliaChanged)
+							.width(Length::Fill)
+							.into()
+					};
+
+				col1 = col1.push(
 					column![
-						text("Other Traits".to_uppercase()).size(H2_SIZE),
-						row![
-							column![self.abilities()]
-								.align_items(Alignment::Center)
-								.width(Length::Fill),
-							column![health, willpower, st, fuel, integrity]
-								.align_items(Alignment::Center)
-								.width(Length::Fill)
-						]
+						text(fl!("favored-regalia")).size(H3_SIZE),
+						column![seeming_regalia, regalia].width(Length::Fill)
 					]
 					.align_items(Alignment::Center)
-					.padding(15)
-					.width(Length::FillPortion(3))
-				],
-				// pick_list(
-				// 	Vec::from(LANGS),
-				// 	Some(self.locale.clone()),
-				// 	Message::LocaleChanged
-				// )
+					.width(Length::Fill),
+				);
+			}
+			_ => {
+				col1 = col1.push(self.abilities());
+			}
+		}
+
+		// let margin_col = || Column::new();
+
+		container(
+			row![
+				// (margin_col)(),
+				column![
+					column![self.info(), self.attributes(),]
+						.align_items(Alignment::Center)
+						.width(Length::Fill),
+					row![
+						self.skills(),
+						column![
+							text("Other Traits".to_uppercase()).size(H2_SIZE),
+							row![
+								col1,
+								column![health, willpower, st, fuel, integrity]
+									.align_items(Alignment::Center)
+									.width(Length::Fill)
+							]
+						]
+						.align_items(Alignment::Center)
+						.padding(15)
+						.width(Length::FillPortion(3))
+					],
+					// pick_list(
+					// 	Vec::from(LANGS),
+					// 	Some(self.locale.clone()),
+					// 	Message::LocaleChanged
+					// )
+				]
+				.width(Length::Fill),
+				// (margin_col)()
 			]
-			.padding(10), // .width(Length::Fill), // .align_items(Alignment::Center)
-			              // .align_y(Vertical::Center)
+			.width(Length::Fill),
 		)
+		.padding(10)
 		.center_x()
 		.into()
 	}
@@ -209,7 +335,7 @@ impl PlayerCompanionApp {
 		row![col1, col2].width(Length::Fill).spacing(5).into()
 	}
 
-	#[allow(clippy::single_match_else)]
+	#[allow(clippy::single_match_else, clippy::similar_names)]
 	fn info(&self) -> Element<'static, Message> {
 		let col3 = match self.character.splat {
 			Splat::Mortal => self.mk_info_col(vec![
@@ -218,31 +344,54 @@ impl PlayerCompanionApp {
 				InfoTrait::GroupName,
 			]),
 			_ => {
-				let mut all = XSplat::all(&self.character.splat._type());
+				let mut xsplats = XSplat::all(&self.character.splat._type());
+				let mut ysplats = YSplat::all(&self.character.splat._type());
 
-				all.extend(self.custom_xsplats.iter().filter_map(|xsplat| {
+				xsplats.extend(self.custom_xsplats.iter().filter_map(|xsplat| {
 					match (xsplat, &self.character.splat) {
 						(XSplat::Vampire(_), Splat::Vampire(_, _, _))
 						| (XSplat::Werewolf(_), Splat::Werewolf(_, _, _, _))
 						| (XSplat::Mage(_), Splat::Mage(_, _, _))
-						| (XSplat::Changeling(_), Splat::Changeling(_, _, _)) => Some(xsplat.clone()),
+						| (XSplat::Changeling(_), Splat::Changeling(_, _, _, _)) => Some(xsplat.clone()),
 						_ => None,
 					}
 				}));
 
 				row![
-					column![text(format!(
-						"{}:",
-						fl(
-							self.character.splat.name(),
-							Some(self.character.splat.xsplat_name())
-						)
-					))]
+					column![
+						text(format!(
+							"{}:",
+							fl(
+								self.character.splat.name(),
+								Some(self.character.splat.xsplat_name())
+							)
+						)),
+						text(format!(
+							"{}:",
+							fl(
+								self.character.splat.name(),
+								Some(self.character.splat.ysplat_name())
+							)
+						))
+					]
 					.spacing(3),
 					column![
-						pick_list(all, self.character.splat.xsplat(), Message::XSplatChanged)
-							.width(Length::Fill)
+						pick_list(
+							xsplats,
+							self.character.splat.xsplat(),
+							Message::XSplatChanged
+						)
+						.padding(1)
+						.width(Length::Fill),
+						pick_list(
+							ysplats,
+							self.character.splat.ysplat(),
+							Message::YSplatChanged
+						)
+						.padding(1)
+						.width(Length::Fill)
 					]
+					.spacing(1)
 					.width(Length::Fill)
 				]
 				.width(Length::Fill)
@@ -279,9 +428,14 @@ impl PlayerCompanionApp {
 			let v = self.character.base_attributes().get(&attr) as u8;
 
 			col1 = col1.push(text(fl("attribute", Some(attr.name()))));
-			col2 = col2.push(SheetDots::new(v, 1, 5, |val| {
-				Message::AttrChanged(val, attr)
-			}));
+			col2 = col2.push(SheetDots::new(
+				v,
+				1,
+				5,
+				widget::Shape::Dots,
+				None,
+				move |val| Message::AttrChanged(val, attr),
+			));
 		}
 
 		row![col1, col2]
@@ -324,9 +478,14 @@ impl PlayerCompanionApp {
 			col1 = col1.push(text(fl("skill", Some(skill.name()))));
 
 			let v = self.character.skills().get(&skill);
-			col2 = col2.push(SheetDots::new(*v, 0, 5, |val| {
-				Message::SkillChanged(val, skill.clone())
-			}));
+			col2 = col2.push(SheetDots::new(
+				*v,
+				0,
+				5,
+				widget::Shape::Dots,
+				None,
+				move |val| Message::SkillChanged(val, skill.clone()),
+			));
 		}
 
 		column![
@@ -369,9 +528,19 @@ impl PlayerCompanionApp {
 					};
 
 					col1 = col1.push(text(fl(splat_name, Some(ability.name()))));
-					col2 = col2.push(SheetDots::new(val, 0, 5, |val| {
-						Message::AbilityChanged(ability.clone(), AbilityVal(ability.clone(), val))
-					}));
+					col2 = col2.push(SheetDots::new(
+						val,
+						0,
+						5,
+						widget::Shape::Dots,
+						None,
+						move |val| {
+							Message::AbilityChanged(
+								ability.clone(),
+								AbilityVal(ability.clone(), val),
+							)
+						},
+					));
 				}
 			}
 		} else {
@@ -404,20 +573,33 @@ impl PlayerCompanionApp {
 						e.push(ability);
 					}
 
-					col1 = col1.push(
-						pick_list(e, Some(ability.0.clone()), {
-							let val = ability.clone();
-							move |key| {
-								Message::AbilityChanged(val.0.clone(), AbilityVal(key, val.1))
-							}
-						})
-						.text_size(20),
-					);
+					col1 = col1
+						.push(
+							pick_list(e, Some(ability.0.clone()), {
+								let val = ability.clone();
+								move |key| {
+									Message::AbilityChanged(val.0.clone(), AbilityVal(key, val.1))
+								}
+							})
+							.padding(1)
+							.text_size(20),
+						)
+						.spacing(1);
 				}
 
-				col2 = col2.push(SheetDots::new(ability.1, 0, 5, |val| {
-					Message::AbilityChanged(ability.0.clone(), AbilityVal(ability.0.clone(), val))
-				}));
+				col2 = col2.push(SheetDots::new(
+					ability.1,
+					0,
+					5,
+					widget::Shape::Dots,
+					None,
+					{
+						let key = ability.0.clone();
+						move |val| {
+							Message::AbilityChanged(key.clone(), AbilityVal(key.clone(), val))
+						}
+					},
+				));
 			}
 		}
 
@@ -442,20 +624,28 @@ impl Application for PlayerCompanionApp {
 		let language_requester = i18n::setup();
 
 		let character = Character::builder()
-			// .with_splat(Splat::Vampire(
-			// 	Clan::Ventrue,
-			// 	Some(Covenant::OrdoDracul),
-			// 	Some(Bloodline::_Custom(
-			// 		"Dragolescu".to_string(),
-			// 		[
-			// 			Discipline::Animalism,
-			// 			Discipline::Dominate,
-			// 			Discipline::Resilience,
-			// 			Discipline::Auspex,
-			// 		],
-			// 	)),
-			// ))
-			.with_splat(Splat::Mage(Path::Mastigos, Some(Order::Mysterium), None))
+			.with_st(3)
+			.with_splat(Splat::Changeling(
+				Seeming::Wizened,
+				// Seeming::_Custom("bler".to_string(), Regalia::Jewels),
+				Some(Court::Autumn),
+				None,
+				Default::default(),
+			))
+			.with_splat(Splat::Vampire(
+				Clan::Ventrue,
+				Some(Covenant::OrdoDracul),
+				Some(Bloodline::_Custom(
+					"Dragolescu".to_string(),
+					[
+						Discipline::Animalism,
+						Discipline::Dominate,
+						Discipline::Resilience,
+						Discipline::Auspex,
+					],
+				)),
+			))
+			// .with_splat(Splat::Mage(Path::Mastigos, Some(Order::Mysterium), None))
 			// .with_splat(Splat::Werewolf(
 			// 	Some(Auspice::Rahu),
 			// 	Some(Tribe::BloodTalons),
@@ -543,6 +733,7 @@ impl Application for PlayerCompanionApp {
 				println!("{}, {}", fl!("attribute"), fl("attribute", None));
 			}
 			Message::XSplatChanged(xsplat) => self.character.splat.set_xsplat(Some(xsplat)),
+			Message::YSplatChanged(ysplat) => self.character.splat.set_ysplat(Some(ysplat)),
 			Message::AbilityChanged(ability, val) => {
 				if self.character.has_ability(&ability) {
 					self.character.remove_ability(&ability);
@@ -565,12 +756,32 @@ impl Application for PlayerCompanionApp {
 				}
 			}
 			Message::TraitChanged(val, _trait) => match _trait {
-				// Trait::Willpower => self.character.w,
+				Trait::Willpower => self.character.willpower = val,
 				Trait::Power => self.character.power = val,
-				// Trait::Fuel => self.character.fu,
+				Trait::Fuel => self.character.fuel = val,
 				Trait::Integrity => self.character.integrity = val,
 				_ => {}
 			},
+			Message::HealthChanged(wound) => self.character.health_mut().poke(&wound),
+			#[allow(clippy::single_match)]
+			Message::IntegrityDamage(_type, wound) => match (_type, &mut self.character.splat) {
+				(SplatType::Changeling, Splat::Changeling(_, _, _, data)) => {
+					data.clarity.poke(&wound);
+					if let Wound::Lethal = wound {
+						data.clarity.poke(&Wound::Aggravated);
+					}
+				}
+				_ => {}
+			},
+			Message::RegaliaChanged(regalia) => {
+				if let Splat::Changeling(seeming, _, _, data) = &mut self.character.splat {
+					// if !flag {
+					data.regalia = Some(regalia);
+					// } else if let Seeming::_Custom(_, _regalia) = seeming {
+					// 	*_regalia = regalia;
+					// }
+				}
+			}
 		}
 
 		Command::none()

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::character::Skill;
 
-use super::{ability::Ability, XSplat};
+use super::{ability::Ability, XSplat, YSplat};
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Path {
@@ -108,6 +108,48 @@ impl Order {
 			},
 			Order::_Custom(_, skills) => skills,
 		}
+	}
+
+	pub fn name(&self) -> &str {
+		match self {
+			Order::AdamantineArrow => "adamantine_arrow",
+			Order::GuardiansOfTheVeil => "guardians_of_the_veil",
+			Order::Mysterium => "mysterium",
+			Order::SilverLadder => "silver_ladder",
+			Order::FreeCouncil => "free_council",
+			Order::SeersOfTheThrone(ministry) => match ministry {
+				Some(ministry) => match ministry {
+					Ministry::Hegemony => "hegemony",
+					Ministry::Panopticon => "panopticon",
+					Ministry::Paternoster => "paternoster",
+					Ministry::Praetorian => "praetorian",
+					Ministry::_Custom(name, _) => name,
+				},
+				None => "seers_of_the_throne",
+			},
+			Order::_Custom(name, _) => name,
+		}
+	}
+
+	pub fn all() -> [Order; 10] {
+		[
+			Order::AdamantineArrow,
+			Order::GuardiansOfTheVeil,
+			Order::Mysterium,
+			Order::SilverLadder,
+			Order::FreeCouncil,
+			Order::SeersOfTheThrone(None),
+			Order::SeersOfTheThrone(Some(Ministry::Hegemony)),
+			Order::SeersOfTheThrone(Some(Ministry::Panopticon)),
+			Order::SeersOfTheThrone(Some(Ministry::Paternoster)),
+			Order::SeersOfTheThrone(Some(Ministry::Praetorian)),
+		]
+	}
+}
+
+impl From<Order> for YSplat {
+	fn from(order: Order) -> Self {
+		YSplat::Mage(order)
 	}
 }
 

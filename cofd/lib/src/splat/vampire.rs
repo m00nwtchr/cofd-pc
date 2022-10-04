@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Trait};
 
-use super::{ability::Ability, XSplat};
+use super::{ability::Ability, XSplat, YSplat};
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Clan {
@@ -88,6 +88,35 @@ pub enum Covenant {
 	LanceaEtSanctum,
 	OrdoDracul,
 	_Custom(String),
+}
+
+impl Covenant {
+	pub fn name(&self) -> &str {
+		match self {
+			Covenant::CarthianMovement => "carthian_movement",
+			Covenant::CircleOfTheCrone => "circle_of_the_crone",
+			Covenant::Invictus => "invictus",
+			Covenant::LanceaEtSanctum => "lancea_et_sanctum",
+			Covenant::OrdoDracul => "ordo_dracul",
+			Covenant::_Custom(name) => name,
+		}
+	}
+
+	pub fn all() -> [Covenant; 5] {
+		[
+			Covenant::CarthianMovement,
+			Covenant::CircleOfTheCrone,
+			Covenant::Invictus,
+			Covenant::LanceaEtSanctum,
+			Covenant::OrdoDracul,
+		]
+	}
+}
+
+impl From<Covenant> for YSplat {
+	fn from(covenant: Covenant) -> Self {
+		YSplat::Vampire(covenant)
+	}
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]

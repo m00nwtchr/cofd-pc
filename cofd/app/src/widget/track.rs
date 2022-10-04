@@ -1,3 +1,4 @@
+use cofd::character::{Damage, Wound};
 use iced::{
 	event, mouse, Alignment, Background, Color, Element, Event, Length, Point, Rectangle, Theme,
 };
@@ -7,21 +8,20 @@ use iced_native::{
 	Clipboard, Layout, Shell, Widget,
 };
 
-pub struct SheetBoxes<Message, Renderer>
+pub struct HealthTrack<'a, Message, Renderer>
 where
 	Renderer: text::Renderer,
 	Renderer::Theme: StyleSheet,
 {
-	value: u8,
-	// min: u8,
-	max: u8,
-	on_click: Vec<Message>,
+	damage: Damage,
+	max: usize,
+	on_click: Box<dyn Fn(Wound) -> Message + 'a>,
 	size: u16,
 	spacing: u16,
 	style: <Renderer::Theme as StyleSheet>::Style,
 }
 
-impl<'a, Message, Renderer> SheetBoxes<Message, Renderer>
+impl<'a, Message, Renderer> HealthTrack<'a, Message, Renderer>
 where
 	Message: Clone,
 	Renderer: text::Renderer,
@@ -33,15 +33,14 @@ where
 	/// The default spacing of a [`Radio`] button.
 	pub const DEFAULT_SPACING: u16 = 2;
 
-	pub fn new<F>(value: u8, _min: u8, max: u8, f: F) -> Self
+	pub fn new<F>(damage: Damage, max: usize, f: F) -> Self
 	where
-		F: FnMut(u8) -> Message,
+		F: Fn(Wound) -> Message + 'a,
 	{
 		Self {
-			value,
-			// min,
+			damage,
 			max,
-			on_click: (0..=max).map(f).collect(),
+			on_click: Box::new(f),
 			size: Self::DEFAULT_SIZE,
 			spacing: Self::DEFAULT_SPACING, //15
 			style: Default::default(),
@@ -49,7 +48,7 @@ where
 	}
 }
 
-impl<Message, Renderer> Widget<Message, Renderer> for SheetBoxes<Message, Renderer>
+impl<'a, Message, Renderer> Widget<Message, Renderer> for HealthTrack<'a, Message, Renderer>
 where
 	Message: Clone,
 	Renderer: text::Renderer,
@@ -94,17 +93,8 @@ where
 			| Event::Touch(touch::Event::FingerPressed { .. }) => {
 				for (i, layout) in layout.children().enumerate() {
 					if layout.bounds().contains(cursor_position) {
-						let i = if (self.value as usize - 1) == i {
-							i
-						} else {
-							i + 1
-						};
-
-						// if i + 1 > self.min as usize {
-						if let Some(message) = self.on_click.get(i) {
-							shell.publish(message.clone());
-						}
-						// }
+						let wound = self.damage.get_i(i);
+						shell.publish((self.on_click)(wound));
 
 						return event::Status::Captured;
 					}
@@ -141,60 +131,83 @@ where
 		cursor_position: Point,
 		_viewport: &Rectangle,
 	) {
-		// for i in self.min..self.max {
-		let mut mouse_i = None;
 		for (i, layout) in layout.children().enumerate() {
 			let bounds = layout.bounds();
-
-			if bounds.contains(cursor_position) {
-				mouse_i = Some(i);
-			}
-		}
-
-		for (i, layout) in layout.children().enumerate() {
-			let bounds = layout.bounds();
-
-			let custom_style = if mouse_i.is_some_and(|mouse_i| i <= *mouse_i) {
-				theme.hovered(self.style)
-			} else {
-				theme.active(self.style)
-			};
+			let custom_style = theme.active(self.style);
 
 			let size = bounds.width;
 			let dot_size = size / 2.0;
 
+			let wound = self.damage.get_i(i);
 			renderer.fill_quad(
 				renderer::Quad {
 					bounds,
-					border_radius: size / 2.0,
+					border_radius: 0.0,
 					border_width: custom_style.border_width,
 					border_color: custom_style.border_color,
 				},
-				custom_style.background,
+				// custom_style.background,
+				match wound {
+					Wound::None => Color::from_rgb(0.0, 1.0, 0.0),
+					Wound::Bashing => Color::from_rgb(0.0, 0.5, 0.0),
+					Wound::Lethal => Color::from_rgb(0.5, 0.4, 0.0),
+					Wound::Aggravated => Color::from_rgb(1.0, 0.0, 0.0),
+				},
 			);
-
-			if (self.value as usize - 1) >= i {
-				renderer.fill_quad(
-					renderer::Quad {
-						bounds,
-						border_radius: dot_size,
-						border_width: 0.0,
-						border_color: Color::TRANSPARENT,
-					},
-					custom_style.dot_color,
-				);
-			}
 		}
 	}
 }
 
-impl<'a, Message, Renderer> From<SheetBoxes<Message, Renderer>> for Element<'a, Message, Renderer>
+// fn vert_line<Renderer: text::Renderer>(
+// 	renderer: &mut Renderer,
+// 	bounds: Rectangle,
+// 	style: Appearance,
+// ) {
+// 	renderer.fill_quad(
+// 		renderer::Quad {
+// 			bounds: Rectangle {
+// 				x: bounds.x + (bounds.width / 2.0) - 1.0,
+// 				y: bounds.y,
+// 				width: 2.0,
+// 				height: bounds.height,
+// 			},
+// 			border_radius: 0.0,
+// 			border_width: 0.0,
+// 			border_color: Color::TRANSPARENT,
+// 		},
+// 		style.dot_color,
+// 	);
+// }
+
+// fn horiz_line<Renderer: text::Renderer>(
+// 	renderer: &mut Renderer,
+// 	bounds: Rectangle,
+// 	style: Appearance,
+// ) {
+// 	renderer.fill_quad(
+// 		renderer::Quad {
+// 			bounds: Rectangle {
+// 				x: bounds.x,
+// 				y: bounds.y + (bounds.height / 2.0) - 1.0,
+// 				width: bounds.width,
+// 				height: 2.0,
+// 			},
+// 			border_radius: 0.0,
+// 			border_width: 0.0,
+// 			border_color: Color::TRANSPARENT,
+// 		},
+// 		style.dot_color,
+// 	);
+// }
+
+impl<'a, Message, Renderer> From<HealthTrack<'a, Message, Renderer>>
+	for Element<'a, Message, Renderer>
 where
 	Message: 'a + Clone,
 	Renderer: 'a + text::Renderer,
 	Renderer::Theme: StyleSheet + widget::text::StyleSheet,
 {
-	fn from(radio: SheetBoxes<Message, Renderer>) -> Element<'a, Message, Renderer> {
+	fn from(radio: HealthTrack<'a, Message, Renderer>) -> Self {
 		Element::new(radio)
 	}
 }

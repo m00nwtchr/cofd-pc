@@ -4,7 +4,6 @@ use std::{
 };
 
 use crate::splat::{
-	self,
 	ability::{Ability, AbilityVal},
 	vampire::MaskDirge,
 	Splat,
@@ -28,6 +27,8 @@ pub fn add(a: u8, b: i8) -> u8 {
 #[derive(Default)]
 pub struct CharacterBuilder {
 	splat: Splat,
+	power: u8,
+	fuel: u8,
 	attributes: Attributes,
 	skills: Skills,
 	abilities: BTreeMap<Ability, AbilityVal>,
@@ -35,6 +36,7 @@ pub struct CharacterBuilder {
 	// merits: HashMap<AbilityKey, MeritAbility>,
 	merits: Vec<AbilityVal>,
 	flag: bool,
+	flag2: bool,
 }
 
 impl CharacterBuilder {
@@ -76,12 +78,28 @@ impl CharacterBuilder {
 	}
 
 	#[must_use]
+	pub fn with_st(mut self, st: u8) -> Self {
+		self.power = st;
+		self
+	}
+
+	#[must_use]
+	pub fn with_fuel(mut self, fuel: u8) -> Self {
+		self.fuel = fuel;
+		self.flag2 = true;
+		self
+	}
+
+	#[must_use]
 	pub fn build(self) -> Character {
 		let power = if let Splat::Mortal = &self.splat {
 			0
+		} else if self.power > 0 {
+			self.power
 		} else {
 			1
 		};
+
 		let mut character = Character {
 			splat: self.splat,
 			power,
@@ -96,41 +114,148 @@ impl CharacterBuilder {
 			character.calc_mod_map();
 		}
 
-		character
-			.health_track
-			.resize((character.max_health() as u8).into(), Wound::None);
-
-		// character.health_track.get_mut(0).unwrap().poke();
+		if self.flag2 {
+			character.fuel = self.fuel;
+		} else {
+			character.fuel = character.max_fuel();
+		}
 
 		character
 	}
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize_repr, Deserialize_repr)]
-#[repr(u8)]
+#[derive(Default, Debug, Clone)]
 pub enum Wound {
 	#[default]
-	None = 0,
-	Bashing = 1,
-	Lethal = 2,
-	Aggravated = 3,
+	None,
+	Bashing,
+	Lethal,
+	Aggravated,
 }
 
 impl Wound {
-	pub fn inc(&mut self) {
-		*self = match self {
+	#[must_use]
+	pub fn inc(&self) -> Wound {
+		match self {
 			Wound::None => Wound::Bashing,
 			Wound::Bashing => Wound::Lethal,
 			Wound::Lethal => Wound::Aggravated,
 			Wound::Aggravated => Wound::Aggravated,
-		};
+		}
 	}
 
-	pub fn poke(&mut self) {
+	#[must_use]
+	pub fn poke(&self) -> Wound {
 		if let Wound::Aggravated = self {
-			*self = Wound::None;
+			Wound::None
 		} else {
-			self.inc();
+			self.inc()
+		}
+	}
+
+	pub fn poke_mut(&mut self) {
+		*self = self.poke();
+	}
+}
+
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(default)]
+pub struct Damage {
+	#[serde(skip_serializing_if = "is_zero")]
+	aggravated: u8,
+	#[serde(skip_serializing_if = "is_zero")]
+	lethal: u8,
+	#[serde(skip_serializing_if = "is_zero")]
+	bashing: u8,
+}
+
+impl Damage {
+	pub fn new(bashing: u8, lethal: u8, aggravated: u8) -> Self {
+		Self {
+			aggravated,
+			lethal,
+			bashing,
+		}
+	}
+
+	pub fn get(&self, wound: &Wound) -> u8 {
+		match wound {
+			Wound::None => 0,
+			Wound::Bashing => self.bashing,
+			Wound::Lethal => self.lethal,
+			Wound::Aggravated => self.aggravated,
+		}
+	}
+
+	pub fn get_i(&self, i: usize) -> Wound {
+		// println!("{i}");
+		if i < self.aggravated as usize {
+			Wound::Aggravated
+		} else if i >= self.aggravated as usize && i < (self.aggravated + self.lethal) as usize {
+			Wound::Lethal
+		} else if i >= (self.aggravated + self.lethal) as usize
+			&& i < (self.aggravated + self.lethal + self.bashing) as usize
+		{
+			Wound::Bashing
+		} else {
+			Wound::None
+		}
+	}
+
+	pub fn sum(&self) -> u8 {
+		self.bashing + self.lethal + self.aggravated
+	}
+
+	pub fn dec(&mut self, wound: &Wound) {
+		match wound {
+			Wound::None => {}
+			Wound::Bashing => {
+				if self.bashing > 0 {
+					self.bashing -= 1;
+				}
+			}
+			Wound::Lethal => {
+				if self.lethal > 0 {
+					self.lethal -= 1;
+				}
+			}
+			Wound::Aggravated => {
+				if self.aggravated > 0 {
+					self.aggravated -= 1;
+				}
+			}
+		}
+	}
+
+	pub fn inc(&mut self, wound: &Wound) {
+		match wound {
+			Wound::None => {}
+			Wound::Bashing => self.bashing += 1,
+			Wound::Lethal => self.lethal += 1,
+			Wound::Aggravated => self.aggravated += 1,
+		}
+	}
+
+	pub fn poke(&mut self, wound: &Wound) {
+		match wound {
+			Wound::None => self.bashing += 1,
+			Wound::Bashing => {
+				if self.bashing > 0 {
+					self.bashing -= 1;
+				}
+				self.lethal += 1;
+			}
+			Wound::Lethal => {
+				if self.lethal > 0 {
+					self.lethal -= 1;
+				}
+				self.aggravated += 1;
+			}
+			Wound::Aggravated => {
+				if self.aggravated > 0 {
+					self.aggravated -= 1;
+				}
+			}
 		}
 	}
 }
@@ -139,7 +264,7 @@ pub fn athletics() -> Skill {
 	Skill::Athletics
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Character {
 	pub splat: Splat,
@@ -154,11 +279,11 @@ pub struct Character {
 	_attributes: Attributes,
 	skills: Skills,
 
-	pub health_track: Vec<Wound>,
+	health: Damage,
 
 	pub willpower: u8,
 	pub power: u8,
-	fuel: u8,
+	pub fuel: u8,
 	pub integrity: u8,
 
 	// #[serde(skip)]
@@ -244,7 +369,7 @@ impl Character {
 		modifiers.extend(self.abilities.values().flat_map(AbilityVal::get_modifiers));
 		modifiers.extend(self.merits.iter().flat_map(AbilityVal::get_modifiers));
 
-		#[allow(clippy::single_match)]
+		#[allow(clippy::single_match)] // Will likely add more stuff here
 		match &self.splat {
 			Splat::Werewolf(auspice, _, _, data) => {
 				modifiers.extend(data.form.get_modifiers());
@@ -337,6 +462,24 @@ impl Character {
 		)
 	}
 
+	pub fn health(&self) -> &Damage {
+		&self.health
+	}
+
+	pub fn health_mut(&mut self) -> &mut Damage {
+		&mut self.health
+	}
+
+	pub fn wound_penalty(&self) -> u8 {
+		let mh = self.max_health();
+		match mh - min(self.health.sum(), mh) {
+			2 => 1,
+			1 => 2,
+			0 => 3,
+			_ => 0,
+		}
+	}
+
 	pub fn max_willpower(&self) -> u8 {
 		let attributes = self.attributes();
 
@@ -406,7 +549,7 @@ impl Default for Character {
 			base_size: 5,
 			abilities: Default::default(),
 			merits: Default::default(),
-			health_track: Default::default(),
+			health: Default::default(),
 			_mod_map: Default::default(),
 			power: Default::default(),
 			integrity: 7,

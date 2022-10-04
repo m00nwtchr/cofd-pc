@@ -1,6 +1,24 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
-use super::XSplat;
+use crate::character::{Character, Damage};
+
+use super::{XSplat, YSplat};
+
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct ChangelingData {
+	pub regalia: Option<Regalia>,
+	pub clarity: Damage,
+}
+
+impl ChangelingData {
+	pub fn max_clarity(&self, character: &Character) -> u8 {
+		let attributes = character.attributes();
+
+		attributes.wits + attributes.composure
+	}
+}
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Seeming {
@@ -65,6 +83,28 @@ pub enum Court {
 	_Custom(String),
 }
 
+impl Court {
+	pub fn name(&self) -> &str {
+		match self {
+			Court::Spring => "spring",
+			Court::Summer => "summer",
+			Court::Autumn => "autumn",
+			Court::Winter => "winter",
+			Court::_Custom(name) => name,
+		}
+	}
+
+	pub fn all() -> [Court; 4] {
+		[Court::Spring, Court::Summer, Court::Autumn, Court::Winter]
+	}
+}
+
+impl From<Court> for YSplat {
+	fn from(court: Court) -> Self {
+		YSplat::Changeling(court)
+	}
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Kith {
 	Artist,
@@ -91,4 +131,35 @@ pub enum Regalia {
 	Steed,
 	Sword,
 	_Custom(String),
+}
+
+impl Regalia {
+	pub fn name(&self) -> &str {
+		match self {
+			Regalia::Crown => "crown",
+			Regalia::Jewels => "jewels",
+			Regalia::Mirror => "mirror",
+			Regalia::Shield => "shield",
+			Regalia::Steed => "steed",
+			Regalia::Sword => "sword",
+			Regalia::_Custom(name) => name,
+		}
+	}
+
+	pub fn all() -> [Regalia; 6] {
+		[
+			Regalia::Crown,
+			Regalia::Jewels,
+			Regalia::Mirror,
+			Regalia::Shield,
+			Regalia::Steed,
+			Regalia::Sword,
+		]
+	}
+}
+
+impl Display for Regalia {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str(self.name())
+	}
 }

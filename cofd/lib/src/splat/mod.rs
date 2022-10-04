@@ -2,6 +2,9 @@ use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
 
+use self::ability::Ability;
+use crate::character::{Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait};
+
 pub mod ability;
 
 pub mod mage;
@@ -21,10 +24,6 @@ use vampire::*;
 use werewolf::*;
 // use promethean::*;
 use changeling::*;
-
-use crate::character::{Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait};
-
-use self::ability::Ability;
 // use hunter::*;
 // use geist::*;
 // use mummy::*;
@@ -32,12 +31,20 @@ use self::ability::Ability;
 // use beast::*;
 // use deviant:*;
 
+#[derive(Debug, Clone)]
 pub enum SplatType {
 	Mortal,
 	Vampire,
 	Werewolf,
 	Mage,
+	// Promethean,
 	Changeling,
+	// Hunter,
+	// Geist,
+	// Mummy,
+	// Demon,
+	// Beast,
+	// Deviant,
 }
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
@@ -48,7 +55,7 @@ pub enum Splat {
 	Werewolf(Option<Auspice>, Option<Tribe>, Option<String>, WerewolfData),
 	Mage(Path, Option<Order>, Option<Legacy>),
 	// Promethean,
-	Changeling(Seeming, Option<Court>, Option<Kith>),
+	Changeling(Seeming, Option<Court>, Option<Kith>, ChangelingData),
 	// Hunter,
 	// Geist,
 	// Mummy,
@@ -64,7 +71,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => "vampire",
 			Splat::Werewolf(_, _, _, _) => "werewolf",
 			Splat::Mage(_, _, _) => "mage",
-			Splat::Changeling(_, _, _) => "changeling",
+			Splat::Changeling(_, _, _, _) => "changeling",
 		}
 	}
 
@@ -74,7 +81,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => SplatType::Vampire,
 			Splat::Werewolf(_, _, _, _) => SplatType::Werewolf,
 			Splat::Mage(_, _, _) => SplatType::Mage,
-			Splat::Changeling(_, _, _) => SplatType::Changeling,
+			Splat::Changeling(_, _, _, _) => SplatType::Changeling,
 		}
 	}
 
@@ -82,7 +89,7 @@ impl Splat {
 		match self {
 			Splat::Vampire(_, _, _) => "mask",
 			Splat::Werewolf(_, _, _, _) => "blood",
-			Splat::Changeling(_, _, _) => "thread",
+			Splat::Changeling(_, _, _, _) => "thread",
 			_ => "virtue",
 		}
 	}
@@ -91,7 +98,7 @@ impl Splat {
 		match self {
 			Splat::Vampire(_, _, _) => "dirge",
 			Splat::Werewolf(_, _, _, _) => "bone",
-			Splat::Changeling(_, _, _) => "needle",
+			Splat::Changeling(_, _, _, _) => "needle",
 			_ => "vice",
 		}
 	}
@@ -102,7 +109,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => "clan",
 			Splat::Werewolf(_, _, _, _) => "auspice",
 			Splat::Mage(_, _, _) => "path",
-			Splat::Changeling(_, _, _) => "seeming",
+			Splat::Changeling(_, _, _, _) => "seeming",
 		}
 	}
 
@@ -112,7 +119,7 @@ impl Splat {
 			Splat::Vampire(clan, _, _) => Some(clan.into()),
 			Splat::Werewolf(auspice, _, _, _) => auspice.map(Into::into),
 			Splat::Mage(path, _, _) => Some(path.into()),
-			Splat::Changeling(seeming, _, _) => Some(seeming.into()),
+			Splat::Changeling(seeming, _, _, _) => Some(seeming.into()),
 		}
 	}
 
@@ -135,7 +142,7 @@ impl Splat {
 					}
 				}
 				XSplat::Changeling(seeming) => {
-					if let Splat::Changeling(_seeming, _, _) = self {
+					if let Splat::Changeling(_seeming, _, _, _) = self {
 						*_seeming = seeming;
 					}
 				}
@@ -154,7 +161,51 @@ impl Splat {
 			Splat::Vampire(_, _, _) => "covenant",
 			Splat::Werewolf(_, _, _, _) => "tribe",
 			Splat::Mage(_, _, _) => "order",
-			Splat::Changeling(_, _, _) => "court",
+			Splat::Changeling(_, _, _, _) => "court",
+		}
+	}
+
+	pub fn ysplat(&self) -> Option<YSplat> {
+		match self.clone() {
+			Splat::Mortal => None,
+			Splat::Vampire(_, covenant, _) => covenant.map(Into::into),
+			Splat::Werewolf(_, tribe, _, _) => tribe.map(Into::into),
+			Splat::Mage(_, order, _) => order.map(Into::into),
+			Splat::Changeling(_, court, _, _) => court.map(Into::into),
+		}
+	}
+
+	pub fn set_ysplat(&mut self, xsplat: Option<YSplat>) {
+		match xsplat {
+			Some(xsplat) => match xsplat {
+				YSplat::Vampire(covenant) => {
+					if let Splat::Vampire(_, _covenant, _) = self {
+						*_covenant = Some(covenant);
+					}
+				}
+				YSplat::Werewolf(tribe) => {
+					if let Splat::Werewolf(_, _tribe, _, _) = self {
+						*_tribe = Some(tribe);
+					}
+				}
+				YSplat::Mage(order) => {
+					if let Splat::Mage(_, _order, _) = self {
+						*_order = Some(order);
+					}
+				}
+				YSplat::Changeling(court) => {
+					if let Splat::Changeling(_, _court, _, _) = self {
+						*_court = Some(court);
+					}
+				}
+			},
+			None => match self {
+				Splat::Mortal => {}
+				Splat::Vampire(_, covenant, _) => *covenant = None,
+				Splat::Werewolf(_, tribe, _, _) => *tribe = None,
+				Splat::Mage(_, order, _) => *order = None,
+				Splat::Changeling(_, court, _, _) => *court = None,
+			},
 		}
 	}
 
@@ -164,7 +215,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => "bloodline",
 			Splat::Werewolf(_, _, _, _) => "lodge",
 			Splat::Mage(_, _, _) => "legacy",
-			Splat::Changeling(_, _, _) => "kith",
+			Splat::Changeling(_, _, _, _) => "kith",
 		}
 	}
 
@@ -174,7 +225,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => Some("disciplines"),
 			Splat::Werewolf(_, _, _, _) => Some("renown"),
 			Splat::Mage(_, _, _) => Some("arcana"),
-			Splat::Changeling(_, _, _) => None,
+			Splat::Changeling(_, _, _, _) => None,
 		}
 	}
 
@@ -184,7 +235,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => false,
 			Splat::Werewolf(_, _, _, _) => true,
 			Splat::Mage(_, _, _) => true,
-			Splat::Changeling(_, _, _) => false,
+			Splat::Changeling(_, _, _, _) => false,
 		}
 	}
 
@@ -194,7 +245,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => Some(Vec::from(Discipline::all().map(Into::into))),
 			Splat::Werewolf(_, _, _, _) => Some(Vec::from(Renown::all().map(Into::into))),
 			Splat::Mage(_, _, _) => Some(Vec::from(Arcanum::all().map(Into::into))),
-			Splat::Changeling(_, _, _) => None,
+			Splat::Changeling(_, _, _, _) => None,
 		}
 	}
 
@@ -204,7 +255,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => Some(Ability::Discipline(Discipline::custom(str))),
 			Splat::Werewolf(_, _, _, _) => Some(Ability::MoonGift(MoonGift::custom(str))),
 			Splat::Mage(_, _, _) => None,
-			Splat::Changeling(_, _, _) => None,
+			Splat::Changeling(_, _, _, _) => None,
 		}
 	}
 
@@ -214,7 +265,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => Some("blood_potency"),
 			Splat::Werewolf(_, _, _, _) => Some("primal_urge"),
 			Splat::Mage(_, _, _) => Some("gnosis"),
-			Splat::Changeling(_, _, _) => Some("wyrd"),
+			Splat::Changeling(_, _, _, _) => Some("wyrd"),
 		}
 	}
 
@@ -224,7 +275,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => Some("vitae"),
 			Splat::Werewolf(_, _, _, _) => Some("essence"),
 			Splat::Mage(_, _, _) => Some("mana"),
-			Splat::Changeling(_, _, _) => Some("glamour"),
+			Splat::Changeling(_, _, _, _) => Some("glamour"),
 		}
 	}
 
@@ -234,7 +285,7 @@ impl Splat {
 			Splat::Vampire(_, _, _) => "humanity",
 			Splat::Werewolf(_, _, _, _) => "harmony",
 			Splat::Mage(_, _, _) => "wisdom",
-			Splat::Changeling(_, _, _) => "clarity",
+			Splat::Changeling(_, _, _, _) => "clarity",
 		}
 	}
 }
@@ -245,12 +296,6 @@ pub enum XSplat {
 	Werewolf(Auspice),
 	Mage(Path),
 	Changeling(Seeming),
-}
-
-impl Display for XSplat {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.name())
-	}
 }
 
 impl XSplat {
@@ -271,6 +316,47 @@ impl XSplat {
 			SplatType::Changeling => Seeming::all().map(Into::into).to_vec(),
 			_ => vec![],
 		}
+	}
+}
+
+impl Display for XSplat {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str(self.name())
+	}
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum YSplat {
+	Vampire(Covenant),
+	Werewolf(Tribe),
+	Mage(Order),
+	Changeling(Court),
+}
+
+impl YSplat {
+	pub fn name(&self) -> &str {
+		match self {
+			YSplat::Vampire(covenant) => covenant.name(),
+			YSplat::Werewolf(tribe) => tribe.name(),
+			YSplat::Mage(order) => order.name(),
+			YSplat::Changeling(court) => court.name(),
+		}
+	}
+
+	pub fn all(_type: &SplatType) -> Vec<YSplat> {
+		match _type {
+			SplatType::Vampire => Covenant::all().map(Into::into).to_vec(),
+			SplatType::Werewolf => Tribe::all().map(Into::into).to_vec(),
+			SplatType::Mage => Order::all().map(Into::into).to_vec(),
+			SplatType::Changeling => Court::all().map(Into::into).to_vec(),
+			_ => vec![],
+		}
+	}
+}
+
+impl Display for YSplat {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str(self.name())
 	}
 }
 

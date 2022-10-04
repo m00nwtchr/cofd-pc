@@ -1,5 +1,8 @@
+use std::cmp::min;
+
 use iced::{
-	event, mouse, Alignment, Background, Color, Element, Event, Length, Point, Rectangle, Theme,
+	event, mouse, widget::Column, Alignment, Background, Color, Element, Event, Length, Point,
+	Rectangle, Theme,
 };
 use iced_native::{
 	layout, renderer, text, touch,
@@ -7,7 +10,12 @@ use iced_native::{
 	Clipboard, Layout, Shell, Widget,
 };
 
-pub struct SheetDots<Message, Renderer>
+pub enum Shape {
+	Dots,
+	Boxes,
+}
+
+pub struct SheetDots<'a, Message, Renderer>
 where
 	Renderer: text::Renderer,
 	Renderer::Theme: StyleSheet,
@@ -15,13 +23,15 @@ where
 	value: u8,
 	min: u8,
 	max: u8,
-	on_click: Vec<Message>,
+	on_click: Box<dyn Fn(u8) -> Message + 'a>,
 	size: u16,
 	spacing: u16,
 	style: <Renderer::Theme as StyleSheet>::Style,
+	shape: Shape,
+	row_count: Option<u8>,
 }
 
-impl<'a, Message, Renderer> SheetDots<Message, Renderer>
+impl<'a, Message, Renderer> SheetDots<'a, Message, Renderer>
 where
 	Message: Clone,
 	Renderer: text::Renderer,
@@ -33,23 +43,25 @@ where
 	/// The default spacing of a [`Radio`] button.
 	pub const DEFAULT_SPACING: u16 = 2;
 
-	pub fn new<F>(value: u8, min: u8, max: u8, f: F) -> Self
+	pub fn new<F>(value: u8, min: u8, max: u8, shape: Shape, row_count: Option<u8>, f: F) -> Self
 	where
-		F: FnMut(u8) -> Message,
+		F: Fn(u8) -> Message + 'a,
 	{
 		Self {
 			value,
 			min,
 			max,
-			on_click: (0..=max).map(f).collect(),
+			on_click: Box::new(f),
 			size: Self::DEFAULT_SIZE,
 			spacing: Self::DEFAULT_SPACING, //15
 			style: Default::default(),
+			shape,
+			row_count,
 		}
 	}
 }
 
-impl<Message, Renderer> Widget<Message, Renderer> for SheetDots<Message, Renderer>
+impl<'a, Message, Renderer> Widget<Message, Renderer> for SheetDots<'a, Message, Renderer>
 where
 	Message: Clone,
 	Renderer: text::Renderer,
@@ -64,19 +76,32 @@ where
 	}
 
 	fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
-		let mut row = Row::<(), Renderer>::new()
-			// .width(Length::Shrink)
-			.spacing(self.spacing)
-			.align_items(Alignment::Center);
+		let mut col = Column::<(), Renderer>::new().spacing(self.spacing);
 
-		for _ in 0..self.max {
-			row = row.push(
-				Row::new()
-					.width(Length::Units(self.size))
-					.height(Length::Units(self.size)),
-			);
+		let per_row_count = self.row_count.unwrap_or(self.max);
+		let row_count: i32 = (f32::from(self.max) / f32::from(per_row_count)).ceil() as i32;
+
+		let mut count = 0;
+		for _ in 0..row_count {
+			let mut row = Row::<(), Renderer>::new()
+				// .width(Length::Shrink)
+				.spacing(self.spacing)
+				.align_items(Alignment::Center);
+
+			let ii = min(self.max - count, per_row_count);
+
+			for _ in 0..ii {
+				count += 1;
+				row = row.push(
+					Row::new()
+						.width(Length::Units(self.size))
+						.height(Length::Units(self.size)),
+				);
+			}
+			col = col.push(row);
 		}
-		row.layout(renderer, limits)
+
+		col.layout(renderer, limits)
 	}
 
 	fn on_event(
@@ -92,18 +117,16 @@ where
 		match event {
 			Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
 			| Event::Touch(touch::Event::FingerPressed { .. }) => {
-				for (i, layout) in layout.children().enumerate() {
+				for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
 					if layout.bounds().contains(cursor_position) {
-						let i = if (self.value as usize - 1) == i {
+						let i = if self.value as usize == i + 1 {
 							i
 						} else {
 							i + 1
 						};
 
 						if i + 1 > self.min as usize {
-							if let Some(message) = self.on_click.get(i) {
-								shell.publish(message.clone());
-							}
+							shell.publish((self.on_click)(i as u8));
 						}
 
 						return event::Status::Captured;
@@ -143,7 +166,7 @@ where
 	) {
 		// for i in self.min..self.max {
 		let mut mouse_i = None;
-		for (i, layout) in layout.children().enumerate() {
+		for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
 			let bounds = layout.bounds();
 
 			if bounds.contains(cursor_position) {
@@ -151,7 +174,7 @@ where
 			}
 		}
 
-		for (i, layout) in layout.children().enumerate() {
+		for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
 			let bounds = layout.bounds();
 
 			let custom_style = if mouse_i.is_some_and(|mouse_i| i <= *mouse_i) {
@@ -166,18 +189,24 @@ where
 			renderer.fill_quad(
 				renderer::Quad {
 					bounds,
-					border_radius: size / 2.0,
+					border_radius: match self.shape {
+						Shape::Dots => size / 2.0,
+						Shape::Boxes => 0.0,
+					},
 					border_width: custom_style.border_width,
 					border_color: custom_style.border_color,
 				},
 				custom_style.background,
 			);
 
-			if (self.value as usize - 1) >= i {
+			if self.value as usize > i {
 				renderer.fill_quad(
 					renderer::Quad {
 						bounds,
-						border_radius: dot_size,
+						border_radius: match self.shape {
+							Shape::Dots => dot_size,
+							Shape::Boxes => 0.0,
+						},
 						border_width: 0.0,
 						border_color: Color::TRANSPARENT,
 					},
@@ -188,13 +217,14 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> From<SheetDots<Message, Renderer>> for Element<'a, Message, Renderer>
+impl<'a, Message, Renderer> From<SheetDots<'a, Message, Renderer>>
+	for Element<'a, Message, Renderer>
 where
 	Message: 'a + Clone,
 	Renderer: 'a + text::Renderer,
 	Renderer::Theme: StyleSheet + widget::text::StyleSheet,
 {
-	fn from(radio: SheetDots<Message, Renderer>) -> Element<'a, Message, Renderer> {
+	fn from(radio: SheetDots<'a, Message, Renderer>) -> Self {
 		Element::new(radio)
 	}
 }

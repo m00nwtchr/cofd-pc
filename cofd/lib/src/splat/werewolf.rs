@@ -4,7 +4,7 @@ use crate::character::{
 	Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait,
 };
 
-use super::{ability::Ability, XSplat};
+use super::{ability::Ability, XSplat, YSplat};
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct WerewolfData {
@@ -146,6 +146,33 @@ impl Tribe {
 			// Tribe::GhostWolves => &None,
 			Tribe::_Custom(_, _, gifts) => gifts,
 		}
+	}
+
+	pub fn name(&self) -> &str {
+		match self {
+			Tribe::BloodTalons => "blood_talons",
+			Tribe::BoneShadows => "bone_shadows",
+			Tribe::HuntersInDarkness => "hunters_in_darkness",
+			Tribe::IronMasters => "iron_masters",
+			Tribe::StormLords => "storm_lords",
+			Tribe::_Custom(name, _, _) => name,
+		}
+	}
+
+	pub fn all() -> [Tribe; 5] {
+		[
+			Tribe::BloodTalons,
+			Tribe::BoneShadows,
+			Tribe::HuntersInDarkness,
+			Tribe::IronMasters,
+			Tribe::StormLords,
+		]
+	}
+}
+
+impl From<Tribe> for YSplat {
+	fn from(tribe: Tribe) -> Self {
+		YSplat::Werewolf(tribe)
 	}
 }
 

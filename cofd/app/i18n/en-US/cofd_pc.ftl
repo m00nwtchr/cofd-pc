@@ -471,6 +471,17 @@ changeling = Changeling
     .glamour = Glamour
     .clarity = Clarity
 
+    .regalia = Regalia
+
+    .crown = Crown
+    .jewels = Jewels
+    .mirror = Mirror
+    .shield = Shield
+    .steed = Steed
+    .sword = Sword
+
+favored-regalia = Favored Regalia
+
 age = Age
 dob = Date of Birth
 hair = Hair
