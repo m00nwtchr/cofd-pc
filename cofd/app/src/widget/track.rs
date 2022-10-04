@@ -135,9 +135,6 @@ where
 			let bounds = layout.bounds();
 			let custom_style = theme.active(self.style);
 
-			let size = bounds.width;
-			let dot_size = size / 2.0;
-
 			let wound = self.damage.get_i(i);
 			renderer.fill_quad(
 				renderer::Quad {

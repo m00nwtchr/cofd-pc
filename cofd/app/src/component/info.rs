@@ -27,6 +27,7 @@ pub fn info_bar<Message>(
 }
 
 #[derive(Clone)]
+#[allow(clippy::enum_variant_names)]
 pub enum Event {
 	InfoTraitChanged(String, InfoTrait),
 	XSplatChanged(XSplat),
@@ -99,7 +100,7 @@ where
 	type State = ();
 	type Event = Event;
 
-	fn update(&mut self, state: &mut Self::State, event: Self::Event) -> Option<Message> {
+	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
 		let mut character = self.character.borrow_mut();
 
 		match event {

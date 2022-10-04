@@ -47,7 +47,7 @@ pub enum SplatType {
 	// Deviant,
 }
 
-#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Splat {
 	#[default]
 	Mortal,

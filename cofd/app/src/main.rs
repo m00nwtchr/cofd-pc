@@ -56,19 +56,6 @@ const H3_SIZE: u16 = 20;
 #[derive(Debug, Clone)]
 enum Message {
 	TabSelected(usize),
-	// LocaleChanged(Locale),
-	// AttrChanged(u8, Attribute),
-	// SkillChanged(u8, Skill),
-	// InfoTraitChanged(String, InfoTrait),
-	// TraitChanged(u8, Trait),
-	// XSplatChanged(XSplat),
-	// YSplatChanged(YSplat),
-	// AbilityChanged(Ability, AbilityVal),
-	// CustomAbilityChanged(Ability, String),
-	// HealthChanged(Wound),
-	// IntegrityDamage(SplatType, Wound),
-
-	// RegaliaChanged(Regalia),
 }
 
 impl PlayerCompanionApp {}

@@ -79,11 +79,11 @@ where
 	type State = ();
 	type Event = Event;
 
-	fn update(&mut self, state: &mut Self::State, event: Self::Event) -> Option<Message> {
+	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
 		Some((self.on_change)(event.0, event.1))
 	}
 
-	fn view(&self, state: &Self::State) -> Element<Self::Event, Renderer> {
+	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
 		column![
 			text(flt!("attributes")).size(H2_SIZE),
 			row![

@@ -157,7 +157,7 @@ impl Wound {
 	}
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(default)]
 pub struct Damage {
 	#[serde(skip_serializing_if = "is_zero")]
@@ -1206,14 +1206,14 @@ pub enum Trait {
 	Integrity,
 }
 
-enum VirtueAnchor {
-	// Virtue(Virtue),
-	Mask(MaskDirge),
-	_Custom(String),
-}
+// enum VirtueAnchor {
+// 	// Virtue(Virtue),
+// 	Mask(MaskDirge),
+// 	_Custom(String),
+// }
 
-enum ViceAnchor {
-	// Vice(Vice),
-	Dirge(MaskDirge),
-	_Custom(String),
-}
+// enum ViceAnchor {
+// 	// Vice(Vice),
+// 	Dirge(MaskDirge),
+// 	_Custom(String),
+// }

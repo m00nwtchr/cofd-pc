@@ -6,7 +6,7 @@ use crate::character::{Character, Damage};
 
 use super::{XSplat, YSplat};
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ChangelingData {
 	pub regalia: Option<Regalia>,
 	pub clarity: Damage,

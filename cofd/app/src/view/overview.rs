@@ -1,12 +1,12 @@
 use std::{cell::RefCell, rc::Rc};
 
 use cofd::{
-	character::{InfoTrait, Trait, TraitCategory, Wound},
+	character::{Trait, Wound},
 	prelude::*,
 	splat::{
 		ability::{Ability, AbilityVal},
 		changeling::Regalia,
-		Splat, SplatType, XSplat, YSplat,
+		Splat, SplatType,
 	},
 };
 use iced::{

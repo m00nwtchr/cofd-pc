@@ -72,14 +72,14 @@ pub fn fl(message_id: &str, attribute: Option<&str>) -> String {
 // 	}
 // }
 
-// impl Display for Locale {
-// 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-// 		match self {
-// 			Locale::System => f.write_str("System"),
-// 			Locale::Lang(id) => f.write_str(&id.to_string()),
-// 		}
-// 	}
-// }
+impl Display for Locale {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Locale::System => f.write_str("System"),
+			Locale::Lang(id) => f.write_str(&id.to_string()),
+		}
+	}
+}
 
 pub fn setup() -> Box<dyn LanguageRequester<'static>> {
 	let localizer = DefaultLocalizer::new(&*LANGUAGE_LOADER, &Localizations);
