@@ -1,5 +1,2 @@
-mod dots;
-mod track;
-
-pub use dots::*;
-pub use track::*;
+pub mod dots;
+pub mod track;

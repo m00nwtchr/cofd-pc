@@ -128,7 +128,7 @@ where
 		theme: &Renderer::Theme,
 		_style: &renderer::Style,
 		layout: Layout<'_>,
-		cursor_position: Point,
+		_cursor_position: Point,
 		_viewport: &Rectangle,
 	) {
 		for (i, layout) in layout.children().enumerate() {

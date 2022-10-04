@@ -321,7 +321,6 @@ dependencies = [
  "erased-serde",
  "serde",
  "serde_json",
- "serde_repr",
 ]
 
 [[package]]
@@ -1149,7 +1148,7 @@ dependencies = [
 [[package]]
 name = "iced"
 version = "0.4.2"
-source = "git+https://github.com/iced-rs/iced#5f758d847f7e0de0ab7134247133c169a6132de1"
+source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
 dependencies = [
  "iced_core",
  "iced_futures",
@@ -1163,7 +1162,7 @@ dependencies = [
 [[package]]
 name = "iced_core"
 version = "0.5.0"
-source = "git+https://github.com/iced-rs/iced#5f758d847f7e0de0ab7134247133c169a6132de1"
+source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
 dependencies = [
  "bitflags",
  "palette",
@@ -1173,7 +1172,7 @@ dependencies = [
 [[package]]
 name = "iced_futures"
 version = "0.4.1"
-source = "git+https://github.com/iced-rs/iced#5f758d847f7e0de0ab7134247133c169a6132de1"
+source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
 dependencies = [
  "futures",
  "log",
@@ -1184,7 +1183,7 @@ dependencies = [
 [[package]]
 name = "iced_graphics"
 version = "0.3.1"
-source = "git+https://github.com/iced-rs/iced#5f758d847f7e0de0ab7134247133c169a6132de1"
+source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
 dependencies = [
  "bytemuck",
  "glam",
@@ -1197,7 +1196,7 @@ dependencies = [
 [[package]]
 name = "iced_lazy"
 version = "0.1.1"
-source = "git+https://github.com/iced-rs/iced#5f758d847f7e0de0ab7134247133c169a6132de1"
+source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
 dependencies = [
  "iced_native",
  "ouroboros",
@@ -1206,7 +1205,7 @@ dependencies = [
 [[package]]
 name = "iced_native"
 version = "0.5.1"
-source = "git+https://github.com/iced-rs/iced#5f758d847f7e0de0ab7134247133c169a6132de1"
+source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
 dependencies = [
  "iced_core",
  "iced_futures",
@@ -1219,7 +1218,7 @@ dependencies = [
 [[package]]
 name = "iced_style"
 version = "0.4.0"
-source = "git+https://github.com/iced-rs/iced#5f758d847f7e0de0ab7134247133c169a6132de1"
+source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
 dependencies = [
  "iced_core",
  "lazy_static",
@@ -1229,7 +1228,7 @@ dependencies = [
 [[package]]
 name = "iced_wgpu"
 version = "0.5.1"
-source = "git+https://github.com/iced-rs/iced#5f758d847f7e0de0ab7134247133c169a6132de1"
+source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
 dependencies = [
  "bitflags",
  "bytemuck",
@@ -1248,7 +1247,7 @@ dependencies = [
 [[package]]
 name = "iced_winit"
 version = "0.4.0"
-source = "git+https://github.com/iced-rs/iced#5f758d847f7e0de0ab7134247133c169a6132de1"
+source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
 dependencies = [
  "iced_futures",
  "iced_graphics",
@@ -2200,17 +2199,6 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
-]
-
-[[package]]
-name = "serde_repr"
-version = "0.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fe39d9fbb0ebf5eb2c7cb7e2a47e4f462fad1379f1166b8ae49ad9eae89a7ca"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]

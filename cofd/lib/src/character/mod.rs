@@ -9,7 +9,6 @@ use crate::splat::{
 	Splat,
 };
 use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn add(a: u8, b: i8) -> u8 {
