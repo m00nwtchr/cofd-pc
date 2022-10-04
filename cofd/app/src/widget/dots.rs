@@ -177,7 +177,7 @@ where
 		for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
 			let bounds = layout.bounds();
 
-			let custom_style = if mouse_i.is_some_and(|mouse_i| i <= *mouse_i) {
+			let custom_style = if mouse_i.is_some_and(|mouse_i| i <= mouse_i) {
 				theme.hovered(self.style)
 			} else {
 				theme.active(self.style)

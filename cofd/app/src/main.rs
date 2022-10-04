@@ -1,4 +1,4 @@
-#![feature(is_some_with)]
+#![feature(is_some_and)]
 #![deny(clippy::pedantic)]
 #![allow(
 	clippy::must_use_candidate,
