@@ -23,8 +23,8 @@ mod tests {
 		character::{Attributes, Character, Skill, Skills},
 		splat::{
 			ability::{Ability, AbilityVal},
-			vampire::{Bloodline, Clan, Covenant, Discipline},
-			werewolf::{Auspice, Form, Renown, Tribe},
+			vampire::{Bloodline, Clan, Covenant, Discipline, VampireMerits},
+			werewolf::{Auspice, Form, Renown, Tribe, WerewolfMerits},
 			Merit, Splat,
 		},
 	};
@@ -81,20 +81,26 @@ mod tests {
 			.with_merits([
 				AbilityVal(Ability::Merit(Merit::Status("Ordo Dracul".to_string())), 1),
 				AbilityVal(Ability::Merit(Merit::Status("City".to_string())), 1),
-				AbilityVal(Ability::Merit(Merit::CacophonySavvy), 3),
+				AbilityVal(
+					Ability::Merit(Merit::Vampire(VampireMerits::CacophonySavvy)),
+					3,
+				),
 				AbilityVal(Ability::Merit(Merit::FastTalking), 1),
 				AbilityVal(
 					Ability::Merit(Merit::ProfessionalTraining(
 						String::new(),
-						[Skill::Expression, Skill::Occult],
+						Some([Skill::Expression, Skill::Occult]),
 						None,
 					)),
 					2,
 				),
 				// AbilityVal(Ability::Merit(Merit::Contacts(String::new())), 2),
-				AbilityVal(Ability::Merit(Merit::SafePlace(None)), 3),
+				AbilityVal(Ability::Merit(Merit::SafePlace(String::from(""))), 3),
 				AbilityVal(Ability::Merit(Merit::Resources), 3),
-				AbilityVal(Ability::Merit(Merit::NestGuardian), 1),
+				AbilityVal(
+					Ability::Merit(Merit::Vampire(VampireMerits::NestGuardian)),
+					1,
+				),
 			])
 			.build();
 
@@ -147,14 +153,25 @@ mod tests {
 					Ability::Merit(Merit::DefensiveCombat(true, Skill::Brawl)),
 					1,
 				),
-				AbilityVal(Ability::Merit(Merit::FavoredForm(Form::Gauru)), 2),
-				AbilityVal(Ability::Merit(Merit::EfficientKiller), 2),
-				AbilityVal(Ability::Merit(Merit::RelentlessAssault), 2),
+				AbilityVal(
+					Ability::Merit(Merit::Werewolf(WerewolfMerits::FavoredForm(Some(
+						Form::Gauru,
+					)))),
+					2,
+				),
+				AbilityVal(
+					Ability::Merit(Merit::Werewolf(WerewolfMerits::EfficientKiller)),
+					2,
+				),
+				AbilityVal(
+					Ability::Merit(Merit::Werewolf(WerewolfMerits::RelentlessAssault)),
+					2,
+				),
 				AbilityVal(
 					Ability::Merit(Merit::Language("First Tongue".to_owned())),
 					1,
 				),
-				AbilityVal(Ability::Merit(Merit::Totem), 1),
+				AbilityVal(Ability::Merit(Merit::Werewolf(WerewolfMerits::Totem)), 1),
 			])
 			.build();
 

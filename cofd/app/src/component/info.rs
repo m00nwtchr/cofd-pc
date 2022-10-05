@@ -1,16 +1,17 @@
 use std::{cell::RefCell, rc::Rc};
 
-use cofd::{
-	character::InfoTrait,
-	prelude::Character,
-	splat::{Splat, XSplat, YSplat},
-};
 use iced::{
 	widget::{column, pick_list, row, text, text_input, Column, Row},
 	Alignment, Length,
 };
 use iced_lazy::Component;
 use iced_native::Element;
+
+use cofd::{
+	character::InfoTrait,
+	prelude::Character,
+	splat::{Splat, XSplat, YSplat},
+};
 
 use crate::{i18n::fl, widget};
 

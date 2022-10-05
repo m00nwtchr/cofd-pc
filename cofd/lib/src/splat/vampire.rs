@@ -236,3 +236,12 @@ pub enum MaskDirge {
 	Visionary,
 	_Custom(String),
 }
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+pub enum VampireMerits {
+	FeedingGrounds,
+	CacophonySavvy,
+	HoneyTrap,
+	// Ordo Dracul
+	NestGuardian,
+}

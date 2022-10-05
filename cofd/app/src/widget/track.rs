@@ -1,4 +1,3 @@
-use cofd::character::{Damage, Wound};
 use iced::{
 	event, mouse, Alignment, Background, Color, Element, Event, Length, Point, Rectangle, Theme,
 };
@@ -7,6 +6,8 @@ use iced_native::{
 	widget::{self, Row, Tree},
 	Clipboard, Layout, Shell, Widget,
 };
+
+use cofd::character::{Damage, Wound};
 
 pub struct HealthTrack<'a, Message, Renderer>
 where

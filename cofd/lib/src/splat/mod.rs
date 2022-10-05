@@ -363,39 +363,157 @@ impl Display for YSplat {
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 
 pub enum Merit {
-	Status(String),
-	FastTalking,
-	ProfessionalTraining(String, [Skill; 2], Option<Skill>),
-	Contacts(String),
-	SafePlace(Option<String>),
-	Resources,
-	SleightOfHand,
-	StrikingLooks(String),
-	TrainedObserver,
+	// Mental Merits
+	AreaOfExpertise(String),
+	CommonSense,
+	DangerSense,
+	DirectionSense,
+	EideticMemory,
+	EncyclopedicKnowledge(String),
+	EyeForTheStrange,
+	FastReflexes,
+	GoodTimeManagement,
+	HolisticAwareness,
+	HumanPrey, // DTR
+	Hypervigilance, // DTR
+	Indomitable,
+	InterdisciplinarySpecialty(String, Skill),
+	InvestigativeAide(Skill),
+	InvestigativeProdigy,
 	Language(String),
+	Library(Skill),
+	LibraryAdvanced(Vec<String>),
+	// LucidDreamer, // CTL
+	MeditativeMind,
+	Multilingual(String, String),
+	ObjectFetishism(String),
+	Patient,
+	// RenownedArtisan(String) // MTC
+	Scarred(String), // TODO: Condition
+	ToleranceForBiology,
+	TrainedObserver,
+	ViceRidden(String),
+	Virtuous(String),
 
+	// Physical Merits
+	Ambidextrous,
+	AutomotiveGenius,
+	CovertOperative,
+	CrackDriver,
+	Demolisher,
+	DoubleJointed,
+	FleetOfFoot,
+	Freediving,
 	Giant,
+	Hardy,
+	Greyhound,
+	// IronSkin, // BTP
+	IronStamina,
+	QuickDraw(String),
+	PunchDrunk,
+	Relentless,
+	Roadkill,
+	SeizingTheEdge,
+	SleightOfHand,
+	SmallFramed,
+	Survivalist,
+
+	// Social Merits
+	AirOfMenace,
+	Allies(String),
+	AlternateIdentity(String),
+	Anonymity,
+	Barfly,
+	ClosedBook,
+	CohesiveUnit,
+	Contacts(Vec<String>),
+	Defender,
+	Empath,
+	Fame,
+	Fixer,
+	HobbyistClique(String, Skill),
+	Inspiring,
+	IronWill,
+	Mentor(String, [Skill; 3]), // TODO: Add Resources to list
+	Peacemaker,
+	Pusher,
+	Resources,
+	Retainer(String),
+	SafePlace(String),
+	SmallUnitTactics,
+	SpinDoctor,
+	Staff,
+	Status(String),
+	StrikingLooks(String),
+	SupportNetwork(String, Option<Box<Merit>>), // TODO: Restrict to social merits
+	Sympathetic,
+	TableTurner,
+	TakesOneToKnowOne,
+	Taste(String, Skill), // TODO: Restrict to Crafts/Expression
+	TrueFriend(String),
+	Untouchable,
+
+	// Style Merits
+	// Mental Styles
+	ProfessionalTraining(String, Option<[Skill; 2]>, Option<Skill>),
+	// Physical Styles
+	AggresiveDriving,
+	DroneControl,
+	Falconry,
+	K9,
+	Parkour,
+	StuntDriver,
+	// Social Styles
+	Etiquette,
+	FastTalking,
+	// MysteryCultInitation(String, _, Merit, _, Merit, _)
+	// ScorpionCultInitation, // MTC
 
 	// Fighting Merits
 	DefensiveCombat(bool, Skill),
 
-	// Vampire
-	FeedingGrounds,
-	CacophonySavvy,
-	HoneyTrap,
-	//
-	NestGuardian,
-
-	// Werewolf
-	FavoredForm(Form),
+	// Fighting Styles
+	// ArmedDefense,
+	// Avoidance,
+	// Berserker,
+	// Bowmanship,
+	// Boxing,
+	// BruteForce,
+	// ChainWeapons,
+	// CloseQuartersCombat,
+	// CombatArchery,
+	// DisablingTactics,
+	// Firefight,
+	// Grappling,
+	// HeavyWeapons,
+	// ImprovisedWeapons,
+	// KinoMutai,
+	// LightWeapons
+	// Marksmanship
+	// MaritalArts
+	// MountedCombat
+	// PoliceTactics
+	// PoweredProjectile
 	RelentlessAssault,
-	EfficientKiller,
-	Totem,
+	// SpearAndBayonet
+	// StaffFighting,
+	// StreetFighting,
+	// StrengthPerformance, // TODO: Give Giant?
+	// Systema,
+	// ThrownWepons,
+	// TwoWeaponFighting,
+	// UnarmedDefense,
+	// WeaponAndShield
+
+	Vampire(VampireMerits),
+	Werewolf(WerewolfMerits),
 
 	_Custom(String),
 }
 
 impl Merit {
+	// pub fn all() -> [] {}
+
 	pub fn custom(str: String) -> Merit {
 		Merit::_Custom(str)
 	}
@@ -426,5 +544,11 @@ impl Merit {
 			}
 			_ => vec![],
 		}
+	}
+}
+
+impl Display for Merit {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str(self.name())
 	}
 }

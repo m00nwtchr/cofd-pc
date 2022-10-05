@@ -5,7 +5,6 @@ use std::{
 
 use crate::splat::{
 	ability::{Ability, AbilityVal},
-	vampire::MaskDirge,
 	Splat,
 };
 use serde::{Deserialize, Serialize};
@@ -288,7 +287,7 @@ pub struct Character {
 	// #[serde(skip)]
 	pub abilities: BTreeMap<Ability, AbilityVal>,
 	// #[serde(skip)]
-	merits: Vec<AbilityVal>,
+	pub merits: Vec<AbilityVal>,
 
 	#[serde(skip)]
 	_mod_map: HashMap<ModifierTarget, Vec<ModifierValue>>,

@@ -443,3 +443,10 @@ impl Form {
 		}
 	}
 }
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+pub enum WerewolfMerits {
+	FavoredForm(Option<Form>),
+	EfficientKiller,
+	Totem,
+}

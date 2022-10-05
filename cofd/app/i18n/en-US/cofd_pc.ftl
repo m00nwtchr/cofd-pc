@@ -387,6 +387,8 @@ group_name = Group Name
 health = Health
 willpower = Willpower
 
+merits = Merits
+
 mortal = Mortal
     .integrity = Integrity
 

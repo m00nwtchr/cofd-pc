@@ -1,5 +1,11 @@
 use std::{cell::RefCell, rc::Rc};
 
+use iced::{
+	widget::{column, pick_list, row, text, text_input, Column},
+	Alignment, Element, Length,
+};
+use iced_lazy::Component;
+
 use cofd::{
 	character::{Trait, Wound},
 	prelude::*,
@@ -9,14 +15,12 @@ use cofd::{
 		Splat, SplatType,
 	},
 };
-use iced::{
-	widget::{column, pick_list, row, text, text_input, Column},
-	Alignment, Element, Length,
-};
-use iced_lazy::Component;
 
 use crate::{
-	component::{attributes::attribute_bar, info::info_bar, skills::skills_component},
+	component::{
+		attributes::attribute_bar, info::info_bar, merits::merit_component,
+		skills::skills_component,
+	},
 	fl,
 	// i18n::fl,
 	widget::{self, dots::Shape, dots::SheetDots, track::HealthTrack},
@@ -43,6 +47,7 @@ pub enum Event {
 	// XSplatChanged(XSplat),
 	// YSplatChanged(YSplat),
 	AbilityChanged(Ability, AbilityVal),
+	MeritChanged(usize, AbilityVal),
 	CustomAbilityChanged(Ability, String),
 	HealthChanged(Wound),
 	IntegrityDamage(SplatType, Wound),
@@ -183,6 +188,10 @@ where
 				character.calc_mod_map();
 				println!("{:?}", character.abilities);
 			}
+			Event::MeritChanged(i, val) => {
+				character.merits.remove(i);
+				character.merits.insert(i, val);
+			}
 			Event::CustomAbilityChanged(ability, name) => {
 				if let Some(mut val) = character.remove_ability(&ability) {
 					*val.0.name_mut().unwrap() = name;
@@ -208,7 +217,7 @@ where
 				_ => {}
 			},
 			Event::RegaliaChanged(regalia) => {
-				if let Splat::Changeling(seeming, _, _, data) = &mut character.splat {
+				if let Splat::Changeling(_seeming, _, _, data) = &mut character.splat {
 					// if !flag {
 					data.regalia = Some(regalia);
 					// } else if let Seeming::_Custom(_, _regalia) = seeming {
@@ -389,6 +398,8 @@ where
 				col1 = col1.push(self.abilities(&character));
 			}
 		}
+
+		col1 = col1.push(merit_component(character.merits.clone(), Event::MeritChanged));
 
 		// let margin_col = || Column::new();
 

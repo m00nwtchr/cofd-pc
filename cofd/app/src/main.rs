@@ -13,18 +13,18 @@
 
 use std::{cell::RefCell, rc::Rc};
 
-// use i18n_embed::LanguageRequester;
-
 use iced::{executor, widget::container, Application, Command, Element, Settings, Theme};
 // use iced_aw::pure::{TabLabel, Tabs};
+
+// use i18n_embed::LanguageRequester;
 
 use cofd::{
 	prelude::*,
 	splat::{
 		ability::{Ability, AbilityVal},
 		changeling::{Court, Seeming},
-		vampire::Discipline,
-		Splat,
+		vampire::{Discipline, VampireMerits},
+		Splat, Merit,
 	},
 };
 
@@ -128,6 +128,30 @@ impl Application for PlayerCompanionApp {
 				AbilityVal(
 					Ability::Discipline(Discipline::_Custom("Coil of the Voivode".to_string())),
 					2,
+				),
+			])
+			.with_merits([
+				AbilityVal(Ability::Merit(Merit::Status("Ordo Dracul".to_string())), 1),
+				AbilityVal(Ability::Merit(Merit::Status("City".to_string())), 1),
+				AbilityVal(
+					Ability::Merit(Merit::Vampire(VampireMerits::CacophonySavvy)),
+					3,
+				),
+				AbilityVal(Ability::Merit(Merit::FastTalking), 1),
+				AbilityVal(
+					Ability::Merit(Merit::ProfessionalTraining(
+						String::new(),
+						Some([Skill::Expression, Skill::Occult]),
+						None,
+					)),
+					2,
+				),
+				// AbilityVal(Ability::Merit(Merit::Contacts(String::new())), 2),
+				AbilityVal(Ability::Merit(Merit::SafePlace(String::from(""))), 3),
+				AbilityVal(Ability::Merit(Merit::Resources), 3),
+				AbilityVal(
+					Ability::Merit(Merit::Vampire(VampireMerits::NestGuardian)),
+					1,
 				),
 			])
 			.build();
