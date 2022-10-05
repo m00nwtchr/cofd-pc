@@ -1,6 +1,5 @@
-use std::fmt::Display;
-
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 use self::ability::Ability;
 use crate::character::{Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait};
@@ -51,6 +50,16 @@ pub enum SplatType {
 pub enum Splat {
 	#[default]
 	Mortal,
+	// #[splat(
+	// 	name = "vampire",
+	// 	xsplat = "clan",
+	// 	ysplat = "covenant",
+	// 	zsplat = "bloodline",
+	// 	virtue_anchor = "mask",
+	// 	vice_anchor = "dirge",
+	// 	ability = "disciplines",
+	// 	st = "blood_potency"
+	// )]
 	Vampire(Clan, Option<Covenant>, Option<Bloodline>),
 	Werewolf(Option<Auspice>, Option<Tribe>, Option<String>, WerewolfData),
 	Mage(Path, Option<Order>, Option<Legacy>),
@@ -374,7 +383,7 @@ pub enum Merit {
 	FastReflexes,
 	GoodTimeManagement,
 	HolisticAwareness,
-	HumanPrey, // DTR
+	HumanPrey,      // DTR
 	Hypervigilance, // DTR
 	Indomitable,
 	InterdisciplinarySpecialty(String, Skill),
@@ -504,7 +513,6 @@ pub enum Merit {
 	// TwoWeaponFighting,
 	// UnarmedDefense,
 	// WeaponAndShield
-
 	Vampire(VampireMerits),
 	Werewolf(WerewolfMerits),
 

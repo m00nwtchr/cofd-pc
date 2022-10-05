@@ -324,10 +324,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cofd-macros"
-version = "0.1.0"
-
-[[package]]
 name = "cofd-pc"
 version = "0.1.0"
 dependencies = [
@@ -1152,7 +1148,7 @@ dependencies = [
 [[package]]
 name = "iced"
 version = "0.4.2"
-source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
+source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
 dependencies = [
  "iced_core",
  "iced_futures",
@@ -1166,7 +1162,7 @@ dependencies = [
 [[package]]
 name = "iced_core"
 version = "0.5.0"
-source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
+source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
 dependencies = [
  "bitflags",
  "palette",
@@ -1176,7 +1172,7 @@ dependencies = [
 [[package]]
 name = "iced_futures"
 version = "0.4.1"
-source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
+source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
 dependencies = [
  "futures",
  "log",
@@ -1187,7 +1183,7 @@ dependencies = [
 [[package]]
 name = "iced_graphics"
 version = "0.3.1"
-source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
+source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
 dependencies = [
  "bytemuck",
  "glam",
@@ -1200,7 +1196,7 @@ dependencies = [
 [[package]]
 name = "iced_lazy"
 version = "0.1.1"
-source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
+source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
 dependencies = [
  "iced_native",
  "ouroboros",
@@ -1209,7 +1205,7 @@ dependencies = [
 [[package]]
 name = "iced_native"
 version = "0.5.1"
-source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
+source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
 dependencies = [
  "iced_core",
  "iced_futures",
@@ -1222,7 +1218,7 @@ dependencies = [
 [[package]]
 name = "iced_style"
 version = "0.4.0"
-source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
+source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
 dependencies = [
  "iced_core",
  "lazy_static",
@@ -1232,7 +1228,7 @@ dependencies = [
 [[package]]
 name = "iced_wgpu"
 version = "0.5.1"
-source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
+source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
 dependencies = [
  "bitflags",
  "bytemuck",
@@ -1251,7 +1247,7 @@ dependencies = [
 [[package]]
 name = "iced_winit"
 version = "0.4.0"
-source = "git+https://github.com/iced-rs/iced#2278bade55b2bcd530c8c9a30a22d5f800921e55"
+source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
 dependencies = [
  "iced_futures",
  "iced_graphics",

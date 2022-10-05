@@ -163,10 +163,7 @@ mod tests {
 					Ability::Merit(Merit::Werewolf(WerewolfMerits::EfficientKiller)),
 					2,
 				),
-				AbilityVal(
-					Ability::Merit(Merit::Werewolf(WerewolfMerits::RelentlessAssault)),
-					2,
-				),
+				AbilityVal(Ability::Merit(Merit::RelentlessAssault), 2),
 				AbilityVal(
 					Ability::Merit(Merit::Language("First Tongue".to_owned())),
 					1,

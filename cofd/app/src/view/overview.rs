@@ -399,7 +399,10 @@ where
 			}
 		}
 
-		col1 = col1.push(merit_component(character.merits.clone(), Event::MeritChanged));
+		col1 = col1.push(merit_component(
+			character.merits.clone(),
+			Event::MeritChanged,
+		));
 
 		// let margin_col = || Column::new();
 

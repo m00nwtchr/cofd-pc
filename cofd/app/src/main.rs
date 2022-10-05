@@ -24,7 +24,7 @@ use cofd::{
 		ability::{Ability, AbilityVal},
 		changeling::{Court, Seeming},
 		vampire::{Discipline, VampireMerits},
-		Splat, Merit,
+		Merit, Splat,
 	},
 };
 
