@@ -45,6 +45,7 @@ mod tests {
 						Discipline::Auspex,
 					],
 				)),
+				Default::default()
 			))
 			.with_attributes(Attributes {
 				intelligence: 3,

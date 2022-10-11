@@ -1,9 +1,8 @@
 skill = Skill
     .socialize = Socialise
 
-trait = Trait
-    .defense = Defence
-    .armor = Armour
+defense = Defence
+armor = Armour
 
 vampire = Vampire
     .vigor = Vigour

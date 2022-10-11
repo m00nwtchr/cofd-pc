@@ -60,7 +60,7 @@ pub enum Splat {
 	// 	ability = "disciplines",
 	// 	st = "blood_potency"
 	// )]
-	Vampire(Clan, Option<Covenant>, Option<Bloodline>),
+	Vampire(Clan, Option<Covenant>, Option<Bloodline>, VampireData),
 	Werewolf(Option<Auspice>, Option<Tribe>, Option<String>, WerewolfData),
 	Mage(Path, Option<Order>, Option<Legacy>),
 	// Promethean,
@@ -77,7 +77,7 @@ impl Splat {
 	pub fn name(&self) -> &str {
 		match self {
 			Splat::Mortal => "mortal",
-			Splat::Vampire(_, _, _) => "vampire",
+			Splat::Vampire(_, _, _, _) => "vampire",
 			Splat::Werewolf(_, _, _, _) => "werewolf",
 			Splat::Mage(_, _, _) => "mage",
 			Splat::Changeling(_, _, _, _) => "changeling",
@@ -87,7 +87,7 @@ impl Splat {
 	pub fn _type(&self) -> SplatType {
 		match self {
 			Splat::Mortal => SplatType::Mortal,
-			Splat::Vampire(_, _, _) => SplatType::Vampire,
+			Splat::Vampire(_, _, _, _) => SplatType::Vampire,
 			Splat::Werewolf(_, _, _, _) => SplatType::Werewolf,
 			Splat::Mage(_, _, _) => SplatType::Mage,
 			Splat::Changeling(_, _, _, _) => SplatType::Changeling,
@@ -96,7 +96,7 @@ impl Splat {
 
 	pub fn virtue_anchor(&self) -> &str {
 		match self {
-			Splat::Vampire(_, _, _) => "mask",
+			Splat::Vampire(_, _, _, _) => "mask",
 			Splat::Werewolf(_, _, _, _) => "blood",
 			Splat::Changeling(_, _, _, _) => "thread",
 			_ => "virtue",
@@ -105,7 +105,7 @@ impl Splat {
 
 	pub fn vice_anchor(&self) -> &str {
 		match self {
-			Splat::Vampire(_, _, _) => "dirge",
+			Splat::Vampire(_, _, _, _) => "dirge",
 			Splat::Werewolf(_, _, _, _) => "bone",
 			Splat::Changeling(_, _, _, _) => "needle",
 			_ => "vice",
@@ -115,7 +115,7 @@ impl Splat {
 	pub fn xsplat_name(&self) -> &str {
 		match self {
 			Splat::Mortal => "",
-			Splat::Vampire(_, _, _) => "clan",
+			Splat::Vampire(_, _, _, _) => "clan",
 			Splat::Werewolf(_, _, _, _) => "auspice",
 			Splat::Mage(_, _, _) => "path",
 			Splat::Changeling(_, _, _, _) => "seeming",
@@ -125,7 +125,7 @@ impl Splat {
 	pub fn xsplat(&self) -> Option<XSplat> {
 		match self.clone() {
 			Splat::Mortal => None,
-			Splat::Vampire(clan, _, _) => Some(clan.into()),
+			Splat::Vampire(clan, _, _, _) => Some(clan.into()),
 			Splat::Werewolf(auspice, _, _, _) => auspice.map(Into::into),
 			Splat::Mage(path, _, _) => Some(path.into()),
 			Splat::Changeling(seeming, _, _, _) => Some(seeming.into()),
@@ -136,7 +136,7 @@ impl Splat {
 		match xsplat {
 			Some(xsplat) => match xsplat {
 				XSplat::Vampire(clan) => {
-					if let Splat::Vampire(_clan, _, _) = self {
+					if let Splat::Vampire(_clan, _, _, _) = self {
 						*_clan = clan;
 					}
 				}
@@ -167,7 +167,7 @@ impl Splat {
 	pub fn ysplat_name(&self) -> &str {
 		match self {
 			Splat::Mortal => "faction",
-			Splat::Vampire(_, _, _) => "covenant",
+			Splat::Vampire(_, _, _, _) => "covenant",
 			Splat::Werewolf(_, _, _, _) => "tribe",
 			Splat::Mage(_, _, _) => "order",
 			Splat::Changeling(_, _, _, _) => "court",
@@ -177,7 +177,7 @@ impl Splat {
 	pub fn ysplat(&self) -> Option<YSplat> {
 		match self.clone() {
 			Splat::Mortal => None,
-			Splat::Vampire(_, covenant, _) => covenant.map(Into::into),
+			Splat::Vampire(_, covenant, _, _) => covenant.map(Into::into),
 			Splat::Werewolf(_, tribe, _, _) => tribe.map(Into::into),
 			Splat::Mage(_, order, _) => order.map(Into::into),
 			Splat::Changeling(_, court, _, _) => court.map(Into::into),
@@ -188,7 +188,7 @@ impl Splat {
 		match xsplat {
 			Some(xsplat) => match xsplat {
 				YSplat::Vampire(covenant) => {
-					if let Splat::Vampire(_, _covenant, _) = self {
+					if let Splat::Vampire(_, _covenant, _, _) = self {
 						*_covenant = Some(covenant);
 					}
 				}
@@ -210,7 +210,7 @@ impl Splat {
 			},
 			None => match self {
 				Splat::Mortal => {}
-				Splat::Vampire(_, covenant, _) => *covenant = None,
+				Splat::Vampire(_, covenant, _, _) => *covenant = None,
 				Splat::Werewolf(_, tribe, _, _) => *tribe = None,
 				Splat::Mage(_, order, _) => *order = None,
 				Splat::Changeling(_, court, _, _) => *court = None,
@@ -221,7 +221,7 @@ impl Splat {
 	pub fn zsplat_name(&self) -> &str {
 		match self {
 			Splat::Mortal => "",
-			Splat::Vampire(_, _, _) => "bloodline",
+			Splat::Vampire(_, _, _, _) => "bloodline",
 			Splat::Werewolf(_, _, _, _) => "lodge",
 			Splat::Mage(_, _, _) => "legacy",
 			Splat::Changeling(_, _, _, _) => "kith",
@@ -231,7 +231,7 @@ impl Splat {
 	pub fn ability_name(&self) -> Option<&str> {
 		match self {
 			Splat::Mortal => None,
-			Splat::Vampire(_, _, _) => Some("disciplines"),
+			Splat::Vampire(_, _, _, _) => Some("disciplines"),
 			Splat::Werewolf(_, _, _, _) => Some("renown"),
 			Splat::Mage(_, _, _) => Some("arcana"),
 			Splat::Changeling(_, _, _, _) => None,
@@ -241,7 +241,7 @@ impl Splat {
 	pub fn are_abilities_finite(&self) -> bool {
 		match self {
 			Splat::Mortal => true,
-			Splat::Vampire(_, _, _) => false,
+			Splat::Vampire(_, _, _, _) => false,
 			Splat::Werewolf(_, _, _, _) => true,
 			Splat::Mage(_, _, _) => true,
 			Splat::Changeling(_, _, _, _) => false,
@@ -251,7 +251,7 @@ impl Splat {
 	pub fn all_abilities(&self) -> Option<Vec<Ability>> {
 		match self {
 			Splat::Mortal => None,
-			Splat::Vampire(_, _, _) => Some(Vec::from(Discipline::all().map(Into::into))),
+			Splat::Vampire(_, _, _, _) => Some(Vec::from(Discipline::all().map(Into::into))),
 			Splat::Werewolf(_, _, _, _) => Some(Vec::from(Renown::all().map(Into::into))),
 			Splat::Mage(_, _, _) => Some(Vec::from(Arcanum::all().map(Into::into))),
 			Splat::Changeling(_, _, _, _) => None,
@@ -261,7 +261,7 @@ impl Splat {
 	pub fn custom_ability(&self, str: String) -> Option<Ability> {
 		match self {
 			Splat::Mortal => None,
-			Splat::Vampire(_, _, _) => Some(Ability::Discipline(Discipline::custom(str))),
+			Splat::Vampire(_, _, _, _) => Some(Ability::Discipline(Discipline::custom(str))),
 			Splat::Werewolf(_, _, _, _) => Some(Ability::MoonGift(MoonGift::custom(str))),
 			Splat::Mage(_, _, _) => None,
 			Splat::Changeling(_, _, _, _) => None,
@@ -271,7 +271,7 @@ impl Splat {
 	pub fn supernatural_tolerance(&self) -> Option<&str> {
 		match self {
 			Splat::Mortal => None,
-			Splat::Vampire(_, _, _) => Some("blood_potency"),
+			Splat::Vampire(_, _, _, _) => Some("blood_potency"),
 			Splat::Werewolf(_, _, _, _) => Some("primal_urge"),
 			Splat::Mage(_, _, _) => Some("gnosis"),
 			Splat::Changeling(_, _, _, _) => Some("wyrd"),
@@ -281,7 +281,7 @@ impl Splat {
 	pub fn fuel(&self) -> Option<&str> {
 		match self {
 			Splat::Mortal => None,
-			Splat::Vampire(_, _, _) => Some("vitae"),
+			Splat::Vampire(_, _, _, _) => Some("vitae"),
 			Splat::Werewolf(_, _, _, _) => Some("essence"),
 			Splat::Mage(_, _, _) => Some("mana"),
 			Splat::Changeling(_, _, _, _) => Some("glamour"),
@@ -291,7 +291,7 @@ impl Splat {
 	pub fn integrity(&self) -> &str {
 		match self {
 			Splat::Mortal => "integrity",
-			Splat::Vampire(_, _, _) => "humanity",
+			Splat::Vampire(_, _, _, _) => "humanity",
 			Splat::Werewolf(_, _, _, _) => "harmony",
 			Splat::Mage(_, _, _) => "wisdom",
 			Splat::Changeling(_, _, _, _) => "clarity",
@@ -530,7 +530,7 @@ impl Merit {
 		""
 	}
 
-	pub fn get_modifiers(&self, value: u8) -> Vec<Modifier> {
+	pub fn get_modifiers(&self, value: u16) -> Vec<Modifier> {
 		match &self {
 			Merit::DefensiveCombat(true, skill) => {
 				vec![Modifier::new(

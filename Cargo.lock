@@ -337,6 +337,7 @@ dependencies = [
  "iced",
  "iced_lazy",
  "iced_native",
+ "itertools",
  "log",
  "once_cell",
  "rust-embed",
@@ -1148,7 +1149,7 @@ dependencies = [
 [[package]]
 name = "iced"
 version = "0.4.2"
-source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
+source = "git+https://github.com/iced-rs/iced#77c838011fe6f8f567389d5994584a1a1b8420c5"
 dependencies = [
  "iced_core",
  "iced_futures",
@@ -1162,7 +1163,7 @@ dependencies = [
 [[package]]
 name = "iced_core"
 version = "0.5.0"
-source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
+source = "git+https://github.com/iced-rs/iced#77c838011fe6f8f567389d5994584a1a1b8420c5"
 dependencies = [
  "bitflags",
  "palette",
@@ -1172,7 +1173,7 @@ dependencies = [
 [[package]]
 name = "iced_futures"
 version = "0.4.1"
-source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
+source = "git+https://github.com/iced-rs/iced#77c838011fe6f8f567389d5994584a1a1b8420c5"
 dependencies = [
  "futures",
  "log",
@@ -1183,7 +1184,7 @@ dependencies = [
 [[package]]
 name = "iced_graphics"
 version = "0.3.1"
-source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
+source = "git+https://github.com/iced-rs/iced#77c838011fe6f8f567389d5994584a1a1b8420c5"
 dependencies = [
  "bytemuck",
  "glam",
@@ -1196,7 +1197,7 @@ dependencies = [
 [[package]]
 name = "iced_lazy"
 version = "0.1.1"
-source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
+source = "git+https://github.com/iced-rs/iced#77c838011fe6f8f567389d5994584a1a1b8420c5"
 dependencies = [
  "iced_native",
  "ouroboros",
@@ -1205,7 +1206,7 @@ dependencies = [
 [[package]]
 name = "iced_native"
 version = "0.5.1"
-source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
+source = "git+https://github.com/iced-rs/iced#77c838011fe6f8f567389d5994584a1a1b8420c5"
 dependencies = [
  "iced_core",
  "iced_futures",
@@ -1218,7 +1219,7 @@ dependencies = [
 [[package]]
 name = "iced_style"
 version = "0.4.0"
-source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
+source = "git+https://github.com/iced-rs/iced#77c838011fe6f8f567389d5994584a1a1b8420c5"
 dependencies = [
  "iced_core",
  "lazy_static",
@@ -1228,7 +1229,7 @@ dependencies = [
 [[package]]
 name = "iced_wgpu"
 version = "0.5.1"
-source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
+source = "git+https://github.com/iced-rs/iced#77c838011fe6f8f567389d5994584a1a1b8420c5"
 dependencies = [
  "bitflags",
  "bytemuck",
@@ -1247,7 +1248,7 @@ dependencies = [
 [[package]]
 name = "iced_winit"
 version = "0.4.0"
-source = "git+https://github.com/iced-rs/iced#cd5a5f2ed23da06ea5a972df948fc735916ba7e1"
+source = "git+https://github.com/iced-rs/iced#77c838011fe6f8f567389d5994584a1a1b8420c5"
 dependencies = [
  "iced_futures",
  "iced_graphics",
@@ -1315,10 +1316,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "itoa"
-version = "1.0.3"
+name = "itertools"
+version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c8af84674fe1f223a982c933a0ee1086ac4d4052aa0fb8060c12c6ad838e754"
+checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
+dependencies = [
+ "either",
+]
+
+[[package]]
+name = "itoa"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4217ad341ebadf8d8e724e264f13e593e0648f5b3e94b3896a5df283be015ecc"
 
 [[package]]
 name = "jni-sys"
@@ -1363,9 +1373,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.134"
+version = "0.2.135"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "329c933548736bc49fd575ee68c89e8be4d260064184389a5b77517cddd99ffb"
+checksum = "68783febc7782c6c5cb401fbda4de5a9898be1762314da0bb2c10ced61f18b0c"
 
 [[package]]
 name = "libloading"
@@ -1943,9 +1953,9 @@ dependencies = [
 
 [[package]]
 name = "profiling"
-version = "1.0.6"
+version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f61dcf0b917cd75d4521d7343d1ffff3d1583054133c9b5cbea3375c703c40d"
+checksum = "74605f360ce573babfe43964cbe520294dcb081afbf8c108fc6e23036b4da2df"
 
 [[package]]
 name = "quote"
@@ -2192,9 +2202,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.85"
+version = "1.0.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e55a28e3aaef9d5ce0506d0a14dbba8054ddc7e499ef522dd8b26859ec9d4a44"
+checksum = "41feea4228a6f1cd09ec7a3593a682276702cd67b5273544757dae23c096f074"
 dependencies = [
  "itoa",
  "ryu",
@@ -2334,9 +2344,9 @@ checksum = "8fb1df15f412ee2e9dfc1c504260fa695c1c3f10fe9f4a6ee2d2184d7d6450e2"
 
 [[package]]
 name = "syn"
-version = "1.0.101"
+version = "1.0.102"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e90cde112c4b9690b8cbe810cba9ddd8bc1d7472e2cae317b69e9438c1cba7d2"
+checksum = "3fcd952facd492f9be3ef0d0b7032a6e442ee9b361d4acc2b1d0c4aaa5f613a1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2490,9 +2500,9 @@ dependencies = [
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.4"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dcc811dc4066ac62f84f11307873c4850cb653bfa9b1719cee2bd2204a4bc5dd"
+checksum = "6ceab39d59e4c9499d4e5a8ee0e2735b891bb7308ac83dfb4e80cad195c9f6f3"
 
 [[package]]
 name = "unicode-segmentation"

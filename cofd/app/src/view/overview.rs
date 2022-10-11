@@ -7,7 +7,7 @@ use iced::{
 use iced_lazy::Component;
 
 use cofd::{
-	character::{Trait, Wound},
+	character::{ModifierTarget, Trait, Wound},
 	prelude::*,
 	splat::{
 		ability::{Ability, AbilityVal},
@@ -19,7 +19,7 @@ use cofd::{
 use crate::{
 	component::{
 		attributes::attribute_bar, info::info_bar, merits::merit_component,
-		skills::skills_component,
+		skills::skills_component, traits::traits_component,
 	},
 	fl,
 	// i18n::fl,
@@ -40,9 +40,9 @@ pub fn overview_tab<Message>(character: Rc<RefCell<Character>>) -> OverviewTab<M
 
 #[derive(Clone)]
 pub enum Event {
-	AttrChanged(u8, Attribute),
-	SkillChanged(u8, Skill),
-	TraitChanged(u8, Trait),
+	AttrChanged(u16, Attribute),
+	SkillChanged(u16, Skill),
+	TraitChanged(u16, Trait),
 	// InfoTraitChanged(String, InfoTrait),
 	// XSplatChanged(XSplat),
 	// YSplatChanged(YSplat),
@@ -80,6 +80,8 @@ impl<Message> OverviewTab<Message> {
 			.width(Length::Fill)
 			.align_items(Alignment::End);
 
+		let mut new = Column::new().width(Length::Fill);
+
 		if character.splat.are_abilities_finite() {
 			if let Some(abilities) = character.splat.all_abilities() {
 				for ability in abilities {
@@ -95,41 +97,35 @@ impl<Message> OverviewTab<Message> {
 				}
 			}
 		} else {
+			let mut e: Vec<Ability> = character
+				.splat
+				.all_abilities()
+				.unwrap()
+				.iter()
+				.filter(|e| !character.has_ability(e))
+				.cloned()
+				.collect();
+
+			if let Some(ability) = character.splat.custom_ability("Custom".to_string()) {
+				e.push(ability);
+			}
+
 			for ability in character.abilities.values() {
 				if ability.0.is_custom() {
-					// if let
-					// 	Ability::Merit(Merit::_Custom(str))
-					// 	| Ability::Discipline(Discipline::_Custom(str))
-					// 	| Ability::MoonGift(MoonGift::_Custom(str)) = ability.0 {
-
 					col1 = col1.push(text_input("", ability.0.name(), {
 						let ab = ability.0.clone();
 						move |val| Event::CustomAbilityChanged(ab.clone(), val)
 					}));
-
-				// }
 				} else {
-					let mut e: Vec<Ability> = character
-						.splat
-						.all_abilities()
-						.unwrap()
-						.iter()
-						.filter(|e| !character.has_ability(e))
-						.cloned()
-						.collect();
-
-					if let Some(ability) = character.splat.custom_ability("Custom".to_string()) {
-						e.push(ability);
-					}
-
 					col1 = col1
 						.push(
-							pick_list(e, Some(ability.0.clone()), {
+							pick_list(e.clone(), Some(ability.0.clone()), {
 								let val = ability.clone();
 								move |key| {
 									Event::AbilityChanged(val.0.clone(), AbilityVal(key, val.1))
 								}
 							})
+							.width(Length::Fill)
 							.padding(1)
 							.text_size(20),
 						)
@@ -141,13 +137,22 @@ impl<Message> OverviewTab<Message> {
 					move |val| Event::AbilityChanged(key.clone(), AbilityVal(key.clone(), val))
 				}));
 			}
+
+			new = new.push(
+				pick_list(e, None, |key| {
+					Event::AbilityChanged(key.clone(), AbilityVal(key, 0))
+				})
+				.width(Length::Fill)
+				.padding(1)
+				.text_size(20),
+			);
 		}
 
 		let mut col = Column::new().align_items(Alignment::Center);
 		if let Some(name) = character.splat.ability_name() {
 			col = col
 				.push(text(fl(splat_name, Some(name))).size(H3_SIZE))
-				.push(column![row![col1, col2]]);
+				.push(column![row![col1, col2], new]);
 		}
 
 		col.into()
@@ -186,7 +191,6 @@ where
 				// }
 
 				character.calc_mod_map();
-				println!("{:?}", character.abilities);
 			}
 			Event::MeritChanged(i, val) => {
 				character.merits.remove(i);
@@ -199,10 +203,15 @@ where
 				}
 			}
 			Event::TraitChanged(val, _trait) => match _trait {
-				Trait::Willpower => character.willpower = val,
-				Trait::Power => character.power = val,
-				Trait::Fuel => character.fuel = val,
-				Trait::Integrity => character.integrity = val,
+				Trait::Size => {
+					character.base_size =
+						(val as i16 - character._mod(ModifierTarget::Trait(Trait::Size))) as u16
+				}
+				Trait::Willpower => character.willpower = val as u16,
+				Trait::Power => character.power = val as u16,
+				Trait::Fuel => character.fuel = val as u16,
+				Trait::Integrity => character.integrity = val as u16,
+				Trait::Beats => character.beats = val,
 				_ => {}
 			},
 			Event::HealthChanged(wound) => character.health_mut().poke(&wound),
@@ -259,10 +268,10 @@ where
 			let dots = SheetDots::new(
 				character.willpower,
 				0,
-				character.max_willpower() as u8,
+				character.max_willpower() as u16,
 				Shape::Dots,
 				None,
-				|val| Event::TraitChanged(val, Trait::Willpower),
+				|val| Event::TraitChanged(val as u16, Trait::Willpower),
 			);
 
 			column![text(fl!("willpower")).size(H3_SIZE), dots].align_items(Alignment::Center)
@@ -270,7 +279,7 @@ where
 
 		let st = if let Some(st) = character.splat.supernatural_tolerance() {
 			let dots = SheetDots::new(character.power, 1, 10, Shape::Dots, None, |val| {
-				Event::TraitChanged(val, Trait::Power)
+				Event::TraitChanged(val as u16, Trait::Power)
 			});
 
 			column![
@@ -289,7 +298,7 @@ where
 				character.max_fuel(),
 				Shape::Boxes,
 				Some(10),
-				|val| Event::TraitChanged(val, Trait::Fuel),
+				|val| Event::TraitChanged(val as u16, Trait::Fuel),
 			);
 
 			column![
@@ -302,20 +311,60 @@ where
 		};
 
 		let integrity = {
-			let dots: Element<Event, Renderer> =
-				if let Splat::Changeling(_, _, _, data) = &character.splat {
-					HealthTrack::new(
-						data.clarity.clone(),
-						data.max_clarity(&character) as usize,
-						|w| Event::IntegrityDamage(SplatType::Changeling, w),
-					)
-					.into()
-				} else {
-					SheetDots::new(character.integrity, 0, 10, Shape::Dots, None, |val| {
-						Event::TraitChanged(val, Trait::Integrity)
+			let dots: Element<Event, Renderer> = if let Splat::Changeling(_, _, _, data) =
+				&character.splat
+			{
+				HealthTrack::new(
+					data.clarity.clone(),
+					data.max_clarity(&character) as usize,
+					|w| Event::IntegrityDamage(SplatType::Changeling, w),
+				)
+				.into()
+			} else {
+				let mut coll = Column::new();
+
+				let mut flag = false;
+
+				if let Splat::Vampire(_, _, _, data) = &character.splat {
+					flag = true;
+
+					coll = coll.width(Length::FillPortion(4)).spacing(1);
+
+					for i in 0..10 {
+						coll = coll.push(
+							column![text_input(
+								"",
+								data.touchstones.get(i).unwrap_or(&String::new()),
+								|val| Event::Msg,
+							)]
+							.max_width(200),
+						);
+					}
+				}
+
+				row![
+					column![
+						SheetDots::new(character.integrity, 1, 10, Shape::Dots, None, |val| {
+							Event::TraitChanged(val as u16, Trait::Integrity)
+						})
+						.axis(if flag {
+							widget::dots::Axis::Vertical
+						} else {
+							widget::dots::Axis::Horizontal
+						}),
+					]
+					.align_items(if flag {
+						Alignment::End
+					} else {
+						Alignment::Center
 					})
-					.into()
-				};
+					.width(Length::Fill),
+					coll
+				]
+				.align_items(Alignment::Center)
+				.spacing(5)
+				.into()
+			};
 
 			let label = text(fl(
 				character.splat.name(),
@@ -326,7 +375,7 @@ where
 			let mut col = Column::new().align_items(Alignment::Center);
 
 			// match character.splat {
-			// 	// Splat::Vampire(_, _, _) => todo!(),
+			// 	// Splat::Vampire(_, _, _, _) => todo!(),
 			// 	Splat::Werewolf(_, _, _, _) => todo!(),
 			// 	_ => ,
 			// }
@@ -399,10 +448,12 @@ where
 			}
 		}
 
-		col1 = col1.push(merit_component(
-			character.merits.clone(),
-			Event::MeritChanged,
-		));
+		col1 = col1
+			.push(merit_component(
+				character.merits.clone(),
+				Event::MeritChanged,
+			))
+			.push(traits_component(&character, Event::TraitChanged));
 
 		// let margin_col = || Column::new();
 

@@ -22,21 +22,21 @@ use crate::{
 
 pub struct SkillsComponent<Message> {
 	skills: Skills,
-	on_change: Box<dyn Fn(u8, Skill) -> Message>,
+	on_change: Box<dyn Fn(u16, Skill) -> Message>,
 }
 
 pub fn skills_component<Message>(
 	skills: Skills,
-	on_change: impl Fn(u8, Skill) -> Message + 'static,
+	on_change: impl Fn(u16, Skill) -> Message + 'static,
 ) -> SkillsComponent<Message> {
 	SkillsComponent::new(skills, on_change)
 }
 
 #[derive(Clone)]
-pub struct Event(u8, Skill);
+pub struct Event(u16, Skill);
 
 impl<Message> SkillsComponent<Message> {
-	fn new(skills: Skills, on_change: impl Fn(u8, Skill) -> Message + 'static) -> Self {
+	fn new(skills: Skills, on_change: impl Fn(u16, Skill) -> Message + 'static) -> Self {
 		Self {
 			skills,
 			on_change: Box::new(on_change),

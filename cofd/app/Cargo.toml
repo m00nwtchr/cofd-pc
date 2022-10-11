@@ -16,6 +16,8 @@ iced_native = { git = "https://github.com/iced-rs/iced" }
 # iced_aw = {version = "0.2", default-features = false, features = ["pure", "tabs"]}
 # iced_aw = {git = "https://github.com/iced-rs/iced_aw", features = ["pure", "tabs"]}
 
+itertools = "0.10"
+
 cfg-if = "1"
 
 i18n-embed = { version = "0.13", features = ["fluent-system"] }

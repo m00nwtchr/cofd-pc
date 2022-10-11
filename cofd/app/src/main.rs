@@ -12,6 +12,8 @@
 )]
 
 use std::{cell::RefCell, rc::Rc};
+#[cfg(target_arch = "wasm32")]
+use log::Level;
 
 use iced::{executor, widget::container, Application, Command, Element, Settings, Theme};
 // use iced_aw::pure::{TabLabel, Tabs};
@@ -23,8 +25,8 @@ use cofd::{
 	splat::{
 		ability::{Ability, AbilityVal},
 		changeling::{Court, Seeming},
-		vampire::{Discipline, VampireMerits},
-		Merit, Splat,
+		vampire::{Discipline, VampireMerits, Clan, Covenant, Bloodline},
+		Merit, Splat, mage::{Path, Order},
 	},
 };
 
@@ -71,26 +73,27 @@ impl Application for PlayerCompanionApp {
 
 		let character = Character::builder()
 			.with_st(3)
-			.with_splat(Splat::Changeling(
-				Seeming::Wizened,
-				// Seeming::_Custom("bler".to_string(), Regalia::Jewels),
-				Some(Court::Autumn),
-				None,
-				Default::default(),
-			))
-			// .with_splat(Splat::Vampire(
-			// 	Clan::Ventrue,
-			// 	Some(Covenant::OrdoDracul),
-			// 	Some(Bloodline::_Custom(
-			// 		"Dragolescu".to_string(),
-			// 		[
-			// 			Discipline::Animalism,
-			// 			Discipline::Dominate,
-			// 			Discipline::Resilience,
-			// 			Discipline::Auspex,
-			// 		],
-			// 	)),
+			// .with_splat(Splat::Changeling(
+			// 	Seeming::Wizened,
+			// 	// Seeming::_Custom("bler".to_string(), Regalia::Jewels),
+			// 	Some(Court::Autumn),
+			// 	None,
+			// 	Default::default(),
 			// ))
+			.with_splat(Splat::Vampire(
+				Clan::Ventrue,
+				Some(Covenant::OrdoDracul),
+				Some(Bloodline::_Custom(
+					"Dragolescu".to_string(),
+					[
+						Discipline::Animalism,
+						Discipline::Dominate,
+						Discipline::Resilience,
+						Discipline::Auspex,
+					],
+				)),
+				Default::default()
+			))
 			// .with_splat(Splat::Mage(Path::Mastigos, Some(Order::Mysterium), None))
 			// .with_splat(Splat::Werewolf(
 			// 	Some(Auspice::Rahu),

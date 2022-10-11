@@ -231,7 +231,7 @@ pub enum MoonGift {
 }
 
 impl MoonGift {
-	pub fn get_modifiers(&self, value: u8) -> Vec<crate::character::Modifier> {
+	pub fn get_modifiers(&self, value: u16) -> Vec<crate::character::Modifier> {
 		match self {
 			// MoonGift::Crescent => vec![],
 			MoonGift::Full => {

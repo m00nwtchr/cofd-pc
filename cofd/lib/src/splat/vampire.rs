@@ -4,6 +4,11 @@ use crate::character::{Attribute, Modifier, ModifierOp, ModifierTarget, Modifier
 
 use super::{ability::Ability, XSplat, YSplat};
 
+#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub struct VampireData {
+	pub touchstones: Vec<String>
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Clan {
 	Daeva,
@@ -176,23 +181,23 @@ impl Discipline {
 	}
 
 	#[warn(clippy::cast_possible_wrap)]
-	pub fn get_modifiers(&self, value: u8) -> Vec<crate::character::Modifier> {
+	pub fn get_modifiers(&self, value: u16) -> Vec<crate::character::Modifier> {
 		match self {
 			Discipline::Celerity => {
 				vec![Modifier::new(
 					ModifierTarget::Trait(Trait::Defense),
-					ModifierValue::Num(value as i8),
+					ModifierValue::Num(value as i16),
 					ModifierOp::Add,
 				)]
 			}
 			Discipline::Resilience => vec![Modifier::new(
 				ModifierTarget::Attribute(Attribute::Stamina),
-				ModifierValue::Num(value as i8),
+				ModifierValue::Num(value as i16),
 				ModifierOp::Add,
 			)],
 			Discipline::Vigor => vec![Modifier::new(
 				ModifierTarget::Attribute(Attribute::Strength),
-				ModifierValue::Num(value as i8),
+				ModifierValue::Num(value as i16),
 				ModifierOp::Add,
 			)],
 			_ => vec![],

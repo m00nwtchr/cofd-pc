@@ -387,6 +387,14 @@ group_name = Group Name
 health = Health
 willpower = Willpower
 
+size = Size
+speed = Speed
+defense = Defense
+armor = Armor
+initative = Initative
+beats = Beats
+experience = Experience
+
 merits = Merits
 
 mortal = Mortal

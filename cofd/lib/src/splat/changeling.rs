@@ -13,7 +13,7 @@ pub struct ChangelingData {
 }
 
 impl ChangelingData {
-	pub fn max_clarity(&self, character: &Character) -> u8 {
+	pub fn max_clarity(&self, character: &Character) -> u16 {
 		let attributes = character.attributes();
 
 		attributes.wits + attributes.composure

@@ -22,22 +22,22 @@ use crate::{
 
 pub struct AttributeBar<Message> {
 	attributes: Attributes,
-	on_change: Box<dyn Fn(u8, Attribute) -> Message>,
+	on_change: Box<dyn Fn(u16, Attribute) -> Message>,
 }
 
 pub fn attribute_bar<Message>(
 	attributes: Attributes,
-	on_change: impl Fn(u8, Attribute) -> Message + 'static,
+	on_change: impl Fn(u16, Attribute) -> Message + 'static,
 ) -> AttributeBar<Message> {
 	AttributeBar::new(attributes, on_change)
 }
 
 #[derive(Clone)]
 #[allow(clippy::enum_variant_names)]
-pub struct Event(u8, Attribute);
+pub struct Event(u16, Attribute);
 
 impl<Message> AttributeBar<Message> {
-	fn new(attributes: Attributes, on_change: impl Fn(u8, Attribute) -> Message + 'static) -> Self {
+	fn new(attributes: Attributes, on_change: impl Fn(u16, Attribute) -> Message + 'static) -> Self {
 		Self {
 			attributes,
 			on_change: Box::new(on_change),
@@ -56,7 +56,7 @@ impl<Message> AttributeBar<Message> {
 			.align_items(Alignment::End);
 
 		for attr in Attribute::get(AttributeCategory::Trait(cat)) {
-			let v = self.attributes.get(&attr) as u8;
+			let v = self.attributes.get(&attr) as u16;
 
 			col1 = col1.push(text(fl("attribute", Some(attr.name()))));
 			col2 = col2.push(SheetDots::new(v, 1, 5, Shape::Dots, None, move |val| {

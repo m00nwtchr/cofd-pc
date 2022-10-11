@@ -1,13 +1,13 @@
-use std::cmp::min;
+use std::{cmp::min, default};
 
 use iced::{
-	event, mouse, widget::Column, Alignment, Background, Color, Element, Event, Length, Point,
-	Rectangle, Theme,
+	alignment::Vertical, event, mouse, widget::Column, Alignment, Background, Color, Element,
+	Event, Length, Point, Rectangle, Theme,
 };
 use iced_native::{
 	layout, renderer, text, touch,
-	widget::{self, Row, Tree},
-	Clipboard, Layout, Shell, Widget,
+	widget::{self, Column as Col, Row, Tree},
+	Clipboard, Element as El, Layout, Shell, Widget,
 };
 
 pub enum Shape {
@@ -15,20 +15,43 @@ pub enum Shape {
 	Boxes,
 }
 
+#[derive(Default)]
+pub enum Axis {
+	Vertical,
+	#[default]
+	Horizontal,
+}
+
 pub struct SheetDots<'a, Message, Renderer>
 where
 	Renderer: text::Renderer,
 	Renderer::Theme: StyleSheet,
 {
-	value: u8,
-	min: u8,
-	max: u8,
-	on_click: Box<dyn Fn(u8) -> Message + 'a>,
+	value: u16,
+	min: u16,
+	max: u16,
+	on_click: Box<dyn Fn(u16) -> Message + 'a>,
 	size: u16,
 	spacing: u16,
 	style: <Renderer::Theme as StyleSheet>::Style,
 	shape: Shape,
-	row_count: Option<u8>,
+	row_count: Option<u16>,
+	axis: Axis,
+}
+
+fn iter<'a>(
+	layout: Layout<'a>,
+	axis: &Axis,
+) -> itertools::Either<
+	impl Iterator<Item = iced_native::Layout<'a>>,
+	impl Iterator<Item = iced_native::Layout<'a>>,
+> {
+	let iter = layout.children().flat_map(Layout::children);
+	if let Axis::Horizontal = axis {
+		itertools::Either::Left(iter)
+	} else {
+		itertools::Either::Right(iter.collect::<Vec<iced_native::Layout>>().into_iter().rev())
+	}
 }
 
 impl<'a, Message, Renderer> SheetDots<'a, Message, Renderer>
@@ -43,9 +66,16 @@ where
 	/// The default spacing of a [`Radio`] button.
 	pub const DEFAULT_SPACING: u16 = 2;
 
-	pub fn new<F>(value: u8, min: u8, max: u8, shape: Shape, row_count: Option<u8>, f: F) -> Self
+	pub fn new<F>(
+		value: u16,
+		min: u16,
+		max: u16,
+		shape: Shape,
+		row_count: Option<u16>,
+		f: F,
+	) -> Self
 	where
-		F: Fn(u8) -> Message + 'a,
+		F: Fn(u16) -> Message + 'a,
 	{
 		Self {
 			value,
@@ -57,7 +87,13 @@ where
 			style: Default::default(),
 			shape,
 			row_count,
+			axis: Default::default(),
 		}
+	}
+
+	pub fn axis(mut self, axis: Axis) -> Self {
+		self.axis = axis;
+		self
 	}
 }
 
@@ -83,22 +119,44 @@ where
 
 		let mut count = 0;
 		for _ in 0..row_count {
-			let mut row = Row::<(), Renderer>::new()
-				// .width(Length::Shrink)
-				.spacing(self.spacing)
-				.align_items(Alignment::Center);
-
 			let ii = min(self.max - count, per_row_count);
 
-			for _ in 0..ii {
-				count += 1;
-				row = row.push(
-					Row::new()
-						.width(Length::Units(self.size))
-						.height(Length::Units(self.size)),
-				);
-			}
-			col = col.push(row);
+			let el: El<(), Renderer> = match self.axis {
+				Axis::Vertical => {
+					let mut col = Col::<(), Renderer>::new()
+						.spacing(self.spacing)
+						.align_items(Alignment::Center);
+
+					for _ in 0..ii {
+						count += 1;
+						col = col.push(
+							Row::new()
+								.width(Length::Units(self.size))
+								.height(Length::Units(self.size)),
+						);
+					}
+
+					col.into()
+				}
+				Axis::Horizontal => {
+					let mut row = Row::<(), Renderer>::new()
+						.spacing(self.spacing)
+						.align_items(Alignment::Center);
+
+					for _ in 0..ii {
+						count += 1;
+						row = row.push(
+							Row::new()
+								.width(Length::Units(self.size))
+								.height(Length::Units(self.size)),
+						);
+					}
+
+					row.into()
+				}
+			};
+
+			col = col.push(el);
 		}
 
 		col.layout(renderer, limits)
@@ -117,7 +175,7 @@ where
 		match event {
 			Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
 			| Event::Touch(touch::Event::FingerPressed { .. }) => {
-				for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
+				for (i, layout) in iter(layout, &self.axis).enumerate() {
 					if layout.bounds().contains(cursor_position) {
 						let i = if self.value as usize == i + 1 {
 							i
@@ -126,7 +184,7 @@ where
 						};
 
 						if i + 1 > self.min as usize {
-							shell.publish((self.on_click)(i as u8));
+							shell.publish((self.on_click)(i as u16));
 						}
 
 						return event::Status::Captured;
@@ -165,8 +223,9 @@ where
 		_viewport: &Rectangle,
 	) {
 		// for i in self.min..self.max {
+
 		let mut mouse_i = None;
-		for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
+		for (i, layout) in iter(layout, &self.axis).enumerate() {
 			let bounds = layout.bounds();
 
 			if bounds.contains(cursor_position) {
@@ -174,7 +233,7 @@ where
 			}
 		}
 
-		for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
+		for (i, layout) in iter(layout, &self.axis).enumerate() {
 			let bounds = layout.bounds();
 
 			let custom_style = if mouse_i.is_some_and(|mouse_i| i <= mouse_i) {

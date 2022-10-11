@@ -40,7 +40,7 @@ impl Ability {
 		}
 	}
 
-	pub fn get_modifiers(&self, value: u8) -> Vec<Modifier> {
+	pub fn get_modifiers(&self, value: u16) -> Vec<Modifier> {
 		match self {
 			Ability::Merit(merit) => merit.get_modifiers(value),
 			Ability::Discipline(discipline) => discipline.get_modifiers(value),
@@ -67,7 +67,7 @@ impl Display for Ability {
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
-pub struct AbilityVal(pub Ability, pub u8);
+pub struct AbilityVal(pub Ability, pub u16);
 
 impl AbilityVal {
 	pub fn get_modifiers(&self) -> Vec<Modifier> {
