@@ -25,7 +25,7 @@ use cofd::{
 	splat::{
 		ability::{Ability, AbilityVal},
 		changeling::{Court, Seeming},
-		vampire::{Discipline, VampireMerits, Clan, Covenant, Bloodline},
+		vampire::{Discipline, VampireMerit, Clan, Covenant, Bloodline},
 		Merit, Splat, mage::{Path, Order},
 	},
 };
@@ -137,7 +137,7 @@ impl Application for PlayerCompanionApp {
 				AbilityVal(Ability::Merit(Merit::Status("Ordo Dracul".to_string())), 1),
 				AbilityVal(Ability::Merit(Merit::Status("City".to_string())), 1),
 				AbilityVal(
-					Ability::Merit(Merit::Vampire(VampireMerits::CacophonySavvy)),
+					Ability::Merit(Merit::Vampire(VampireMerit::CacophonySavvy)),
 					3,
 				),
 				AbilityVal(Ability::Merit(Merit::FastTalking), 1),
@@ -150,10 +150,10 @@ impl Application for PlayerCompanionApp {
 					2,
 				),
 				// AbilityVal(Ability::Merit(Merit::Contacts(String::new())), 2),
-				AbilityVal(Ability::Merit(Merit::SafePlace(String::from(""))), 3),
+				AbilityVal(Ability::Merit(Merit::SafePlace(String::new())), 3),
 				AbilityVal(Ability::Merit(Merit::Resources), 3),
 				AbilityVal(
-					Ability::Merit(Merit::Vampire(VampireMerits::NestGuardian)),
+					Ability::Merit(Merit::Vampire(VampireMerit::NestGuardian)),
 					1,
 				),
 			])

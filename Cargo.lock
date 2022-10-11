@@ -321,6 +321,7 @@ dependencies = [
  "erased-serde",
  "serde",
  "serde_json",
+ "serde_variant",
 ]
 
 [[package]]
@@ -2208,6 +2209,15 @@ checksum = "41feea4228a6f1cd09ec7a3593a682276702cd67b5273544757dae23c096f074"
 dependencies = [
  "itoa",
  "ryu",
+ "serde",
+]
+
+[[package]]
+name = "serde_variant"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f988d71f968b960b45cf71e3210662f0b23906256c87820077e4f101225c494"
+dependencies = [
  "serde",
 ]
 

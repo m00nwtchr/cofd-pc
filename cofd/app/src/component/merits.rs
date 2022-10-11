@@ -7,8 +7,9 @@ use iced_native::Element;
 
 use cofd::splat::{
 	ability::{Ability, AbilityVal},
-	Merit,
+	Merit, SplatType,
 };
+use itertools::Itertools;
 
 use crate::{
 	fl,
@@ -20,15 +21,17 @@ use crate::{
 };
 
 pub struct MeritComponent<Message> {
+	splat: SplatType,
 	merits: Vec<AbilityVal>,
 	on_change: Box<dyn Fn(usize, AbilityVal) -> Message>,
 }
 
 pub fn merit_component<Message>(
+	splat: SplatType,
 	merits: Vec<AbilityVal>,
 	on_change: impl Fn(usize, AbilityVal) -> Message + 'static,
 ) -> MeritComponent<Message> {
-	MeritComponent::new(merits, on_change)
+	MeritComponent::new(splat, merits, on_change)
 }
 
 #[derive(Clone)]
@@ -36,10 +39,12 @@ pub struct Event(usize, AbilityVal);
 
 impl<Message> MeritComponent<Message> {
 	fn new(
+		splat: SplatType,
 		merits: Vec<AbilityVal>,
 		on_change: impl Fn(usize, AbilityVal) -> Message + 'static,
 	) -> Self {
 		Self {
+			splat,
 			merits,
 			on_change: Box::new(on_change),
 		}
@@ -58,6 +63,12 @@ where
 	type Event = Event;
 
 	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
+		if let Ability::Merit(Merit::_Custom(str)) = &event.1 .0 {
+			if str.contains("---") {
+				return None;
+			}
+		}
+
 		Some((self.on_change)(event.0, event.1))
 	}
 
@@ -67,6 +78,39 @@ where
 			.spacing(4)
 			.width(Length::Fill)
 			.align_items(Alignment::End);
+
+		let mut vec = Vec::new();
+
+		vec.push(Merit::_Custom(String::from("--- Mental Merits ---")));
+		vec.extend(Merit::mental());
+
+		vec.push(Merit::_Custom(String::from("--- Physical Merits ---")));
+		vec.extend(Merit::physical());
+
+		vec.push(Merit::_Custom(String::from("--- Social Merits ---")));
+		vec.extend(Merit::social());
+
+		vec.push(Merit::_Custom(format!("--- Vampire Merits ---")));
+		vec.extend(Merit::get(self.splat));
+
+		vec.push(Merit::custom(String::from("Custom")));
+
+		let vec: Vec<Merit> = vec
+			.iter()
+			.cloned()
+			.filter(|e| {
+				self.merits
+					.iter()
+					.filter(|el| {
+						if let Ability::Merit(merit) = &el.0 {
+							*merit == *e
+						} else {
+							false
+						}
+					})
+					.count() == 0
+			})
+			.collect();
 
 		for (i, ability) in self.merits.iter().enumerate() {
 			let merit = ability.0.clone();
@@ -78,19 +122,9 @@ where
 						Event(i, AbilityVal(Ability::Merit(Merit::_Custom(key)), val))
 					}));
 				} else {
-					let mut e = Vec::new();
-					// let mut e: Vec<Ability> = Merit::all()
-					// 	.unwrap()
-					// 	.iter()
-					// 	.filter(|e| !self.merits.contains(e))
-					// 	.cloned()
-					// 	.collect();
-
-					e.push(Merit::custom(String::from("Custom")));
-
 					col1 = col1
 						.push(
-							pick_list(e, Some(merit.clone()), move |key| {
+							pick_list(vec.clone(), Some(merit.clone()), move |key| {
 								Event(i, AbilityVal(Ability::Merit(key), val))
 							})
 							.padding(1)
@@ -107,9 +141,19 @@ where
 			}));
 		}
 
-		column![text(fl!("merits")).size(H3_SIZE), column![row![col1, col2]]]
-			.align_items(Alignment::Center)
-			.into()
+		let new = pick_list(vec, None, |key| {
+			Event(self.merits.len(), AbilityVal(Ability::Merit(key), 0))
+		})
+		.padding(1)
+		.text_size(20)
+		.width(Length::Fill);
+
+		column![
+			text(fl!("merits")).size(H3_SIZE),
+			column![row![col1, col2], new]
+		]
+		.align_items(Alignment::Center)
+		.into()
 	}
 }
 

@@ -98,5 +98,7 @@ pub fn setup() -> Box<dyn LanguageRequester<'static>> {
 	language_requester.add_listener(Arc::downgrade(&localizer_arc));
 	language_requester.poll().unwrap();
 
+	LANGUAGE_LOADER.set_use_isolating(false);
+
 	language_requester
 }

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_variant::to_variant_name;
 use std::fmt::Display;
 
 use self::ability::Ability;
@@ -30,7 +31,7 @@ use changeling::*;
 // use beast::*;
 // use deviant:*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum SplatType {
 	Mortal,
 	Vampire,
@@ -383,14 +384,14 @@ pub enum Merit {
 	FastReflexes,
 	GoodTimeManagement,
 	HolisticAwareness,
-	HumanPrey,      // DTR
-	Hypervigilance, // DTR
+	// HumanPrey,      // DTR
+	// Hypervigilance, // DTR
 	Indomitable,
-	InterdisciplinarySpecialty(String, Skill),
-	InvestigativeAide(Skill),
+	InterdisciplinarySpecialty(String, Option<Skill>),
+	InvestigativeAide(Option<Skill>),
 	InvestigativeProdigy,
 	Language(String),
-	Library(Skill),
+	Library(Option<Skill>),
 	LibraryAdvanced(Vec<String>),
 	// LucidDreamer, // CTL
 	MeditativeMind,
@@ -440,10 +441,10 @@ pub enum Merit {
 	Empath,
 	Fame,
 	Fixer,
-	HobbyistClique(String, Skill),
+	HobbyistClique(String, Option<Skill>),
 	Inspiring,
 	IronWill,
-	Mentor(String, [Skill; 3]), // TODO: Add Resources to list
+	Mentor(String, Option<[Skill; 3]>), // TODO: Add Resources to list
 	Peacemaker,
 	Pusher,
 	Resources,
@@ -458,7 +459,7 @@ pub enum Merit {
 	Sympathetic,
 	TableTurner,
 	TakesOneToKnowOne,
-	Taste(String, Skill), // TODO: Restrict to Crafts/Expression
+	Taste(String, Option<Skill>), // TODO: Restrict to Crafts/Expression
 	TrueFriend(String),
 	Untouchable,
 
@@ -479,7 +480,7 @@ pub enum Merit {
 	// ScorpionCultInitation, // MTC
 
 	// Fighting Merits
-	DefensiveCombat(bool, Skill),
+	DefensiveCombat(bool, Option<Skill>), // Brawl / Weaponry
 
 	// Fighting Styles
 	// ArmedDefense,
@@ -513,26 +514,209 @@ pub enum Merit {
 	// TwoWeaponFighting,
 	// UnarmedDefense,
 	// WeaponAndShield
-	Vampire(VampireMerits),
+	Vampire(VampireMerit),
 	Werewolf(WerewolfMerits),
 
 	_Custom(String),
 }
 
 impl Merit {
-	// pub fn all() -> [] {}
+	pub fn all() -> Vec<Merit> {
+		let v = vec![
+			// Mental Merits
+
+			// Physical Merits
+
+			// Social Merits
+
+			// Style Merits
+			// Mental Styles
+			Self::ProfessionalTraining(String::new(), None, None),
+			// Physical Styles
+			Self::AggresiveDriving,
+			Self::DroneControl,
+			Self::Falconry,
+			Self::K9,
+			Self::Parkour,
+			Self::StuntDriver,
+			// Social Styles
+			Self::Etiquette,
+			Self::FastTalking,
+			// MysteryCultInitation(String, _, Merit, _, Merit, _)
+			// ScorpionCultInitation, // MTC
+
+			// Fighting Merits
+			Self::DefensiveCombat(false, None),
+			// Fighting Styles
+			// ArmedDefense,
+			// Avoidance,
+			// Berserker,
+			// Bowmanship,
+			// Boxing,
+			// BruteForce,
+			// ChainWeapons,
+			// CloseQuartersCombat,
+			// CombatArchery,
+			// DisablingTactics,
+			// Firefight,
+			// Grappling,
+			// HeavyWeapons,
+			// ImprovisedWeapons,
+			// KinoMutai,
+			// LightWeapons
+			// Marksmanship
+			// MaritalArts
+			// MountedCombat
+			// PoliceTactics
+			// PoweredProjectile
+			Self::RelentlessAssault,
+			// SpearAndBayonet
+			// StaffFighting,
+			// StreetFighting,
+			// StrengthPerformance, // TODO: Give Giant?
+			// Systema,
+			// ThrownWepons,
+			// TwoWeaponFighting,
+			// UnarmedDefense,
+			// WeaponAndShield
+		];
+
+		let mut vec = Vec::new();
+
+		vec.extend(Merit::mental());
+		vec.extend(Merit::physical());
+		vec.extend(Merit::social());
+
+		vec.extend(v);
+
+		vec
+	}
+
+	pub fn mental() -> Vec<Merit> {
+		vec![
+			Self::AreaOfExpertise(String::new()),
+			Self::CommonSense,
+			Self::DangerSense,
+			Self::DirectionSense,
+			Self::EideticMemory,
+			Self::EncyclopedicKnowledge(String::new()),
+			Self::EyeForTheStrange,
+			Self::FastReflexes,
+			Self::GoodTimeManagement,
+			Self::HolisticAwareness,
+			// Self::HumanPrey,      // DTR
+			// Self::Hypervigilance, // DTR
+			Self::Indomitable,
+			Self::InterdisciplinarySpecialty(String::new(), None),
+			Self::InvestigativeAide(None),
+			Self::InvestigativeProdigy,
+			Self::Language(String::new()),
+			Self::Library(None),
+			Self::LibraryAdvanced(vec![]),
+			// LucidDreamer, // CTL
+			Self::MeditativeMind,
+			Self::Multilingual(String::new(), String::new()),
+			Self::ObjectFetishism(String::new()),
+			Self::Patient,
+			// RenownedArtisan(String) // MTC
+			Self::Scarred(String::new()), // TODO: Condition
+			Self::ToleranceForBiology,
+			Self::TrainedObserver,
+			Self::ViceRidden(String::new()),
+			Self::Virtuous(String::new()),
+		]
+	}
+
+	pub fn physical() -> Vec<Merit> {
+		vec![
+			Self::Ambidextrous,
+			Self::AutomotiveGenius,
+			Self::CovertOperative,
+			Self::CrackDriver,
+			Self::Demolisher,
+			Self::DoubleJointed,
+			Self::FleetOfFoot,
+			Self::Freediving,
+			Self::Giant,
+			Self::Hardy,
+			Self::Greyhound,
+			// IronSkin, // BTP
+			Self::IronStamina,
+			Self::QuickDraw(String::new()),
+			Self::PunchDrunk,
+			Self::Relentless,
+			Self::Roadkill,
+			Self::SeizingTheEdge,
+			Self::SleightOfHand,
+			Self::SmallFramed,
+			Self::Survivalist,
+		]
+	}
+
+	pub fn social() -> Vec<Merit> {
+		vec![
+			Self::AirOfMenace,
+			Self::Allies(String::new()),
+			Self::AlternateIdentity(String::new()),
+			Self::Anonymity,
+			Self::Barfly,
+			Self::ClosedBook,
+			Self::CohesiveUnit,
+			Self::Contacts(vec![]),
+			Self::Defender,
+			Self::Empath,
+			Self::Fame,
+			Self::Fixer,
+			Self::HobbyistClique(String::new(), None),
+			Self::Inspiring,
+			Self::IronWill,
+			Self::Mentor(String::new(), None), // TODO: Add Resources to list
+			Self::Peacemaker,
+			Self::Pusher,
+			Self::Resources,
+			Self::Retainer(String::new()),
+			Self::SafePlace(String::new()),
+			Self::SmallUnitTactics,
+			Self::SpinDoctor,
+			Self::Staff,
+			Self::Status(String::new()),
+			Self::StrikingLooks(String::new()),
+			Self::SupportNetwork(String::new(), None), // TODO: Restrict to social merits
+			Self::Sympathetic,
+			Self::TableTurner,
+			Self::TakesOneToKnowOne,
+			Self::Taste(String::new(), None), // TODO: Restrict to Crafts/Expression
+			Self::TrueFriend(String::new()),
+			Self::Untouchable,
+		]
+	}
+
+	pub fn get(splat: SplatType) -> Vec<Merit> {
+		match splat {
+			SplatType::Mortal => Merit::all(),
+			SplatType::Vampire => VampireMerit::all().into_iter().map(Into::into).collect(),
+			SplatType::Werewolf => Merit::all(),
+			SplatType::Mage => Merit::all(),
+			SplatType::Changeling => Merit::all(),
+		}
+	}
 
 	pub fn custom(str: String) -> Merit {
 		Merit::_Custom(str)
 	}
 
 	fn name(&self) -> &str {
-		""
+		match self {
+			Merit::Vampire(merit) => to_variant_name(merit).unwrap(),
+			Merit::Werewolf(merit) => to_variant_name(merit).unwrap(),
+			Merit::_Custom(name) => name,
+			_ => to_variant_name(self).unwrap(),
+		}
 	}
 
 	pub fn get_modifiers(&self, value: u16) -> Vec<Modifier> {
 		match &self {
-			Merit::DefensiveCombat(true, skill) => {
+			Merit::DefensiveCombat(true, Some(skill)) => {
 				vec![Modifier::new(
 					ModifierTarget::Trait(Trait::DefenseSkill),
 					ModifierValue::Skill(skill.clone()),
@@ -558,5 +742,11 @@ impl Merit {
 impl Display for Merit {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		f.write_str(self.name())
+	}
+}
+
+impl From<Merit> for Ability {
+	fn from(merit: Merit) -> Self {
+		Ability::Merit(merit)
 	}
 }

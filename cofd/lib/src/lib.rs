@@ -23,7 +23,7 @@ mod tests {
 		character::{Attributes, Character, Skill, Skills},
 		splat::{
 			ability::{Ability, AbilityVal},
-			vampire::{Bloodline, Clan, Covenant, Discipline, VampireMerits},
+			vampire::{Bloodline, Clan, Covenant, Discipline, VampireMerit},
 			werewolf::{Auspice, Form, Renown, Tribe, WerewolfMerits},
 			Merit, Splat,
 		},
@@ -83,7 +83,7 @@ mod tests {
 				AbilityVal(Ability::Merit(Merit::Status("Ordo Dracul".to_string())), 1),
 				AbilityVal(Ability::Merit(Merit::Status("City".to_string())), 1),
 				AbilityVal(
-					Ability::Merit(Merit::Vampire(VampireMerits::CacophonySavvy)),
+					Ability::Merit(Merit::Vampire(VampireMerit::CacophonySavvy)),
 					3,
 				),
 				AbilityVal(Ability::Merit(Merit::FastTalking), 1),
@@ -96,10 +96,10 @@ mod tests {
 					2,
 				),
 				// AbilityVal(Ability::Merit(Merit::Contacts(String::new())), 2),
-				AbilityVal(Ability::Merit(Merit::SafePlace(String::from(""))), 3),
+				AbilityVal(Ability::Merit(Merit::SafePlace(String::new())), 3),
 				AbilityVal(Ability::Merit(Merit::Resources), 3),
 				AbilityVal(
-					Ability::Merit(Merit::Vampire(VampireMerits::NestGuardian)),
+					Ability::Merit(Merit::Vampire(VampireMerit::NestGuardian)),
 					1,
 				),
 			])
@@ -151,7 +151,7 @@ mod tests {
 				AbilityVal(Ability::Merit(Merit::Giant), 3),
 				AbilityVal(Ability::Merit(Merit::TrainedObserver), 1),
 				AbilityVal(
-					Ability::Merit(Merit::DefensiveCombat(true, Skill::Brawl)),
+					Ability::Merit(Merit::DefensiveCombat(true, Some(Skill::Brawl))),
 					1,
 				),
 				AbilityVal(

@@ -193,8 +193,12 @@ where
 				character.calc_mod_map();
 			}
 			Event::MeritChanged(i, val) => {
-				character.merits.remove(i);
-				character.merits.insert(i, val);
+				if character.merits.len() == i {
+					character.merits.push(val);
+				} else {
+					character.merits.remove(i);
+					character.merits.insert(i, val);
+				}
 			}
 			Event::CustomAbilityChanged(ability, name) => {
 				if let Some(mut val) = character.remove_ability(&ability) {
@@ -450,6 +454,7 @@ where
 
 		col1 = col1
 			.push(merit_component(
+				character.splat._type(),
 				character.merits.clone(),
 				Event::MeritChanged,
 			))

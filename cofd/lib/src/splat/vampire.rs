@@ -2,11 +2,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Trait};
 
-use super::{ability::Ability, XSplat, YSplat};
+use super::{ability::Ability, Merit, XSplat, YSplat};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct VampireData {
-	pub touchstones: Vec<String>
+	pub touchstones: Vec<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
@@ -243,10 +243,133 @@ pub enum MaskDirge {
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
-pub enum VampireMerits {
-	FeedingGrounds,
-	CacophonySavvy,
+pub enum VampireMerit {
+	AcuteSenses,
+	Atrocious,
+	// Beloved, // TY
+	Bloodhound,
+	// CallTheBeast // TY
+	ClawsOfTheUnholy,
+	CloseFamily,
+	Cutthroat,
+	DistinguishedPalate,
+	DreamVisions, // Mekhet
+	Enticing,
+	FeedingGrounds(String),
+	// HeartOfStone, // TY
+	Herd,
 	HoneyTrap,
+	KindredStatus(String), // Status?
+	KissOfTheSuccubus,     // Daeva
+	Lineage(String),
+	LingeringDreams, // DE2
+	// MajorDomo, // TY
+	// MarriedByBlood, // TY
+	PackAlpha, // Gangrel
+	// ReceptiveMind, // TY
+	// RevenantImpostor, // HD
+	// SaviorOfTheLost, // TY
+	// SpecialTreat, // TY
+	SwarmForm,
+	Touchstone,
+	UndeadMenses,
+	UnnaturalAffinity,
+	UnsettlingGaze,
+
+	CacophonySavvy,
+	Courtoisie,
+	Crusade,
+	DynastyMembership,
+	KindredDueling,
+	MobilizeOutrage, // SotC, Carthian
+	RidingTheWave,
+	RitesOfTheImpaled, // SotC, Ordo, Sworn
+	TempleGuardian,    // SotC, Crone
+
+	// Elder Merits,
+
+	// Revenant Merits
+
+	// Covenant Merits
+
 	// Ordo Dracul
+	IndependentStudy, // SotC
+	SecretSocietyJunkie,
+	Sworn(String),
+	TwilightJudge, // SotC
+
 	NestGuardian,
+}
+
+impl VampireMerit {
+	pub fn all() -> Vec<VampireMerit> {
+		vec![
+			Self::AcuteSenses,
+			Self::Atrocious,
+			
+			Self::Bloodhound,
+			Self::ClawsOfTheUnholy,
+			Self::CloseFamily,
+			Self::Cutthroat,
+			Self::DistinguishedPalate,
+			Self::DreamVisions, // Mekhet
+			Self::Enticing,
+			Self::FeedingGrounds(String::new()),
+			Self::Herd,
+			Self::HoneyTrap,
+			Self::KindredStatus(String::new()), // Status?
+			Self::KissOfTheSuccubus,            // Daeva
+			Self::Lineage(String::new()),
+			Self::LingeringDreams, // DE2
+
+			Self::PackAlpha, // Gangrel
+			// RevenantImpostor, // HD
+
+			Self::SwarmForm,
+			Self::Touchstone,
+			Self::UndeadMenses,
+			Self::UnnaturalAffinity,
+			Self::UnsettlingGaze,
+
+			// Style Merits
+			Self::CacophonySavvy,
+			Self::Courtoisie,
+			Self::Crusade,
+			Self::DynastyMembership,
+			Self::KindredDueling,
+			Self::MobilizeOutrage, // SotC, Carthian
+			Self::RidingTheWave,
+			Self::RitesOfTheImpaled, // SotC, Ordo, Sworn
+			Self::TempleGuardian,    // SotC, Crone
+			
+			// Elder Merits,
+			// Beloved, // TY
+			// CallTheBeast // TY
+			// HeartOfStone, // TY
+			// MajorDomo, // TY
+			// MarriedByBlood, // TY
+			// ReceptiveMind, // TY
+
+			// SaviorOfTheLost, // TY
+			// SpecialTreat, // TY
+
+
+			// Revenant Merits
+
+			// Covenant Merits
+
+			// Ordo Dracul
+			Self::IndependentStudy, // SotC
+			Self::SecretSocietyJunkie,
+			Self::Sworn(String::new()),
+			Self::TwilightJudge, // SotC
+			Self::NestGuardian,
+		]
+	}
+}
+
+impl From<VampireMerit> for Merit {
+	fn from(merit: VampireMerit) -> Self {
+		Merit::Vampire(merit)
+	}
 }
