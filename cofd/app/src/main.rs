@@ -30,9 +30,9 @@ use cofd::{
 	splat::{
 		ability::{Ability, AbilityVal},
 		changeling::{Court, Seeming},
-		mage::{Order, Path},
+		mage::{Arcanum, MageData, MageMerit, Order, Path},
 		vampire::{Bloodline, Clan, Covenant, Discipline, VampireMerit},
-		werewolf::{Auspice, Form, Renown, Tribe, WerewolfMerits},
+		werewolf::{Auspice, Form, Renown, Tribe, WerewolfMerit},
 		Merit, Splat,
 	},
 };
@@ -154,36 +154,30 @@ impl Application for PlayerCompanionApp {
 			.with_specialties(Skill::Streetwise, vec![String::from("Rumours")])
 			.with_specialties(Skill::Subterfuge, vec![String::from("Detecting Lies")])
 			.with_abilities([
-				AbilityVal(Ability::Discipline(Discipline::Animalism), 1),
-				AbilityVal(Ability::Discipline(Discipline::Dominate), 2),
-				AbilityVal(
+				(Ability::Discipline(Discipline::Animalism), 1),
+				(Ability::Discipline(Discipline::Dominate), 2),
+				(
 					Ability::Discipline(Discipline::_Custom("Coil of the Voivode".to_string())),
 					2,
 				),
 			])
 			.with_merits([
-				AbilityVal(Ability::Merit(Merit::Status("Ordo Dracul".to_string())), 1),
-				AbilityVal(Ability::Merit(Merit::Status("City".to_string())), 1),
-				AbilityVal(
-					Ability::Merit(Merit::Vampire(VampireMerit::CacophonySavvy)),
-					3,
-				),
-				AbilityVal(Ability::Merit(Merit::FastTalking), 1),
-				AbilityVal(
-					Ability::Merit(Merit::ProfessionalTraining(
+				(Merit::Status("Ordo Dracul".to_string()), 1),
+				(Merit::Status("City".to_string()), 1),
+				(Merit::Vampire(VampireMerit::CacophonySavvy), 3),
+				(Merit::FastTalking, 1),
+				(
+					Merit::ProfessionalTraining(
 						String::new(),
 						Some([Skill::Expression, Skill::Occult]),
 						None,
-					)),
+					),
 					2,
 				),
 				// AbilityVal(Ability::Merit(Merit::Contacts(String::new())), 2),
-				AbilityVal(Ability::Merit(Merit::SafePlace(String::new())), 3),
-				AbilityVal(Ability::Merit(Merit::Resources), 3),
-				AbilityVal(
-					Ability::Merit(Merit::Vampire(VampireMerit::NestGuardian)),
-					1,
-				),
+				(Merit::SafePlace(String::new()), 3),
+				(Merit::Resources, 3),
+				(Merit::Vampire(VampireMerit::NestGuardian), 1),
 			])
 			.build();
 
@@ -227,32 +221,95 @@ impl Application for PlayerCompanionApp {
 			.with_specialties(Skill::Stealth, vec![String::from("Stalking")])
 			.with_specialties(Skill::Intimidation, vec![String::from("Direct Threats")])
 			.with_abilities([
-				AbilityVal(Ability::Renown(Renown::Glory), 1),
-				AbilityVal(Ability::Renown(Renown::Purity), 3),
+				(Ability::Renown(Renown::Glory), 1),
+				(Ability::Renown(Renown::Purity), 3),
 			])
 			.with_merits([
-				AbilityVal(Ability::Merit(Merit::Giant), 3),
-				AbilityVal(Ability::Merit(Merit::TrainedObserver), 1),
-				AbilityVal(
-					Ability::Merit(Merit::DefensiveCombat(true, Some(Skill::Brawl))),
-					1,
-				),
-				AbilityVal(
-					Ability::Merit(Merit::Werewolf(WerewolfMerits::FavoredForm(Some(
-						Form::Gauru,
-					)))),
+				(Merit::Giant, 3),
+				(Merit::TrainedObserver, 1),
+				(Merit::DefensiveCombat(true, Some(Skill::Brawl)), 1),
+				(
+					Merit::Werewolf(WerewolfMerit::FavoredForm(Some(Form::Gauru))),
 					2,
 				),
-				AbilityVal(
-					Ability::Merit(Merit::Werewolf(WerewolfMerits::EfficientKiller)),
-					2,
+				(Merit::Werewolf(WerewolfMerit::EfficientKiller), 2),
+				(Merit::RelentlessAssault, 2),
+				(Merit::Language("First Tongue".to_owned()), 1),
+				(Merit::Werewolf(WerewolfMerit::Totem), 1),
+			])
+			.build();
+
+		let mage_character = Character::builder()
+			.with_splat(Splat::Mage(
+				Path::Mastigos,
+				Some(Order::Mysterium),
+				None,
+				MageData {
+					attr_bonus: Attribute::Resolve,
+					obsessions: vec![],
+				},
+			))
+			.with_info(CharacterInfo {
+				name: String::from("Polaris"),
+				player: String::from("m00n"),
+				virtue_anchor: String::from("Curious"),
+				vice_anchor: String::from("Greedy"),
+				concept: String::from("Astronomer"),
+				..Default::default()
+			})
+			.with_attributes(Attributes {
+				intelligence: 3,
+				wits: 3,
+				resolve: 3,
+				strength: 2,
+				dexterity: 3,
+				stamina: 2,
+				presence: 1,
+				manipulation: 2,
+				composure: 3,
+			})
+			.with_skills(Skills {
+				academics: 2,
+				computer: 1,
+				crafts: 1,
+				investigation: 3,
+				occult: 3,
+				science: 2,
+
+				larceny: 2,
+				stealth: 2,
+
+				animal_ken: 1,
+				empathy: 2,
+				expression: 1,
+				subterfuge: 3,
+				..Default::default()
+			})
+			.with_specialties(Skill::Academics, vec![String::from("Research")])
+			.with_specialties(Skill::AnimalKen, vec![String::from("Felines")])
+			.with_specialties(Skill::Subterfuge, vec![String::from("Detecting Lies")])
+			// TODO: Professional Training specialties
+			.with_specialties(Skill::Investigation, vec![String::from("Riddles")])
+			.with_specialties(Skill::Science, vec![String::from("Astronomy")])
+			.with_abilities([
+				(Ability::Arcanum(Arcanum::Mind), 1),
+				(Ability::Arcanum(Arcanum::Prime), 2),
+				(Ability::Arcanum(Arcanum::Space), 3),
+			])
+			.with_merits([
+				(Merit::Status("Mysterium".to_string()), 1),
+				(Merit::Mage(MageMerit::HighSpeech), 1),
+				(
+					Merit::ProfessionalTraining(
+						"e".to_owned(),
+						Some([Skill::Investigation, Skill::Science]),
+						None,
+					),
+					3,
 				),
-				AbilityVal(Ability::Merit(Merit::RelentlessAssault), 2),
-				AbilityVal(
-					Ability::Merit(Merit::Language("First Tongue".to_owned())),
-					1,
-				),
-				AbilityVal(Ability::Merit(Merit::Werewolf(WerewolfMerits::Totem)), 1),
+				(Merit::TrainedObserver, 1),
+				// AbilityVal(Ability::Merit(Merit::ProfessionalTraining("e".to_owned(), Some([Skill::Investigation, Skill::Science]), None)), 3),
+				// AbilityVal(Ability::Merit(Merit::ProfessionalTraining("e".to_owned(), Some([Skill::Investigation, Skill::Science]), None)), 3),
 			])
 			.build();
 
@@ -265,6 +322,7 @@ impl Application for PlayerCompanionApp {
 				characters: vec![
 					Rc::new(RefCell::new(vampire_character)),
 					Rc::new(RefCell::new(werewolf_character)),
+					Rc::new(RefCell::new(mage_character)),
 				],
 				// locale: Default::default(), // lang_loader,
 				// language_requester,

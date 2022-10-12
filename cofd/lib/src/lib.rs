@@ -22,9 +22,9 @@ mod tests {
 	use crate::{
 		character::{Attributes, Character, CharacterInfo, Skill, Skills},
 		splat::{
-			ability::{Ability, AbilityVal},
+			ability::{Ability},
 			vampire::{Bloodline, Clan, Covenant, Discipline, VampireMerit},
-			werewolf::{Auspice, Form, Renown, Tribe, WerewolfMerits},
+			werewolf::{Auspice, Form, Renown, Tribe, WerewolfMerit},
 			Merit, Splat,
 		},
 	};
@@ -84,36 +84,30 @@ mod tests {
 			.with_specialties(Skill::Streetwise, vec![String::from("Rumours")])
 			.with_specialties(Skill::Subterfuge, vec![String::from("Detecting Lies")])
 			.with_abilities([
-				AbilityVal(Ability::Discipline(Discipline::Animalism), 1),
-				AbilityVal(Ability::Discipline(Discipline::Dominate), 2),
-				AbilityVal(
+				(Ability::Discipline(Discipline::Animalism), 1),
+				(Ability::Discipline(Discipline::Dominate), 2),
+				(
 					Ability::Discipline(Discipline::_Custom("Coil of the Voivode".to_string())),
 					2,
 				),
 			])
 			.with_merits([
-				AbilityVal(Ability::Merit(Merit::Status("Ordo Dracul".to_string())), 1),
-				AbilityVal(Ability::Merit(Merit::Status("City".to_string())), 1),
-				AbilityVal(
-					Ability::Merit(Merit::Vampire(VampireMerit::CacophonySavvy)),
-					3,
-				),
-				AbilityVal(Ability::Merit(Merit::FastTalking), 1),
-				AbilityVal(
-					Ability::Merit(Merit::ProfessionalTraining(
+				(Merit::Status("Ordo Dracul".to_string()), 1),
+				(Merit::Status("City".to_string()), 1),
+				(Merit::Vampire(VampireMerit::CacophonySavvy), 3),
+				(Merit::FastTalking, 1),
+				(
+					Merit::ProfessionalTraining(
 						String::new(),
 						Some([Skill::Expression, Skill::Occult]),
 						None,
-					)),
+					),
 					2,
 				),
 				// AbilityVal(Ability::Merit(Merit::Contacts(String::new())), 2),
-				AbilityVal(Ability::Merit(Merit::SafePlace(String::new())), 3),
-				AbilityVal(Ability::Merit(Merit::Resources), 3),
-				AbilityVal(
-					Ability::Merit(Merit::Vampire(VampireMerit::NestGuardian)),
-					1,
-				),
+				(Merit::SafePlace(String::new()), 3),
+				(Merit::Resources, 3),
+				(Merit::Vampire(VampireMerit::NestGuardian), 1),
 			])
 			.build();
 
@@ -169,32 +163,21 @@ mod tests {
 			.with_specialties(Skill::Stealth, vec![String::from("Stalking")])
 			.with_specialties(Skill::Intimidation, vec![String::from("Direct Threats")])
 			.with_abilities([
-				AbilityVal(Ability::Renown(Renown::Glory), 1),
-				AbilityVal(Ability::Renown(Renown::Purity), 3),
+				(Ability::Renown(Renown::Glory), 1),
+				(Ability::Renown(Renown::Purity), 3),
 			])
 			.with_merits([
-				AbilityVal(Ability::Merit(Merit::Giant), 3),
-				AbilityVal(Ability::Merit(Merit::TrainedObserver), 1),
-				AbilityVal(
-					Ability::Merit(Merit::DefensiveCombat(true, Some(Skill::Brawl))),
-					1,
-				),
-				AbilityVal(
-					Ability::Merit(Merit::Werewolf(WerewolfMerits::FavoredForm(Some(
-						Form::Gauru,
-					)))),
+				(Merit::Giant, 3),
+				(Merit::TrainedObserver, 1),
+				(Merit::DefensiveCombat(true, Some(Skill::Brawl)), 1),
+				(
+					Merit::Werewolf(WerewolfMerit::FavoredForm(Some(Form::Gauru))),
 					2,
 				),
-				AbilityVal(
-					Ability::Merit(Merit::Werewolf(WerewolfMerits::EfficientKiller)),
-					2,
-				),
-				AbilityVal(Ability::Merit(Merit::RelentlessAssault), 2),
-				AbilityVal(
-					Ability::Merit(Merit::Language("First Tongue".to_owned())),
-					1,
-				),
-				AbilityVal(Ability::Merit(Merit::Werewolf(WerewolfMerits::Totem)), 1),
+				(Merit::Werewolf(WerewolfMerit::EfficientKiller), 2),
+				(Merit::RelentlessAssault, 2),
+				(Merit::Language("First Tongue".to_owned()), 1),
+				(Merit::Werewolf(WerewolfMerit::Totem), 1),
 			])
 			.build();
 

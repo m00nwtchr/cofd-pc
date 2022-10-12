@@ -5,7 +5,7 @@ use std::{
 
 use crate::splat::{
 	ability::{Ability, AbilityVal},
-	Splat,
+	Merit, Splat,
 };
 use serde::{Deserialize, Serialize};
 
@@ -71,11 +71,12 @@ impl CharacterBuilder {
 	}
 
 	#[must_use]
-	pub fn with_abilities<const N: usize>(mut self, abilities: [AbilityVal; N]) -> Self {
+	pub fn with_abilities<const N: usize>(mut self, abilities: [(Ability, u16); N]) -> Self {
 		self.abilities = BTreeMap::new();
 
-		for ability in abilities {
-			self.abilities.insert(ability.0.clone(), ability);
+		for (ability, val) in abilities {
+			self.abilities
+				.insert(ability.clone(), AbilityVal(ability, val));
 		}
 
 		self.flag = true;
@@ -83,8 +84,11 @@ impl CharacterBuilder {
 	}
 
 	#[must_use]
-	pub fn with_merits<const N: usize>(mut self, merits: [AbilityVal; N]) -> Self {
-		self.merits = Vec::from(merits);
+	pub fn with_merits<const N: usize>(mut self, merits: [(Merit, u16); N]) -> Self {
+		self.merits = merits
+			.into_iter()
+			.map(|(merit, val)| AbilityVal(Ability::Merit(merit), val))
+			.collect();
 		self.flag = true;
 		self
 	}
