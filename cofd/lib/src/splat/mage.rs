@@ -1,8 +1,15 @@
 use serde::{Deserialize, Serialize};
 
-use crate::character::Skill;
+use crate::{character::Skill, prelude::Attribute};
 
-use super::{ability::Ability, XSplat, YSplat};
+use super::{ability::Ability, Merit, XSplat, YSplat};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct MageData {
+	pub attr_bonus: Attribute, // TODO: Resolve, Composure, or Stamina (Resistance Attr)
+
+	pub obsessions: Vec<String>,
+}
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Path {
@@ -206,5 +213,23 @@ impl Arcanum {
 impl From<Arcanum> for Ability {
 	fn from(val: Arcanum) -> Self {
 		Ability::Arcanum(val)
+	}
+}
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+
+pub enum MageMerit {
+	HighSpeech,
+}
+
+impl MageMerit {
+	pub fn all() -> Vec<MageMerit> {
+		vec![Self::HighSpeech]
+	}
+}
+
+impl From<MageMerit> for Merit {
+	fn from(merit: MageMerit) -> Self {
+		Merit::Mage(merit)
 	}
 }

@@ -63,7 +63,7 @@ pub enum Splat {
 	// )]
 	Vampire(Clan, Option<Covenant>, Option<Bloodline>, VampireData),
 	Werewolf(Option<Auspice>, Option<Tribe>, Option<String>, WerewolfData),
-	Mage(Path, Option<Order>, Option<Legacy>),
+	Mage(Path, Option<Order>, Option<Legacy>, MageData), // TODO: Order = free occult dot, free order status, high speech merit
 	// Promethean,
 	Changeling(Seeming, Option<Court>, Option<Kith>, ChangelingData),
 	// Hunter,
@@ -80,7 +80,7 @@ impl Splat {
 			Splat::Mortal => "mortal",
 			Splat::Vampire(_, _, _, _) => "vampire",
 			Splat::Werewolf(_, _, _, _) => "werewolf",
-			Splat::Mage(_, _, _) => "mage",
+			Splat::Mage(_, _, _, _) => "mage",
 			Splat::Changeling(_, _, _, _) => "changeling",
 		}
 	}
@@ -90,7 +90,7 @@ impl Splat {
 			Splat::Mortal => SplatType::Mortal,
 			Splat::Vampire(_, _, _, _) => SplatType::Vampire,
 			Splat::Werewolf(_, _, _, _) => SplatType::Werewolf,
-			Splat::Mage(_, _, _) => SplatType::Mage,
+			Splat::Mage(_, _, _, _) => SplatType::Mage,
 			Splat::Changeling(_, _, _, _) => SplatType::Changeling,
 		}
 	}
@@ -118,7 +118,7 @@ impl Splat {
 			Splat::Mortal => "",
 			Splat::Vampire(_, _, _, _) => "clan",
 			Splat::Werewolf(_, _, _, _) => "auspice",
-			Splat::Mage(_, _, _) => "path",
+			Splat::Mage(_, _, _, _) => "path",
 			Splat::Changeling(_, _, _, _) => "seeming",
 		}
 	}
@@ -128,7 +128,7 @@ impl Splat {
 			Splat::Mortal => None,
 			Splat::Vampire(clan, _, _, _) => Some(clan.into()),
 			Splat::Werewolf(auspice, _, _, _) => auspice.map(Into::into),
-			Splat::Mage(path, _, _) => Some(path.into()),
+			Splat::Mage(path, _, _, _) => Some(path.into()),
 			Splat::Changeling(seeming, _, _, _) => Some(seeming.into()),
 		}
 	}
@@ -147,7 +147,7 @@ impl Splat {
 					}
 				}
 				XSplat::Mage(path) => {
-					if let Splat::Mage(_path, _, _) = self {
+					if let Splat::Mage(_path, _, _, _) = self {
 						*_path = path;
 					}
 				}
@@ -170,7 +170,7 @@ impl Splat {
 			Splat::Mortal => "faction",
 			Splat::Vampire(_, _, _, _) => "covenant",
 			Splat::Werewolf(_, _, _, _) => "tribe",
-			Splat::Mage(_, _, _) => "order",
+			Splat::Mage(_, _, _, _) => "order",
 			Splat::Changeling(_, _, _, _) => "court",
 		}
 	}
@@ -180,7 +180,7 @@ impl Splat {
 			Splat::Mortal => None,
 			Splat::Vampire(_, covenant, _, _) => covenant.map(Into::into),
 			Splat::Werewolf(_, tribe, _, _) => tribe.map(Into::into),
-			Splat::Mage(_, order, _) => order.map(Into::into),
+			Splat::Mage(_, order, _, _) => order.map(Into::into),
 			Splat::Changeling(_, court, _, _) => court.map(Into::into),
 		}
 	}
@@ -199,7 +199,7 @@ impl Splat {
 					}
 				}
 				YSplat::Mage(order) => {
-					if let Splat::Mage(_, _order, _) = self {
+					if let Splat::Mage(_, _order, _, _) = self {
 						*_order = Some(order);
 					}
 				}
@@ -213,7 +213,7 @@ impl Splat {
 				Splat::Mortal => {}
 				Splat::Vampire(_, covenant, _, _) => *covenant = None,
 				Splat::Werewolf(_, tribe, _, _) => *tribe = None,
-				Splat::Mage(_, order, _) => *order = None,
+				Splat::Mage(_, order, _, _) => *order = None,
 				Splat::Changeling(_, court, _, _) => *court = None,
 			},
 		}
@@ -224,7 +224,7 @@ impl Splat {
 			Splat::Mortal => "",
 			Splat::Vampire(_, _, _, _) => "bloodline",
 			Splat::Werewolf(_, _, _, _) => "lodge",
-			Splat::Mage(_, _, _) => "legacy",
+			Splat::Mage(_, _, _, _) => "legacy",
 			Splat::Changeling(_, _, _, _) => "kith",
 		}
 	}
@@ -234,7 +234,7 @@ impl Splat {
 			Splat::Mortal => None,
 			Splat::Vampire(_, _, _, _) => Some("disciplines"),
 			Splat::Werewolf(_, _, _, _) => Some("renown"),
-			Splat::Mage(_, _, _) => Some("arcana"),
+			Splat::Mage(_, _, _, _) => Some("arcana"),
 			Splat::Changeling(_, _, _, _) => None,
 		}
 	}
@@ -244,7 +244,7 @@ impl Splat {
 			Splat::Mortal => true,
 			Splat::Vampire(_, _, _, _) => false,
 			Splat::Werewolf(_, _, _, _) => true,
-			Splat::Mage(_, _, _) => true,
+			Splat::Mage(_, _, _, _) => true,
 			Splat::Changeling(_, _, _, _) => false,
 		}
 	}
@@ -254,7 +254,7 @@ impl Splat {
 			Splat::Mortal => None,
 			Splat::Vampire(_, _, _, _) => Some(Vec::from(Discipline::all().map(Into::into))),
 			Splat::Werewolf(_, _, _, _) => Some(Vec::from(Renown::all().map(Into::into))),
-			Splat::Mage(_, _, _) => Some(Vec::from(Arcanum::all().map(Into::into))),
+			Splat::Mage(_, _, _, _) => Some(Vec::from(Arcanum::all().map(Into::into))),
 			Splat::Changeling(_, _, _, _) => None,
 		}
 	}
@@ -264,7 +264,7 @@ impl Splat {
 			Splat::Mortal => None,
 			Splat::Vampire(_, _, _, _) => Some(Ability::Discipline(Discipline::custom(str))),
 			Splat::Werewolf(_, _, _, _) => Some(Ability::MoonGift(MoonGift::custom(str))),
-			Splat::Mage(_, _, _) => None,
+			Splat::Mage(_, _, _, _) => None,
 			Splat::Changeling(_, _, _, _) => None,
 		}
 	}
@@ -274,7 +274,7 @@ impl Splat {
 			Splat::Mortal => None,
 			Splat::Vampire(_, _, _, _) => Some("blood_potency"),
 			Splat::Werewolf(_, _, _, _) => Some("primal_urge"),
-			Splat::Mage(_, _, _) => Some("gnosis"),
+			Splat::Mage(_, _, _, _) => Some("gnosis"),
 			Splat::Changeling(_, _, _, _) => Some("wyrd"),
 		}
 	}
@@ -284,7 +284,7 @@ impl Splat {
 			Splat::Mortal => None,
 			Splat::Vampire(_, _, _, _) => Some("vitae"),
 			Splat::Werewolf(_, _, _, _) => Some("essence"),
-			Splat::Mage(_, _, _) => Some("mana"),
+			Splat::Mage(_, _, _, _) => Some("mana"),
 			Splat::Changeling(_, _, _, _) => Some("glamour"),
 		}
 	}
@@ -294,7 +294,7 @@ impl Splat {
 			Splat::Mortal => "integrity",
 			Splat::Vampire(_, _, _, _) => "humanity",
 			Splat::Werewolf(_, _, _, _) => "harmony",
-			Splat::Mage(_, _, _) => "wisdom",
+			Splat::Mage(_, _, _, _) => "wisdom",
 			Splat::Changeling(_, _, _, _) => "clarity",
 		}
 	}
@@ -514,8 +514,9 @@ pub enum Merit {
 	// TwoWeaponFighting,
 	// UnarmedDefense,
 	// WeaponAndShield
+	Mage(MageMerit),
 	Vampire(VampireMerit),
-	Werewolf(WerewolfMerits),
+	Werewolf(WerewolfMerit),
 
 	_Custom(String),
 }
@@ -573,7 +574,7 @@ impl Merit {
 			// SpearAndBayonet
 			// StaffFighting,
 			// StreetFighting,
-			// StrengthPerformance, // TODO: Give Giant?
+			// StrengthPerformance,
 			// Systema,
 			// ThrownWepons,
 			// TwoWeaponFighting,
@@ -619,7 +620,7 @@ impl Merit {
 			Self::ObjectFetishism(String::new()),
 			Self::Patient,
 			// RenownedArtisan(String) // MTC
-			Self::Scarred(String::new()), // TODO: Condition
+			Self::Scarred(String::new()),
 			Self::ToleranceForBiology,
 			Self::TrainedObserver,
 			Self::ViceRidden(String::new()),
@@ -670,7 +671,7 @@ impl Merit {
 			Self::HobbyistClique(String::new(), None),
 			Self::Inspiring,
 			Self::IronWill,
-			Self::Mentor(String::new(), None), // TODO: Add Resources to list
+			Self::Mentor(String::new(), None),
 			Self::Peacemaker,
 			Self::Pusher,
 			Self::Resources,
@@ -681,11 +682,11 @@ impl Merit {
 			Self::Staff,
 			Self::Status(String::new()),
 			Self::StrikingLooks(String::new()),
-			Self::SupportNetwork(String::new(), None), // TODO: Restrict to social merits
+			Self::SupportNetwork(String::new(), None),
 			Self::Sympathetic,
 			Self::TableTurner,
 			Self::TakesOneToKnowOne,
-			Self::Taste(String::new(), None), // TODO: Restrict to Crafts/Expression
+			Self::Taste(String::new(), None),
 			Self::TrueFriend(String::new()),
 			Self::Untouchable,
 		]
@@ -695,8 +696,8 @@ impl Merit {
 		match splat {
 			SplatType::Mortal => Merit::all(),
 			SplatType::Vampire => VampireMerit::all().into_iter().map(Into::into).collect(),
-			SplatType::Werewolf => Merit::all(),
-			SplatType::Mage => Merit::all(),
+			SplatType::Werewolf => WerewolfMerit::all().into_iter().map(Into::into).collect(),
+			SplatType::Mage => MageMerit::all().into_iter().map(Into::into).collect(),
 			SplatType::Changeling => Merit::all(),
 		}
 	}
@@ -707,6 +708,7 @@ impl Merit {
 
 	fn name(&self) -> &str {
 		match self {
+			Merit::Mage(merit) => to_variant_name(merit).unwrap(),
 			Merit::Vampire(merit) => to_variant_name(merit).unwrap(),
 			Merit::Werewolf(merit) => to_variant_name(merit).unwrap(),
 			Merit::_Custom(name) => name,

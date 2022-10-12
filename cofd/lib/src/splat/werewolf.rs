@@ -4,7 +4,7 @@ use crate::character::{
 	Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait,
 };
 
-use super::{ability::Ability, XSplat, YSplat};
+use super::{ability::Ability, Merit, XSplat, YSplat};
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct WerewolfData {
@@ -445,8 +445,20 @@ impl Form {
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
-pub enum WerewolfMerits {
+pub enum WerewolfMerit {
 	FavoredForm(Option<Form>),
 	EfficientKiller,
 	Totem,
+}
+
+impl WerewolfMerit {
+	pub fn all() -> Vec<WerewolfMerit> {
+		vec![Self::FavoredForm(None), Self::EfficientKiller, Self::Totem]
+	}
+}
+
+impl From<WerewolfMerit> for Merit {
+	fn from(merit: WerewolfMerit) -> Self {
+		Merit::Werewolf(merit)
+	}
 }
