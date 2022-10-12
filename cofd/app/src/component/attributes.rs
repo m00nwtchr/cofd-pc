@@ -37,7 +37,10 @@ pub fn attribute_bar<Message>(
 pub struct Event(u16, Attribute);
 
 impl<Message> AttributeBar<Message> {
-	fn new(attributes: Attributes, on_change: impl Fn(u16, Attribute) -> Message + 'static) -> Self {
+	fn new(
+		attributes: Attributes,
+		on_change: impl Fn(u16, Attribute) -> Message + 'static,
+	) -> Self {
 		Self {
 			attributes,
 			on_change: Box::new(on_change),
@@ -58,7 +61,7 @@ impl<Message> AttributeBar<Message> {
 		for attr in Attribute::get(AttributeCategory::Trait(cat)) {
 			let v = self.attributes.get(&attr) as u16;
 
-			col1 = col1.push(text(fl("attribute", Some(attr.name()))));
+			col1 = col1.push(text(fl("attribute", Some(attr.name())).unwrap()));
 			col2 = col2.push(SheetDots::new(v, 1, 5, Shape::Dots, None, move |val| {
 				Event(val, attr)
 			}));
@@ -88,9 +91,9 @@ where
 			text(flt!("attributes")).size(H2_SIZE),
 			row![
 				column![
-					text(fl("attribute", Some("power"))),
-					text(fl("attribute", Some("finesse"))),
-					text(fl("attribute", Some("resistance")))
+					text(fl("attribute", Some("power")).unwrap()),
+					text(fl("attribute", Some("finesse")).unwrap()),
+					text(fl("attribute", Some("resistance")).unwrap())
 				]
 				.spacing(3)
 				.width(Length::Fill)

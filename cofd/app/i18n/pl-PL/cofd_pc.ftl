@@ -64,12 +64,41 @@ vice = Wada
 faction = Frakcja
 group_name = Nazwa grupy
 
+health = Zdrowie
+willpower = Siła woli
+
+size = Rozmiar
+speed = Prędkość
+defense = Obrona
+armor = Zbroja
+initative = Inicjatywa
+beats = Beats
+experience = Doświadczenie
+
 vampire = Wampir
     .mask = Maska
     .dirge = Lament
 
     .clan = Klan
     .covenant = Przymierze
+    .bloodline = Bloodline
+
+    .blood_potency = Moc Krwi
+    .vitae = Żywot
+    .humanity = Człowieczeństwo
+
+    .disciplines = Dyscypliny
+
+    .animalism = Animalizm
+    .auspex = Nadwrażliwość
+    .celerity = Przyspieszenie
+    .dominate = Dominacja
+    .majesty = Majestat
+    .nightmare = Koszmar
+    .obfuscate = Niewidoczność
+    .protean = Transformacja
+    .resilience = Odporność
+    .vigor = Wigor
 
 mage = Mag
     .path = Ścieżka

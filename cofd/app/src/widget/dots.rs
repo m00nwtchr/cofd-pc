@@ -1,8 +1,8 @@
-use std::{cmp::min, default};
+use std::cmp::min;
 
 use iced::{
-	alignment::Vertical, event, mouse, widget::Column, Alignment, Background, Color, Element,
-	Event, Length, Point, Rectangle, Theme,
+	event, mouse, widget::Column, Alignment, Background, Color, Element, Event, Length, Point,
+	Rectangle, Theme,
 };
 use iced_native::{
 	layout, renderer, text, touch,

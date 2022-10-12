@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use iced::{
-	widget::{column, pick_list, row, text, text_input, Column},
+	widget::{button, column, pick_list, row, text, text_input, Column},
 	Alignment, Element, Length,
 };
 use iced_lazy::Component;
@@ -30,12 +30,15 @@ use crate::{
 
 pub struct OverviewTab<Message> {
 	character: Rc<RefCell<Character>>,
-
+	back: Message,
 	_c: Option<Message>,
 }
 
-pub fn overview_tab<Message>(character: Rc<RefCell<Character>>) -> OverviewTab<Message> {
-	OverviewTab::new(character)
+pub fn overview_tab<Message>(
+	character: Rc<RefCell<Character>>,
+	back: Message,
+) -> OverviewTab<Message> {
+	OverviewTab::new(character, back)
 }
 
 #[derive(Clone)]
@@ -55,13 +58,15 @@ pub enum Event {
 	RegaliaChanged(Regalia),
 
 	Msg,
+	Back,
 }
 
 impl<Message> OverviewTab<Message> {
-	pub fn new(character: Rc<RefCell<Character>>) -> Self {
+	pub fn new(character: Rc<RefCell<Character>>, back: Message) -> Self {
 		Self {
 			character,
 			_c: None,
+			back,
 		}
 	}
 
@@ -90,7 +95,7 @@ impl<Message> OverviewTab<Message> {
 						None => 0,
 					};
 
-					col1 = col1.push(text(fl(splat_name, Some(ability.name()))));
+					col1 = col1.push(text(fl(splat_name, Some(ability.name())).unwrap()));
 					col2 = col2.push(SheetDots::new(val, 0, 5, Shape::Dots, None, move |val| {
 						Event::AbilityChanged(ability.clone(), AbilityVal(ability.clone(), val))
 					}));
@@ -151,7 +156,7 @@ impl<Message> OverviewTab<Message> {
 		let mut col = Column::new().align_items(Alignment::Center);
 		if let Some(name) = character.splat.ability_name() {
 			col = col
-				.push(text(fl(splat_name, Some(name))).size(H3_SIZE))
+				.push(text(fl(splat_name, Some(name)).unwrap()).size(H3_SIZE))
 				.push(column![row![col1, col2], new]);
 		}
 
@@ -161,10 +166,12 @@ impl<Message> OverviewTab<Message> {
 
 impl<Message, Renderer> Component<Message, Renderer> for OverviewTab<Message>
 where
+	Message: Clone,
 	Renderer: iced_native::text::Renderer + 'static,
 	Renderer::Theme: iced::widget::pick_list::StyleSheet
 		+ iced::widget::text_input::StyleSheet
 		+ iced::widget::text::StyleSheet
+		+ iced::widget::button::StyleSheet
 		+ widget::dots::StyleSheet
 		+ widget::track::StyleSheet,
 {
@@ -174,6 +181,8 @@ where
 
 	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
 		let mut character = self.character.borrow_mut();
+
+		let mut res = None;
 
 		match event {
 			Event::AttrChanged(val, attr) => *character.base_attributes_mut().get_mut(&attr) = val,
@@ -193,11 +202,24 @@ where
 				character.calc_mod_map();
 			}
 			Event::MeritChanged(i, val) => {
+				let mut flag = false;
+
 				if character.merits.len() == i {
+					if !val.get_modifiers().is_empty() {
+						flag = true;
+					}
 					character.merits.push(val);
 				} else {
-					character.merits.remove(i);
+					let old = character.merits.remove(i);
+					if old.get_modifiers() != val.get_modifiers() {
+						flag = true;
+					}
+
 					character.merits.insert(i, val);
+				}
+
+				if flag {
+					character.calc_mod_map();
 				}
 			}
 			Event::CustomAbilityChanged(ability, name) => {
@@ -239,9 +261,10 @@ where
 				}
 			}
 			Event::Msg => {}
+			Event::Back => res = Some(self.back.clone()),
 		}
 
-		None
+		res
 	}
 
 	#[allow(clippy::too_many_lines)]
@@ -287,7 +310,7 @@ where
 			});
 
 			column![
-				text(fl(character.splat.name(), Some(st))).size(H3_SIZE),
+				text(fl(character.splat.name(), Some(st)).unwrap()).size(H3_SIZE),
 				dots
 			]
 			.align_items(Alignment::Center)
@@ -306,7 +329,7 @@ where
 			);
 
 			column![
-				text(fl(character.splat.name(), Some(fuel))).size(H3_SIZE),
+				text(fl(character.splat.name(), Some(fuel)).unwrap()).size(H3_SIZE),
 				boxes
 			]
 			.align_items(Alignment::Center)
@@ -370,11 +393,9 @@ where
 				.into()
 			};
 
-			let label = text(fl(
-				character.splat.name(),
-				Some(character.splat.integrity()),
-			))
-			.size(H3_SIZE);
+			let label =
+				text(fl(character.splat.name(), Some(character.splat.integrity())).unwrap())
+					.size(H3_SIZE);
 
 			let mut col = Column::new().align_items(Alignment::Center);
 
@@ -399,7 +420,7 @@ where
 				let sg = seeming.get_favored_regalia();
 				let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
 
-				let seeming_regalia = text(fl(character.splat.name(), Some(sg.name())));
+				let seeming_regalia = text(fl(character.splat.name(), Some(sg.name())).unwrap());
 				// if let Seeming::_Custom(_, sg) = seeming {
 				// 	let reg: Vec<Regalia> = all_regalia
 				// 		.iter()
@@ -466,6 +487,7 @@ where
 		row![
 			// (margin_col)(),
 			column![
+				button("Back").on_press(Event::Back),
 				column![
 					info_bar(self.character.clone(), || Event::Msg),
 					attribute_bar(character.base_attributes().clone(), Event::AttrChanged)
@@ -506,11 +528,12 @@ where
 
 impl<'a, Message, Renderer> From<OverviewTab<Message>> for Element<'a, Message, Renderer>
 where
-	Message: 'a,
+	Message: 'a + Clone,
 	Renderer: 'static + iced_native::text::Renderer,
 	Renderer::Theme: iced::widget::pick_list::StyleSheet
 		+ iced::widget::text_input::StyleSheet
 		+ iced::widget::text::StyleSheet
+		+ iced::widget::button::StyleSheet
 		+ widget::dots::StyleSheet
 		+ widget::track::StyleSheet,
 {

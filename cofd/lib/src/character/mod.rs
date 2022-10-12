@@ -25,14 +25,16 @@ pub fn add(a: u16, b: i16) -> u16 {
 #[derive(Default)]
 pub struct CharacterBuilder {
 	splat: Splat,
-	power: u16,
-	fuel: u16,
+	info: CharacterInfo,
 	attributes: Attributes,
 	skills: Skills,
-	abilities: BTreeMap<Ability, AbilityVal>,
-	// abilities: HashMap<AbilityKey, Box<dyn ability::Ability>>,
-	// merits: HashMap<AbilityKey, MeritAbility>,
+	specialties: HashMap<Skill, Vec<String>>,
 	merits: Vec<AbilityVal>,
+
+	abilities: BTreeMap<Ability, AbilityVal>,
+	power: u16,
+	fuel: u16,
+
 	flag: bool,
 	flag2: bool,
 }
@@ -45,6 +47,12 @@ impl CharacterBuilder {
 	}
 
 	#[must_use]
+	pub fn with_info(mut self, info: CharacterInfo) -> Self {
+		self.info = info;
+		self
+	}
+
+	#[must_use]
 	pub fn with_attributes(mut self, attributes: Attributes) -> Self {
 		self.attributes = attributes;
 		self
@@ -53,6 +61,12 @@ impl CharacterBuilder {
 	#[must_use]
 	pub fn with_skills(mut self, skills: Skills) -> Self {
 		self.skills = skills;
+		self
+	}
+
+	#[must_use]
+	pub fn with_specialties(mut self, skill: Skill, specialties: Vec<String>) -> Self {
+		self.specialties.insert(skill, specialties);
 		self
 	}
 
@@ -100,11 +114,13 @@ impl CharacterBuilder {
 
 		let mut character = Character {
 			splat: self.splat,
+			info: self.info,
 			power,
 			_attributes: self.attributes,
 			skills: self.skills,
 			abilities: self.abilities,
 			merits: self.merits,
+			specialties: self.specialties,
 			..Default::default()
 		};
 
@@ -269,13 +285,11 @@ pub struct Character {
 
 	pub info: CharacterInfo,
 
-	virtue_anchor: String,
-	vice_anchor: String,
-
 	pub base_size: u16,
 	#[serde(rename = "attributes")]
 	_attributes: Attributes,
 	skills: Skills,
+	pub specialties: HashMap<Skill, Vec<String>>,
 
 	health: Damage,
 
@@ -284,7 +298,7 @@ pub struct Character {
 	pub fuel: u16,
 	pub integrity: u16,
 
-	// #[serde(skip)]
+	#[serde(skip)]
 	pub abilities: BTreeMap<Ability, AbilityVal>,
 	// #[serde(skip)]
 	pub merits: Vec<AbilityVal>,
@@ -555,8 +569,6 @@ impl Default for Character {
 		let mut s = Self {
 			splat: Default::default(),
 			info: Default::default(),
-			virtue_anchor: Default::default(),
-			vice_anchor: Default::default(),
 			_attributes: Default::default(),
 			skills: Default::default(),
 			base_size: 5,
@@ -571,6 +583,7 @@ impl Default for Character {
 			willpower: 0,
 			beats: 0,
 			base_armor: Default::default(),
+			specialties: Default::default(),
 		};
 
 		s.willpower = s.max_willpower();
@@ -579,32 +592,54 @@ impl Default for Character {
 	}
 }
 
+fn is_empty(str: &String) -> bool {
+	str.is_empty()
+}
+
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(default)]
 pub struct CharacterInfo {
-	name: String,
-	player: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub name: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub player: String,
 
-	virtue_anchor: String,
-	vice_anchor: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub virtue_anchor: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub vice_anchor: String,
 
-	faction: String,
-	group_name: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub faction: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub group_name: String,
 
-	concept: String,
-	chronicle: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub concept: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub chronicle: String,
 
-	age: String,
-	date_of_birth: String,
-	hair: String,
-	eyes: String,
-	race: String,
-	nationality: String,
-	height: String,
-	weight: String,
-	sex: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub age: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub date_of_birth: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub hair: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub eyes: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub race: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub nationality: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub height: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub weight: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub sex: String,
 
-	other: String,
+	#[serde(skip_serializing_if = "is_empty")]
+	pub other: String,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -771,6 +806,11 @@ fn is_zero(n: &u16) -> bool {
 	*n == 0
 }
 
+// #[allow(clippy::trivially_copy_pass_by_ref)]
+// fn is_empty(n: &String) -> bool {
+// 	*n == 0
+// }
+
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(default)]
 pub struct Skills {
@@ -890,7 +930,7 @@ impl Skills {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Modifier {
 	target: ModifierTarget,
 	value: ModifierValue,
@@ -1065,7 +1105,7 @@ impl Attribute {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(Clone, Debug, Hash, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Skill {
 	Academics,
 	Computer,

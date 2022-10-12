@@ -20,7 +20,7 @@ pub mod prelude {
 #[cfg(test)]
 mod tests {
 	use crate::{
-		character::{Attributes, Character, Skill, Skills},
+		character::{Attributes, Character, CharacterInfo, Skill, Skills},
 		splat::{
 			ability::{Ability, AbilityVal},
 			vampire::{Bloodline, Clan, Covenant, Discipline, VampireMerit},
@@ -45,8 +45,17 @@ mod tests {
 						Discipline::Auspex,
 					],
 				)),
-				Default::default()
+				Default::default(),
 			))
+			.with_info(CharacterInfo {
+				name: String::from("Darren Webb"),
+				player: String::from("m00n"),
+				chronicle: String::from("Night Trains"),
+				virtue_anchor: String::from("Scholar"),
+				vice_anchor: String::from("Authoritarian"),
+				concept: String::from("Occult Journalist/Mastermind"),
+				..Default::default()
+			})
 			.with_attributes(Attributes {
 				intelligence: 3,
 				wits: 3,
@@ -71,6 +80,9 @@ mod tests {
 				subterfuge: 4,
 				..Default::default()
 			})
+			.with_specialties(Skill::Larceny, vec![String::from("Sleight of Hand")])
+			.with_specialties(Skill::Streetwise, vec![String::from("Rumours")])
+			.with_specialties(Skill::Subterfuge, vec![String::from("Detecting Lies")])
 			.with_abilities([
 				AbilityVal(Ability::Discipline(Discipline::Animalism), 1),
 				AbilityVal(Ability::Discipline(Discipline::Dominate), 2),
@@ -108,7 +120,10 @@ mod tests {
 		println!("{:?}", vampire_character);
 		println!("{:?}", vampire_character.attributes());
 
-		// println!("{}", serde_json::to_string_pretty(&character).unwrap());
+		println!(
+			"{}",
+			serde_json::to_string_pretty(&vampire_character).unwrap()
+		);
 
 		assert_eq!(vampire_character.max_health(), 7);
 		assert_eq!(vampire_character.attributes().strength, 1);
@@ -121,6 +136,13 @@ mod tests {
 				None,
 				Default::default(),
 			))
+			.with_info(CharacterInfo {
+				name: String::from("Amos Gray"),
+				player: String::from("m00n"),
+				virtue_anchor: String::from("Destroyer"),
+				vice_anchor: String::from("Lone Wolf"),
+				..Default::default()
+			})
 			.with_attributes(Attributes {
 				intelligence: 1,
 				wits: 3,
@@ -143,6 +165,9 @@ mod tests {
 				intimidation: 4,
 				..Default::default()
 			})
+			.with_specialties(Skill::Brawl, vec![String::from("Claws")])
+			.with_specialties(Skill::Stealth, vec![String::from("Stalking")])
+			.with_specialties(Skill::Intimidation, vec![String::from("Direct Threats")])
 			.with_abilities([
 				AbilityVal(Ability::Renown(Renown::Glory), 1),
 				AbilityVal(Ability::Renown(Renown::Purity), 3),

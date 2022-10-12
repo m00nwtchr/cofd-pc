@@ -306,7 +306,6 @@ impl VampireMerit {
 		vec![
 			Self::AcuteSenses,
 			Self::Atrocious,
-			
 			Self::Bloodhound,
 			Self::ClawsOfTheUnholy,
 			Self::CloseFamily,
@@ -321,16 +320,13 @@ impl VampireMerit {
 			Self::KissOfTheSuccubus,            // Daeva
 			Self::Lineage(String::new()),
 			Self::LingeringDreams, // DE2
-
-			Self::PackAlpha, // Gangrel
+			Self::PackAlpha,       // Gangrel
 			// RevenantImpostor, // HD
-
 			Self::SwarmForm,
 			Self::Touchstone,
 			Self::UndeadMenses,
 			Self::UnnaturalAffinity,
 			Self::UnsettlingGaze,
-
 			// Style Merits
 			Self::CacophonySavvy,
 			Self::Courtoisie,
@@ -341,7 +337,6 @@ impl VampireMerit {
 			Self::RidingTheWave,
 			Self::RitesOfTheImpaled, // SotC, Ordo, Sworn
 			Self::TempleGuardian,    // SotC, Crone
-			
 			// Elder Merits,
 			// Beloved, // TY
 			// CallTheBeast // TY
@@ -352,7 +347,6 @@ impl VampireMerit {
 
 			// SaviorOfTheLost, // TY
 			// SpecialTreat, // TY
-
 
 			// Revenant Merits
 

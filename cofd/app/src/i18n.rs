@@ -2,7 +2,6 @@ use std::{fmt::Display, rc::Rc, sync::Arc};
 
 use i18n_embed::{
 	fluent::{fluent_language_loader, FluentLanguageLoader},
-	unic_langid::LanguageIdentifier,
 	DefaultLocalizer, LanguageRequester, Localizer,
 };
 cfg_if! {
@@ -34,7 +33,7 @@ macro_rules! fl {
     }};
 }
 
-pub fn fl(message_id: &str, attribute: Option<&str>) -> String {
+pub fn fl(message_id: &str, attribute: Option<&str>) -> Option<String> {
 	let message = Rc::new(OnceCell::new());
 	let message_clone = message.clone();
 	LANGUAGE_LOADER.with_bundles_mut(|bundle| {
@@ -57,7 +56,7 @@ pub fn fl(message_id: &str, attribute: Option<&str>) -> String {
 		}
 	});
 	// println!("{}.{:?}", message_id, attribute);
-	message_clone.get().unwrap().clone()
+	message_clone.get().cloned()
 }
 
 // #[derive(Debug, Clone, PartialEq, Eq)]

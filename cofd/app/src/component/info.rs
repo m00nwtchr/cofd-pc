@@ -81,7 +81,7 @@ impl<Message> InfoBar<Message> {
 				_ => (_trait.name(), None),
 			};
 
-			col1 = col1.push(text(format!("{}:", fl(msg, attribute))));
+			col1 = col1.push(text(format!("{}:", fl(msg, attribute).unwrap())));
 			col2 = col2.push(text_input("", character.info.get(&_trait), move |val| {
 				Event::InfoTraitChanged(val, _trait)
 			}));
@@ -143,10 +143,12 @@ where
 						text(format!(
 							"{}:",
 							fl(character.splat.name(), Some(character.splat.xsplat_name()))
+								.unwrap()
 						)),
 						text(format!(
 							"{}:",
 							fl(character.splat.name(), Some(character.splat.ysplat_name()))
+								.unwrap()
 						))
 					]
 					.spacing(3),

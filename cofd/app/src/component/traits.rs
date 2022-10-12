@@ -6,7 +6,7 @@ use iced_lazy::Component;
 use iced_native::Element;
 
 use cofd::{
-	character::{Armor, ArmorStruct, Trait},
+	character::{ArmorStruct, Trait},
 	prelude::Character,
 };
 
@@ -75,13 +75,10 @@ where
 	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
 		column![
 			row![
-				text(format!(
-					"{}: ",
-					fl!("size") // , self.traits.size
-				)),
-				text_input("", &format!("{}", self.traits.size), |val| {
-					Event(val, Trait::Size)
-				})
+				text(format!("{}: {}", fl!("size"), self.traits.size)),
+				// text_input("", &format!("{}", self.traits.size), |val| {
+				// 	Event(val, Trait::Size)
+				// })
 			],
 			row![
 				text(format!("{}: {}", fl!("speed"), self.traits.speed)),

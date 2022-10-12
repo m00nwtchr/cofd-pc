@@ -55,7 +55,7 @@ impl<Message> SkillsComponent<Message> {
 			.align_items(Alignment::End);
 
 		for skill in Skill::get(cat) {
-			col1 = col1.push(text(fl("skill", Some(skill.name()))));
+			col1 = col1.push(text(fl("skill", Some(skill.name())).unwrap()));
 
 			let v = self.skills.get(&skill);
 			col2 = col2.push(SheetDots::new(*v, 0, 5, Shape::Dots, None, move |val| {
@@ -64,7 +64,7 @@ impl<Message> SkillsComponent<Message> {
 		}
 
 		column![
-			text(fl(cat.name(), None)).size(H3_SIZE),
+			text(fl(cat.name(), None).unwrap()).size(H3_SIZE),
 			text(flt!("unskilled", num = cat.unskilled())).size(17),
 			row![col1, col2].spacing(5)
 		]
