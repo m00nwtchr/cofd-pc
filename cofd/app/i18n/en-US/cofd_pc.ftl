@@ -176,6 +176,9 @@ werewolf = Werewolf
     .essence = Essence
     .harmony = Harmony
 
+    .flesh-touchstone = Flesh touchstone
+    .spirit-touchstone = Spirit Touchstone
+
     .cunning = Cunning
     .glory = Glory
     .honor = Honor

@@ -282,8 +282,12 @@ pub fn athletics() -> Skill {
 	Skill::Athletics
 }
 
+pub fn is_empty_vec(vec: &Vec<String>) -> bool {
+	vec.is_empty()
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)]
 pub struct Character {
 	pub splat: Splat,
 
@@ -301,6 +305,9 @@ pub struct Character {
 	pub power: u16,
 	pub fuel: u16,
 	pub integrity: u16,
+
+	#[serde(skip_serializing_if = "is_empty_vec")]
+	pub touchstones: Vec<String>,
 
 	#[serde(skip)]
 	pub abilities: BTreeMap<Ability, AbilityVal>,
@@ -584,10 +591,11 @@ impl Default for Character {
 			integrity: 7,
 			fuel: Default::default(),
 			_defense_skill: Skill::Athletics,
-			willpower: 0,
-			beats: 0,
+			willpower: Default::default(),
+			beats: Default::default(),
 			base_armor: Default::default(),
 			specialties: Default::default(),
+			touchstones: Default::default(),
 		};
 
 		s.willpower = s.max_willpower();

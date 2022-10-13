@@ -54,6 +54,7 @@ pub enum Event {
 	CustomAbilityChanged(Ability, String),
 	HealthChanged(Wound),
 	IntegrityDamage(SplatType, Wound),
+	TouchstoneChanged(usize, String),
 
 	RegaliaChanged(Regalia),
 
@@ -262,6 +263,14 @@ where
 			}
 			Event::Msg => {}
 			Event::Back => res = Some(self.back.clone()),
+			Event::TouchstoneChanged(i, str) => {
+				if let Some(touchstone) = character.touchstones.get_mut(i) {
+					*touchstone = str;
+				} else {
+					character.touchstones.resize(i+1, String::new());
+					*character.touchstones.get_mut(i).unwrap() = str;
+				}
+			}
 		}
 
 		res
@@ -352,7 +361,7 @@ where
 
 				let mut flag = false;
 
-				if let Splat::Vampire(_, _, _, data) = &character.splat {
+				if let Splat::Vampire(_, _, _, _) = &character.splat {
 					flag = true;
 
 					coll = coll.width(Length::FillPortion(4)).spacing(1);
@@ -361,8 +370,8 @@ where
 						coll = coll.push(
 							column![text_input(
 								"",
-								data.touchstones.get(i).unwrap_or(&String::new()),
-								|val| Event::Msg,
+								character.touchstones.get(i).unwrap_or(&String::new()),
+								move |val| Event::TouchstoneChanged(i, val),
 							)]
 							.max_width(200),
 						);
@@ -399,13 +408,33 @@ where
 
 			let mut col = Column::new().align_items(Alignment::Center);
 
-			// match character.splat {
-			// 	// Splat::Vampire(_, _, _, _) => todo!(),
-			// 	Splat::Werewolf(_, _, _, _) => todo!(),
-			// 	_ => ,
-			// }
+			if let Splat::Werewolf(_, _, _, _) = character.splat {
+				col = col
+					.push(
+						text(fl(character.splat.name(), Some("flesh-touchstone")).unwrap())
+							.size(H3_SIZE),
+					)
+					.push(text_input(
+						"",
+						character.touchstones.get(0).unwrap_or(&String::new()),
+						|str| Event::TouchstoneChanged(0, str),
+					));
+			}
 
 			col = col.push(label).push(dots);
+
+			if let Splat::Werewolf(_, _, _, _) = character.splat {
+				col = col
+					.push(
+						text(fl(character.splat.name(), Some("spirit-touchstone")).unwrap())
+							.size(H3_SIZE),
+					)
+					.push(text_input(
+						"",
+						character.touchstones.get(1).unwrap_or(&String::new()),
+						|str| Event::TouchstoneChanged(1, str),
+					));
+			}
 
 			col
 		};
