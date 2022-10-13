@@ -132,7 +132,7 @@ where
 				// 	match (xsplat, &character.splat) {
 				// 		(XSplat::Vampire(_), Splat::Vampire(_, _, _, _))
 				// 		| (XSplat::Werewolf(_), Splat::Werewolf(_, _, _, _))
-				// 		| (XSplat::Mage(_), Splat::Mage(_, _, _))
+				// 		| (XSplat::Mage(_), Splat::Mage(_, _, _, _))
 				// 		| (XSplat::Changeling(_), Splat::Changeling(_, _, _, _)) => Some(xsplat.clone()),
 				// 		_ => None,
 				// 	}

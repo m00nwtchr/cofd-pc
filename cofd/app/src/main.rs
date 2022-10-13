@@ -376,13 +376,6 @@ impl Application for PlayerCompanionApp {
 				character,
 			} => container(view::overview_tab(character.clone(), Message::Previous)).into(),
 		}
-		// Tabs::new(self.active_tab, Message::TabSelected)
-		// .push(
-		// 	TabLabel::Text(String::from("Overview")),
-		// 	self.overview_tab(),
-		// )
-		// .push(TabLabel::Text("UwU".to_string()), self.overview_tab())
-		// .into()
 	}
 }
 

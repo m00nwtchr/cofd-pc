@@ -90,7 +90,7 @@ where
 		vec.push(Merit::_Custom(String::from("--- Social Merits ---")));
 		vec.extend(Merit::social());
 
-		vec.push(Merit::_Custom(format!("--- Vampire Merits ---")));
+		vec.push(Merit::_Custom(format!("--- {{}} Merits ---"))); // TODO: Splat Name
 		vec.extend(Merit::get(self.splat));
 
 		vec.push(Merit::custom(String::from("Custom")));
