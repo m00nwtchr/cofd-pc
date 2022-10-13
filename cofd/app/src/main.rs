@@ -154,17 +154,17 @@ impl Application for PlayerCompanionApp {
 			.with_specialties(Skill::Streetwise, vec![String::from("Rumours")])
 			.with_specialties(Skill::Subterfuge, vec![String::from("Detecting Lies")])
 			.with_abilities([
-				(Ability::Discipline(Discipline::Animalism), 1),
-				(Ability::Discipline(Discipline::Dominate), 2),
+				(Discipline::Animalism.into(), 1),
+				(Discipline::Dominate.into(), 2),
 				(
-					Ability::Discipline(Discipline::_Custom("Coil of the Voivode".to_string())),
+					Discipline::_Custom("Coil of the Voivode".to_string()).into(),
 					2,
 				),
 			])
 			.with_merits([
 				(Merit::Status("Ordo Dracul".to_string()), 1),
 				(Merit::Status("City".to_string()), 1),
-				(Merit::Vampire(VampireMerit::CacophonySavvy), 3),
+				(VampireMerit::CacophonySavvy.into(), 3),
 				(Merit::FastTalking, 1),
 				(
 					Merit::ProfessionalTraining(
@@ -177,7 +177,7 @@ impl Application for PlayerCompanionApp {
 				// AbilityVal(Ability::Merit(Merit::Contacts(String::new())), 2),
 				(Merit::SafePlace(String::new()), 3),
 				(Merit::Resources, 3),
-				(Merit::Vampire(VampireMerit::NestGuardian), 1),
+				(VampireMerit::NestGuardian.into(), 1),
 			])
 			.build();
 
@@ -220,22 +220,16 @@ impl Application for PlayerCompanionApp {
 			.with_specialties(Skill::Brawl, vec![String::from("Claws")])
 			.with_specialties(Skill::Stealth, vec![String::from("Stalking")])
 			.with_specialties(Skill::Intimidation, vec![String::from("Direct Threats")])
-			.with_abilities([
-				(Ability::Renown(Renown::Glory), 1),
-				(Ability::Renown(Renown::Purity), 3),
-			])
+			.with_abilities([(Renown::Glory.into(), 1), (Renown::Purity.into(), 3)])
 			.with_merits([
 				(Merit::Giant, 3),
 				(Merit::TrainedObserver, 1),
 				(Merit::DefensiveCombat(true, Some(Skill::Brawl)), 1),
-				(
-					Merit::Werewolf(WerewolfMerit::FavoredForm(Some(Form::Gauru))),
-					2,
-				),
-				(Merit::Werewolf(WerewolfMerit::EfficientKiller), 2),
+				(WerewolfMerit::FavoredForm(Some(Form::Gauru)).into(), 2),
+				(WerewolfMerit::EfficientKiller.into(), 2),
 				(Merit::RelentlessAssault, 2),
 				(Merit::Language("First Tongue".to_owned()), 1),
-				(Merit::Werewolf(WerewolfMerit::Totem), 1),
+				(WerewolfMerit::Totem.into(), 1),
 			])
 			.build();
 
@@ -292,13 +286,13 @@ impl Application for PlayerCompanionApp {
 			.with_specialties(Skill::Investigation, vec![String::from("Riddles")])
 			.with_specialties(Skill::Science, vec![String::from("Astronomy")])
 			.with_abilities([
-				(Ability::Arcanum(Arcanum::Mind), 1),
-				(Ability::Arcanum(Arcanum::Prime), 2),
-				(Ability::Arcanum(Arcanum::Space), 3),
+				(Arcanum::Mind.into(), 1),
+				(Arcanum::Prime.into(), 2),
+				(Arcanum::Space.into(), 3),
 			])
 			.with_merits([
 				(Merit::Status("Mysterium".to_string()), 1),
-				(Merit::Mage(MageMerit::HighSpeech), 1),
+				(MageMerit::HighSpeech.into(), 1),
 				(
 					Merit::ProfessionalTraining(
 						"e".to_owned(),
@@ -308,8 +302,8 @@ impl Application for PlayerCompanionApp {
 					3,
 				),
 				(Merit::TrainedObserver, 1),
-				// AbilityVal(Ability::Merit(Merit::ProfessionalTraining("e".to_owned(), Some([Skill::Investigation, Skill::Science]), None)), 3),
-				// AbilityVal(Ability::Merit(Merit::ProfessionalTraining("e".to_owned(), Some([Skill::Investigation, Skill::Science]), None)), 3),
+				//
+				//
 			])
 			.build();
 
