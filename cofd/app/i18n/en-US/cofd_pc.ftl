@@ -97,6 +97,8 @@ vampire = Vampire
     .vitae = Vitae
     .humanity = Humanity
 
+    .banes = Banes
+
     .animalism = Animalism
     .auspex = Auspex
     .celerity = Celerity

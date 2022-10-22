@@ -6,6 +6,7 @@ use super::{ability::Ability, Merit, XSplat, YSplat};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct VampireData {
+	pub banes: Vec<String>
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]

@@ -235,7 +235,6 @@ impl MoonGift {
 		match self {
 			// MoonGift::Crescent => vec![],
 			MoonGift::Full => {
-				println!("Full {}", value);
 				if value > 2 {
 					vec![Modifier::new(
 						ModifierTarget::Trait(Trait::Health),
