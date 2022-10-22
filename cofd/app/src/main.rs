@@ -59,6 +59,8 @@ struct PlayerCompanionApp {
 const H2_SIZE: u16 = 25;
 const H3_SIZE: u16 = 20;
 
+const MAX_INPUT_WIDTH: u32 = 200;
+
 // const LANGS: [Locale; 4] = [
 // 	Locale::System,
 // 	Locale::Lang(langid!("en-GB")),
@@ -98,7 +100,7 @@ impl Application for PlayerCompanionApp {
 			Self {
 				state: State::CharacterList,
 				prev_state: Default::default(),
-				characters: sample::characters()
+				characters: demo::characters()
 					.map(|f| Rc::new(RefCell::new(f)))
 					.into(),
 				// custom_xsplats: vec![
@@ -181,8 +183,8 @@ fn main() -> iced::Result {
 	})
 }
 
-// TODO: Add sample mortal.
-mod sample {
+// TODO: Add demo mortal.
+mod demo {
 	use cofd::{
 		character::CharacterInfo,
 		prelude::*,

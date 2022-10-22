@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, marker::PhantomData};
+use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use iced::{
 	widget::{column, pick_list, row, text, text_input, Column},
@@ -26,6 +26,7 @@ use crate::{
 	widget::{self, dots::Shape, dots::SheetDots, track::HealthTrack},
 	H2_SIZE,
 	H3_SIZE,
+	MAX_INPUT_WIDTH,
 };
 
 pub struct OverviewTab<Message> {
@@ -53,6 +54,7 @@ pub enum Event {
 	TouchstoneChanged(usize, String),
 
 	RegaliaChanged(Regalia),
+	FrailtyChanged(usize, String),
 
 	Msg,
 }
@@ -226,7 +228,7 @@ where
 			Event::TraitChanged(val, _trait) => match _trait {
 				Trait::Size => {
 					character.base_size =
-						(val as i16 - character._mod(ModifierTarget::Trait(Trait::Size))) as u16
+						(val as i16 - character._mod(ModifierTarget::Trait(Trait::Size))) as u16;
 				}
 				Trait::Willpower => character.willpower = val as u16,
 				Trait::Power => character.power = val as u16,
@@ -262,6 +264,16 @@ where
 				} else {
 					character.touchstones.resize(i + 1, String::new());
 					*character.touchstones.get_mut(i).unwrap() = str;
+				}
+			}
+			Event::FrailtyChanged(i, str) => {
+				if let Splat::Changeling(_, _, _, data) = &mut character.splat {
+					if let Some(frailty) = data.frailties.get_mut(i) {
+						*frailty = str;
+					} else {
+						data.frailties.resize(i + 1, String::new());
+						*data.frailties.get_mut(i).unwrap() = str;
+					}
 				}
 			}
 		}
@@ -366,7 +378,7 @@ where
 								character.touchstones.get(i).unwrap_or(&String::new()),
 								move |val| Event::TouchstoneChanged(i, val),
 							)]
-							.max_width(200),
+							.max_width(MAX_INPUT_WIDTH),
 						);
 					}
 				}
@@ -407,26 +419,48 @@ where
 						text(fl(character.splat.name(), Some("flesh-touchstone")).unwrap())
 							.size(H3_SIZE),
 					)
-					.push(text_input(
-						"",
-						character.touchstones.get(0).unwrap_or(&String::new()),
-						|str| Event::TouchstoneChanged(0, str),
-					));
+					.push(
+						column![text_input(
+							"",
+							character.touchstones.get(0).unwrap_or(&String::new()),
+							|str| Event::TouchstoneChanged(0, str),
+						)]
+						.max_width(MAX_INPUT_WIDTH),
+					);
 			}
 
 			col = col.push(label).push(dots);
 
-			if let Splat::Werewolf(_, _, _, _) = character.splat {
-				col = col
-					.push(
-						text(fl(character.splat.name(), Some("spirit-touchstone")).unwrap())
-							.size(H3_SIZE),
-					)
-					.push(text_input(
-						"",
-						character.touchstones.get(1).unwrap_or(&String::new()),
-						|str| Event::TouchstoneChanged(1, str),
-					));
+			match character.splat {
+				Splat::Werewolf(_, _, _, _) => {
+					col = col
+						.push(
+							text(fl(character.splat.name(), Some("spirit-touchstone")).unwrap())
+								.size(H3_SIZE),
+						)
+						.push(
+							column![text_input(
+								"",
+								character.touchstones.get(1).unwrap_or(&String::new()),
+								|str| Event::TouchstoneChanged(1, str),
+							)]
+							.max_width(MAX_INPUT_WIDTH),
+						);
+				}
+				Splat::Changeling(_, _, _, _) => {
+					col = col.push(text(fl!("touchstones")).size(H3_SIZE));
+					for i in 0..10 {
+						col = col.push(
+							column![text_input(
+								"",
+								character.touchstones.get(i).unwrap_or(&String::new()),
+								move |val| Event::TouchstoneChanged(i, val),
+							)]
+							.max_width(MAX_INPUT_WIDTH),
+						);
+					}
+				}
+				_ => (),
 			}
 
 			col
@@ -438,70 +472,91 @@ where
 
 		match &character.splat {
 			Splat::Mortal => {}
-			Splat::Changeling(seeming, _, _, data) => {
-				let sg = seeming.get_favored_regalia();
-				let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
+			Splat::Changeling(_, _, _, _) => {}
+			_ => {
+				col1 = col1.push(self.abilities(&character));
+			}
+		}
 
-				let seeming_regalia = text(fl(character.splat.name(), Some(sg.name())).unwrap());
-				// if let Seeming::_Custom(_, sg) = seeming {
-				// 	let reg: Vec<Regalia> = all_regalia
-				// 		.iter()
-				// 		.cloned()
-				// 		.filter(|reg| {
-				// 			if let Some(regalia) = &data.regalia {
-				// 				*reg != *regalia
-				// 			} else {
-				// 				true
-				// 			}
-				// 		})
-				// 		.collect();
+		col1 = col1.push(merit_component(
+			character.splat._type(),
+			character.merits.clone(),
+			Event::MeritChanged,
+		));
 
-				// 	pick_list(reg, Some(sg.clone()), |val| {
-				// 		Event::RegaliaChanged(val, true)
-				// 	})
-				// 	.into()
-				// } else {
-				// text(fl(character.splat.name(), Some(sg.name()))).into()
-				// };
+		if let Splat::Changeling(seeming, _, _, data) = &character.splat {
+			let sg = seeming.get_favored_regalia();
+			let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
 
-				let regalia: Element<Event, Renderer> =
-					if let Some(Regalia::_Custom(name)) = &data.regalia {
-						text_input("", name, |val| Event::RegaliaChanged(Regalia::_Custom(val)))
-							.width(Length::Fill)
-							.into()
-					} else {
-						let reg: Vec<Regalia> = all_regalia
-							.iter()
-							.cloned()
-							.filter(|reg| reg != sg)
-							.collect();
+			let seeming_regalia = text(fl(character.splat.name(), Some(sg.name())).unwrap());
+			// if let Seeming::_Custom(_, sg) = seeming {
+			// 	let reg: Vec<Regalia> = all_regalia
+			// 		.iter()
+			// 		.cloned()
+			// 		.filter(|reg| {
+			// 			if let Some(regalia) = &data.regalia {
+			// 				*reg != *regalia
+			// 			} else {
+			// 				true
+			// 			}
+			// 		})
+			// 		.collect();
 
-						pick_list(reg, data.regalia.clone(), Event::RegaliaChanged)
-							.width(Length::Fill)
-							.into()
-					};
+			// 	pick_list(reg, Some(sg.clone()), |val| {
+			// 		Event::RegaliaChanged(val, true)
+			// 	})
+			// 	.into()
+			// } else {
+			// text(fl(character.splat.name(), Some(sg.name()))).into()
+			// };
 
-				col1 = col1.push(
+			let regalia: Element<Event, Renderer> =
+				if let Some(Regalia::_Custom(name)) = &data.regalia {
+					text_input("", name, |val| Event::RegaliaChanged(Regalia::_Custom(val)))
+						.width(Length::Fill)
+						.into()
+				} else {
+					let reg: Vec<Regalia> = all_regalia
+						.iter()
+						.cloned()
+						.filter(|reg| reg != sg)
+						.collect();
+
+					pick_list(reg, data.regalia.clone(), Event::RegaliaChanged)
+						.width(Length::Fill)
+						.into()
+				};
+
+			let mut frailties = Column::new().width(Length::Fill);
+
+			for i in 0..4 {
+				frailties = frailties.push(column![text_input(
+					"",
+					data.frailties.get(i).unwrap_or(&String::new()),
+					move |val| Event::FrailtyChanged(i, val),
+				)]);
+			}
+
+			col1 = col1
+				.push(
 					column![
 						text(fl!("favored-regalia")).size(H3_SIZE),
 						column![seeming_regalia, regalia].width(Length::Fill)
 					]
 					.align_items(Alignment::Center)
 					.width(Length::Fill),
+				)
+				.push(
+					column![
+						text(fl("changeling", Some("frailties")).unwrap()).size(H3_SIZE),
+						frailties
+					]
+					.align_items(Alignment::Center)
+					.width(Length::Fill),
 				);
-			}
-			_ => {
-				col1 = col1.push(self.abilities(&character));
-			}
 		}
 
-		col1 = col1
-			.push(merit_component(
-				character.splat._type(),
-				character.merits.clone(),
-				Event::MeritChanged,
-			))
-			.push(traits_component(&character, Event::TraitChanged));
+		col1 = col1.push(traits_component(&character, Event::TraitChanged));
 
 		// let margin_col = || Column::new();
 
@@ -527,7 +582,7 @@ where
 				]
 				.align_items(Alignment::Center)
 				.padding(15)
-				.width(Length::FillPortion(3))
+				.width(Length::FillPortion(2))
 			],
 			// pick_list(
 			// 	Vec::from(LANGS),

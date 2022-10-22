@@ -9,6 +9,7 @@ use super::{Merit, XSplat, YSplat};
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ChangelingData {
 	pub regalia: Option<Regalia>,
+	pub frailties: Vec<String>,
 	pub clarity: Damage,
 }
 

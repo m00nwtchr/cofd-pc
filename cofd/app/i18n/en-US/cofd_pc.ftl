@@ -67,6 +67,8 @@ group_name = Group Name
 health = Health
 willpower = Willpower
 
+touchstones = Touchstones
+
 size = Size
 speed = Speed
 defense = Defense
@@ -211,6 +213,7 @@ changeling = Changeling
     .kith = Kith
 
     .regalia = Regalia
+    .frailties = Frailties
 
     .wyrd = Wyrd
     .glamour = Glamour
