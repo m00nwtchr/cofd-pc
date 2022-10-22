@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::character::{Character, Damage};
 
-use super::{XSplat, YSplat};
+use super::{Merit, XSplat, YSplat};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ChangelingData {
@@ -161,5 +161,20 @@ impl Regalia {
 impl Display for Regalia {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		f.write_str(self.name())
+	}
+}
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+pub enum ChangelingMerit {}
+
+impl ChangelingMerit {
+	pub fn all() -> Vec<ChangelingMerit> {
+		vec![]
+	}
+}
+
+impl From<ChangelingMerit> for Merit {
+	fn from(merit: ChangelingMerit) -> Self {
+		Merit::Changeling(merit)
 	}
 }

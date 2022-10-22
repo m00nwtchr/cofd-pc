@@ -517,6 +517,7 @@ pub enum Merit {
 	Mage(MageMerit),
 	Vampire(VampireMerit),
 	Werewolf(WerewolfMerit),
+	Changeling(ChangelingMerit),
 
 	_Custom(String),
 }
@@ -698,7 +699,7 @@ impl Merit {
 			SplatType::Vampire => VampireMerit::all().into_iter().map(Into::into).collect(),
 			SplatType::Werewolf => WerewolfMerit::all().into_iter().map(Into::into).collect(),
 			SplatType::Mage => MageMerit::all().into_iter().map(Into::into).collect(),
-			SplatType::Changeling => Merit::all(),
+			SplatType::Changeling => ChangelingMerit::all().into_iter().map(Into::into).collect(),
 		}
 	}
 

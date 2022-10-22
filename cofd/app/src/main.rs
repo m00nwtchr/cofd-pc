@@ -11,18 +11,16 @@
 	clippy::default_trait_access
 )]
 
-#[cfg(target_arch = "wasm32")]
-use log::Level;
 use std::{cell::RefCell, mem, rc::Rc};
 
 use iced::{
 	executor,
-	widget::{button, container, row, text, Column},
-	Application, Command, Element, Length, Settings, Theme,
+	widget::{button, row, Column},
+	Application, Command, Element, Settings, Theme,
 };
-use iced_aw::{TabLabel, Tabs};
 
-// use i18n_embed::LanguageRequester;
+#[cfg(target_arch = "wasm32")]
+use log::Level;
 
 use cofd::prelude::*;
 
@@ -98,15 +96,11 @@ impl Application for PlayerCompanionApp {
 
 		(
 			Self {
-				// active_tab: 0,
-				// character: Rc::new(RefCell::new(character)),
 				state: State::CharacterList,
 				prev_state: Default::default(),
 				characters: sample::characters()
 					.map(|f| Rc::new(RefCell::new(f)))
 					.into(),
-				// locale: Default::default(), // lang_loader,
-				// language_requester,
 				// custom_xsplats: vec![
 				// 	// My OC (Original Clan) (Do Not Steal)
 				// 	// XSplat::Vampire(Clan::_Custom(
@@ -187,6 +181,7 @@ fn main() -> iced::Result {
 	})
 }
 
+// TODO: Add sample mortal.
 mod sample {
 	use cofd::{
 		character::CharacterInfo,
