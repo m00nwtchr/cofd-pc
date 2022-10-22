@@ -24,18 +24,7 @@ use iced_aw::{TabLabel, Tabs};
 
 // use i18n_embed::LanguageRequester;
 
-use cofd::{
-	character::CharacterInfo,
-	prelude::*,
-	splat::{
-		ability::{Ability, AbilityVal},
-		changeling::{Court, Seeming},
-		mage::{Arcanum, MageData, MageMerit, Order, Path},
-		vampire::{Bloodline, Clan, Covenant, Discipline, VampireMerit},
-		werewolf::{Auspice, Form, Renown, Tribe, WerewolfMerit},
-		Merit, Splat,
-	},
-};
+use cofd::prelude::*;
 
 mod component;
 mod i18n;
@@ -104,10 +93,109 @@ impl Application for PlayerCompanionApp {
 	type Message = Message;
 	type Theme = Theme;
 
-	#[allow(clippy::too_many_lines)]
 	fn new(_flags: ()) -> (Self, Command<Self::Message>) {
 		let _language_requester = i18n::setup();
 
+		(
+			Self {
+				// active_tab: 0,
+				// character: Rc::new(RefCell::new(character)),
+				state: State::CharacterList,
+				prev_state: Default::default(),
+				characters: sample::characters()
+					.map(|f| Rc::new(RefCell::new(f)))
+					.into(),
+				// locale: Default::default(), // lang_loader,
+				// language_requester,
+				// custom_xsplats: vec![
+				// 	// My OC (Original Clan) (Do Not Steal)
+				// 	// XSplat::Vampire(Clan::_Custom(
+				// 	// 	"Blorbo".to_owned(),
+				// 	// 	[
+				// 	// 		Discipline::Majesty,
+				// 	// 		Discipline::Dominate,
+				// 	// 		Discipline::Auspex,
+				// 	// 	],
+				// 	// 	[Attribute::Intelligence, Attribute::Presence],
+				// 	// )),
+				// ],
+			},
+			Command::none(),
+		)
+	}
+
+	fn title(&self) -> String {
+		fl!("app-name")
+	}
+
+	fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
+		match message {
+			Message::TabSelected(tab) => {
+				if let State::Sheet { active_tab, .. } = &mut self.state {
+					*active_tab = tab;
+				}
+			}
+			Message::PickCharacter(i) => {
+				self.next(State::Sheet {
+					active_tab: Tab::Overview,
+					character: self.characters.get(i).unwrap().clone(),
+				});
+			}
+			Message::Previous => self.prev(),
+		}
+
+		Command::none()
+	}
+
+	fn view(&self) -> Element<Self::Message> {
+		// view::overview_tab(character.clone(), Message::Previous)
+		match &self.state {
+			State::CharacterList => {
+				view::character_list(self.characters.clone(), Message::PickCharacter).into()
+			}
+			State::Sheet {
+				active_tab,
+				character,
+			} => {
+				let tab: Element<Self::Message> = match active_tab {
+					Tab::Overview => view::overview_tab(character.clone()).into(),
+					Tab::Equipment => view::equipment_tab(character.clone()).into(),
+				};
+
+				Column::new()
+					.push(row![
+						button("Back").on_press(Message::Previous),
+						button("Home").on_press(Message::TabSelected(Tab::Overview)),
+						button("Equipment").on_press(Message::TabSelected(Tab::Equipment))
+					])
+					.spacing(1)
+					.push(tab)
+					.into()
+			}
+		}
+	}
+}
+
+fn main() -> iced::Result {
+	#[cfg(not(target_arch = "wasm32"))]
+	env_logger::init();
+	#[cfg(target_arch = "wasm32")]
+	console_log::init_with_level(Level::Info);
+
+	PlayerCompanionApp::run(Settings {
+		..Default::default()
+	})
+}
+
+mod sample {
+	use cofd::{
+		character::CharacterInfo,
+		prelude::*,
+		splat::{changeling::*, mage::*, vampire::*, werewolf::*, Merit, Splat},
+	};
+
+	#[allow(clippy::too_many_lines)]
+	pub fn characters() -> [Character; 4] {
 		let vampire_character = Character::builder()
 			.with_splat(Splat::Vampire(
 				Clan::Ventrue,
@@ -313,94 +401,42 @@ impl Application for PlayerCompanionApp {
 			])
 			.build();
 
-		(
-			Self {
-				// active_tab: 0,
-				// character: Rc::new(RefCell::new(character)),
-				state: State::CharacterList,
-				prev_state: Default::default(),
-				characters: vec![
-					Rc::new(RefCell::new(vampire_character)),
-					Rc::new(RefCell::new(werewolf_character)),
-					Rc::new(RefCell::new(mage_character)),
-				],
-				// locale: Default::default(), // lang_loader,
-				// language_requester,
-				// custom_xsplats: vec![
-				// 	// My OC (Original Clan) (Do Not Steal)
-				// 	// XSplat::Vampire(Clan::_Custom(
-				// 	// 	"Blorbo".to_owned(),
-				// 	// 	[
-				// 	// 		Discipline::Majesty,
-				// 	// 		Discipline::Dominate,
-				// 	// 		Discipline::Auspex,
-				// 	// 	],
-				// 	// 	[Attribute::Intelligence, Attribute::Presence],
-				// 	// )),
-				// ],
-			},
-			Command::none(),
-		)
+		let changeling_character = Character::builder()
+			.with_splat(Splat::Changeling(
+				Seeming::Wizened,
+				Some(Court::Autumn),
+				None,
+				ChangelingData {
+					regalia: Some(Regalia::Crown),
+					..Default::default()
+				},
+			))
+			.with_info(CharacterInfo {
+				// name: String::from("Darren Webb"),
+				player: String::from("m00n"),
+				// chronicle: String::from("Night Trains"),
+				// virtue_anchor: String::from("Scholar"),
+				// vice_anchor: String::from("Authoritarian"),
+				concept: String::from("Fae Magic Enthusiast"),
+				..Default::default()
+			})
+			.with_attributes(Attributes {
+				..Default::default()
+			})
+			.with_skills(Skills {
+				..Default::default()
+			})
+			// .with_specialties(Skill::Larceny, vec![String::from("Sleight of Hand")])
+			// .with_specialties(Skill::Streetwise, vec![String::from("Rumours")])
+			// .with_specialties(Skill::Subterfuge, vec![String::from("Detecting Lies")])
+			.with_merits([])
+			.build();
+
+		[
+			vampire_character,
+			mage_character,
+			werewolf_character,
+			changeling_character,
+		]
 	}
-
-	fn title(&self) -> String {
-		fl!("app-name")
-	}
-
-	fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
-		match message {
-			Message::TabSelected(tab) => {
-				if let State::Sheet { active_tab, .. } = &mut self.state {
-					*active_tab = tab;
-				}
-			}
-			Message::PickCharacter(i) => {
-				self.next(State::Sheet {
-					active_tab: Tab::Overview,
-					character: self.characters.get(i).unwrap().clone(),
-				});
-			}
-			Message::Previous => self.prev(),
-		}
-
-		Command::none()
-	}
-
-	fn view(&self) -> Element<Self::Message> {
-		// view::overview_tab(character.clone(), Message::Previous)
-		match &self.state {
-			State::CharacterList => {
-				view::character_list(self.characters.clone(), Message::PickCharacter).into()
-			}
-			State::Sheet {
-				active_tab,
-				character,
-			} => {
-				let tab: Element<Self::Message> = match active_tab {
-					Tab::Overview => view::overview_tab(character.clone()).into(),
-					Tab::Equipment => view::equipment_tab(character.clone()).into(),
-				};
-
-				Column::new()
-					.push(row![
-						button("Back").on_press(Message::Previous),
-						button("Home").on_press(Message::TabSelected(Tab::Overview)),
-						button("Equipment").on_press(Message::TabSelected(Tab::Equipment))
-					]).spacing(1)
-					.push(tab)
-					.into()
-			}
-		}
-	}
-}
-
-fn main() -> iced::Result {
-	#[cfg(not(target_arch = "wasm32"))]
-	env_logger::init();
-	#[cfg(target_arch = "wasm32")]
-	console_log::init_with_level(Level::Info);
-
-	PlayerCompanionApp::run(Settings {
-		..Default::default()
-	})
 }
