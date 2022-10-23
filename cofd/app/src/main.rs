@@ -15,14 +15,14 @@ use std::{cell::RefCell, mem, rc::Rc};
 
 use iced::{
 	executor,
-	widget::{button, row, Column},
+	widget::{button, row, Column, text},
 	Application, Command, Element, Settings, Theme,
 };
 
 #[cfg(target_arch = "wasm32")]
 use log::Level;
 
-use cofd::prelude::*;
+use cofd::{prelude::*, splat::Splat};
 
 mod component;
 mod i18n;
@@ -35,6 +35,8 @@ use i18n::fl;
 pub enum Tab {
 	Overview,
 	Equipment,
+
+	Forms,
 }
 
 // #[derive(Clone)]
@@ -73,6 +75,7 @@ enum Message {
 	TabSelected(Tab),
 	PickCharacter(usize),
 	Previous,
+	Msg,
 }
 
 impl PlayerCompanionApp {
@@ -100,9 +103,7 @@ impl Application for PlayerCompanionApp {
 			Self {
 				state: State::CharacterList,
 				prev_state: Default::default(),
-				characters: demo::characters()
-					.map(|f| Rc::new(RefCell::new(f)))
-					.into(),
+				characters: demo::characters().map(|f| Rc::new(RefCell::new(f))).into(),
 				// custom_xsplats: vec![
 				// 	// My OC (Original Clan) (Do Not Steal)
 				// 	// XSplat::Vampire(Clan::_Custom(
@@ -138,6 +139,7 @@ impl Application for PlayerCompanionApp {
 				});
 			}
 			Message::Previous => self.prev(),
+			Message::Msg => {},
 		}
 
 		Command::none()
@@ -153,20 +155,32 @@ impl Application for PlayerCompanionApp {
 				active_tab,
 				character,
 			} => {
+				let brw = character.borrow();
+
 				let tab: Element<Self::Message> = match active_tab {
 					Tab::Overview => view::overview_tab(character.clone()).into(),
 					Tab::Equipment => view::equipment_tab(character.clone()).into(),
+					Tab::Forms => {
+						if let Splat::Werewolf(_, _, _, _) = brw.splat {
+							view::werewolf::form_tab(character.clone(), Message::Msg).into()
+						} else {
+							unreachable!()
+						}
+					}
 				};
 
-				Column::new()
-					.push(row![
-						button("Back").on_press(Message::Previous),
-						button("Home").on_press(Message::TabSelected(Tab::Overview)),
-						button("Equipment").on_press(Message::TabSelected(Tab::Equipment))
-					])
-					.spacing(1)
-					.push(tab)
-					.into()
+				let mut row = row![
+					button("Back").on_press(Message::Previous),
+					button("Home").on_press(Message::TabSelected(Tab::Overview)),
+				];
+
+				if let Splat::Werewolf(_, _, _, data) = &brw.splat {
+					row = row.push(button("Forms").on_press(Message::TabSelected(Tab::Forms)));
+				}
+
+				row = row.push(button("Equipment").on_press(Message::TabSelected(Tab::Equipment)));
+
+				Column::new().push(row).spacing(1).push(tab).into()
 			}
 		}
 	}

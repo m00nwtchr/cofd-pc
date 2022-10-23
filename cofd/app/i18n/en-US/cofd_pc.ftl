@@ -180,7 +180,7 @@ werewolf = Werewolf
     .essence = Essence
     .harmony = Harmony
 
-    .flesh-touchstone = Flesh touchstone
+    .flesh-touchstone = Flesh Touchstone
     .spirit-touchstone = Spirit Touchstone
 
     .cunning = Cunning
@@ -205,6 +205,12 @@ werewolf = Werewolf
     .fire_touched = Fire-Touched
     .ivory_claws = Ivory Claws
     .predator_kings = Predator Kings
+
+    .hishu = Hishu
+    .dalu = Dalu
+    .gauru = Gauru
+    .urshul = Urshul
+    .urhan = Urhan
 
 changeling = Changeling
     .needle = Needle

@@ -308,6 +308,26 @@ pub enum Form {
 }
 
 impl Form {
+	pub fn all() -> [Form; 5] {
+		[
+			Self::Hishu,
+			Self::Dalu,
+			Self::Gauru,
+			Self::Urshul,
+			Self::Urhan,
+		]
+	}
+
+	pub fn name(&self) -> &str {
+		match self {
+			Form::Hishu => "hishu",
+			Form::Dalu => "dalu",
+			Form::Gauru => "gauru",
+			Form::Urshul => "urshul",
+			Form::Urhan => "urhan",
+		}
+	}
+
 	#[allow(clippy::too_many_lines)]
 	pub fn get_modifiers(&self) -> Vec<Modifier> {
 		match self {

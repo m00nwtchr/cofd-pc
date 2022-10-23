@@ -540,7 +540,7 @@ where
 							.into()
 					};
 
-				let mut frailties = Column::new().width(Length::Fill);
+				let mut frailties = Column::new().width(Length::Fill).spacing(1);
 
 				for i in 0..4 {
 					frailties = frailties.push(column![text_input(
@@ -569,7 +569,7 @@ where
 					);
 			}
 			Splat::Vampire(_, _, _, data) => {
-				let mut banes = Column::new().width(Length::Fill);
+				let mut banes = Column::new().width(Length::Fill).spacing(1);;
 
 				for i in 0..3 {
 					banes = banes.push(column![text_input(
