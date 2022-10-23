@@ -3,19 +3,21 @@ members = [ "cofd/*" ]
 resolver = "2"
 
 [profile.release]
-# # less code to include into binary
-# panic = 'abort'
-# # optimization over all codebase ( better optimization, slower build )
-# codegen-units = 1
-# # optimization for size ( more aggressive )
-# opt-level = 'z'
-# optimization for size
-# opt-level = 's'
-# link time optimization using using whole-program analysis
 lto = true
 
-[patch.'https://github.com/iced-rs/iced']
-iced = { git = "https://github.com/iced-rs/iced?rev=77c8380" }
-iced_native = { git = "https://github.com/iced-rs/iced?rev=77c8380" }
-iced_graphics = { git = "https://github.com/iced-rs/iced?rev=77c8380" }
-iced_style = { git = "https://github.com/iced-rs/iced?rev=77c8380" }
+[profile.release-web]
+inherits = "release"
+# less code to include into binary
+panic = 'abort'
+# optimization over all codebase ( better optimization, slower build )
+codegen-units = 1
+# optimization for size ( more aggressive )
+opt-level = 'z'
+# optimization for size
+# opt-level = 's'
+
+# [patch.'https://github.com/iced-rs/iced']
+# iced = { git = "https://github.com/iced-rs/iced?rev=8221794" }
+# iced_native = { git = "https://github.com/iced-rs/iced?rev=8221794" }
+# iced_graphics = { git = "https://github.com/iced-rs/iced?rev=8221794" }
+# iced_style = { git = "https://github.com/iced-rs/iced?rev=8221794" }
