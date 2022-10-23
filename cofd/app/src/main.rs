@@ -207,7 +207,9 @@ mod demo {
 	};
 
 	#[allow(clippy::too_many_lines)]
-	pub fn characters() -> [Character; 4] {
+	pub fn characters() -> [Character; 5] {
+		let character = Character::builder().build();
+
 		let vampire_character = Character::builder()
 			.with_splat(Splat::Vampire(
 				Clan::Ventrue,
@@ -444,7 +446,8 @@ mod demo {
 			.with_merits([])
 			.build();
 
-		[
+		[	
+			character,
 			vampire_character,
 			mage_character,
 			werewolf_character,

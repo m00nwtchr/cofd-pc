@@ -38,12 +38,12 @@ mod tests {
 				Some(Covenant::OrdoDracul),
 				Some(Bloodline::_Custom(
 					"Dragolescu".to_string(),
-					[
+					Some([
 						Discipline::Animalism,
 						Discipline::Dominate,
 						Discipline::Resilience,
 						Discipline::Auspex,
-					],
+					]),
 				)),
 				Default::default(),
 			))
