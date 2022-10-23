@@ -1,3 +1,5 @@
+// TODO: Implement wrapping (boxes-style)
+
 use iced::{
 	event, mouse, Alignment, Background, Color, Element, Event, Length, Point, Rectangle, Theme,
 };
@@ -147,8 +149,8 @@ where
 				// custom_style.background,
 				match wound {
 					Wound::None => Color::from_rgb(0.0, 1.0, 0.0),
-					Wound::Bashing => Color::from_rgb(0.0, 0.5, 0.0),
-					Wound::Lethal => Color::from_rgb(0.5, 0.4, 0.0),
+					Wound::Bashing => Color::from_rgb(1.0, 1.0, 0.0),
+					Wound::Lethal => Color::from_rgb(1.0, 0.8, 0.0),
 					Wound::Aggravated => Color::from_rgb(1.0, 0.0, 0.0),
 				},
 			);
