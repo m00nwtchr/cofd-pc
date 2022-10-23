@@ -93,7 +93,7 @@ where
 		vec.push(Merit::_Custom(format!("--- {{}} Merits ---"))); // TODO: Splat Name
 		vec.extend(Merit::get(self.splat));
 
-		vec.push(Merit::custom(String::from("Custom")));
+		vec.push(Merit::_Custom(String::from("Custom")));
 
 		let vec: Vec<Merit> = vec
 			.iter()

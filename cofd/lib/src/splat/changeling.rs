@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::character::{Character, Damage};
 
-use super::{Merit, XSplat, YSplat};
+use super::{Merit, XSplat, YSplat, ZSplat};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ChangelingData {
@@ -121,6 +121,48 @@ pub enum Kith {
 	Playmate,
 	Snowskin,
 	_Custom(String),
+}
+
+impl Kith {
+	pub fn name(&self) -> &str {
+		match self {
+			Self::Artist => "artist",
+			Self::BrightOne => "bright_one",
+			Self::Chatelane => "chatelane",
+			Self::Gristlegrinder => "gristlegrinder",
+			Self::Helldiver => "helldiver",
+			Self::Hunterheart => "hunterheart",
+			Self::Leechfinger => "leechfinger",
+			Self::Mirrorskin => "mirrorskin",
+			Self::Nightsinger => "nightsinger",
+			Self::Notary => "notary",
+			Self::Playmate => "playmate",
+			Self::Snowskin => "snowskin",
+			Self::_Custom(name) => name,
+		}
+	}
+
+	pub fn all() -> [Kith; 12] {
+		[
+			Self::Artist,
+			Self::BrightOne,
+			Self::Chatelane,
+			Self::Gristlegrinder,
+			Self::Helldiver,
+			Self::Hunterheart,
+			Self::Leechfinger,
+			Self::Mirrorskin,
+			Self::Nightsinger,
+			Self::Notary,
+			Self::Playmate,
+			Self::Snowskin,
+		]
+	}
+}
+impl From<Kith> for ZSplat {
+	fn from(kith: Kith) -> Self {
+		ZSplat::Changeling(kith)
+	}
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]

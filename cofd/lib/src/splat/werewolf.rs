@@ -4,7 +4,7 @@ use crate::character::{
 	Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait,
 };
 
-use super::{ability::Ability, Merit, XSplat, YSplat};
+use super::{ability::Ability, Merit, XSplat, YSplat, ZSplat};
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct WerewolfData {
@@ -176,6 +176,25 @@ impl From<Tribe> for YSplat {
 	}
 }
 
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub enum Lodge {
+	_Custom(String),
+}
+
+impl Lodge {
+	pub fn name(&self) -> &str {
+		match self {
+			Self::_Custom(name) => name,
+		}
+	}
+}
+
+impl From<Lodge> for ZSplat {
+	fn from(lodge: Lodge) -> Self {
+		ZSplat::Werewolf(lodge)
+	}
+}
+
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Renown {
 	Purity,
@@ -262,10 +281,6 @@ impl MoonGift {
 			MoonGift::New => "new",
 			MoonGift::_Custom(name) => name,
 		}
-	}
-
-	pub fn custom(str: String) -> MoonGift {
-		MoonGift::_Custom(str)
 	}
 }
 

@@ -2,11 +2,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Trait};
 
-use super::{ability::Ability, Merit, XSplat, YSplat};
+use super::{ability::Ability, Merit, XSplat, YSplat, ZSplat};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct VampireData {
-	pub banes: Vec<String>
+	pub banes: Vec<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
@@ -126,7 +126,20 @@ impl From<Covenant> for YSplat {
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Bloodline {
-	_Custom(String, [Discipline; 4]),
+	_Custom(String, Option<[Discipline; 4]>),
+}
+
+impl Bloodline {
+	pub fn name(&self) -> &str {
+		match self {
+			Bloodline::_Custom(name, _) => name,
+		}
+	}
+}
+impl From<Bloodline> for ZSplat {
+	fn from(bloodline: Bloodline) -> Self {
+		ZSplat::Vampire(bloodline)
+	}
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
@@ -174,10 +187,6 @@ impl Discipline {
 			Discipline::Vigor => "vigor",
 			Discipline::_Custom(name) => name,
 		}
-	}
-
-	pub fn custom(str: String) -> Discipline {
-		Discipline::_Custom(str)
 	}
 
 	#[warn(clippy::cast_possible_wrap)]

@@ -1,4 +1,5 @@
 #![feature(is_some_and)]
+#![feature(let_chains)]
 #![deny(clippy::pedantic)]
 #![allow(
 	clippy::must_use_candidate,
@@ -15,7 +16,7 @@ use std::{cell::RefCell, mem, rc::Rc};
 
 use iced::{
 	executor,
-	widget::{button, row, Column, text},
+	widget::{button, row, Column},
 	Application, Command, Element, Settings, Theme,
 };
 
@@ -213,12 +214,12 @@ mod demo {
 				Some(Covenant::OrdoDracul),
 				Some(Bloodline::_Custom(
 					"Dragolescu".to_string(),
-					[
+					Some([
 						Discipline::Animalism,
 						Discipline::Dominate,
 						Discipline::Resilience,
 						Discipline::Auspex,
-					],
+					]),
 				)),
 				Default::default(),
 			))

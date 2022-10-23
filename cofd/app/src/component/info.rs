@@ -10,7 +10,7 @@ use iced_native::Element;
 use cofd::{
 	character::InfoTrait,
 	prelude::Character,
-	splat::{Splat, XSplat, YSplat},
+	splat::{Splat, XSplat, YSplat, ZSplat},
 };
 
 use crate::{i18n::fl, widget};
@@ -33,6 +33,7 @@ pub enum Event {
 	InfoTraitChanged(String, InfoTrait),
 	XSplatChanged(XSplat),
 	YSplatChanged(YSplat),
+	ZSplatChanged(ZSplat),
 }
 
 impl<Message> InfoBar<Message> {
@@ -108,6 +109,13 @@ where
 			Event::InfoTraitChanged(val, _trait) => *character.info.get_mut(&_trait) = val,
 			Event::XSplatChanged(xsplat) => character.splat.set_xsplat(Some(xsplat)),
 			Event::YSplatChanged(ysplat) => character.splat.set_ysplat(Some(ysplat)),
+			Event::ZSplatChanged(zsplat) => {
+				if zsplat.name().eq("") {
+					character.splat.set_zsplat(None);
+				} else {
+					character.splat.set_zsplat(Some(zsplat));
+				}
+			}
 		}
 
 		Some((self.on_change)())
@@ -127,6 +135,7 @@ where
 			_ => {
 				let xsplats = XSplat::all(&character.splat._type());
 				let ysplats = YSplat::all(&character.splat._type());
+				let mut zsplats = ZSplat::all(&character.splat._type());
 
 				// xsplats.extend(self.custom_xsplats.iter().filter_map(|xsplat| {
 				// 	match (xsplat, &character.splat) {
@@ -137,6 +146,29 @@ where
 				// 		_ => None,
 				// 	}
 				// }));
+
+				if let Some(zsplat) = character.splat.custom_zsplat(String::from("Custom")) {
+					zsplats.push(zsplat);
+				}
+
+				let zsplat = character.splat.zsplat();
+
+				let zsplat: Element<Self::Event, Renderer> = if let Some(zsplat) = zsplat.clone() && zsplat.is_custom() {
+					text_input("", zsplat.name(), {
+						let zsplat = zsplat.clone();
+						move |val| {
+							let mut zsplat = zsplat.clone();
+							*zsplat.name_mut().unwrap() = val;
+							Event::ZSplatChanged(zsplat)
+						}
+					})
+					.into()
+				} else {
+					pick_list(zsplats, zsplat, Event::ZSplatChanged)
+						.padding(1)
+						.width(Length::Fill)
+						.into()
+				};
 
 				row![
 					column![
@@ -149,6 +181,11 @@ where
 							"{}:",
 							fl(character.splat.name(), Some(character.splat.ysplat_name()))
 								.unwrap()
+						)),
+						text(format!(
+							"{}:",
+							fl(character.splat.name(), Some(character.splat.zsplat_name()))
+								.unwrap()
 						))
 					]
 					.spacing(3),
@@ -158,7 +195,8 @@ where
 							.width(Length::Fill),
 						pick_list(ysplats, character.splat.ysplat(), Event::YSplatChanged)
 							.padding(1)
-							.width(Length::Fill)
+							.width(Length::Fill),
+						zsplat
 					]
 					.spacing(1)
 					.width(Length::Fill)

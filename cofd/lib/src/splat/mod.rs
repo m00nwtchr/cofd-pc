@@ -62,7 +62,7 @@ pub enum Splat {
 	// 	st = "blood_potency"
 	// )]
 	Vampire(Clan, Option<Covenant>, Option<Bloodline>, VampireData),
-	Werewolf(Option<Auspice>, Option<Tribe>, Option<String>, WerewolfData),
+	Werewolf(Option<Auspice>, Option<Tribe>, Option<Lodge>, WerewolfData),
 	Mage(Path, Option<Order>, Option<Legacy>, MageData), // TODO: Order = free occult dot, free order status, high speech merit
 	// Promethean,
 	Changeling(Seeming, Option<Court>, Option<Kith>, ChangelingData),
@@ -124,12 +124,12 @@ impl Splat {
 	}
 
 	pub fn xsplat(&self) -> Option<XSplat> {
-		match self.clone() {
+		match self {
 			Splat::Mortal => None,
-			Splat::Vampire(clan, _, _, _) => Some(clan.into()),
-			Splat::Werewolf(auspice, _, _, _) => auspice.map(Into::into),
-			Splat::Mage(path, _, _, _) => Some(path.into()),
-			Splat::Changeling(seeming, _, _, _) => Some(seeming.into()),
+			Splat::Vampire(clan, _, _, _) => Some(clan.clone().into()),
+			Splat::Werewolf(auspice, _, _, _) => auspice.clone().map(Into::into),
+			Splat::Mage(path, _, _, _) => Some(path.clone().into()),
+			Splat::Changeling(seeming, _, _, _) => Some(seeming.clone().into()),
 		}
 	}
 
@@ -176,12 +176,12 @@ impl Splat {
 	}
 
 	pub fn ysplat(&self) -> Option<YSplat> {
-		match self.clone() {
+		match self {
 			Splat::Mortal => None,
-			Splat::Vampire(_, covenant, _, _) => covenant.map(Into::into),
-			Splat::Werewolf(_, tribe, _, _) => tribe.map(Into::into),
-			Splat::Mage(_, order, _, _) => order.map(Into::into),
-			Splat::Changeling(_, court, _, _) => court.map(Into::into),
+			Splat::Vampire(_, covenant, _, _) => covenant.clone().map(Into::into),
+			Splat::Werewolf(_, tribe, _, _) => tribe.clone().map(Into::into),
+			Splat::Mage(_, order, _, _) => order.clone().map(Into::into),
+			Splat::Changeling(_, court, _, _) => court.clone().map(Into::into),
 		}
 	}
 
@@ -229,6 +229,60 @@ impl Splat {
 		}
 	}
 
+	pub fn zsplat(&self) -> Option<ZSplat> {
+		match self {
+			Splat::Mortal => None,
+			Splat::Vampire(_, _, bloodline, _) => bloodline.clone().map(Into::into),
+			Splat::Werewolf(_, _, lodge, _) => lodge.clone().map(Into::into),
+			Splat::Mage(_, _, legacy, _) => legacy.clone().map(Into::into),
+			Splat::Changeling(_, _, kith, _) => kith.clone().map(Into::into),
+		}
+	}
+
+	pub fn set_zsplat(&mut self, zsplat: Option<ZSplat>) {
+		match zsplat {
+			Some(zsplat) => match zsplat {
+				ZSplat::Vampire(bloodline) => {
+					if let Splat::Vampire(_, _, _bloodline, _) = self {
+						*_bloodline = Some(bloodline);
+					}
+				}
+				ZSplat::Werewolf(lodge) => {
+					if let Splat::Werewolf(_, _, _lodge, _) = self {
+						*_lodge = Some(lodge);
+					}
+				}
+				ZSplat::Mage(legacy) => {
+					if let Splat::Mage(_, _, _legacy, _) = self {
+						*_legacy = Some(legacy);
+					}
+				}
+				ZSplat::Changeling(kith) => {
+					if let Splat::Changeling(_, _, _kith, _) = self {
+						*_kith = Some(kith);
+					}
+				}
+			},
+			None => match self {
+				Splat::Mortal => {}
+				Splat::Vampire(_, _, bloodline, _) => *bloodline = None,
+				Splat::Werewolf(_, _, lodge, _) => *lodge = None,
+				Splat::Mage(_, _, legacy, _) => *legacy = None,
+				Splat::Changeling(_, _, kith, _) => *kith = None,
+			},
+		}
+	}
+
+	pub fn custom_zsplat(&self, name: String) -> Option<ZSplat> {
+		match self {
+			Splat::Mortal => None,
+			Splat::Vampire(_, _, _, _) => Some(Bloodline::_Custom(name, None).into()),
+			Splat::Werewolf(_, _, _, _) => Some(Lodge::_Custom(name).into()),
+			Splat::Mage(_, _, _, _) => Some(Legacy::_Custom(name, None).into()),
+			Splat::Changeling(_, _, _, _) => Some(Kith::_Custom(name).into()),
+		}
+	}
+
 	pub fn ability_name(&self) -> Option<&str> {
 		match self {
 			Splat::Mortal => None,
@@ -259,11 +313,11 @@ impl Splat {
 		}
 	}
 
-	pub fn custom_ability(&self, str: String) -> Option<Ability> {
+	pub fn custom_ability(&self, name: String) -> Option<Ability> {
 		match self {
 			Splat::Mortal => None,
-			Splat::Vampire(_, _, _, _) => Some(Ability::Discipline(Discipline::custom(str))),
-			Splat::Werewolf(_, _, _, _) => Some(Ability::MoonGift(MoonGift::custom(str))),
+			Splat::Vampire(_, _, _, _) => Some(Ability::Discipline(Discipline::_Custom(name))),
+			Splat::Werewolf(_, _, _, _) => Some(Ability::MoonGift(MoonGift::_Custom(name))),
 			Splat::Mage(_, _, _, _) => None,
 			Splat::Changeling(_, _, _, _) => None,
 		}
@@ -365,6 +419,58 @@ impl YSplat {
 }
 
 impl Display for YSplat {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str(self.name())
+	}
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ZSplat {
+	Vampire(Bloodline),
+	Werewolf(Lodge),
+	Mage(Legacy),
+	Changeling(Kith),
+}
+
+impl ZSplat {
+	pub fn name(&self) -> &str {
+		match self {
+			Self::Vampire(bloodline) => bloodline.name(),
+			Self::Werewolf(lodge) => lodge.name(),
+			Self::Mage(legacy) => legacy.name(),
+			Self::Changeling(kith) => kith.name(),
+		}
+	}
+
+	pub fn name_mut(&mut self) -> Option<&mut String> {
+		match self {
+			ZSplat::Vampire(Bloodline::_Custom(name, _))
+			| ZSplat::Werewolf(Lodge::_Custom(name))
+			| ZSplat::Mage(Legacy::_Custom(name, _))
+			| ZSplat::Changeling(Kith::_Custom(name)) => Some(name),
+			_ => None,
+		}
+	}
+
+	pub fn all(_type: &SplatType) -> Vec<ZSplat> {
+		match _type {
+			SplatType::Changeling => Kith::all().map(Into::into).to_vec(),
+			_ => vec![],
+		}
+	}
+
+	pub fn is_custom(&self) -> bool {
+		matches!(
+			self,
+			ZSplat::Vampire(Bloodline::_Custom(_, _))
+				| ZSplat::Werewolf(Lodge::_Custom(_))
+				| ZSplat::Mage(Legacy::_Custom(_, _))
+				| ZSplat::Changeling(Kith::_Custom(_))
+		)
+	}
+}
+
+impl Display for ZSplat {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		f.write_str(self.name())
 	}
@@ -701,10 +807,6 @@ impl Merit {
 			SplatType::Mage => MageMerit::all().into_iter().map(Into::into).collect(),
 			SplatType::Changeling => ChangelingMerit::all().into_iter().map(Into::into).collect(),
 		}
-	}
-
-	pub fn custom(str: String) -> Merit {
-		Merit::_Custom(str)
 	}
 
 	fn name(&self) -> &str {

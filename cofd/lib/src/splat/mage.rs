@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{character::Skill, prelude::Attribute};
 
-use super::{ability::Ability, Merit, XSplat, YSplat};
+use super::{ability::Ability, Merit, XSplat, YSplat, ZSplat};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MageData {
@@ -162,7 +162,20 @@ impl From<Order> for YSplat {
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Legacy {
-	_Custom(String, Arcanum),
+	_Custom(String, Option<Arcanum>),
+}
+
+impl Legacy {
+	pub fn name(&self) -> &str {
+		match self {
+			Self::_Custom(name, _) => name,
+		}
+	}
+}
+impl From<Legacy> for ZSplat {
+	fn from(legacy: Legacy) -> Self {
+		ZSplat::Mage(legacy)
+	}
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
