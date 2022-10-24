@@ -191,10 +191,12 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 						fl!("touchstones"),
 						10,
 						character.touchstones.clone() as Vec<String>,
-						|i, val: String| {
-							text_input("", &val, move |val| Event::TouchstoneChanged(i, val))
-								.padding(INPUT_PADDING)
-								.into()
+						|i, val| {
+							text_input("", &val.unwrap_or_default(), move |val| {
+								Event::TouchstoneChanged(i, val)
+							})
+							.padding(INPUT_PADDING)
+							.into()
 						},
 					)
 					.max_width(MAX_INPUT_WIDTH),

@@ -1,4 +1,4 @@
-use std::fmt::Display;
+
 
 use serde::{Deserialize, Serialize};
 
@@ -10,11 +10,13 @@ use crate::{
 use super::{Merit, NameKey, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(default)]
 pub struct ChangelingData {
 	pub attr_bonus: Option<Attribute>,
 	pub regalia: Option<Regalia>,
 	pub frailties: Vec<String>,
 	pub clarity: Damage,
+	pub contracts: Vec<Contract>,
 }
 
 impl ChangelingData {
@@ -233,9 +235,7 @@ impl ChangelingMerit {
 
 	pub fn is_available(&self, character: &Character) -> bool {
 		if let Splat::Changeling(_, _, _, _) = character.splat {
-			match self {
-				_ => true,
-			}
+			true
 		} else {
 			false
 		}
@@ -246,4 +246,16 @@ impl From<ChangelingMerit> for Merit {
 	fn from(merit: ChangelingMerit) -> Self {
 		Merit::Changeling(merit)
 	}
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct Contract {
+	pub name: String,
+	pub goblin: bool,
+	pub cost: String,
+	pub dice: String,
+	pub action: String,
+	pub duration: String,
+	pub loophole: String,
+	pub seeming_benefit: String,
 }

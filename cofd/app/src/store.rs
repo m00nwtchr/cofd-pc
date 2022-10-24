@@ -1,5 +1,6 @@
 #[cfg(not(target_arch = "wasm32"))]
 use directories::ProjectDirs;
+use ron::Options;
 #[cfg(not(target_arch = "wasm32"))]
 use std::{
 	fs::File,

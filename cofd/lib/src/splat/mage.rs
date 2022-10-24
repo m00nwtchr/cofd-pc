@@ -7,9 +7,10 @@ use crate::{
 
 use super::{ability::Ability, Merit, NameKey, Splat, XSplat, YSplat, ZSplat};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(default)]
 pub struct MageData {
-	pub attr_bonus: Attribute,
+	pub attr_bonus: Option<Attribute>,
 	pub obsessions: Vec<String>,
 	pub rotes: Vec<Rote>,
 }
@@ -251,9 +252,7 @@ impl MageMerit {
 
 	pub fn is_available(&self, character: &Character) -> bool {
 		if let Splat::Mage(_, _, _, _) = character.splat {
-			match self {
-				_ => true,
-			}
+			true
 		} else {
 			false
 		}

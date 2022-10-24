@@ -8,23 +8,25 @@ use iced::{
 use iced_lazy::Component;
 
 use cofd::{
-	character::{ModifierTarget, Trait},
-	prelude::*,
+	character::{ArmorStruct, ModifierTarget, Trait},
+	prelude::{Attribute, Character},
 	splat::{werewolf::Form, Splat},
 };
 
 use crate::{fl, Element, INPUT_PADDING};
 
-pub struct FormTab<Message> {
+pub struct FormsComponent<Message> {
 	character: Rc<RefCell<Character>>,
+	// on_change: Box<dyn Fn(u16, Trait) -> Message>,
 	on_change: Message,
 }
 
-pub fn form_tab<Message>(
+pub fn forms_component<Message>(
 	character: Rc<RefCell<Character>>,
+	// on_change: impl Fn(u16, Trait) -> Message + 'static,
 	on_change: Message,
-) -> FormTab<Message> {
-	FormTab::new(character, on_change)
+) -> FormsComponent<Message> {
+	FormsComponent::new(character, on_change)
 }
 
 #[derive(Clone)]
@@ -34,8 +36,8 @@ pub enum Event {
 	Msg,
 }
 
-impl<Message> FormTab<Message> {
-	pub fn new(character: Rc<RefCell<Character>>, on_change: Message) -> Self {
+impl<Message> FormsComponent<Message> {
+	fn new(character: Rc<RefCell<Character>>, on_change: Message) -> Self {
 		Self {
 			character,
 			on_change,
@@ -133,12 +135,8 @@ impl<Message> FormTab<Message> {
 	}
 }
 
-impl<Message> Component<Message, iced::Renderer> for FormTab<Message>
-where
-	Message: Clone,
-{
+impl<Message: Clone> Component<Message, iced::Renderer> for FormsComponent<Message> {
 	type State = ();
-
 	type Event = Event;
 
 	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
@@ -173,11 +171,11 @@ where
 	}
 }
 
-impl<'a, Message> From<FormTab<Message>> for Element<'a, Message>
+impl<'a, Message> From<FormsComponent<Message>> for Element<'a, Message>
 where
 	Message: 'a + Clone,
 {
-	fn from(form_tab: FormTab<Message>) -> Self {
-		iced_lazy::component(form_tab)
+	fn from(forms_component: FormsComponent<Message>) -> Self {
+		iced_lazy::component(forms_component)
 	}
 }

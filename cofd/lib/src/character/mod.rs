@@ -441,12 +441,14 @@ impl Character {
 					));
 				}
 
-				if data.attr_bonus.get_type() == AttributeType::Resistance {
-					modifiers.push(Modifier::new(
-						ModifierTarget::BaseAttribute(data.attr_bonus),
-						ModifierValue::Num(1),
-						ModifierOp::Add,
-					));
+				if let Some(attr_bonus) = data.attr_bonus {
+					if attr_bonus.get_type() == AttributeType::Resistance {
+						modifiers.push(Modifier::new(
+							ModifierTarget::BaseAttribute(attr_bonus),
+							ModifierValue::Num(1),
+							ModifierOp::Add,
+						));
+					}
 				}
 			}
 			Splat::Vampire(clan, _, _, data) => {

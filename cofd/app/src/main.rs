@@ -17,7 +17,7 @@ use std::{cell::RefCell, mem, rc::Rc};
 use iced::{
 	executor,
 	widget::{button, row, Column},
-	Application, Command, Settings, Theme,
+	Application, Color, Command, Settings, Theme,
 };
 
 #[cfg(target_arch = "wasm32")]
@@ -38,7 +38,7 @@ use store::Store;
 pub enum Tab {
 	Overview,
 	Equipment,
-	Forms,
+	// Forms,
 	SplatExtras,
 }
 
@@ -166,7 +166,9 @@ impl Application for PlayerCompanionApp {
 			// ],
 		};
 
-		self_.load();
+		if let Err(err) = self_.load() {
+			log::error!("{}", err);
+		}
 
 		(self_, Command::none())
 	}
@@ -217,13 +219,13 @@ impl Application for PlayerCompanionApp {
 				let tab: Element<Self::Message> = match active_tab {
 					Tab::Overview => view::overview_tab(character.clone()).into(),
 					Tab::Equipment => view::equipment_tab(character.clone()).into(),
-					Tab::Forms => {
-						if let Splat::Werewolf(_, _, _, _) = brw.splat {
-							view::werewolf::form_tab(character.clone(), Message::Msg).into()
-						} else {
-							unreachable!()
-						}
-					}
+					// Tab::Forms => {
+					// 	if let Splat::Werewolf(_, _, _, _) = brw.splat {
+					// 		view::werewolf::form_tab(character.clone(), Message::Msg).into()
+					// 	} else {
+					// 		unreachable!()
+					// 	}
+					// }
 					Tab::SplatExtras => view::splat_extras_tab(character.clone()).into(),
 				};
 
@@ -234,9 +236,9 @@ impl Application for PlayerCompanionApp {
 					button("Splat").on_press(Message::TabSelected(Tab::SplatExtras)),
 				];
 
-				if let Splat::Werewolf(_, _, _, data) = &brw.splat {
-					row = row.push(button("Forms").on_press(Message::TabSelected(Tab::Forms)));
-				}
+				// if let Splat::Werewolf(_, _, _, data) = &brw.splat {
+				// row = row.push(button("Forms").on_press(Message::TabSelected(Tab::Forms)));
+				// }
 
 				// row = row.push(button("Equipment").on_press(Message::TabSelected(Tab::Equipment)));
 
@@ -380,6 +382,14 @@ mod demo {
 				WerewolfData {
 					skill_bonus: Some(Skill::Brawl),
 					triggers: KuruthTriggers::Moon,
+					shadow_gifts: vec![
+						ShadowGift::Rage,     // Slaughterer (Purity)
+						ShadowGift::Strength, // Primal Strength (Purity)
+					],
+					wolf_gifts: vec![
+						WolfGift::Change, // Father's Form
+					],
+					rites: vec![Rite::SacredHunt],
 					..Default::default()
 				},
 			))
@@ -434,7 +444,7 @@ mod demo {
 				Some(Order::Mysterium),
 				None,
 				MageData {
-					attr_bonus: Attribute::Resolve,
+					attr_bonus: Some(Attribute::Resolve),
 					obsessions: vec!["Open the Gate".to_string()],
 					rotes: vec![
 						Rote {
@@ -535,6 +545,7 @@ mod demo {
 				ChangelingData {
 					attr_bonus: Some(Attribute::Dexterity),
 					regalia: Some(Regalia::Crown),
+					contracts: vec![Default::default()],
 					..Default::default()
 				},
 			))

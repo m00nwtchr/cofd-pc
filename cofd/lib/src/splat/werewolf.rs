@@ -1,5 +1,6 @@
-use std::fmt::Display;
+use std::{collections::HashMap};
 
+use convert_case::{Case, Casing};
 use serde::{Deserialize, Serialize};
 use serde_variant::to_variant_name;
 
@@ -54,7 +55,7 @@ impl NameKey for KuruthTriggers {
 		if let Some(name) = self.name() {
 			format!("kuruth-triggers.{}", name)
 		} else {
-			format!("custom")
+			"custom".to_string()
 		}
 	}
 }
@@ -133,12 +134,17 @@ impl KuruthTriggers {
 }
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(default)]
 pub struct WerewolfData {
 	pub skill_bonus: Option<Skill>,
 	pub form: Form,
 	// pub moon_gifts: BTreeMap<MoonGift, AbilityVal>,
 	pub triggers: KuruthTriggers,
 	pub hunters_aspect: Option<HuntersAspect>,
+	pub moon_gifts: HashMap<MoonGift, u16>,
+	pub shadow_gifts: Vec<ShadowGift>,
+	pub wolf_gifts: Vec<WolfGift>,
+	pub rites: Vec<Rite>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -555,6 +561,12 @@ impl MoonGift {
 	}
 }
 
+impl NameKey for MoonGift {
+	fn name_key(&self) -> String {
+		format!("moon-gifts.{}", self.name())
+	}
+}
+
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum ShadowGift {
 	Death,
@@ -582,12 +594,69 @@ pub enum ShadowGift {
 	_Custom(String),
 }
 
+impl ShadowGift {
+	pub fn all() -> [ShadowGift; 20] {
+		[
+			Self::Death,
+			Self::Dominance,
+			Self::Elemental,
+			Self::Evasion,
+			Self::Insight,
+			Self::Inspiration,
+			Self::Knowledge,
+			Self::Nature,
+			Self::Rage,
+			Self::Shaping,
+			Self::Stealth,
+			Self::Strength,
+			Self::Technology,
+			Self::Warding,
+			Self::Weather,
+			Self::Agony,
+			Self::Blood,
+			Self::Disease,
+			Self::Fervor,
+			Self::Hunger,
+		]
+	}
+
+	pub fn name(&self) -> String {
+		to_variant_name(self).unwrap().to_lowercase()
+	}
+}
+
+impl NameKey for ShadowGift {
+	fn name_key(&self) -> String {
+		format!("shadow-gifts.{}", self.name())
+	}
+}
+
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum WolfGift {
 	Change,
 	Hunting,
 	Pack,
 	_Custom(String),
+}
+
+impl WolfGift {
+	pub fn all() -> [WolfGift; 3] {
+		[Self::Change, Self::Hunting, Self::Pack]
+	}
+
+	pub fn name(&self) -> String {
+		if let Self::_Custom(name) = self {
+			name.clone()
+		} else {
+			to_variant_name(self).unwrap().to_lowercase()
+		}
+	}
+}
+
+impl NameKey for WolfGift {
+	fn name_key(&self) -> String {
+		format!("wolf-gifts.{}", self.name())
+	}
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -756,6 +825,28 @@ impl Form {
 	}
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub enum Rite {
+	SacredHunt,
+	_Custom(String),
+}
+
+impl Rite {
+	pub fn name(&self) -> String {
+		if let Rite::_Custom(name) = self {
+			name.clone()
+		} else {
+			to_variant_name(&self).unwrap().to_case(Case::Snake)
+		}
+	}
+}
+
+impl NameKey for Rite {
+	fn name_key(&self) -> String {
+		format!("werewolf.{}", self.name())
+	}
+}
+
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
 pub enum WerewolfMerit {
 	FavoredForm(Option<Form>),
@@ -770,9 +861,7 @@ impl WerewolfMerit {
 
 	pub fn is_available(&self, character: &crate::prelude::Character) -> bool {
 		if let Splat::Werewolf(_, _, _, _) = character.splat {
-			match self {
-				_ => true,
-			}
+			true
 		} else {
 			false
 		}

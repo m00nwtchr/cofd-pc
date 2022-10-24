@@ -959,7 +959,7 @@ impl Merit {
 			Merit::Mage(merit) => to_variant_name(merit).unwrap().to_case(Case::Snake),
 			Merit::Vampire(merit) => to_variant_name(merit).unwrap().to_case(Case::Snake),
 			Merit::Werewolf(merit) => to_variant_name(merit).unwrap().to_case(Case::Snake),
-			Merit::_Custom(name) => name.to_owned(),
+			Merit::_Custom(name) => name.clone(),
 			_ => to_variant_name(self).unwrap().to_case(Case::Snake),
 		}
 	}

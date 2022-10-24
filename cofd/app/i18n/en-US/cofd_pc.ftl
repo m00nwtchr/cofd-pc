@@ -184,9 +184,6 @@ werewolf = Werewolf
     .lodge = Lodge
 
     .renown = Renown
-    .moon_gifts = Moon Gifts
-    .shadow_gifts = Shadow Gifts
-    .wolf_gifts = Wolf Gifts
     
     .hunters_aspect = Hunter's Aspect
     
@@ -278,6 +275,15 @@ kuruth-triggers = Kuruth Triggers
     .wound-passive  = Being in the area of a Wound.
     .wound-common   = Interacting with a Wound-born spirit.
     .wound-specific = Being attacked by a Wound-born spirit.
+
+moon-gifts = Moon Gifts
+    .crescent = Crescent Moon's Gift
+    .full = Full Moon's Gift
+    .gibbous = Gibbous Moon's Gift
+    .new = New Moon's Gift
+shadow-gifts = Shadow Gifts
+wolf-gifts = Wolf Gifts
+rites = Rites
 
 changeling = Changeling
     .needle = Needle

@@ -5,6 +5,7 @@ use crate::character::{Attribute, Modifier, ModifierOp, ModifierTarget, Modifier
 use super::{ability::Ability, Merit, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[serde(default)]
 pub struct VampireData {
 	pub attr_bonus: Option<Attribute>,
 	pub banes: Vec<String>,
@@ -373,9 +374,7 @@ impl VampireMerit {
 
 	pub fn is_available(&self, character: &crate::prelude::Character) -> bool {
 		if let Splat::Vampire(_, _, _, _) = character.splat {
-			match self {
-				_ => true,
-			}
+			true
 		} else {
 			false
 		}
@@ -386,4 +385,14 @@ impl From<VampireMerit> for Merit {
 	fn from(merit: VampireMerit) -> Self {
 		Merit::Vampire(merit)
 	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct Devotion {
+	name: String,
+	cost: String,
+	disciplines: Vec<(Discipline, u16)>,
+	dice_pool: String,
+	book: String,
+	page: u16,
 }

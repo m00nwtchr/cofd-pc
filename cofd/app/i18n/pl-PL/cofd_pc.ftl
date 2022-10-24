@@ -159,9 +159,6 @@ werewolf = Wilkołak
     .lodge = Loża
 
     .renown = Renoma
-    .moon_gifts = Dary Księżyca
-    .shadow_gifts = Dary Cienia
-    .wolf_gifts = Dary Wilka
     
     .primal_urge = Pierwotny Instynkt
     .essence = Esencja
@@ -217,11 +214,17 @@ kuruth-triggers = Kuruth Triggers
     .wound-common   = Interakcja z duchem zrodzonym z Rany.
     .wound-specific = Bycie zaatakowanym przez ducha zrodzonego z Rany.
 
+moon-gifts = Dary Księżyca
+    .full = Dar Pełnego Księżyca
+
+shadow-gifts = Dary Cienia
+wolf-gifts = Dary Wilka
+
 changeling = Podmieńca
     .needle = Igła
     .thread = Nić
 
-    .seeming = Pozór    
+    .seeming = Pozór
     .court = Dwór
 
     .frailties = Słabości

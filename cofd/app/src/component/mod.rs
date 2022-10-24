@@ -5,6 +5,7 @@ mod list;
 mod merits;
 mod skills;
 mod traits;
+mod forms;
 
 pub use attributes::{attribute_bar, AttributeBar};
 pub use info::{info_bar, InfoBar};
@@ -13,3 +14,4 @@ pub use list::{list, List};
 pub use merits::{merit_component, MeritComponent};
 pub use skills::{skills_component, SkillsComponent};
 pub use traits::{traits_component, TraitsComponent};
+pub use forms::{forms_component, FormsComponent};

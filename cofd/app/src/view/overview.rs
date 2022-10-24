@@ -419,9 +419,11 @@ where
 			character.conditions.len() + 1,
 			character.conditions.clone(),
 			|i, val| {
-				text_input("", &val, move |val| Event::ConditionChanged(i, val))
-					.padding(INPUT_PADDING)
-					.into()
+				text_input("", &val.unwrap_or_default(), move |val| {
+					Event::ConditionChanged(i, val)
+				})
+				.padding(INPUT_PADDING)
+				.into()
 			},
 		);
 		// .max_width(MAX_INPUT_WIDTH);
@@ -431,9 +433,11 @@ where
 			character.aspirations.len() + 1,
 			character.aspirations.clone(),
 			|i, val| {
-				text_input("", &val, move |val| Event::AspirationChanged(i, val))
-					.padding(INPUT_PADDING)
-					.into()
+				text_input("", &val.unwrap_or_default(), move |val| {
+					Event::AspirationChanged(i, val)
+				})
+				.padding(INPUT_PADDING)
+				.into()
 			},
 		);
 		// .max_width(MAX_INPUT_WIDTH);
@@ -450,9 +454,11 @@ where
 				// 	_ => 1,
 				// },
 				data.obsessions.clone(),
-				|i, val| text_input("", &val, move |val| Event::SplatThingChanged(i, val))
-					.padding(INPUT_PADDING)
-					.into()
+				|i, val| text_input("", &val.unwrap_or_default(), move |val| {
+					Event::SplatThingChanged(i, val)
+				})
+				.padding(INPUT_PADDING)
+				.into()
 			)]
 			.max_width(MAX_INPUT_WIDTH)
 		} else {
@@ -574,9 +580,11 @@ where
 					3,
 					data.frailties.clone(),
 					|i, val| {
-						text_input("", &val, move |val| Event::SplatThingChanged(i, val))
-							.padding(INPUT_PADDING)
-							.into()
+						text_input("", &val.unwrap_or_default(), move |val| {
+							Event::SplatThingChanged(i, val)
+						})
+						.padding(INPUT_PADDING)
+						.into()
 					},
 				)
 				.into()
@@ -590,9 +598,11 @@ where
 				3,
 				data.banes.clone(),
 				|i, val| {
-					text_input("", &val, move |val| Event::SplatThingChanged(i, val))
-						.padding(INPUT_PADDING)
-						.into()
+					text_input("", &val.unwrap_or_default(), move |val| {
+						Event::SplatThingChanged(i, val)
+					})
+					.padding(INPUT_PADDING)
+					.into()
 				},
 			)
 			.into()

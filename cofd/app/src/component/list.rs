@@ -10,7 +10,7 @@ pub struct List<'a, T, Message> {
 	str: String,
 	min: usize,
 	vec: Vec<T>,
-	f: Box<dyn Fn(usize, T) -> Element<'a, Message>>,
+	f: Box<dyn Fn(usize, Option<T>) -> Element<'a, Message>>,
 	max_width: Option<u32>, // on_change: Box<dyn Fn(usize, T) -> Message>,
 }
 
@@ -18,7 +18,7 @@ pub fn list<'a, T, Message>(
 	str: String,
 	min: usize,
 	vec: Vec<T>,
-	f: impl Fn(usize, T) -> Element<'a, Message> + 'static,
+	f: impl Fn(usize, Option<T>) -> Element<'a, Message> + 'static,
 	// on_change: impl Fn(usize, T) -> Message + 'static,
 ) -> List<'a, T, Message> {
 	List::new(str, min, vec, f)
@@ -32,7 +32,7 @@ impl<'a, T, Message> List<'a, T, Message> {
 		str: String,
 		min: usize,
 		vec: Vec<T>,
-		f: impl Fn(usize, T) -> Element<'a, Message> + 'static,
+		f: impl Fn(usize, Option<T>) -> Element<'a, Message> + 'static,
 		// on_change: impl Fn(usize, T) -> Message + 'static,
 	) -> Self {
 		Self {
@@ -53,7 +53,7 @@ impl<'a, T, Message> List<'a, T, Message> {
 
 impl<'a, T, Message> Component<Message, iced::Renderer> for List<'a, T, Message>
 where
-	T: Clone + Default,
+	T: Clone,
 {
 	type State = ();
 	type Event = Message;
@@ -66,7 +66,7 @@ where
 		let mut col = Column::new();
 
 		for i in 0..self.min {
-			let val = self.vec.get(i).cloned().unwrap_or_default();
+			let val = self.vec.get(i).cloned();
 
 			col = col.push((self.f)(i, val));
 		}
@@ -87,7 +87,7 @@ where
 
 impl<'a, T, Message> From<List<'a, T, Message>> for Element<'a, Message>
 where
-	T: 'a + Clone + Default,
+	T: 'a + Clone,
 	Message: 'a,
 {
 	fn from(list: List<'a, T, Message>) -> Self {

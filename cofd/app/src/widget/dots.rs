@@ -143,11 +143,11 @@ where
 	Renderer::Theme: StyleSheet + widget::text::StyleSheet,
 {
 	fn width(&self) -> iced::Length {
-		iced::Length::Fill
+		self.width
 	}
 
 	fn height(&self) -> iced::Length {
-		self.width
+		iced::Length::Shrink
 	}
 
 	fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
