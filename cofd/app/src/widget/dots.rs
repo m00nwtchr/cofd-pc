@@ -22,6 +22,40 @@ pub enum Axis {
 	Horizontal,
 }
 
+pub enum ColOrRow<'a, Message, Renderer> {
+	Col(Col<'a, Message, Renderer>),
+	Row(Row<'a, Message, Renderer>),
+}
+
+impl<'a, Message, Renderer> ColOrRow<'a, Message, Renderer> {
+	pub fn push(self, child: impl Into<Element<'a, Message, Renderer>>) -> Self {
+		match self {
+			ColOrRow::Col(col) => ColOrRow::Col(col.push(child)),
+			ColOrRow::Row(row) => ColOrRow::Row(row.push(child)),
+		}
+	}
+
+	// pub fn size(&self) -> usize {
+	// 	match self {
+	// 		ColOrRow::Col(col) => ColOrRow::Col(col.push(child)),
+	// 		ColOrRow::Row(row) => ColOrRow::Row(row.push(child)),
+	// 	}
+	// }
+}
+
+impl<'a, Message, Renderer> From<ColOrRow<'a, Message, Renderer>> for Element<'a, Message, Renderer>
+where
+	Message: 'a,
+	Renderer: 'a + text::Renderer,
+{
+	fn from(val: ColOrRow<'a, Message, Renderer>) -> Self {
+		match val {
+			ColOrRow::Col(col) => col.into(),
+			ColOrRow::Row(row) => row.into(),
+		}
+	}
+}
+
 pub struct SheetDots<'a, Message, Renderer>
 where
 	Renderer: text::Renderer,
@@ -37,6 +71,7 @@ where
 	shape: Shape,
 	row_count: Option<u16>,
 	axis: Axis,
+	width: Length,
 }
 
 fn iter<'a>(
@@ -88,11 +123,17 @@ where
 			shape,
 			row_count,
 			axis: Default::default(),
+			width: iced::Length::Units(15),
 		}
 	}
 
 	pub fn axis(mut self, axis: Axis) -> Self {
 		self.axis = axis;
+		self
+	}
+
+	pub fn width(mut self, width: Length) -> Self {
+		self.width = width;
 		self
 	}
 }
@@ -108,55 +149,48 @@ where
 	}
 
 	fn height(&self) -> iced::Length {
-		iced::Length::Units(15)
+		self.width
 	}
 
 	fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
 		let mut col = Column::<(), Renderer>::new().spacing(self.spacing);
 
 		let per_row_count = self.row_count.unwrap_or(self.max);
-		let row_count: i32 = (f32::from(self.max) / f32::from(per_row_count)).ceil() as i32;
 
-		let mut count = 0;
-		for _ in 0..row_count {
-			let ii = min(self.max - count, per_row_count);
+		let new_row = || match self.axis {
+			Axis::Vertical => ColOrRow::Col(
+				Col::<(), Renderer>::new()
+					.spacing(self.spacing)
+					.align_items(Alignment::Center),
+			),
+			Axis::Horizontal => ColOrRow::Row(
+				Row::<(), Renderer>::new()
+					.spacing(self.spacing)
+					.align_items(Alignment::Center),
+			),
+		};
 
-			let el: El<(), Renderer> = match self.axis {
-				Axis::Vertical => {
-					let mut col = Col::<(), Renderer>::new()
-						.spacing(self.spacing)
-						.align_items(Alignment::Center);
+		let mut col_or_row: ColOrRow<(), Renderer> = new_row();
 
-					for _ in 0..ii {
-						count += 1;
-						col = col.push(
-							Row::new()
-								.width(Length::Units(self.size))
-								.height(Length::Units(self.size)),
-						);
-					}
+		for i in 0..self.max {
+			col_or_row = col_or_row.push(
+				Row::new()
+					.width(Length::Units(self.size))
+					.height(Length::Units(self.size)),
+			);
 
-					col.into()
-				}
-				Axis::Horizontal => {
-					let mut row = Row::<(), Renderer>::new()
-						.spacing(self.spacing)
-						.align_items(Alignment::Center);
+			if (i + 1) % per_row_count == 0 {
+				col = col.push(col_or_row);
+				col_or_row = new_row();
+			}
+		}
 
-					for _ in 0..ii {
-						count += 1;
-						row = row.push(
-							Row::new()
-								.width(Length::Units(self.size))
-								.height(Length::Units(self.size)),
-						);
-					}
-
-					row.into()
-				}
-			};
-
-			col = col.push(el);
+		if match &col_or_row {
+			ColOrRow::Col(e) => e.children().len(),
+			ColOrRow::Row(e) => e.children().len(),
+		} > 0
+		{
+			col = col.push(col_or_row);
 		}
 
 		col.layout(renderer, limits)
