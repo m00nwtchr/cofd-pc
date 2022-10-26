@@ -22,7 +22,7 @@ mod tests {
 	use crate::{
 		character::{Attributes, Character, CharacterInfo, Skill, Skills},
 		splat::{
-			ability::{Ability},
+			ability::Ability,
 			vampire::{Bloodline, Clan, Covenant, Discipline, VampireMerit},
 			werewolf::{Auspice, Form, Renown, Tribe, WerewolfMerit},
 			Merit, Splat,

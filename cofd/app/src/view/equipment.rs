@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, marker::PhantomData};
+use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use iced::{
 	widget::{column, pick_list, row, text, text_input, Column},
@@ -38,9 +38,7 @@ pub fn equipment_tab<Message>(character: Rc<RefCell<Character>>) -> EquipmentTab
 }
 
 #[derive(Clone)]
-pub enum Event {
-
-}
+pub enum Event {}
 
 impl<Message> EquipmentTab<Message> {
 	pub fn new(character: Rc<RefCell<Character>>) -> Self {
@@ -82,8 +80,7 @@ where
 
 		let mut res = None;
 
-		match event {
-		}
+		match event {}
 
 		res
 	}

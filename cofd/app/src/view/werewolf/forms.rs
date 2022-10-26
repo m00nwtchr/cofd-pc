@@ -18,8 +18,10 @@ pub struct FormTab<Message> {
 	on_change: Message,
 }
 
-pub fn form_tab<Message>(character: Rc<RefCell<Character>>, on_change: Message) -> FormTab<Message>
-{
+pub fn form_tab<Message>(
+	character: Rc<RefCell<Character>>,
+	on_change: Message,
+) -> FormTab<Message> {
 	FormTab::new(character, on_change)
 }
 
@@ -29,8 +31,7 @@ pub enum Event {
 }
 
 impl<Message> FormTab<Message> {
-	pub fn new(character: Rc<RefCell<Character>>, on_change: Message) -> Self
-	{
+	pub fn new(character: Rc<RefCell<Character>>, on_change: Message) -> Self {
 		Self {
 			character,
 			on_change,

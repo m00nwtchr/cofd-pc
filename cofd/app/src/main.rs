@@ -140,7 +140,7 @@ impl Application for PlayerCompanionApp {
 				});
 			}
 			Message::Previous => self.prev(),
-			Message::Msg => {},
+			Message::Msg => {}
 		}
 
 		Command::none()
@@ -446,7 +446,7 @@ mod demo {
 			.with_merits([])
 			.build();
 
-		[	
+		[
 			character,
 			vampire_character,
 			mage_character,
