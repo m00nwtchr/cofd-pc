@@ -107,8 +107,20 @@ where
 
 		match event {
 			Event::InfoTraitChanged(val, _trait) => *character.info.get_mut(&_trait) = val,
-			Event::XSplatChanged(xsplat) => character.splat.set_xsplat(Some(xsplat)),
-			Event::YSplatChanged(ysplat) => character.splat.set_ysplat(Some(ysplat)),
+			Event::XSplatChanged(xsplat) => {
+				if xsplat.name().eq("") {
+					character.splat.set_xsplat(None);
+				} else {
+					character.splat.set_xsplat(Some(xsplat));
+				}
+			}
+			Event::YSplatChanged(ysplat) => {
+				if ysplat.name().eq("") {
+					character.splat.set_ysplat(None);
+				} else {
+					character.splat.set_ysplat(Some(ysplat));
+				}
+			}
 			Event::ZSplatChanged(zsplat) => {
 				if zsplat.name().eq("") {
 					character.splat.set_zsplat(None);
@@ -121,7 +133,11 @@ where
 		Some((self.on_change)())
 	}
 
-	#[allow(clippy::similar_names, clippy::single_match_else)]
+	#[allow(
+		clippy::similar_names,
+		clippy::single_match_else,
+		clippy::too_many_lines
+	)]
 	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
 		let character = self.character.borrow();
 
@@ -133,25 +149,55 @@ where
 				)
 				.into(),
 			_ => {
-				let xsplats = XSplat::all(&character.splat._type());
-				let ysplats = YSplat::all(&character.splat._type());
+				let mut xsplats = XSplat::all(&character.splat._type());
+				let mut ysplats = YSplat::all(&character.splat._type());
 				let mut zsplats = ZSplat::all(&character.splat._type());
 
-				// xsplats.extend(self.custom_xsplats.iter().filter_map(|xsplat| {
-				// 	match (xsplat, &character.splat) {
-				// 		(XSplat::Vampire(_), Splat::Vampire(_, _, _, _))
-				// 		| (XSplat::Werewolf(_), Splat::Werewolf(_, _, _, _))
-				// 		| (XSplat::Mage(_), Splat::Mage(_, _, _, _))
-				// 		| (XSplat::Changeling(_), Splat::Changeling(_, _, _, _)) => Some(xsplat.clone()),
-				// 		_ => None,
-				// 	}
-				// }));
-
+				if let Some(xsplat) = character.splat.custom_xsplat(String::from("Custom")) {
+					xsplats.push(xsplat);
+				}
+				if let Some(ysplat) = character.splat.custom_ysplat(String::from("Custom")) {
+					ysplats.push(ysplat);
+				}
 				if let Some(zsplat) = character.splat.custom_zsplat(String::from("Custom")) {
 					zsplats.push(zsplat);
 				}
 
+				let xsplat = character.splat.xsplat();
+				let ysplat = character.splat.ysplat();
 				let zsplat = character.splat.zsplat();
+
+				let xsplat: Element<Self::Event, Renderer> = if let Some(xsplat) = xsplat.clone() && xsplat.is_custom() {
+					text_input("", xsplat.name(), {
+						let xsplat = xsplat.clone();
+						move |val| {
+							let mut xsplat = xsplat.clone();
+							*xsplat.name_mut().unwrap() = val;
+							Event::XSplatChanged(xsplat)
+						}
+					})
+					.into()
+				} else {
+					pick_list(xsplats, xsplat, Event::XSplatChanged)
+					.padding(1)
+					.width(Length::Fill).into()
+				};
+
+				let ysplat: Element<Self::Event, Renderer> = if let Some(ysplat) = ysplat.clone() && ysplat.is_custom() {
+					text_input("", ysplat.name(), {
+						let ysplat = ysplat.clone();
+						move |val| {
+							let mut ysplat = ysplat.clone();
+							*ysplat.name_mut().unwrap() = val;
+							Event::YSplatChanged(ysplat)
+						}
+					})
+					.into()
+				} else {
+					pick_list(ysplats, ysplat, Event::YSplatChanged)
+					.padding(1)
+					.width(Length::Fill).into()
+				};
 
 				let zsplat: Element<Self::Event, Renderer> = if let Some(zsplat) = zsplat.clone() && zsplat.is_custom() {
 					text_input("", zsplat.name(), {
@@ -189,17 +235,9 @@ where
 						))
 					]
 					.spacing(3),
-					column![
-						pick_list(xsplats, character.splat.xsplat(), Event::XSplatChanged)
-							.padding(1)
-							.width(Length::Fill),
-						pick_list(ysplats, character.splat.ysplat(), Event::YSplatChanged)
-							.padding(1)
-							.width(Length::Fill),
-						zsplat
-					]
-					.spacing(1)
-					.width(Length::Fill)
+					column![xsplat, ysplat, zsplat]
+						.spacing(1)
+						.width(Length::Fill)
 				]
 				.width(Length::Fill)
 				.spacing(5)

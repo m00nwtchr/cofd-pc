@@ -3,7 +3,10 @@ use serde_variant::to_variant_name;
 use std::fmt::Display;
 
 use self::ability::Ability;
-use crate::character::{Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait};
+use crate::{
+	character::{Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait},
+	prelude::Attribute,
+};
 
 pub mod ability;
 
@@ -165,6 +168,38 @@ impl Splat {
 		}
 	}
 
+	pub fn custom_xsplat(&self, name: String) -> Option<XSplat> {
+		match self {
+			Self::Mortal => None,
+			Self::Vampire(_, _, _, _) => Some(
+				Clan::_Custom(
+					name,
+					[
+						Discipline::Animalism,
+						Discipline::Auspex,
+						Discipline::Celerity,
+					],
+					[Attribute::Composure, Attribute::Dexterity],
+				)
+				.into(),
+			),
+			Self::Werewolf(_, _, _, _) => Some(
+				Auspice::_Custom(
+					name,
+					[Skill::Academics, Skill::AnimalKen, Skill::Athletics],
+					Renown::Cunning,
+					MoonGift::_Custom(String::from("Custom")),
+					[ShadowGift::Death, ShadowGift::Dominance],
+				)
+				.into(),
+			),
+			Self::Mage(_, _, _, _) => {
+				Some(Path::_Custom(name, [Arcanum::Death, Arcanum::Fate], Arcanum::Forces).into())
+			}
+			Self::Changeling(_, _, _, _) => Some(Seeming::_Custom(name, Regalia::Crown).into()),
+		}
+	}
+
 	pub fn ysplat_name(&self) -> &str {
 		match self {
 			Splat::Mortal => "faction",
@@ -216,6 +251,29 @@ impl Splat {
 				Splat::Mage(_, order, _, _) => *order = None,
 				Splat::Changeling(_, court, _, _) => *court = None,
 			},
+		}
+	}
+
+	pub fn custom_ysplat(&self, name: String) -> Option<YSplat> {
+		match self {
+			Self::Mortal => None,
+			Self::Vampire(_, _, _, _) => Some(Covenant::_Custom(name).into()),
+			Self::Werewolf(_, _, _, _) => Some(
+				Tribe::_Custom(
+					name,
+					Renown::Cunning,
+					[
+						ShadowGift::Death,
+						ShadowGift::Dominance,
+						ShadowGift::Elemental,
+					],
+				)
+				.into(),
+			),
+			Self::Mage(_, _, _, _) => Some(
+				Order::_Custom(name, [Skill::Academics, Skill::AnimalKen, Skill::Athletics]).into(),
+			),
+			Self::Changeling(_, _, _, _) => Some(Court::_Custom(name).into()),
 		}
 	}
 
@@ -372,6 +430,16 @@ impl XSplat {
 		}
 	}
 
+	pub fn name_mut(&mut self) -> Option<&mut String> {
+		match self {
+			Self::Vampire(Clan::_Custom(name, ..))
+			| Self::Werewolf(Auspice::_Custom(name, ..))
+			| Self::Mage(Path::_Custom(name, ..))
+			| Self::Changeling(Seeming::_Custom(name, _)) => Some(name),
+			_ => None,
+		}
+	}
+
 	pub fn all(_type: &SplatType) -> Vec<XSplat> {
 		match _type {
 			SplatType::Vampire => Clan::all().map(Into::into).to_vec(),
@@ -380,6 +448,16 @@ impl XSplat {
 			SplatType::Changeling => Seeming::all().map(Into::into).to_vec(),
 			_ => vec![],
 		}
+	}
+
+	pub fn is_custom(&self) -> bool {
+		matches!(
+			self,
+			Self::Vampire(Clan::_Custom(..))
+				| Self::Werewolf(Auspice::_Custom(..))
+				| Self::Mage(Path::_Custom(..))
+				| Self::Changeling(Seeming::_Custom(..))
+		)
 	}
 }
 
@@ -407,6 +485,18 @@ impl YSplat {
 		}
 	}
 
+	pub fn name_mut(&mut self) -> Option<&mut String> {
+		match self {
+			Self::Vampire(Covenant::_Custom(name))
+			| Self::Werewolf(Tribe::_Custom(name, _, _))
+			| Self::Mage(
+				Order::_Custom(name, _) | Order::SeersOfTheThrone(Some(Ministry::_Custom(name, _))),
+			)
+			| Self::Changeling(Court::_Custom(name)) => Some(name),
+			_ => None,
+		}
+	}
+
 	pub fn all(_type: &SplatType) -> Vec<YSplat> {
 		match _type {
 			SplatType::Vampire => Covenant::all().map(Into::into).to_vec(),
@@ -415,6 +505,17 @@ impl YSplat {
 			SplatType::Changeling => Court::all().map(Into::into).to_vec(),
 			_ => vec![],
 		}
+	}
+
+	pub fn is_custom(&self) -> bool {
+		matches!(
+			self,
+			YSplat::Vampire(Covenant::_Custom(_))
+				| YSplat::Werewolf(Tribe::_Custom(_, _, _))
+				| YSplat::Mage(
+					Order::_Custom(_, _) | Order::SeersOfTheThrone(Some(Ministry::_Custom(_, _))),
+				) | YSplat::Changeling(Court::_Custom(_))
+		)
 	}
 }
 
