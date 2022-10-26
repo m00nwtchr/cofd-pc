@@ -12,6 +12,7 @@ use cofd::{
 	splat::{
 		ability::{Ability, AbilityVal},
 		changeling::Regalia,
+		mage::{Ministry, Order},
 		Splat, SplatType,
 	},
 };
@@ -57,6 +58,8 @@ pub enum Event {
 
 	RegaliaChanged(Regalia),
 	FrailtyChanged(usize, String),
+
+	RoteSkillChanged(Skill),
 
 	Msg,
 }
@@ -172,12 +175,14 @@ where
 		+ iced::widget::text::StyleSheet
 		+ iced::widget::button::StyleSheet
 		+ widget::dots::StyleSheet
-		+ widget::track::StyleSheet,
+		+ widget::track::StyleSheet
+		+ iced::widget::checkbox::StyleSheet,
 {
 	type State = ();
 
 	type Event = Event;
 
+	#[allow(clippy::too_many_lines)]
 	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
 		let mut character = self.character.borrow_mut();
 
@@ -285,6 +290,23 @@ where
 					} else {
 						data.banes.resize(i + 1, String::new());
 						*data.banes.get_mut(i).unwrap() = str;
+					}
+				}
+			}
+			Event::RoteSkillChanged(skill) => {
+				if let Splat::Mage(
+					_,
+					Some(
+						Order::_Custom(_, rote_skills)
+						| Order::SeersOfTheThrone(Some(Ministry::_Custom(_, rote_skills))),
+					),
+					_,
+					_,
+				) = &mut character.splat
+				{
+					if !rote_skills.contains(&skill) {
+						rote_skills.rotate_left(1);
+						rote_skills[2] = skill;
 					}
 				}
 			}
@@ -569,7 +591,7 @@ where
 					);
 			}
 			Splat::Vampire(_, _, _, data) => {
-				let mut banes = Column::new().width(Length::Fill).spacing(1);;
+				let mut banes = Column::new().width(Length::Fill).spacing(1);
 
 				for i in 0..3 {
 					banes = banes.push(column![text_input(
@@ -605,7 +627,12 @@ where
 			.align_items(Alignment::Center)
 			.width(Length::Fill),
 			row![
-				skills_component(character.skills().clone(), Event::SkillChanged),
+				skills_component(
+					character.skills().clone(),
+					character.splat.clone(),
+					Event::SkillChanged,
+					Event::RoteSkillChanged
+				),
 				column![
 					text("Other Traits".to_uppercase()).size(H2_SIZE),
 					row![
@@ -643,7 +670,8 @@ where
 		+ iced::widget::text::StyleSheet
 		+ iced::widget::button::StyleSheet
 		+ widget::dots::StyleSheet
-		+ widget::track::StyleSheet,
+		+ widget::track::StyleSheet
+		+ iced::widget::checkbox::StyleSheet,
 {
 	fn from(overview_tab: OverviewTab<Message>) -> Self {
 		iced_lazy::component(overview_tab)

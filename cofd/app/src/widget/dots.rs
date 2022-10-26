@@ -34,13 +34,6 @@ impl<'a, Message, Renderer> ColOrRow<'a, Message, Renderer> {
 			ColOrRow::Row(row) => ColOrRow::Row(row.push(child)),
 		}
 	}
-
-	// pub fn size(&self) -> usize {
-	// 	match self {
-	// 		ColOrRow::Col(col) => ColOrRow::Col(col.push(child)),
-	// 		ColOrRow::Row(row) => ColOrRow::Row(row.push(child)),
-	// 	}
-	// }
 }
 
 impl<'a, Message, Renderer> From<ColOrRow<'a, Message, Renderer>> for Element<'a, Message, Renderer>
@@ -123,7 +116,7 @@ where
 			shape,
 			row_count,
 			axis: Default::default(),
-			width: iced::Length::Units(15),
+			width: Length::Shrink,
 		}
 	}
 
@@ -153,7 +146,9 @@ where
 	}
 
 	fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
-		let mut col = Column::<(), Renderer>::new().spacing(self.spacing);
+		let mut col = Column::<(), Renderer>::new()
+			.spacing(self.spacing)
+			.width(self.width);
 
 		let per_row_count = self.row_count.unwrap_or(self.max);
 
@@ -256,8 +251,6 @@ where
 		cursor_position: Point,
 		_viewport: &Rectangle,
 	) {
-		// for i in self.min..self.max {
-
 		let mut mouse_i = None;
 		for (i, layout) in iter(layout, &self.axis).enumerate() {
 			let bounds = layout.bounds();
