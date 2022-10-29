@@ -1,4 +1,4 @@
-use std::{rc::Rc, cell::RefCell};
+use std::{cell::RefCell, rc::Rc};
 
 use iced::{
 	widget::{checkbox, column, row, text, Column, Row},
@@ -8,8 +8,8 @@ use iced_lazy::Component;
 use iced_native::Element;
 
 use cofd::{
-	character::{TraitCategory, ModifierTarget},
-	prelude::{Skill, Skills, Character},
+	character::{ModifierTarget, TraitCategory},
+	prelude::{Character, Skill, Skills},
 	splat::{mage::Order, Splat},
 };
 
@@ -97,9 +97,14 @@ impl<Message> SkillsComponent<Message> {
 			let val = character._modified(ModifierTarget::BaseSkill(skill));
 			let mod_ = val - v;
 
-			col2 = col2.push(SheetDots::new(val, mod_, 5, Shape::Dots, None, move |val| {
-				Event::SkillChanged(val - mod_, skill.clone())
-			}));
+			col2 = col2.push(SheetDots::new(
+				val,
+				mod_,
+				5,
+				Shape::Dots,
+				None,
+				move |val| Event::SkillChanged(val - mod_, skill.clone()),
+			));
 		}
 
 		column![

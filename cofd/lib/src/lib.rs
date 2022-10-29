@@ -25,7 +25,6 @@ mod tests {
 		character::{Attributes, Character, CharacterInfo, Skill, Skills},
 		prelude::Attribute,
 		splat::{
-			ability::Ability,
 			mage::{Arcanum, MageData, MageMerit, Order, Path},
 			vampire::{Bloodline, Clan, Covenant, Discipline, VampireMerit},
 			werewolf::{Auspice, Form, Renown, Tribe, WerewolfMerit},

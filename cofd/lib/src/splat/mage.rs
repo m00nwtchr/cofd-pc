@@ -6,8 +6,7 @@ use super::{ability::Ability, Merit, XSplat, YSplat, ZSplat};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MageData {
-	pub attr_bonus: Attribute, // TODO: Resolve, Composure, or Stamina (Resistance Attr)
-
+	pub attr_bonus: Attribute,
 	pub obsessions: Vec<String>,
 }
 

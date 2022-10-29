@@ -66,7 +66,7 @@ pub enum Splat {
 	// )]
 	Vampire(Clan, Option<Covenant>, Option<Bloodline>, VampireData),
 	Werewolf(Option<Auspice>, Option<Tribe>, Option<Lodge>, WerewolfData),
-	Mage(Path, Option<Order>, Option<Legacy>, MageData), // TODO: Order = free occult dot, free order status, high speech merit
+	Mage(Path, Option<Order>, Option<Legacy>, MageData), // TODO: Order = free order status, high speech merit
 	// Promethean,
 	Changeling(Seeming, Option<Court>, Option<Kith>, ChangelingData),
 	// Hunter,
@@ -927,7 +927,7 @@ impl Merit {
 			Merit::DefensiveCombat(true, Some(skill)) => {
 				vec![Modifier::new(
 					ModifierTarget::Trait(Trait::DefenseSkill),
-					ModifierValue::Skill(skill.clone()),
+					ModifierValue::Skill(*skill),
 					ModifierOp::Set,
 				)]
 			}

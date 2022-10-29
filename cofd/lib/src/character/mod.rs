@@ -1,10 +1,7 @@
-use std::{
-	cmp::min,
-	collections::{BTreeMap, HashMap},
-};
+use std::{cmp::min, collections::HashMap};
+use serde::{Deserialize, Serialize};
 
 use crate::splat::{ability::Ability, Merit, Splat};
-use serde::{Deserialize, Serialize};
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn add(a: u16, b: i16) -> u16 {
@@ -392,7 +389,16 @@ impl Character {
 					}
 				}
 			}
-			Splat::Mage(_, _, _, data) => {
+			Splat::Mage(_, order, _, data) => {
+				// TODO: High Speech merit, Order Status merit
+				if order.is_some() {
+					modifiers.push(Modifier::new(
+						ModifierTarget::BaseSkill(Skill::Occult),
+						ModifierValue::Num(1),
+						ModifierOp::Add,
+					));
+				}
+
 				if data.attr_bonus.get_type() == AttributeType::Resistance {
 					modifiers.push(Modifier::new(
 						ModifierTarget::BaseAttribute(data.attr_bonus),
