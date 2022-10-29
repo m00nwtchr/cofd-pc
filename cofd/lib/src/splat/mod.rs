@@ -442,7 +442,7 @@ impl XSplat {
 		}
 	}
 
-	pub fn all(_type: &SplatType) -> Vec<XSplat> {
+	pub fn all(_type: SplatType) -> Vec<XSplat> {
 		match _type {
 			SplatType::Vampire => Clan::all().map(Into::into).to_vec(),
 			SplatType::Werewolf => Auspice::all().map(Into::into).to_vec(),
@@ -499,7 +499,7 @@ impl YSplat {
 		}
 	}
 
-	pub fn all(_type: &SplatType) -> Vec<YSplat> {
+	pub fn all(_type: SplatType) -> Vec<YSplat> {
 		match _type {
 			SplatType::Vampire => Covenant::all().map(Into::into).to_vec(),
 			SplatType::Werewolf => Tribe::all().map(Into::into).to_vec(),
@@ -555,7 +555,7 @@ impl ZSplat {
 		}
 	}
 
-	pub fn all(_type: &SplatType) -> Vec<ZSplat> {
+	pub fn all(_type: SplatType) -> Vec<ZSplat> {
 		match _type {
 			SplatType::Changeling => Kith::all().map(Into::into).to_vec(),
 			_ => vec![],

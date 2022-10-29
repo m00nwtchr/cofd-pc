@@ -9,11 +9,7 @@ use iced_lazy::Component;
 use cofd::{
 	character::{ModifierTarget, Trait, Wound},
 	prelude::*,
-	splat::{
-		ability::{Ability},
-		changeling::Regalia,
-		Splat, SplatType,
-	},
+	splat::{ability::Ability, changeling::Regalia, Splat, SplatType},
 };
 
 use crate::{

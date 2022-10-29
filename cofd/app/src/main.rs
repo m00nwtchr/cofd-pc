@@ -355,7 +355,10 @@ mod demo {
 				Some(Auspice::Rahu),
 				Some(Tribe::BloodTalons),
 				None,
-				WerewolfData { skill_bonus: Some(Skill::Brawl), ..Default::default() },
+				WerewolfData {
+					skill_bonus: Some(Skill::Brawl),
+					..Default::default()
+				},
 			))
 			.with_info(CharacterInfo {
 				name: String::from("Amos Gray"),

@@ -13,7 +13,7 @@ use cofd::{
 		ability::Ability,
 		changeling::Regalia,
 		mage::{Ministry, Order},
-		Splat, SplatType, Merit,
+		Merit, Splat, SplatType,
 	},
 };
 
@@ -96,9 +96,14 @@ impl<Message> OverviewTab<Message> {
 					let val = character.get_ability_value(&ability).unwrap_or(&0);
 
 					col1 = col1.push(text(fl(splat_name, Some(ability.name())).unwrap()));
-					col2 = col2.push(SheetDots::new(val.clone(), 0, 5, Shape::Dots, None, move |val| {
-						Event::AbilityValChanged(ability.clone(), val)
-					}));
+					col2 = col2.push(SheetDots::new(
+						val.clone(),
+						0,
+						5,
+						Shape::Dots,
+						None,
+						move |val| Event::AbilityValChanged(ability.clone(), val),
+					));
 				}
 			}
 		} else {
@@ -146,12 +151,10 @@ impl<Message> OverviewTab<Message> {
 			}
 
 			new = new.push(
-				pick_list(e, None, |key| {
-					Event::AbilityValChanged(key, 0)
-				})
-				.width(Length::Fill)
-				.padding(1)
-				.text_size(20),
+				pick_list(e, None, |key| Event::AbilityValChanged(key, 0))
+					.width(Length::Fill)
+					.padding(1)
+					.text_size(20),
 			);
 		}
 
@@ -189,8 +192,8 @@ where
 		let mut res = None;
 
 		match event {
-			Event::AttrChanged(val, attr) => *character.base_attributes_mut().get_mut(&attr) = val,
-			Event::SkillChanged(val, skill) => *character.skills_mut().get_mut(&skill) = val,
+			Event::AttrChanged(val, attr) => *character.base_attributes_mut().get_mut(attr) = val,
+			Event::SkillChanged(val, skill) => *character.base_skills_mut().get_mut(skill) = val,
 			Event::AbilityValChanged(ability, val) => {
 				if let Some(val_) = character.get_ability_value_mut(&ability) {
 					*val_ = val;
@@ -201,10 +204,7 @@ where
 			Event::AbilityChanged(ability, new) => {
 				if character.has_ability(&ability) {
 					let val = character.remove_ability(&ability).unwrap_or_default();
-					character.add_ability(
-						new,
-						val
-					);
+					character.add_ability(new, val);
 				} else {
 					character.add_ability(ability, 0);
 				}
@@ -213,13 +213,13 @@ where
 				let mut flag = false;
 
 				if character.merits.len() == i {
-					if !ability.get_modifiers(&val).is_empty() {
+					if !ability.get_modifiers(val).is_empty() {
 						flag = true;
 					}
 					character.merits.push((ability, val));
 				} else {
 					let old = character.merits.remove(i);
-					if old.0.get_modifiers(&old.1) != ability.get_modifiers(&val) {
+					if old.0.get_modifiers(old.1) != ability.get_modifiers(val) {
 						flag = true;
 					}
 
@@ -626,8 +626,7 @@ where
 			.width(Length::Fill),
 			row![
 				skills_component(
-					character.skills().clone(),
-					character.splat.clone(),
+					self.character.clone(),
 					Event::SkillChanged,
 					Event::RoteSkillChanged
 				),

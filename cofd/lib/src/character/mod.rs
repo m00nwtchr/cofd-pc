@@ -469,10 +469,40 @@ impl Character {
 		&self._attributes
 	}
 
-	pub fn skills(&self) -> &Skills {
+	pub fn skills(&self) -> Skills {
+		Skills {
+			academics: self._modified_skll(Skill::Academics),
+			computer: self._modified_skll(Skill::Computer),
+			crafts: self._modified_skll(Skill::Crafts),
+			investigation: self._modified_skll(Skill::Investigation),
+			medicine: self._modified_skll(Skill::Medicine),
+			occult: self._modified_skll(Skill::Occult),
+			politics: self._modified_skll(Skill::Politics),
+			science: self._modified_skll(Skill::Science),
+
+			athletics: self._modified_skll(Skill::Athletics),
+			brawl: self._modified_skll(Skill::Brawl),
+			drive: self._modified_skll(Skill::Drive),
+			firearms: self._modified_skll(Skill::Firearms),
+			larceny: self._modified_skll(Skill::Larceny),
+			stealth: self._modified_skll(Skill::Stealth),
+			survival: self._modified_skll(Skill::Survival),
+			weaponry: self._modified_skll(Skill::Weaponry),
+
+			animal_ken: self._modified_skll(Skill::AnimalKen),
+			empathy: self._modified_skll(Skill::Empathy),
+			expression: self._modified_skll(Skill::Expression),
+			intimidation: self._modified_skll(Skill::Intimidation),
+			persuasion: self._modified_skll(Skill::Persuasion),
+			socialize: self._modified_skll(Skill::Socialize),
+			streetwise: self._modified_skll(Skill::Streetwise),
+			subterfuge: self._modified_skll(Skill::Subterfuge),
+		}
+	}
+	pub fn base_skills(&self) -> &Skills {
 		&self.skills
 	}
-	pub fn skills_mut(&mut self) -> &mut Skills {
+	pub fn base_skills_mut(&mut self) -> &mut Skills {
 		&mut self.skills
 	}
 
@@ -527,7 +557,7 @@ impl Character {
 		let attributes = self.attributes();
 
 		add(
-			min(attributes.wits, attributes.dexterity) + *self.skills.get(&self._defense_skill),
+			min(attributes.wits, attributes.dexterity) + *self.skills.get(self._defense_skill),
 			self._mod(ModifierTarget::Trait(Trait::Defense)),
 		)
 	}
@@ -581,7 +611,7 @@ impl Character {
 					ModifierValue::Ability(ability) => {
 						*self.get_ability_value(ability).unwrap_or(&0) as i16
 					}
-					ModifierValue::Skill(skill) => *self.skills.get(skill) as i16,
+					ModifierValue::Skill(skill) => *self.skills.get(*skill) as i16,
 				}
 			}
 		}
@@ -589,22 +619,22 @@ impl Character {
 		count
 	}
 
-	fn _attr_mod(&self, attr: Attribute) -> i16 {
-		self._mod(ModifierTarget::Attribute(attr)) + self._mod(ModifierTarget::BaseAttribute(attr))
-	}
-
 	fn _modified_attr(&self, attr: Attribute) -> u16 {
 		self._modified(ModifierTarget::Attribute(attr))
+	}
+
+	fn _modified_skll(&self, skill: Skill) -> u16 {
+		self._modified(ModifierTarget::Skill(skill))
 	}
 
 	pub fn _modified(&self, target: ModifierTarget) -> u16 {
 		// let base = base as i16;
 		let base = *match target {
 			ModifierTarget::BaseAttribute(attr) | ModifierTarget::Attribute(attr) => {
-				self._attributes.get(&attr)
+				self._attributes.get(attr)
 			}
 			ModifierTarget::BaseSkill(skill) | ModifierTarget::Skill(skill) => {
-				self.skills.get(&skill)
+				self.skills.get(skill)
 			}
 			_ => &0,
 		};
@@ -755,7 +785,7 @@ impl InfoTrait {
 }
 
 impl CharacterInfo {
-	pub fn get(&self, info: &InfoTrait) -> &String {
+	pub fn get(&self, info: InfoTrait) -> &String {
 		match info {
 			InfoTrait::Name => &self.name,
 			InfoTrait::Age => &self.age,
@@ -777,7 +807,7 @@ impl CharacterInfo {
 		}
 	}
 
-	pub fn get_mut(&mut self, info: &InfoTrait) -> &mut String {
+	pub fn get_mut(&mut self, info: InfoTrait) -> &mut String {
 		match info {
 			InfoTrait::Name => &mut self.name,
 			InfoTrait::Age => &mut self.age,
@@ -831,7 +861,7 @@ pub struct Attributes {
 }
 
 impl Attributes {
-	pub fn get(&self, attr: &Attribute) -> &u16 {
+	pub fn get(&self, attr: Attribute) -> &u16 {
 		match attr {
 			Attribute::Intelligence => &self.intelligence,
 			Attribute::Wits => &self.wits,
@@ -847,7 +877,7 @@ impl Attributes {
 		}
 	}
 
-	pub fn get_mut(&mut self, attr: &Attribute) -> &mut u16 {
+	pub fn get_mut(&mut self, attr: Attribute) -> &mut u16 {
 		match attr {
 			Attribute::Intelligence => &mut self.intelligence,
 			Attribute::Wits => &mut self.wits,
@@ -946,7 +976,7 @@ pub struct Skills {
 }
 
 impl Skills {
-	pub fn get(&self, skill: &Skill) -> &u16 {
+	pub fn get(&self, skill: Skill) -> &u16 {
 		match skill {
 			Skill::Academics => &self.academics,
 			Skill::Computer => &self.computer,
@@ -977,7 +1007,7 @@ impl Skills {
 		}
 	}
 
-	pub fn get_mut(&mut self, skill: &Skill) -> &mut u16 {
+	pub fn get_mut(&mut self, skill: Skill) -> &mut u16 {
 		match skill {
 			Skill::Academics => &mut self.academics,
 			Skill::Computer => &mut self.computer,
@@ -1187,6 +1217,7 @@ impl Attribute {
 		}
 	}
 
+	#[allow(clippy::trivially_copy_pass_by_ref)]
 	pub fn get_type(&self) -> AttributeType {
 		match self {
 			Attribute::Intelligence => AttributeType::Power,

@@ -1,3 +1,5 @@
+use std::{rc::Rc, cell::RefCell};
+
 use iced::{
 	widget::{checkbox, column, row, text, Column, Row},
 	Alignment, Length,
@@ -6,8 +8,8 @@ use iced_lazy::Component;
 use iced_native::Element;
 
 use cofd::{
-	character::TraitCategory,
-	prelude::{Skill, Skills},
+	character::{TraitCategory, ModifierTarget},
+	prelude::{Skill, Skills, Character},
 	splat::{mage::Order, Splat},
 };
 
@@ -22,19 +24,17 @@ use crate::{
 };
 
 pub struct SkillsComponent<Message> {
-	skills: Skills,
-	splat: Splat,
+	character: Rc<RefCell<Character>>,
 	on_change: Box<dyn Fn(u16, Skill) -> Message>,
 	on_rote_change: Box<dyn Fn(Skill) -> Message>,
 }
 
 pub fn skills_component<Message>(
-	skills: Skills,
-	splat: Splat,
+	character: Rc<RefCell<Character>>,
 	on_change: impl Fn(u16, Skill) -> Message + 'static,
 	on_rote_change: impl Fn(Skill) -> Message + 'static,
 ) -> SkillsComponent<Message> {
-	SkillsComponent::new(skills, splat, on_change, on_rote_change)
+	SkillsComponent::new(character, on_change, on_rote_change)
 }
 
 #[derive(Clone)]
@@ -45,20 +45,22 @@ pub enum Event {
 
 impl<Message> SkillsComponent<Message> {
 	fn new(
-		skills: Skills,
-		splat: Splat,
+		character: Rc<RefCell<Character>>,
 		on_change: impl Fn(u16, Skill) -> Message + 'static,
 		on_rote_change: impl Fn(Skill) -> Message + 'static,
 	) -> Self {
 		Self {
-			skills,
-			splat,
+			character,
 			on_change: Box::new(on_change),
 			on_rote_change: Box::new(on_rote_change),
 		}
 	}
 
-	fn mk_skill_col<Renderer>(&self, cat: &TraitCategory) -> Element<Event, Renderer>
+	fn mk_skill_col<Renderer>(
+		&self,
+		character: &Character,
+		cat: &TraitCategory,
+	) -> Element<Event, Renderer>
 	where
 		Renderer: iced_native::text::Renderer + 'static,
 		Renderer::Theme: iced::widget::text::StyleSheet
@@ -73,7 +75,7 @@ impl<Message> SkillsComponent<Message> {
 			.align_items(Alignment::End);
 
 		for skill in Skill::get(cat) {
-			if let Splat::Mage(_, order, _, data) = &self.splat {
+			if let Splat::Mage(_, order, _, data) = &character.splat {
 				let flag = if let Some(order) = order {
 					order.get_rote_skills().contains(&skill)
 				} else {
@@ -91,9 +93,12 @@ impl<Message> SkillsComponent<Message> {
 
 			col1 = col1.push(text(fl("skill", Some(skill.name())).unwrap()));
 
-			let v = self.skills.get(&skill);
-			col2 = col2.push(SheetDots::new(*v, 0, 5, Shape::Dots, None, move |val| {
-				Event::SkillChanged(val, skill.clone())
+			let v = character.base_skills().get(skill);
+			let val = character._modified(ModifierTarget::BaseSkill(skill));
+			let mod_ = val - v;
+
+			col2 = col2.push(SheetDots::new(val, mod_, 5, Shape::Dots, None, move |val| {
+				Event::SkillChanged(val - mod_, skill.clone())
 			}));
 		}
 
@@ -125,11 +130,13 @@ where
 	}
 
 	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
+		let character = self.character.borrow();
+
 		column![
 			text(flt!("skills").to_uppercase()).size(H2_SIZE),
-			self.mk_skill_col(&TraitCategory::Mental),
-			self.mk_skill_col(&TraitCategory::Physical),
-			self.mk_skill_col(&TraitCategory::Social),
+			self.mk_skill_col(&character, &TraitCategory::Mental),
+			self.mk_skill_col(&character, &TraitCategory::Physical),
+			self.mk_skill_col(&character, &TraitCategory::Social),
 		]
 		.spacing(10)
 		.padding(15)

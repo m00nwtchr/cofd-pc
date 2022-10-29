@@ -83,7 +83,7 @@ impl<Message> InfoBar<Message> {
 			};
 
 			col1 = col1.push(text(format!("{}:", fl(msg, attribute).unwrap())));
-			col2 = col2.push(text_input("", character.info.get(&_trait), move |val| {
+			col2 = col2.push(text_input("", character.info.get(_trait), move |val| {
 				Event::InfoTraitChanged(val, _trait)
 			}));
 		}
@@ -106,7 +106,7 @@ where
 		let mut character = self.character.borrow_mut();
 
 		match event {
-			Event::InfoTraitChanged(val, _trait) => *character.info.get_mut(&_trait) = val,
+			Event::InfoTraitChanged(val, _trait) => *character.info.get_mut(_trait) = val,
 			Event::XSplatChanged(xsplat) => {
 				if xsplat.name().eq("") {
 					character.splat.set_xsplat(None);
@@ -149,9 +149,9 @@ where
 				)
 				.into(),
 			_ => {
-				let mut xsplats = XSplat::all(&character.splat._type());
-				let mut ysplats = YSplat::all(&character.splat._type());
-				let mut zsplats = ZSplat::all(&character.splat._type());
+				let mut xsplats = XSplat::all(character.splat._type());
+				let mut ysplats = YSplat::all(character.splat._type());
+				let mut zsplats = ZSplat::all(character.splat._type());
 
 				if let Some(xsplat) = character.splat.custom_xsplat(String::from("Custom")) {
 					xsplats.push(xsplat);

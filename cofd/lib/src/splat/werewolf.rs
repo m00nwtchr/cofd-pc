@@ -251,11 +251,11 @@ pub enum MoonGift {
 }
 
 impl MoonGift {
-	pub fn get_modifiers(&self, value: &u16) -> Vec<crate::character::Modifier> {
+	pub fn get_modifiers(&self, value: u16) -> Vec<crate::character::Modifier> {
 		match self {
 			// MoonGift::Crescent => vec![],
 			MoonGift::Full => {
-				if value > &2 {
+				if value > 2 {
 					vec![Modifier::new(
 						ModifierTarget::Trait(Trait::Health),
 						ModifierValue::Ability(Ability::Renown(Renown::Purity)),

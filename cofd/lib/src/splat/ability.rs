@@ -40,7 +40,7 @@ impl Ability {
 		}
 	}
 
-	pub fn get_modifiers(&self, value: &u16) -> Vec<Modifier> {
+	pub fn get_modifiers(&self, value: u16) -> Vec<Modifier> {
 		match self {
 			Ability::Merit(merit) => merit.get_modifiers(value),
 			Ability::Discipline(discipline) => discipline.get_modifiers(value),

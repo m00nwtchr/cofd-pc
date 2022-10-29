@@ -68,7 +68,7 @@ impl<Message> AttributeBar<Message> {
 			.align_items(Alignment::End);
 
 		for attr in Attribute::get(AttributeCategory::Trait(cat)) {
-			let v = character.base_attributes().get(&attr);
+			let v = character.base_attributes().get(attr);
 			let val = character._modified(ModifierTarget::BaseAttribute(attr));
 			let mod_ = val - v;
 

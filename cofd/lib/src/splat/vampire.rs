@@ -191,23 +191,23 @@ impl Discipline {
 	}
 
 	#[warn(clippy::cast_possible_wrap)]
-	pub fn get_modifiers(&self, value: &u16) -> Vec<crate::character::Modifier> {
+	pub fn get_modifiers(&self, value: u16) -> Vec<crate::character::Modifier> {
 		match self {
 			Discipline::Celerity => {
 				vec![Modifier::new(
 					ModifierTarget::Trait(Trait::Defense),
-					ModifierValue::Num(*value as i16),
+					ModifierValue::Num(value as i16),
 					ModifierOp::Add,
 				)]
 			}
 			Discipline::Resilience => vec![Modifier::new(
 				ModifierTarget::Attribute(Attribute::Stamina),
-				ModifierValue::Num(*value as i16),
+				ModifierValue::Num(value as i16),
 				ModifierOp::Add,
 			)],
 			Discipline::Vigor => vec![Modifier::new(
 				ModifierTarget::Attribute(Attribute::Strength),
-				ModifierValue::Num(*value as i16),
+				ModifierValue::Num(value as i16),
 				ModifierOp::Add,
 			)],
 			_ => vec![],
