@@ -17,6 +17,7 @@ iced_native = { git = "https://github.com/iced-rs/iced" }
 # iced_aw = {git = "https://github.com/iced-rs/iced_aw", features = ["pure", "tabs"]}
 # iced_aw = { git = "https://github.com/genusistimelord/iced_aw", features = ["tabs"] }
 
+ron = "0.8"
 
 itertools = "0.10"
 

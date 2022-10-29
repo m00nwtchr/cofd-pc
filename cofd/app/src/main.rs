@@ -12,7 +12,7 @@
 	clippy::default_trait_access
 )]
 
-use std::{cell::RefCell, mem, rc::Rc};
+use std::{cell::RefCell, fs::File, io::Write, mem, rc::Rc};
 
 use iced::{
 	executor,
@@ -31,6 +31,7 @@ mod view;
 mod widget;
 
 use i18n::fl;
+use ron::ser::PrettyConfig;
 
 #[derive(Debug, Clone)]
 pub enum Tab {
@@ -77,6 +78,8 @@ enum Message {
 	PickCharacter(usize),
 	Previous,
 	Msg,
+
+	Save,
 }
 
 impl PlayerCompanionApp {
@@ -89,6 +92,33 @@ impl PlayerCompanionApp {
 		mem::swap(&mut self.state, &mut state);
 		self.prev_state = Some(state);
 	}
+
+	pub fn save(&self) -> anyhow::Result<()> {
+		let vec: Vec<Character> = self
+			.characters
+			.iter()
+			.map(|rip| rip.borrow().clone())
+			.collect();
+
+		let val = ron::ser::to_string_pretty(&vec, PrettyConfig::default())?;
+		let mut file = File::create("./characters.ron")?;
+
+		file.write_all(val.as_bytes())?;
+
+		Ok(())
+	}
+
+	pub fn load(&mut self) -> anyhow::Result<()> {
+		let str = std::fs::read_to_string("./characters.ron")?;
+		let characters: Vec<Character> = ron::de::from_str(&str)?;
+
+		self.characters = characters
+			.into_iter()
+			.map(|val| Rc::new(RefCell::new(val)))
+			.collect();
+
+		Ok(())
+	}
 }
 
 impl Application for PlayerCompanionApp {
@@ -100,24 +130,28 @@ impl Application for PlayerCompanionApp {
 	fn new(_flags: ()) -> (Self, Command<Self::Message>) {
 		let _language_requester = i18n::setup();
 
+		let mut self_ = Self {
+			state: State::CharacterList,
+			prev_state: Default::default(),
+			characters: demo::characters().map(|f| Rc::new(RefCell::new(f))).into(),
+			// custom_xsplats: vec![
+			// 	// My OC (Original Clan) (Do Not Steal)
+			// 	// XSplat::Vampire(Clan::_Custom(
+			// 	// 	"Blorbo".to_owned(),
+			// 	// 	[
+			// 	// 		Discipline::Majesty,
+			// 	// 		Discipline::Dominate,
+			// 	// 		Discipline::Auspex,
+			// 	// 	],
+			// 	// 	[Attribute::Intelligence, Attribute::Presence],
+			// 	// )),
+			// ],
+		};
+
+		self_.load();
+
 		(
-			Self {
-				state: State::CharacterList,
-				prev_state: Default::default(),
-				characters: demo::characters().map(|f| Rc::new(RefCell::new(f))).into(),
-				// custom_xsplats: vec![
-				// 	// My OC (Original Clan) (Do Not Steal)
-				// 	// XSplat::Vampire(Clan::_Custom(
-				// 	// 	"Blorbo".to_owned(),
-				// 	// 	[
-				// 	// 		Discipline::Majesty,
-				// 	// 		Discipline::Dominate,
-				// 	// 		Discipline::Auspex,
-				// 	// 	],
-				// 	// 	[Attribute::Intelligence, Attribute::Presence],
-				// 	// )),
-				// ],
-			},
+			self_,
 			Command::none(),
 		)
 	}
@@ -141,6 +175,13 @@ impl Application for PlayerCompanionApp {
 			}
 			Message::Previous => self.prev(),
 			Message::Msg => {}
+
+			Message::Save => match self.save() {
+				Ok(_) => {}
+				Err(err) => {
+					log::error!("{}", err);
+				}
+			},
 		}
 
 		Command::none()
@@ -173,6 +214,7 @@ impl Application for PlayerCompanionApp {
 				let mut row = row![
 					button("Back").on_press(Message::Previous),
 					button("Home").on_press(Message::TabSelected(Tab::Overview)),
+					button("Save").on_press(Message::Save),
 				];
 
 				if let Splat::Werewolf(_, _, _, data) = &brw.splat {

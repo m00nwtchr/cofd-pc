@@ -19,7 +19,9 @@ pub mod prelude {
 
 #[cfg(test)]
 mod tests {
-	use crate::{
+	use ron::ser::PrettyConfig;
+
+use crate::{
 		character::{Attributes, Character, CharacterInfo, Skill, Skills},
 		splat::{
 			ability::Ability,
@@ -116,7 +118,7 @@ mod tests {
 
 		println!(
 			"{}",
-			serde_json::to_string_pretty(&vampire_character).unwrap()
+			ron::ser::to_string_pretty(&vampire_character, PrettyConfig::default()).unwrap()
 		);
 
 		assert_eq!(vampire_character.max_health(), 7);

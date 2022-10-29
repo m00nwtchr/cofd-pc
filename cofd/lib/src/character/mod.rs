@@ -309,7 +309,7 @@ pub struct Character {
 	#[serde(skip_serializing_if = "is_empty_vec")]
 	pub touchstones: Vec<String>,
 
-	#[serde(skip)]
+	// #[serde(skip)]
 	pub abilities: BTreeMap<Ability, AbilityVal>,
 	// #[serde(skip)]
 	pub merits: Vec<AbilityVal>,
