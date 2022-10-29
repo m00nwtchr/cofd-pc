@@ -3,10 +3,7 @@ use std::{
 	collections::{BTreeMap, HashMap},
 };
 
-use crate::splat::{
-	ability::{Ability, AbilityVal},
-	Merit, Splat,
-};
+use crate::splat::{ability::Ability, Merit, Splat};
 use serde::{Deserialize, Serialize};
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
@@ -29,9 +26,9 @@ pub struct CharacterBuilder {
 	attributes: Attributes,
 	skills: Skills,
 	specialties: HashMap<Skill, Vec<String>>,
-	merits: Vec<AbilityVal>,
+	merits: Vec<(Merit, u16)>,
 
-	abilities: BTreeMap<Ability, AbilityVal>,
+	abilities: HashMap<Ability, u16>,
 	power: u16,
 	fuel: u16,
 
@@ -72,12 +69,7 @@ impl CharacterBuilder {
 
 	#[must_use]
 	pub fn with_abilities<const N: usize>(mut self, abilities: [(Ability, u16); N]) -> Self {
-		self.abilities = BTreeMap::new();
-
-		for (ability, val) in abilities {
-			self.abilities
-				.insert(ability.clone(), AbilityVal(ability, val));
-		}
+		self.abilities = HashMap::from(abilities);
 
 		self.flag = true;
 		self
@@ -85,10 +77,7 @@ impl CharacterBuilder {
 
 	#[must_use]
 	pub fn with_merits<const N: usize>(mut self, merits: [(Merit, u16); N]) -> Self {
-		self.merits = merits
-			.into_iter()
-			.map(|(merit, val)| AbilityVal(Ability::Merit(merit), val))
-			.collect();
+		self.merits = Vec::from(merits);
 		self.flag = true;
 		self
 	}
@@ -310,9 +299,9 @@ pub struct Character {
 	pub touchstones: Vec<String>,
 
 	// #[serde(skip)]
-	pub abilities: BTreeMap<Ability, AbilityVal>,
+	pub abilities: HashMap<Ability, u16>,
 	// #[serde(skip)]
-	pub merits: Vec<AbilityVal>,
+	pub merits: Vec<(Merit, u16)>,
 
 	base_armor: ArmorStruct,
 	pub beats: u16,
@@ -328,39 +317,39 @@ impl Character {
 		CharacterBuilder::default()
 	}
 
-	pub fn add_ability(&mut self, ability: AbilityVal) {
-		self.abilities.insert(ability.0.clone(), ability);
+	pub fn add_ability(&mut self, ability: Ability, val: u16) {
+		self.abilities.insert(ability, val);
 	}
 
 	pub fn has_ability(&self, key: &Ability) -> bool {
 		self.abilities.contains_key(key)
 	}
 
-	pub fn remove_ability(&mut self, key: &Ability) -> Option<AbilityVal> {
+	pub fn remove_ability(&mut self, key: &Ability) -> Option<u16> {
 		self.abilities.remove(key)
 	}
 
-	pub fn get_ability(&self, key: &Ability) -> Option<&AbilityVal> {
+	pub fn get_ability_value(&self, key: &Ability) -> Option<&u16> {
 		self.abilities.get(key)
 	}
 
-	pub fn get_ability_mut(&mut self, key: &Ability) -> Option<&mut AbilityVal> {
+	pub fn get_ability_value_mut(&mut self, key: &Ability) -> Option<&mut u16> {
 		self.abilities.get_mut(key)
 	}
 
-	pub fn add_merit(&mut self, key: AbilityVal) {
-		self.merits.push(key);
+	pub fn add_merit(&mut self, key: Merit) {
+		self.merits.push((key, 0));
 	}
 
-	pub fn remove_merit(&mut self, i: usize) -> AbilityVal {
+	pub fn remove_merit(&mut self, i: usize) -> (Merit, u16) {
 		self.merits.remove(i)
 	}
 
-	pub fn get_merit(&self, i: usize) -> Option<&AbilityVal> {
+	pub fn get_merit(&self, i: usize) -> Option<&(Merit, u16)> {
 		self.merits.get(i)
 	}
 
-	pub fn get_merit_mut(&mut self, i: usize) -> Option<&mut AbilityVal> {
+	pub fn get_merit_mut(&mut self, i: usize) -> Option<&mut (Merit, u16)> {
 		self.merits.get_mut(i)
 	}
 
@@ -369,8 +358,16 @@ impl Character {
 
 		let mut modifiers: Vec<Modifier> = Vec::new();
 
-		modifiers.extend(self.abilities.values().flat_map(AbilityVal::get_modifiers));
-		modifiers.extend(self.merits.iter().flat_map(AbilityVal::get_modifiers));
+		modifiers.extend(
+			self.abilities
+				.iter()
+				.flat_map(|(ability, val)| ability.get_modifiers(val)),
+		);
+		modifiers.extend(
+			self.merits
+				.iter()
+				.flat_map(|(merit, val)| merit.get_modifiers(val)),
+		);
 
 		#[allow(clippy::single_match)] // Will likely add more stuff here
 		match &self.splat {
@@ -379,9 +376,8 @@ impl Character {
 				if let Some(auspice) = auspice {
 					modifiers.extend(
 						auspice.get_moon_gift().get_modifiers(
-							self.get_ability(&Ability::Renown(auspice.get_renown().clone()))
-								.map(|f| f.1)
-								.unwrap_or_default(),
+							self.get_ability_value(&auspice.get_renown().clone().into())
+								.unwrap_or(&0),
 						),
 					);
 				}
@@ -558,10 +554,9 @@ impl Character {
 			for value in vec {
 				count += match value {
 					ModifierValue::Num(value) => *value,
-					ModifierValue::Ability(ability) => self
-						.get_ability(ability)
-						.map(|a| a.1 as i16)
-						.unwrap_or_default(),
+					ModifierValue::Ability(ability) => {
+						*self.get_ability_value(ability).unwrap_or(&0) as i16
+					}
 					ModifierValue::Skill(skill) => *self.skills.get(skill) as i16,
 				}
 			}

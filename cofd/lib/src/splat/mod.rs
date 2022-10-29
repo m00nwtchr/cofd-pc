@@ -577,7 +577,7 @@ impl Display for ZSplat {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
 
 pub enum Merit {
 	// Mental Merits
@@ -920,7 +920,7 @@ impl Merit {
 		}
 	}
 
-	pub fn get_modifiers(&self, value: u16) -> Vec<Modifier> {
+	pub fn get_modifiers(&self, value: &u16) -> Vec<Modifier> {
 		match &self {
 			Merit::DefensiveCombat(true, Some(skill)) => {
 				vec![Modifier::new(
@@ -930,7 +930,7 @@ impl Merit {
 				)]
 			}
 			Merit::Giant => {
-				if value == 3 {
+				if *value == 3 {
 					vec![Modifier::new(
 						ModifierTarget::Trait(Trait::Size),
 						ModifierValue::Num(1),

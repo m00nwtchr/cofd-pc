@@ -178,7 +178,7 @@ impl From<Legacy> for ZSplat {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
 pub enum Arcanum {
 	Death,
 	Fate,
@@ -229,7 +229,7 @@ impl From<Arcanum> for Ability {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
 
 pub enum MageMerit {
 	HighSpeech,

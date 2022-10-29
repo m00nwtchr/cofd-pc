@@ -10,7 +10,7 @@ use cofd::{
 	character::{ModifierTarget, Trait, Wound},
 	prelude::*,
 	splat::{
-		ability::{Ability, AbilityVal},
+		ability::{Ability},
 		changeling::Regalia,
 		Splat, SplatType,
 	},

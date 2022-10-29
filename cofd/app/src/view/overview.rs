@@ -10,10 +10,10 @@ use cofd::{
 	character::{ModifierTarget, Trait, Wound},
 	prelude::*,
 	splat::{
-		ability::{Ability, AbilityVal},
+		ability::Ability,
 		changeling::Regalia,
 		mage::{Ministry, Order},
-		Splat, SplatType,
+		Splat, SplatType, Merit,
 	},
 };
 
@@ -47,9 +47,10 @@ pub enum Event {
 	// InfoTraitChanged(String, InfoTrait),
 	// XSplatChanged(XSplat),
 	// YSplatChanged(YSplat),
-	AbilityChanged(Ability, AbilityVal),
-	MeritChanged(usize, AbilityVal),
-	CustomAbilityChanged(Ability, String),
+	AbilityValChanged(Ability, u16),
+	AbilityChanged(Ability, Ability),
+	MeritChanged(usize, Merit, u16),
+	// CustomAbilityChanged(Ability, String),
 	HealthChanged(Wound),
 	IntegrityDamage(SplatType, Wound),
 	TouchstoneChanged(usize, String),
@@ -92,14 +93,11 @@ impl<Message> OverviewTab<Message> {
 		if character.splat.are_abilities_finite() {
 			if let Some(abilities) = character.splat.all_abilities() {
 				for ability in abilities {
-					let val = match character.get_ability(&ability) {
-						Some(val) => val.1,
-						None => 0,
-					};
+					let val = character.get_ability_value(&ability).unwrap_or(&0);
 
 					col1 = col1.push(text(fl(splat_name, Some(ability.name())).unwrap()));
-					col2 = col2.push(SheetDots::new(val, 0, 5, Shape::Dots, None, move |val| {
-						Event::AbilityChanged(ability.clone(), AbilityVal(ability.clone(), val))
+					col2 = col2.push(SheetDots::new(val.clone(), 0, 5, Shape::Dots, None, move |val| {
+						Event::AbilityValChanged(ability.clone(), val)
 					}));
 				}
 			}
@@ -117,20 +115,22 @@ impl<Message> OverviewTab<Message> {
 				e.push(ability);
 			}
 
-			for ability in character.abilities.values() {
-				if ability.0.is_custom() {
-					col1 = col1.push(text_input("", ability.0.name(), {
-						let ab = ability.0.clone();
-						move |val| Event::CustomAbilityChanged(ab.clone(), val)
+			for (ability, val) in &character.abilities {
+				if ability.is_custom() {
+					col1 = col1.push(text_input("", ability.name(), {
+						let ab = ability.clone();
+						move |val| {
+							let mut new = ab.clone();
+							*new.name_mut().unwrap() = val;
+							Event::AbilityChanged(ab.clone(), new)
+						}
 					}));
 				} else {
 					col1 = col1
 						.push(
-							pick_list(e.clone(), Some(ability.0.clone()), {
-								let val = ability.clone();
-								move |key| {
-									Event::AbilityChanged(val.0.clone(), AbilityVal(key, val.1))
-								}
+							pick_list(e.clone(), Some(ability.clone()), {
+								let ability = ability.clone();
+								move |val| Event::AbilityChanged(ability.clone(), val)
 							})
 							.width(Length::Fill)
 							.padding(1)
@@ -139,15 +139,15 @@ impl<Message> OverviewTab<Message> {
 						.spacing(1);
 				}
 
-				col2 = col2.push(SheetDots::new(ability.1, 0, 5, Shape::Dots, None, {
-					let key = ability.0.clone();
-					move |val| Event::AbilityChanged(key.clone(), AbilityVal(key.clone(), val))
+				col2 = col2.push(SheetDots::new(val.clone(), 0, 5, Shape::Dots, None, {
+					let ability = ability.clone();
+					move |val| Event::AbilityValChanged(ability.clone(), val)
 				}));
 			}
 
 			new = new.push(
 				pick_list(e, None, |key| {
-					Event::AbilityChanged(key.clone(), AbilityVal(key, 0))
+					Event::AbilityValChanged(key, 0)
 				})
 				.width(Length::Fill)
 				.padding(1)
@@ -191,45 +191,43 @@ where
 		match event {
 			Event::AttrChanged(val, attr) => *character.base_attributes_mut().get_mut(&attr) = val,
 			Event::SkillChanged(val, skill) => *character.skills_mut().get_mut(&skill) = val,
-			Event::AbilityChanged(ability, val) => {
-				if character.has_ability(&ability) {
-					character.remove_ability(&ability);
-					character.add_ability(val);
-				} else {
-					character.add_ability(val);
+			Event::AbilityValChanged(ability, val) => {
+				if let Some(val_) = character.get_ability_value_mut(&ability) {
+					*val_ = val;
 				}
-				// match character.get_ability_mut(&ability) {
-				// 	Some(ability) => *ability = val,
-				// 	None => character.add_ability(val),
-				// }
 
 				character.calc_mod_map();
 			}
-			Event::MeritChanged(i, val) => {
+			Event::AbilityChanged(ability, new) => {
+				if character.has_ability(&ability) {
+					let val = character.remove_ability(&ability).unwrap_or_default();
+					character.add_ability(
+						new,
+						val
+					);
+				} else {
+					character.add_ability(ability, 0);
+				}
+			}
+			Event::MeritChanged(i, ability, val) => {
 				let mut flag = false;
 
 				if character.merits.len() == i {
-					if !val.get_modifiers().is_empty() {
+					if !ability.get_modifiers(&val).is_empty() {
 						flag = true;
 					}
-					character.merits.push(val);
+					character.merits.push((ability, val));
 				} else {
 					let old = character.merits.remove(i);
-					if old.get_modifiers() != val.get_modifiers() {
+					if old.0.get_modifiers(&old.1) != ability.get_modifiers(&val) {
 						flag = true;
 					}
 
-					character.merits.insert(i, val);
+					character.merits.insert(i, (ability, val));
 				}
 
 				if flag {
 					character.calc_mod_map();
-				}
-			}
-			Event::CustomAbilityChanged(ability, name) => {
-				if let Some(mut val) = character.remove_ability(&ability) {
-					*val.0.name_mut().unwrap() = name;
-					character.add_ability(val);
 				}
 			}
 			Event::TraitChanged(val, _trait) => match _trait {

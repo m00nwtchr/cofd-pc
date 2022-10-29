@@ -207,7 +207,7 @@ impl Display for Regalia {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
 pub enum ChangelingMerit {}
 
 impl ChangelingMerit {

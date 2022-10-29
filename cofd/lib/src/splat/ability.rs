@@ -11,7 +11,7 @@ use super::{
 	Merit,
 };
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
 pub enum Ability {
 	Merit(Merit),
 	Discipline(Discipline),
@@ -40,7 +40,7 @@ impl Ability {
 		}
 	}
 
-	pub fn get_modifiers(&self, value: u16) -> Vec<Modifier> {
+	pub fn get_modifiers(&self, value: &u16) -> Vec<Modifier> {
 		match self {
 			Ability::Merit(merit) => merit.get_modifiers(value),
 			Ability::Discipline(discipline) => discipline.get_modifiers(value),
@@ -66,11 +66,11 @@ impl Display for Ability {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
-pub struct AbilityVal(pub Ability, pub u16);
+// #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+// pub struct AbilityVal(pub Ability, pub u16);
 
-impl AbilityVal {
-	pub fn get_modifiers(&self) -> Vec<Modifier> {
-		self.0.get_modifiers(self.1)
-	}
-}
+// impl AbilityVal {
+// 	pub fn get_modifiers(&self) -> Vec<Modifier> {
+// 		self.0.get_modifiers(self.1)
+// 	}
+// }

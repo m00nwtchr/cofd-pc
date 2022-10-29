@@ -195,7 +195,7 @@ impl From<Lodge> for ZSplat {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
 pub enum Renown {
 	Purity,
 	Glory,
@@ -239,7 +239,7 @@ pub enum Gift {
 	Wolf(WolfGift),
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
 pub enum MoonGift {
 	Crescent,
 	Full,
@@ -250,11 +250,11 @@ pub enum MoonGift {
 }
 
 impl MoonGift {
-	pub fn get_modifiers(&self, value: u16) -> Vec<crate::character::Modifier> {
+	pub fn get_modifiers(&self, value: &u16) -> Vec<crate::character::Modifier> {
 		match self {
 			// MoonGift::Crescent => vec![],
 			MoonGift::Full => {
-				if value > 2 {
+				if value > &2 {
 					vec![Modifier::new(
 						ModifierTarget::Trait(Trait::Health),
 						ModifierValue::Ability(Ability::Renown(Renown::Purity)),
@@ -312,7 +312,7 @@ pub enum WolfGift {
 	_Custom(String),
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Form {
 	#[default]
 	Hishu,
@@ -478,7 +478,7 @@ impl Form {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
 pub enum WerewolfMerit {
 	FavoredForm(Option<Form>),
 	EfficientKiller,
