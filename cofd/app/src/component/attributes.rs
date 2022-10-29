@@ -1,3 +1,5 @@
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
+
 use iced::{
 	widget::{column, row, text, Column},
 	Alignment, Length,
@@ -6,8 +8,8 @@ use iced_lazy::Component;
 use iced_native::Element;
 
 use cofd::{
-	character::{AttributeCategory, TraitCategory},
-	prelude::{Attribute, Attributes},
+	character::{AttributeCategory, ModifierTarget, TraitCategory},
+	prelude::{Attribute, Attributes, Character},
 };
 
 use crate::{
@@ -21,33 +23,40 @@ use crate::{
 };
 
 pub struct AttributeBar<Message> {
-	attributes: Attributes,
+	// attributes: Attributes,
+	character: Rc<RefCell<Character>>,
 	on_change: Box<dyn Fn(u16, Attribute) -> Message>,
 }
 
 pub fn attribute_bar<Message>(
-	attributes: Attributes,
+	// attributes: Attributes,
+	character: Rc<RefCell<Character>>,
 	on_change: impl Fn(u16, Attribute) -> Message + 'static,
 ) -> AttributeBar<Message> {
-	AttributeBar::new(attributes, on_change)
+	AttributeBar::new(character, on_change)
 }
 
 #[derive(Clone)]
-#[allow(clippy::enum_variant_names)]
 pub struct Event(u16, Attribute);
 
 impl<Message> AttributeBar<Message> {
 	fn new(
-		attributes: Attributes,
+		// attributes: Attributes,
+		character: Rc<RefCell<Character>>,
 		on_change: impl Fn(u16, Attribute) -> Message + 'static,
 	) -> Self {
 		Self {
-			attributes,
+			// attributes,
+			character,
 			on_change: Box::new(on_change),
 		}
 	}
 
-	fn mk_attr_col<Renderer>(&self, cat: TraitCategory) -> Element<Event, Renderer>
+	fn mk_attr_col<Renderer>(
+		&self,
+		character: &Character,
+		cat: TraitCategory,
+	) -> Element<Event, Renderer>
 	where
 		Renderer: iced_native::text::Renderer + 'static,
 		Renderer::Theme: iced::widget::text::StyleSheet + widget::dots::StyleSheet,
@@ -59,12 +68,19 @@ impl<Message> AttributeBar<Message> {
 			.align_items(Alignment::End);
 
 		for attr in Attribute::get(AttributeCategory::Trait(cat)) {
-			let v = self.attributes.get(&attr) as u16;
+			let v = character.base_attributes().get(&attr);
+			let val = character._modified(ModifierTarget::BaseAttribute(attr));
+			let mod_ = val - v;
 
 			col1 = col1.push(text(fl("attribute", Some(attr.name())).unwrap()));
-			col2 = col2.push(SheetDots::new(v, 1, 5, Shape::Dots, None, move |val| {
-				Event(val, attr)
-			}));
+			col2 = col2.push(SheetDots::new(
+				val,
+				1 + mod_,
+				5,
+				Shape::Dots,
+				None,
+				move |val| Event(val - mod_, attr),
+			));
 		}
 
 		row![col1, col2]
@@ -87,6 +103,8 @@ where
 	}
 
 	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
+		let character = self.character.borrow();
+
 		column![
 			text(flt!("attributes")).size(H2_SIZE),
 			row![
@@ -98,9 +116,9 @@ where
 				.spacing(3)
 				.width(Length::Fill)
 				.align_items(Alignment::End),
-				self.mk_attr_col(TraitCategory::Mental),
-				self.mk_attr_col(TraitCategory::Physical),
-				self.mk_attr_col(TraitCategory::Social),
+				self.mk_attr_col(&character, TraitCategory::Mental),
+				self.mk_attr_col(&character, TraitCategory::Physical),
+				self.mk_attr_col(&character, TraitCategory::Social),
 				column![].width(Length::Fill)
 			]
 			.spacing(10)

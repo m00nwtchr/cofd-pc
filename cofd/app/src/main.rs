@@ -114,6 +114,10 @@ impl PlayerCompanionApp {
 
 		self.characters = characters
 			.into_iter()
+			.map(|mut val| {
+				val.calc_mod_map();
+				val
+			})
 			.map(|val| Rc::new(RefCell::new(val)))
 			.collect();
 
@@ -150,10 +154,7 @@ impl Application for PlayerCompanionApp {
 
 		self_.load();
 
-		(
-			self_,
-			Command::none(),
-		)
+		(self_, Command::none())
 	}
 
 	fn title(&self) -> String {
@@ -242,11 +243,26 @@ fn main() -> iced::Result {
 
 // TODO: Add demo mortal.
 mod demo {
+	use std::{fs::File, io::Write};
+
 	use cofd::{
 		character::CharacterInfo,
 		prelude::*,
 		splat::{changeling::*, mage::*, vampire::*, werewolf::*, Merit, Splat},
 	};
+	use ron::ser::PrettyConfig;
+
+	#[test]
+	pub fn save() -> anyhow::Result<()> {
+		let vec = characters();
+
+		let val = ron::ser::to_string_pretty(&vec, PrettyConfig::default())?;
+		let mut file = File::create("../../characters.ron")?;
+
+		file.write_all(val.as_bytes())?;
+
+		Ok(())
+	}
 
 	#[allow(clippy::too_many_lines)]
 	pub fn characters() -> [Character; 5] {
@@ -265,7 +281,10 @@ mod demo {
 						Discipline::Auspex,
 					]),
 				)),
-				Default::default(),
+				VampireData {
+					attr_bonus: Some(Attribute::Presence),
+					..Default::default()
+				},
 			))
 			.with_info(CharacterInfo {
 				name: String::from("Darren Webb"),
@@ -283,7 +302,7 @@ mod demo {
 				strength: 1,
 				dexterity: 3,
 				stamina: 2,
-				presence: 3,
+				presence: 2,
 				manipulation: 2,
 				composure: 3,
 			})
@@ -336,7 +355,7 @@ mod demo {
 				Some(Auspice::Rahu),
 				Some(Tribe::BloodTalons),
 				None,
-				Default::default(),
+				WerewolfData { skill_bonus: Some(Skill::Brawl), ..Default::default() },
 			))
 			.with_info(CharacterInfo {
 				name: String::from("Amos Gray"),
@@ -404,7 +423,7 @@ mod demo {
 			.with_attributes(Attributes {
 				intelligence: 3,
 				wits: 3,
-				resolve: 3,
+				resolve: 2,
 				strength: 2,
 				dexterity: 3,
 				stamina: 2,
@@ -463,6 +482,7 @@ mod demo {
 				Some(Court::Autumn),
 				None,
 				ChangelingData {
+					attr_bonus: Some(Attribute::Dexterity),
 					regalia: Some(Regalia::Crown),
 					..Default::default()
 				},

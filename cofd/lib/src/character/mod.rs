@@ -276,7 +276,7 @@ pub fn is_empty_vec(vec: &Vec<String>) -> bool {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", default)]
+#[serde(default)]
 pub struct Character {
 	pub splat: Splat,
 
@@ -361,27 +361,69 @@ impl Character {
 		modifiers.extend(
 			self.abilities
 				.iter()
-				.flat_map(|(ability, val)| ability.get_modifiers(val)),
+				.flat_map(|(ability, val)| ability.get_modifiers(*val)),
 		);
 		modifiers.extend(
 			self.merits
 				.iter()
-				.flat_map(|(merit, val)| merit.get_modifiers(val)),
+				.flat_map(|(merit, val)| merit.get_modifiers(*val)),
 		);
 
-		#[allow(clippy::single_match)] // Will likely add more stuff here
 		match &self.splat {
 			Splat::Werewolf(auspice, _, _, data) => {
 				modifiers.extend(data.form.get_modifiers());
 				if let Some(auspice) = auspice {
 					modifiers.extend(
 						auspice.get_moon_gift().get_modifiers(
-							self.get_ability_value(&auspice.get_renown().clone().into())
+							*self
+								.get_ability_value(&auspice.get_renown().clone().into())
 								.unwrap_or(&0),
 						),
 					);
+
+					if let Some(skill_bonus) = data.skill_bonus {
+						if auspice.get_skills().contains(&skill_bonus) {
+							modifiers.push(Modifier::new(
+								ModifierTarget::BaseSkill(skill_bonus),
+								ModifierValue::Num(1),
+								ModifierOp::Add,
+							));
+						}
+					}
 				}
 			}
+			Splat::Mage(_, _, _, data) => {
+				if data.attr_bonus.get_type() == AttributeType::Resistance {
+					modifiers.push(Modifier::new(
+						ModifierTarget::BaseAttribute(data.attr_bonus),
+						ModifierValue::Num(1),
+						ModifierOp::Add,
+					));
+				}
+			}
+			Splat::Vampire(clan, _, _, data) => {
+				if let Some(attr_bonus) = data.attr_bonus {
+					if clan.get_favored_attributes().contains(&attr_bonus) {
+						modifiers.push(Modifier::new(
+							ModifierTarget::BaseAttribute(attr_bonus),
+							ModifierValue::Num(1),
+							ModifierOp::Add,
+						));
+					}
+				}
+			}
+			Splat::Changeling(seeming, _, _, data) => {
+				if let Some(attr_bonus) = data.attr_bonus {
+					if seeming.get_favored_attributes().contains(&attr_bonus) {
+						modifiers.push(Modifier::new(
+							ModifierTarget::BaseAttribute(attr_bonus),
+							ModifierValue::Num(1),
+							ModifierOp::Add,
+						));
+					}
+				}
+			}
+
 			_ => {}
 		}
 
@@ -409,33 +451,15 @@ impl Character {
 
 	pub fn attributes(&self) -> Attributes {
 		Attributes {
-			intelligence: add(
-				self._attributes.intelligence,
-				self._attr_mod(Attribute::Intelligence),
-			),
-			wits: add(self._attributes.wits, self._attr_mod(Attribute::Wits)),
-			resolve: add(self._attributes.resolve, self._attr_mod(Attribute::Resolve)),
-			strength: add(
-				self._attributes.strength,
-				self._attr_mod(Attribute::Strength),
-			),
-			dexterity: add(
-				self._attributes.dexterity,
-				self._attr_mod(Attribute::Dexterity),
-			),
-			stamina: add(self._attributes.stamina, self._attr_mod(Attribute::Stamina)),
-			presence: add(
-				self._attributes.presence,
-				self._attr_mod(Attribute::Presence),
-			),
-			manipulation: add(
-				self._attributes.manipulation,
-				self._attr_mod(Attribute::Manipulation),
-			),
-			composure: add(
-				self._attributes.composure,
-				self._attr_mod(Attribute::Composure),
-			),
+			intelligence: self._modified_attr(Attribute::Intelligence),
+			wits: self._modified_attr(Attribute::Wits),
+			resolve: self._modified_attr(Attribute::Resolve),
+			strength: self._modified_attr(Attribute::Strength),
+			dexterity: self._modified_attr(Attribute::Dexterity),
+			stamina: self._modified_attr(Attribute::Stamina),
+			presence: self._modified_attr(Attribute::Presence),
+			manipulation: self._modified_attr(Attribute::Manipulation),
+			composure: self._modified_attr(Attribute::Composure),
 		}
 	}
 	pub fn base_attributes_mut(&mut self) -> &mut Attributes {
@@ -566,7 +590,41 @@ impl Character {
 	}
 
 	fn _attr_mod(&self, attr: Attribute) -> i16 {
-		self._mod(ModifierTarget::Attribute(attr))
+		self._mod(ModifierTarget::Attribute(attr)) + self._mod(ModifierTarget::BaseAttribute(attr))
+	}
+
+	fn _modified_attr(&self, attr: Attribute) -> u16 {
+		self._modified(ModifierTarget::Attribute(attr))
+	}
+
+	pub fn _modified(&self, target: ModifierTarget) -> u16 {
+		// let base = base as i16;
+		let base = *match target {
+			ModifierTarget::BaseAttribute(attr) | ModifierTarget::Attribute(attr) => {
+				self._attributes.get(&attr)
+			}
+			ModifierTarget::BaseSkill(skill) | ModifierTarget::Skill(skill) => {
+				self.skills.get(&skill)
+			}
+			_ => &0,
+		};
+
+		let base_mod = self._mod(match target {
+			ModifierTarget::Attribute(attr) => ModifierTarget::BaseAttribute(attr),
+			ModifierTarget::Skill(skill) => ModifierTarget::BaseSkill(skill),
+			_ => target,
+		});
+		let _mod = match target {
+			ModifierTarget::BaseAttribute(_) => 0,
+			ModifierTarget::BaseSkill(_) => 0,
+			_ => self._mod(target),
+		};
+
+		if add(base, base_mod) > 5 {
+			add(base, _mod)
+		} else {
+			add(base, base_mod + _mod)
+		}
 	}
 }
 
@@ -742,36 +800,50 @@ impl CharacterInfo {
 	}
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_one(num: &u16) -> bool {
+	num.eq(&1)
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(default)]
 pub struct Attributes {
+	#[serde(skip_serializing_if = "is_one")]
 	pub intelligence: u16,
+	#[serde(skip_serializing_if = "is_one")]
 	pub wits: u16,
+	#[serde(skip_serializing_if = "is_one")]
 	pub resolve: u16,
 
+	#[serde(skip_serializing_if = "is_one")]
 	pub strength: u16,
+	#[serde(skip_serializing_if = "is_one")]
 	pub dexterity: u16,
+	#[serde(skip_serializing_if = "is_one")]
 	pub stamina: u16,
 
+	#[serde(skip_serializing_if = "is_one")]
 	pub presence: u16,
+	#[serde(skip_serializing_if = "is_one")]
 	pub manipulation: u16,
+	#[serde(skip_serializing_if = "is_one")]
 	pub composure: u16,
 }
 
 impl Attributes {
-	pub fn get(&self, attr: &Attribute) -> u16 {
+	pub fn get(&self, attr: &Attribute) -> &u16 {
 		match attr {
-			Attribute::Intelligence => self.intelligence,
-			Attribute::Wits => self.wits,
-			Attribute::Resolve => self.resolve,
+			Attribute::Intelligence => &self.intelligence,
+			Attribute::Wits => &self.wits,
+			Attribute::Resolve => &self.resolve,
 			//
-			Attribute::Strength => self.strength,
-			Attribute::Dexterity => self.dexterity,
-			Attribute::Stamina => self.stamina,
+			Attribute::Strength => &self.strength,
+			Attribute::Dexterity => &self.dexterity,
+			Attribute::Stamina => &self.stamina,
 			//
-			Attribute::Presence => self.presence,
-			Attribute::Manipulation => self.manipulation,
-			Attribute::Composure => self.composure,
+			Attribute::Presence => &self.presence,
+			Attribute::Manipulation => &self.manipulation,
+			Attribute::Composure => &self.composure,
 		}
 	}
 
@@ -952,7 +1024,10 @@ impl Modifier {
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum ModifierTarget {
+	BaseAttribute(Attribute),
+	BaseSkill(Skill),
 	Attribute(Attribute),
+	Skill(Skill),
 	Trait(Trait),
 }
 
@@ -993,6 +1068,7 @@ impl TraitCategory {
 	}
 }
 
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum AttributeType {
 	Power,
 	Finesse,
@@ -1110,9 +1186,23 @@ impl Attribute {
 			Attribute::Composure => "composure",
 		}
 	}
+
+	pub fn get_type(&self) -> AttributeType {
+		match self {
+			Attribute::Intelligence => AttributeType::Power,
+			Attribute::Wits => AttributeType::Finesse,
+			Attribute::Resolve => AttributeType::Resistance,
+			Attribute::Strength => AttributeType::Power,
+			Attribute::Dexterity => AttributeType::Finesse,
+			Attribute::Stamina => AttributeType::Resistance,
+			Attribute::Presence => AttributeType::Power,
+			Attribute::Manipulation => AttributeType::Finesse,
+			Attribute::Composure => AttributeType::Resistance,
+		}
+	}
 }
 
-#[derive(Clone, Debug, Hash, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Skill {
 	Academics,
 	Computer,

@@ -21,10 +21,12 @@ pub mod prelude {
 mod tests {
 	use ron::ser::PrettyConfig;
 
-use crate::{
+	use crate::{
 		character::{Attributes, Character, CharacterInfo, Skill, Skills},
+		prelude::Attribute,
 		splat::{
 			ability::Ability,
+			mage::{Arcanum, MageData, MageMerit, Order, Path},
 			vampire::{Bloodline, Clan, Covenant, Discipline, VampireMerit},
 			werewolf::{Auspice, Form, Renown, Tribe, WerewolfMerit},
 			Merit, Splat,
@@ -197,5 +199,92 @@ use crate::{
 		println!("{:?}", std::time::Instant::now().duration_since(t));
 
 		assert_eq!(werewolf_character.perception(), 9);
+
+		let mut mage_character = Character::builder()
+			.with_splat(Splat::Mage(
+				Path::Mastigos,
+				Some(Order::Mysterium),
+				None,
+				MageData {
+					attr_bonus: Attribute::Intelligence,
+					obsessions: vec![],
+				},
+			))
+			.with_info(CharacterInfo {
+				name: String::from("Polaris"),
+				player: String::from("m00n"),
+				virtue_anchor: String::from("Curious"),
+				vice_anchor: String::from("Greedy"),
+				concept: String::from("Astronomer"),
+				..Default::default()
+			})
+			.with_attributes(Attributes {
+				intelligence: 3,
+				wits: 3,
+				resolve: 5,
+				strength: 2,
+				dexterity: 3,
+				stamina: 2,
+				presence: 1,
+				manipulation: 2,
+				composure: 3,
+			})
+			.with_skills(Skills {
+				academics: 2,
+				computer: 1,
+				crafts: 1,
+				investigation: 3,
+				occult: 3,
+				science: 2,
+
+				larceny: 2,
+				stealth: 2,
+
+				animal_ken: 1,
+				empathy: 2,
+				expression: 1,
+				subterfuge: 3,
+				..Default::default()
+			})
+			.with_specialties(Skill::Academics, vec![String::from("Research")])
+			.with_specialties(Skill::AnimalKen, vec![String::from("Felines")])
+			.with_specialties(Skill::Subterfuge, vec![String::from("Detecting Lies")])
+			// TODO: Professional Training specialties
+			.with_specialties(Skill::Investigation, vec![String::from("Riddles")])
+			.with_specialties(Skill::Science, vec![String::from("Astronomy")])
+			.with_abilities([
+				(Arcanum::Mind.into(), 1),
+				(Arcanum::Prime.into(), 2),
+				(Arcanum::Space.into(), 3),
+			])
+			.with_merits([
+				(Merit::Status("Mysterium".to_string()), 1),
+				(MageMerit::HighSpeech.into(), 1),
+				(
+					Merit::ProfessionalTraining(
+						"e".to_owned(),
+						Some([Skill::Investigation, Skill::Science]),
+						None,
+					),
+					3,
+				),
+				(Merit::TrainedObserver, 1),
+				//
+				//
+			])
+			.build();
+
+		mage_character.calc_mod_map();
+
+		if let Splat::Mage(_, _, _, data) = &mut mage_character.splat {
+			data.attr_bonus = Attribute::Resolve;
+		}
+
+		mage_character.calc_mod_map();
+
+		assert_ne!(mage_character.attributes().resolve, 6);
+
+		mage_character.base_attributes_mut().resolve = 4;
+		assert_eq!(mage_character.attributes().resolve, 5);
 	}
 }

@@ -620,7 +620,7 @@ where
 		column![
 			column![
 				info_bar(self.character.clone(), || Event::Msg),
-				attribute_bar(character.base_attributes().clone(), Event::AttrChanged)
+				attribute_bar(self.character.clone(), Event::AttrChanged)
 			]
 			.align_items(Alignment::Center)
 			.width(Length::Fill),

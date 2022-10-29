@@ -4,7 +4,7 @@ use std::fmt::Display;
 
 use self::ability::Ability;
 use crate::{
-	character::{Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait},
+	character::{AttributeType, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait},
 	prelude::Attribute,
 };
 
@@ -171,7 +171,7 @@ impl Splat {
 	pub fn custom_xsplat(&self, name: String) -> Option<XSplat> {
 		match self {
 			Self::Mortal => None,
-			Self::Vampire(_, _, _, _) => Some(
+			Self::Vampire(..) => Some(
 				Clan::_Custom(
 					name,
 					[
@@ -183,7 +183,7 @@ impl Splat {
 				)
 				.into(),
 			),
-			Self::Werewolf(_, _, _, _) => Some(
+			Self::Werewolf(..) => Some(
 				Auspice::_Custom(
 					name,
 					[Skill::Academics, Skill::AnimalKen, Skill::Athletics],
@@ -193,10 +193,12 @@ impl Splat {
 				)
 				.into(),
 			),
-			Self::Mage(_, _, _, _) => {
+			Self::Mage(..) => {
 				Some(Path::_Custom(name, [Arcanum::Death, Arcanum::Fate], Arcanum::Forces).into())
 			}
-			Self::Changeling(_, _, _, _) => Some(Seeming::_Custom(name, Regalia::Crown).into()),
+			Self::Changeling(..) => {
+				Some(Seeming::_Custom(name, Regalia::Crown, AttributeType::Power).into())
+			}
 		}
 	}
 
@@ -435,7 +437,7 @@ impl XSplat {
 			Self::Vampire(Clan::_Custom(name, ..))
 			| Self::Werewolf(Auspice::_Custom(name, ..))
 			| Self::Mage(Path::_Custom(name, ..))
-			| Self::Changeling(Seeming::_Custom(name, _)) => Some(name),
+			| Self::Changeling(Seeming::_Custom(name, ..)) => Some(name),
 			_ => None,
 		}
 	}
@@ -920,7 +922,7 @@ impl Merit {
 		}
 	}
 
-	pub fn get_modifiers(&self, value: &u16) -> Vec<Modifier> {
+	pub fn get_modifiers(&self, value: u16) -> Vec<Modifier> {
 		match &self {
 			Merit::DefensiveCombat(true, Some(skill)) => {
 				vec![Modifier::new(
@@ -930,7 +932,7 @@ impl Merit {
 				)]
 			}
 			Merit::Giant => {
-				if *value == 3 {
+				if value == 3 {
 					vec![Modifier::new(
 						ModifierTarget::Trait(Trait::Size),
 						ModifierValue::Num(1),

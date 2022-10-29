@@ -8,6 +8,7 @@ use super::{ability::Ability, Merit, XSplat, YSplat, ZSplat};
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct WerewolfData {
+	pub skill_bonus: Option<Skill>,
 	pub form: Form,
 	// pub moon_gifts: BTreeMap<MoonGift, AbilityVal>,
 }

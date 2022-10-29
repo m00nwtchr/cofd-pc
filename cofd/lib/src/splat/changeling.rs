@@ -2,12 +2,16 @@ use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
 
-use crate::character::{Character, Damage};
+use crate::{
+	character::{AttributeCategory, AttributeType, Character, Damage},
+	prelude::Attribute,
+};
 
 use super::{Merit, XSplat, YSplat, ZSplat};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ChangelingData {
+	pub attr_bonus: Option<Attribute>,
 	pub regalia: Option<Regalia>,
 	pub frailties: Vec<String>,
 	pub clarity: Damage,
@@ -29,7 +33,7 @@ pub enum Seeming {
 	Fairest,
 	Ogre,
 	Wizened,
-	_Custom(String, Regalia),
+	_Custom(String, Regalia, AttributeType),
 }
 
 impl Seeming {
@@ -52,7 +56,7 @@ impl Seeming {
 			Seeming::Fairest => "fairest",
 			Seeming::Ogre => "ogre",
 			Seeming::Wizened => "wizened",
-			Seeming::_Custom(name, _) => name,
+			Seeming::_Custom(name, ..) => name,
 		}
 	}
 
@@ -64,8 +68,20 @@ impl Seeming {
 			Seeming::Fairest => &Regalia::Crown,
 			Seeming::Ogre => &Regalia::Shield,
 			Seeming::Wizened => &Regalia::Jewels,
-			Seeming::_Custom(_, regalia) => regalia,
+			Seeming::_Custom(_, regalia, ..) => regalia,
 		}
+	}
+
+	pub fn get_favored_attributes(&self) -> [Attribute; 3] {
+		Attribute::get(AttributeCategory::Type(match self {
+			Seeming::Beast => AttributeType::Resistance,
+			Seeming::Darkling => AttributeType::Finesse,
+			Seeming::Elemental => AttributeType::Resistance,
+			Seeming::Fairest => AttributeType::Power,
+			Seeming::Ogre => AttributeType::Power,
+			Seeming::Wizened => AttributeType::Finesse,
+			Seeming::_Custom(_, _, _type) => _type.clone(),
+		}))
 	}
 }
 
