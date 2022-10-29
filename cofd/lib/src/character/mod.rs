@@ -272,6 +272,11 @@ pub fn is_empty_vec(vec: &Vec<String>) -> bool {
 	vec.is_empty()
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
+pub fn is_five(n: &u16) -> bool {
+	*n == 5
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Character {
@@ -279,7 +284,6 @@ pub struct Character {
 
 	pub info: CharacterInfo,
 
-	pub base_size: u16,
 	#[serde(rename = "attributes")]
 	_attributes: Attributes,
 	skills: Skills,
@@ -300,6 +304,8 @@ pub struct Character {
 	// #[serde(skip)]
 	pub merits: Vec<(Merit, u16)>,
 
+	#[serde(skip_serializing_if = "is_five")]
+	pub base_size: u16,
 	base_armor: ArmorStruct,
 	pub beats: u16,
 

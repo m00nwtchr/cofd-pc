@@ -14,6 +14,7 @@
 
 use std::{cell::RefCell, fs::File, io::Write, mem, rc::Rc};
 
+use directories::ProjectDirs;
 use iced::{
 	executor,
 	widget::{button, row, Column},
@@ -54,6 +55,8 @@ struct PlayerCompanionApp {
 	state: State,
 	prev_state: Option<State>,
 	characters: Vec<Rc<RefCell<Character>>>,
+
+	project_dirs: ProjectDirs,
 	// character: Rc<RefCell<Character>>,
 	// custom_xsplats: Vec<XSplat>,
 	// locale: Locale,
@@ -100,8 +103,13 @@ impl PlayerCompanionApp {
 			.map(|rip| rip.borrow().clone())
 			.collect();
 
+		let data_dir = self.project_dirs.data_dir();
+		if !data_dir.exists() {
+			std::fs::create_dir_all(data_dir)?;
+		}
+
 		let val = ron::ser::to_string_pretty(&vec, PrettyConfig::default())?;
-		let mut file = File::create("./characters.ron")?;
+		let mut file = File::create(data_dir.join("characters.ron"))?;
 
 		file.write_all(val.as_bytes())?;
 
@@ -109,7 +117,7 @@ impl PlayerCompanionApp {
 	}
 
 	pub fn load(&mut self) -> anyhow::Result<()> {
-		let str = std::fs::read_to_string("./characters.ron")?;
+		let str = std::fs::read_to_string(self.project_dirs.data_dir().join("characters.ron"))?;
 		let characters: Vec<Character> = ron::de::from_str(&str)?;
 
 		self.characters = characters
@@ -138,6 +146,7 @@ impl Application for PlayerCompanionApp {
 			state: State::CharacterList,
 			prev_state: Default::default(),
 			characters: demo::characters().map(|f| Rc::new(RefCell::new(f))).into(),
+			project_dirs: ProjectDirs::from("", "", "cofd-pc").unwrap(),
 			// custom_xsplats: vec![
 			// 	// My OC (Original Clan) (Do Not Steal)
 			// 	// XSplat::Vampire(Clan::_Custom(
@@ -250,6 +259,7 @@ mod demo {
 		prelude::*,
 		splat::{changeling::*, mage::*, vampire::*, werewolf::*, Merit, Splat},
 	};
+	use directories::ProjectDirs;
 	use ron::ser::PrettyConfig;
 
 	#[test]
@@ -257,7 +267,12 @@ mod demo {
 		let vec = characters();
 
 		let val = ron::ser::to_string_pretty(&vec, PrettyConfig::default())?;
-		let mut file = File::create("../../characters.ron")?;
+		let mut file = File::create(
+			ProjectDirs::from("", "", "cofd-pc")
+				.unwrap()
+				.data_dir()
+				.join("characters.ron"),
+		)?;
 
 		file.write_all(val.as_bytes())?;
 
