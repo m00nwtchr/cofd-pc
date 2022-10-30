@@ -69,6 +69,8 @@ willpower = Willpower
 
 touchstones = Touchstones
 
+merits = Merits
+
 size = Size
 speed = Speed
 defense = Defense
@@ -77,7 +79,8 @@ initative = Initative
 beats = Beats
 experience = Experience
 
-merits = Merits
+conditions = Conditions
+aspirations = Aspirations
 
 mortal = Mortal
     .integrity = Integrity

@@ -124,6 +124,8 @@ impl CharacterBuilder {
 			character.fuel = character.max_fuel();
 		}
 
+		character.willpower = character.max_willpower();
+
 		character
 	}
 }
@@ -308,6 +310,9 @@ pub struct Character {
 	pub base_size: u16,
 	base_armor: ArmorStruct,
 	pub beats: u16,
+
+	pub conditions: Vec<String>,
+	pub aspirations: Vec<String>,
 
 	#[serde(skip)]
 	_mod_map: HashMap<ModifierTarget, Vec<ModifierValue>>,
@@ -672,7 +677,7 @@ impl Character {
 
 impl Default for Character {
 	fn default() -> Self {
-		let mut s = Self {
+		Self {
 			splat: Default::default(),
 			info: Default::default(),
 			_attributes: Default::default(),
@@ -691,11 +696,9 @@ impl Default for Character {
 			base_armor: Default::default(),
 			specialties: Default::default(),
 			touchstones: Default::default(),
-		};
-
-		s.willpower = s.max_willpower();
-
-		s
+			conditions: Default::default(),
+			aspirations: Default::default(),
+		}
 	}
 }
 

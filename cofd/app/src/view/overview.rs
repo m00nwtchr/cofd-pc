@@ -19,7 +19,7 @@ use cofd::{
 
 use crate::{
 	component::{
-		attributes::attribute_bar, info::info_bar, merits::merit_component,
+		attributes::attribute_bar, info::info_bar, list::list, merits::merit_component,
 		skills::skills_component, traits::traits_component,
 	},
 	fl,
@@ -55,14 +55,24 @@ pub enum Event {
 	IntegrityDamage(SplatType, Wound),
 	TouchstoneChanged(usize, String),
 
-	BaneChanged(usize, String),
+	ConditionChanged(usize, String),
+	AspirationChanged(usize, String),
+	SplatThingChanged(usize, String),
 
 	RegaliaChanged(Regalia),
-	FrailtyChanged(usize, String),
 
 	RoteSkillChanged(Skill),
 
 	Msg,
+}
+
+pub fn vec_changed<T: Default + Clone>(i: usize, val: T, vec: &mut Vec<T>) {
+	if let Some(v) = vec.get_mut(i) {
+		*v = val;
+	} else {
+		vec.resize_with(i + 1, Default::default);
+		*vec.get_mut(i).unwrap() = val;
+	}
 }
 
 impl<Message> OverviewTab<Message> {
@@ -253,16 +263,6 @@ where
 				}
 				_ => {}
 			},
-			Event::RegaliaChanged(regalia) => {
-				if let Splat::Changeling(_seeming, _, _, data) = &mut character.splat {
-					// if !flag {
-					data.regalia = Some(regalia);
-					// } else if let Seeming::_Custom(_, _regalia) = seeming {
-					// 	*_regalia = regalia;
-					// }
-				}
-			}
-			Event::Msg => {}
 			Event::TouchstoneChanged(i, str) => {
 				if let Some(touchstone) = character.touchstones.get_mut(i) {
 					*touchstone = str;
@@ -271,26 +271,14 @@ where
 					*character.touchstones.get_mut(i).unwrap() = str;
 				}
 			}
-			Event::FrailtyChanged(i, str) => {
-				if let Splat::Changeling(_, _, _, data) = &mut character.splat {
-					if let Some(frailty) = data.frailties.get_mut(i) {
-						*frailty = str;
-					} else {
-						data.frailties.resize(i + 1, String::new());
-						*data.frailties.get_mut(i).unwrap() = str;
-					}
-				}
-			}
-			Event::BaneChanged(i, str) => {
-				if let Splat::Vampire(_, _, _, data) = &mut character.splat {
-					if let Some(bane) = data.banes.get_mut(i) {
-						*bane = str;
-					} else {
-						data.banes.resize(i + 1, String::new());
-						*data.banes.get_mut(i).unwrap() = str;
-					}
-				}
-			}
+			Event::ConditionChanged(i, val) => vec_changed(i, val, &mut character.conditions),
+			Event::AspirationChanged(i, val) => vec_changed(i, val, &mut character.aspirations),
+			Event::SplatThingChanged(i, val) => match &mut character.splat {
+				Splat::Changeling(_, _, _, data) => vec_changed(i, val, &mut data.frailties),
+				Splat::Vampire(_, _, _, data) => vec_changed(i, val, &mut data.banes),
+				Splat::Mage(_, _, _, data) => vec_changed(i, val, &mut data.obsessions),
+				_ => (),
+			},
 			Event::RoteSkillChanged(skill) => {
 				if let Splat::Mage(
 					_,
@@ -308,6 +296,17 @@ where
 					}
 				}
 			}
+			Event::RegaliaChanged(regalia) => {
+				if let Splat::Changeling(_seeming, _, _, data) = &mut character.splat {
+					// if !flag {
+					data.regalia = Some(regalia);
+					// } else if let Seeming::_Custom(_, _regalia) = seeming {
+					// 	*_regalia = regalia;
+					// }
+				}
+			}
+
+			Event::Msg => {}
 		}
 
 		res
@@ -498,6 +497,41 @@ where
 			col
 		};
 
+		let conditions = column![list(
+			fl!("conditions"),
+			5,
+			character.conditions.clone(),
+			|i, val| text_input("", &val, move |val| Event::ConditionChanged(i, val)).into()
+		)]
+		.max_width(200);
+
+		let aspirations = column![list(
+			fl!("aspirations"),
+			5,
+			character.aspirations.clone(),
+			|i, val| text_input("", &val, move |val| Event::AspirationChanged(i, val)).into()
+		)]
+		.max_width(200);
+
+		let obsessions = if let Splat::Mage(_, _, _, data) = &character.splat {
+			column![list(
+				fl("mage", Some("obsessions")).unwrap(),
+				5,
+				// match character.power {
+				// 	1..=2 => 1,
+				// 	3..=5 => 2,
+				// 	6..=8 => 3,
+				// 	9..=10 => 4,
+				// 	_ => 1,
+				// },
+				data.obsessions.clone(),
+				|i, val| text_input("", &val, move |val| Event::SplatThingChanged(i, val)).into()
+			)]
+			.max_width(200)
+		} else {
+			column![]
+		};
+
 		let mut col1 = Column::new()
 			.align_items(Alignment::Center)
 			.width(Length::Fill);
@@ -566,7 +600,7 @@ where
 					frailties = frailties.push(column![text_input(
 						"",
 						data.frailties.get(i).unwrap_or(&String::new()),
-						move |val| Event::FrailtyChanged(i, val),
+						move |val| Event::SplatThingChanged(i, val),
 					)]);
 				}
 
@@ -589,23 +623,32 @@ where
 					);
 			}
 			Splat::Vampire(_, _, _, data) => {
-				let mut banes = Column::new().width(Length::Fill).spacing(1);
+				// let mut banes = Column::new().width(Length::Fill).spacing(1);
 
-				for i in 0..3 {
-					banes = banes.push(column![text_input(
-						"",
-						data.banes.get(i).unwrap_or(&String::new()),
-						move |val| Event::BaneChanged(i, val),
-					)]);
-				}
+				// for i in 0..3 {
+				// 	banes = banes.push(column![text_input(
+				// 		"",
+				// 		data.banes.get(i).unwrap_or(&String::new()),
+				// 		move |val| Event::BaneChanged(i, val),
+				// 	)]);
+				// }
+
+				let banes = list(
+					fl("vampire", Some("banes")).unwrap(),
+					3,
+					data.banes.clone(),
+					|i, val| {
+						text_input("", &val, move |val| Event::SplatThingChanged(i, val)).into()
+					},
+				);
 
 				col1 = col1.push(
-					column![
-						text(fl("vampire", Some("banes")).unwrap()).size(H3_SIZE),
-						banes
-					]
-					.align_items(Alignment::Center)
-					.width(Length::Fill),
+					banes, // column![
+					      // 	text(fl("vampire", Some("banes")).unwrap()).size(H3_SIZE),
+					      // 	banes
+					      // ]
+					      // .align_items(Alignment::Center)
+					      // .width(Length::Fill),
 				);
 			}
 			_ => {}
@@ -634,9 +677,18 @@ where
 					text("Other Traits".to_uppercase()).size(H2_SIZE),
 					row![
 						col1,
-						column![health, willpower, st, fuel, integrity]
-							.align_items(Alignment::Center)
-							.width(Length::Fill)
+						column![
+							health,
+							willpower,
+							st,
+							fuel,
+							integrity,
+							conditions,
+							aspirations,
+							obsessions
+						]
+						.align_items(Alignment::Center)
+						.width(Length::Fill)
 					]
 				]
 				.align_items(Alignment::Center)
