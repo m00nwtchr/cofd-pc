@@ -223,8 +223,8 @@ impl Application for PlayerCompanionApp {
 
 				let mut row = row![
 					button("Back").on_press(Message::Previous),
-					button("Home").on_press(Message::TabSelected(Tab::Overview)),
 					button("Save").on_press(Message::Save),
+					button("Home").on_press(Message::TabSelected(Tab::Overview)),
 				];
 
 				if let Splat::Werewolf(_, _, _, data) = &brw.splat {
