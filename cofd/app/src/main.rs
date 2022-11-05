@@ -12,7 +12,7 @@
 	clippy::default_trait_access
 )]
 
-use std::{cell::RefCell, fs::File, io::Write, mem, rc::Rc, path::PathBuf};
+use std::{cell::RefCell, fs::File, io::Write, mem, path::PathBuf, rc::Rc};
 
 use directories::ProjectDirs;
 use iced::{
@@ -68,8 +68,8 @@ const H3_SIZE: u16 = 20;
 
 const MAX_INPUT_WIDTH: u32 = 200;
 
-const TITLE_SPACING: u16 = 3;
-const COMPONENT_SPACING: u16 = 5;
+const TITLE_SPACING: u16 = 2;
+const COMPONENT_SPACING: u16 = 8;
 
 // const LANGS: [Locale; 4] = [
 // 	Locale::System,

@@ -13,10 +13,7 @@ use cofd::{
 };
 
 use crate::{
-	component::{
-		attributes::attribute_bar, info::info_bar, merits::merit_component,
-		skills::skills_component, traits::traits_component,
-	},
+	component::{attribute_bar, info_bar, merit_component, skills_component, traits_component},
 	fl,
 	// i18n::fl,
 	widget::{self, dots::Shape, dots::SheetDots, track::HealthTrack},

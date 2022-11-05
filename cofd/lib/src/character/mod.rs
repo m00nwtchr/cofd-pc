@@ -1,5 +1,5 @@
-use std::{cmp::min, collections::HashMap};
 use serde::{Deserialize, Serialize};
+use std::{cmp::min, collections::HashMap};
 
 use crate::splat::{ability::Ability, Merit, Splat};
 

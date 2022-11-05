@@ -19,8 +19,8 @@ use cofd::{
 
 use crate::{
 	component::{
-		attributes::attribute_bar, info::info_bar, list::list, merits::merit_component,
-		skills::skills_component, traits::traits_component,
+		attribute_bar, info_bar, integrity_component, list, merit_component, skills_component,
+		traits_component,
 	},
 	fl,
 	// i18n::fl,
@@ -54,9 +54,8 @@ pub enum Event {
 	MeritChanged(usize, Merit, u16),
 	// CustomAbilityChanged(Ability, String),
 	HealthChanged(Wound),
-	IntegrityDamage(SplatType, Wound),
-	TouchstoneChanged(usize, String),
-
+	// IntegrityDamage(SplatType, Wound),
+	// TouchstoneChanged(usize, String),
 	ConditionChanged(usize, String),
 	AspirationChanged(usize, String),
 	SplatThingChanged(usize, String),
@@ -257,24 +256,24 @@ where
 				_ => {}
 			},
 			Event::HealthChanged(wound) => character.health_mut().poke(&wound),
-			#[allow(clippy::single_match)]
-			Event::IntegrityDamage(_type, wound) => match (_type, &mut character.splat) {
-				(SplatType::Changeling, Splat::Changeling(_, _, _, data)) => {
-					data.clarity.poke(&wound);
-					if let Wound::Lethal = wound {
-						data.clarity.poke(&Wound::Aggravated);
-					}
-				}
-				_ => {}
-			},
-			Event::TouchstoneChanged(i, str) => {
-				if let Some(touchstone) = character.touchstones.get_mut(i) {
-					*touchstone = str;
-				} else {
-					character.touchstones.resize(i + 1, String::new());
-					*character.touchstones.get_mut(i).unwrap() = str;
-				}
-			}
+			// #[allow(clippy::single_match)]
+			// Event::IntegrityDamage(_type, wound) => match (_type, &mut character.splat) {
+			// 	(SplatType::Changeling, Splat::Changeling(_, _, _, data)) => {
+			// 		data.clarity.poke(&wound);
+			// 		if let Wound::Lethal = wound {
+			// 			data.clarity.poke(&Wound::Aggravated);
+			// 		}
+			// 	}
+			// 	_ => {}
+			// },
+			// Event::TouchstoneChanged(i, str) => {
+			// 	if let Some(touchstone) = character.touchstones.get_mut(i) {
+			// 		*touchstone = str;
+			// 	} else {
+			// 		character.touchstones.resize(i + 1, String::new());
+			// 		*character.touchstones.get_mut(i).unwrap() = str;
+			// 	}
+			// }
 			Event::ConditionChanged(i, val) => vec_changed(i, val, &mut character.conditions),
 			Event::AspirationChanged(i, val) => vec_changed(i, val, &mut character.aspirations),
 			Event::SplatThingChanged(i, val) => match &mut character.splat {
@@ -391,135 +390,22 @@ where
 			column![]
 		};
 
-		let integrity = {
-			let dots: Element<Event, Renderer> = if let Splat::Changeling(_, _, _, data) =
-				&character.splat
-			{
-				HealthTrack::new(
-					data.clarity.clone(),
-					data.max_clarity(&character) as usize,
-					|w| Event::IntegrityDamage(SplatType::Changeling, w),
-				)
-				.into()
-			} else {
-				let mut coll = Column::new();
+		let integrity = integrity_component(self.character.clone());
 
-				let mut flag = false;
-
-				if let Splat::Vampire(_, _, _, _) = &character.splat {
-					flag = true;
-
-					coll = coll.width(Length::FillPortion(4)).spacing(1);
-
-					for i in 0..10 {
-						coll = coll.push(
-							column![text_input(
-								"",
-								character.touchstones.get(i).unwrap_or(&String::new()),
-								move |val| Event::TouchstoneChanged(i, val),
-							)]
-							.max_width(MAX_INPUT_WIDTH),
-						);
-					}
-				}
-
-				row![
-					column![
-						SheetDots::new(character.integrity, 1, 10, Shape::Dots, None, |val| {
-							Event::TraitChanged(val as u16, Trait::Integrity)
-						})
-						.axis(if flag {
-							widget::dots::Axis::Vertical
-						} else {
-							widget::dots::Axis::Horizontal
-						}),
-					]
-					.align_items(if flag {
-						Alignment::End
-					} else {
-						Alignment::Center
-					})
-					.width(Length::Fill),
-					coll
-				]
-				.align_items(Alignment::Center)
-				.spacing(5)
-				.into()
-			};
-
-			let label =
-				text(fl(character.splat.name(), Some(character.splat.integrity())).unwrap())
-					.size(H3_SIZE);
-
-			let mut col = Column::new().align_items(Alignment::Center);
-
-			if let Splat::Werewolf(_, _, _, _) = character.splat {
-				col = col.push(
-					column![
-						text(fl(character.splat.name(), Some("flesh-touchstone")).unwrap())
-							.size(H3_SIZE),
-						column![text_input(
-							"",
-							character.touchstones.get(0).unwrap_or(&String::new()),
-							|str| Event::TouchstoneChanged(0, str),
-						)]
-						.max_width(MAX_INPUT_WIDTH),
-					]
-					.spacing(TITLE_SPACING),
-				);
-			}
-
-			col = col.push(column![label, dots].spacing(TITLE_SPACING));
-
-			match character.splat {
-				Splat::Werewolf(_, _, _, _) => {
-					col = col
-						.push(
-							text(fl(character.splat.name(), Some("spirit-touchstone")).unwrap())
-								.size(H3_SIZE),
-						)
-						.push(
-							column![text_input(
-								"",
-								character.touchstones.get(1).unwrap_or(&String::new()),
-								|str| Event::TouchstoneChanged(1, str),
-							)]
-							.max_width(MAX_INPUT_WIDTH),
-						);
-				}
-				Splat::Changeling(_, _, _, _) => {
-					col = col.push(text(fl!("touchstones")).size(H3_SIZE));
-					for i in 0..10 {
-						col = col.push(
-							column![text_input(
-								"",
-								character.touchstones.get(i).unwrap_or(&String::new()),
-								move |val| Event::TouchstoneChanged(i, val),
-							)]
-							.max_width(MAX_INPUT_WIDTH),
-						);
-					}
-				}
-				_ => (),
-			}
-
-			col
-		};
-
-		let conditions = column![list(
+		let conditions = list(
 			fl!("conditions"),
-			5,
+			character.conditions.len()+1,
 			character.conditions.clone(),
-			|i, val| text_input("", &val, move |val| Event::ConditionChanged(i, val)).into()
-		)]
+			|i, val| text_input("", &val, move |val| Event::ConditionChanged(i, val)).into(),
+		)
 		.max_width(MAX_INPUT_WIDTH);
 
-		let aspirations = column![list(
+		let aspirations = list(
 			fl!("aspirations"),
-			5,
+			character.aspirations.len()+1,
 			character.aspirations.clone(),
-			|i, val| text_input("", &val, move |val| Event::AspirationChanged(i, val)).into()
-		)]
+			|i, val| text_input("", &val, move |val| Event::AspirationChanged(i, val)).into(),
+		)
 		.max_width(MAX_INPUT_WIDTH);
 
 		let obsessions = if let Splat::Mage(_, _, _, data) = &character.splat {

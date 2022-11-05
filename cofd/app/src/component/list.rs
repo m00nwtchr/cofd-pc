@@ -5,18 +5,14 @@ use iced::{
 use iced_lazy::Component;
 use iced_native::Element;
 
-use crate::{
-	fl,
-	widget::{self},
-	H3_SIZE, TITLE_SPACING,
-};
+use crate::{fl, widget, H3_SIZE, TITLE_SPACING};
 
 pub struct List<'a, T, Message, Renderer> {
 	str: String,
 	min: usize,
 	vec: Vec<T>,
 	f: Box<dyn Fn(usize, T) -> Element<'a, Message, Renderer>>,
-	// on_change: Box<dyn Fn(usize, T) -> Message>,
+	max_width: Option<u32>, // on_change: Box<dyn Fn(usize, T) -> Message>,
 }
 
 pub fn list<'a, T, Message, Renderer>(
@@ -28,10 +24,7 @@ pub fn list<'a, T, Message, Renderer>(
 ) -> List<'a, T, Message, Renderer>
 where
 	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet
-		+ iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ widget::dots::StyleSheet,
+	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::text_input::StyleSheet,
 {
 	List::new(str, min, vec, f)
 }
@@ -42,10 +35,7 @@ where
 impl<'a, T, Message, Renderer> List<'a, T, Message, Renderer>
 where
 	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet
-		+ iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ widget::dots::StyleSheet,
+	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::text_input::StyleSheet,
 {
 	fn new(
 		str: String,
@@ -59,18 +49,21 @@ where
 			min,
 			vec,
 			f: Box::new(f),
+			max_width: None,
 			// on_change: Box::new(on_change),
 		}
+	}
+
+	pub fn max_width(mut self, width: u32) -> Self {
+		self.max_width = Some(width);
+		self
 	}
 }
 
 impl<'a, T, Message, Renderer> Component<Message, Renderer> for List<'a, T, Message, Renderer>
 where
 	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet
-		+ iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ widget::dots::StyleSheet,
+	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::text_input::StyleSheet,
 	T: Clone + Default,
 {
 	type State = ();
@@ -89,10 +82,17 @@ where
 			col = col.push((self.f)(i, val));
 		}
 
-		column![text(self.str.clone()).size(H3_SIZE), col]
+		let mut col = Column::new()
+			.push(text(self.str.clone()).size(H3_SIZE))
+			.push(col)
 			.spacing(TITLE_SPACING)
-			.align_items(Alignment::Center)
-			.into()
+			.align_items(Alignment::Center);
+
+		if let Some(max_width) = self.max_width {
+			col = col.max_width(max_width);
+		}
+
+		col.into()
 	}
 }
 
@@ -102,10 +102,7 @@ where
 	T: 'a + Clone + Default,
 	Message: 'a,
 	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::text::StyleSheet
-		+ iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ widget::dots::StyleSheet,
+	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::text_input::StyleSheet,
 {
 	fn from(list: List<'a, T, Message, Renderer>) -> Self {
 		iced_lazy::component(list)
