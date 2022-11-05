@@ -394,7 +394,7 @@ where
 
 		let conditions = list(
 			fl!("conditions"),
-			character.conditions.len()+1,
+			character.conditions.len() + 1,
 			character.conditions.clone(),
 			|i, val| text_input("", &val, move |val| Event::ConditionChanged(i, val)).into(),
 		)
@@ -402,7 +402,7 @@ where
 
 		let aspirations = list(
 			fl!("aspirations"),
-			character.aspirations.len()+1,
+			character.aspirations.len() + 1,
 			character.aspirations.clone(),
 			|i, val| text_input("", &val, move |val| Event::AspirationChanged(i, val)).into(),
 		)
@@ -490,15 +490,14 @@ where
 							.into()
 					};
 
-				let mut frailties = Column::new().width(Length::Fill).spacing(1);
-
-				for i in 0..4 {
-					frailties = frailties.push(column![text_input(
-						"",
-						data.frailties.get(i).unwrap_or(&String::new()),
-						move |val| Event::SplatThingChanged(i, val),
-					)]);
-				}
+				let frailties = list(
+					fl("changeling", Some("frailties")).unwrap(),
+					3,
+					data.frailties.clone(),
+					|i, val| {
+						text_input("", &val, move |val| Event::SplatThingChanged(i, val)).into()
+					},
+				);
 
 				col1 = col1
 					.push(
@@ -509,43 +508,17 @@ where
 						.align_items(Alignment::Center)
 						.width(Length::Fill),
 					)
-					.push(
-						column![
-							text(fl("changeling", Some("frailties")).unwrap()).size(H3_SIZE),
-							frailties
-						]
-						.align_items(Alignment::Center)
-						.width(Length::Fill),
-					);
+					.push(frailties);
 			}
 			Splat::Vampire(_, _, _, data) => {
-				// let mut banes = Column::new().width(Length::Fill).spacing(1);
-
-				// for i in 0..3 {
-				// 	banes = banes.push(column![text_input(
-				// 		"",
-				// 		data.banes.get(i).unwrap_or(&String::new()),
-				// 		move |val| Event::BaneChanged(i, val),
-				// 	)]);
-				// }
-
-				let banes = list(
+				col1 = col1.push(list(
 					fl("vampire", Some("banes")).unwrap(),
 					3,
 					data.banes.clone(),
 					|i, val| {
 						text_input("", &val, move |val| Event::SplatThingChanged(i, val)).into()
 					},
-				);
-
-				col1 = col1.push(
-					banes, // column![
-					      // 	text(fl("vampire", Some("banes")).unwrap()).size(H3_SIZE),
-					      // 	banes
-					      // ]
-					      // .align_items(Alignment::Center)
-					      // .width(Length::Fill),
-				);
+				));
 			}
 			_ => {}
 		}

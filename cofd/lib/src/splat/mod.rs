@@ -34,7 +34,7 @@ use changeling::*;
 // use beast::*;
 // use deviant:*;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub enum SplatType {
 	Mortal,
 	Vampire,
@@ -48,6 +48,12 @@ pub enum SplatType {
 	// Demon,
 	// Beast,
 	// Deviant,
+}
+
+impl SplatType {
+	pub fn name(&self) -> &str {
+		to_variant_name(self).unwrap()
+	}
 }
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
