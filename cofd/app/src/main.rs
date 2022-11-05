@@ -380,6 +380,7 @@ mod demo {
 				None,
 				WerewolfData {
 					skill_bonus: Some(Skill::Brawl),
+					triggers: KuruthTriggers::Moon,
 					..Default::default()
 				},
 			))

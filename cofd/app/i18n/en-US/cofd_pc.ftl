@@ -186,6 +186,11 @@ werewolf = Werewolf
     .flesh-touchstone = Flesh Touchstone
     .spirit-touchstone = Spirit Touchstone
 
+    .kuruth-triggers = Kuruth Triggers
+    .passive = Passive
+    .common = Common
+    .specific = Specific
+
     .cunning = Cunning
     .glory = Glory
     .honor = Honor

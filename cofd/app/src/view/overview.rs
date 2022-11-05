@@ -13,6 +13,7 @@ use cofd::{
 		ability::Ability,
 		changeling::Regalia,
 		mage::{Ministry, Order},
+		werewolf::{KuruthTrigger, KuruthTriggerSet, KuruthTriggers, WerewolfData},
 		Merit, Splat, SplatType,
 	},
 };
@@ -61,6 +62,9 @@ pub enum Event {
 	SplatThingChanged(usize, String),
 
 	RegaliaChanged(Regalia),
+
+	KuruthTriggersChanged(KuruthTriggers),
+	KuruthTriggerChanged(KuruthTrigger, String),
 
 	RoteSkillChanged(Skill),
 
@@ -256,24 +260,6 @@ where
 				_ => {}
 			},
 			Event::HealthChanged(wound) => character.health_mut().poke(&wound),
-			// #[allow(clippy::single_match)]
-			// Event::IntegrityDamage(_type, wound) => match (_type, &mut character.splat) {
-			// 	(SplatType::Changeling, Splat::Changeling(_, _, _, data)) => {
-			// 		data.clarity.poke(&wound);
-			// 		if let Wound::Lethal = wound {
-			// 			data.clarity.poke(&Wound::Aggravated);
-			// 		}
-			// 	}
-			// 	_ => {}
-			// },
-			// Event::TouchstoneChanged(i, str) => {
-			// 	if let Some(touchstone) = character.touchstones.get_mut(i) {
-			// 		*touchstone = str;
-			// 	} else {
-			// 		character.touchstones.resize(i + 1, String::new());
-			// 		*character.touchstones.get_mut(i).unwrap() = str;
-			// 	}
-			// }
 			Event::ConditionChanged(i, val) => vec_changed(i, val, &mut character.conditions),
 			Event::AspirationChanged(i, val) => vec_changed(i, val, &mut character.aspirations),
 			Event::SplatThingChanged(i, val) => match &mut character.splat {
@@ -301,15 +287,37 @@ where
 			}
 			Event::RegaliaChanged(regalia) => {
 				if let Splat::Changeling(_seeming, _, _, data) = &mut character.splat {
-					// if !flag {
 					data.regalia = Some(regalia);
-					// } else if let Seeming::_Custom(_, _regalia) = seeming {
-					// 	*_regalia = regalia;
-					// }
 				}
 			}
 
 			Event::Msg => {}
+			Event::KuruthTriggersChanged(triggers) => {
+				if let Splat::Werewolf(_, _, _, data) = &mut character.splat {
+					data.triggers = triggers;
+				}
+			}
+			Event::KuruthTriggerChanged(trigger, val) => {
+				if let Splat::Werewolf(
+					..,
+					WerewolfData {
+						triggers:
+							KuruthTriggers::_Custom(KuruthTriggerSet {
+								passive,
+								common,
+								specific,
+							}),
+						..
+					},
+				) = &mut character.splat
+				{
+					match trigger {
+						KuruthTrigger::Passive => *passive = val,
+						KuruthTrigger::Common => *common = val,
+						KuruthTrigger::Specific => *specific = val,
+					}
+				}
+			}
 		}
 
 		res
@@ -427,6 +435,70 @@ where
 			column![]
 		};
 
+		let kuruth_triggers = if let Splat::Werewolf(_, _, _, data) = &character.splat {
+			let (passive, common, specific): (
+				Element<Event, Renderer>,
+				Element<Event, Renderer>,
+				Element<Event, Renderer>,
+			) = if let KuruthTriggers::_Custom(KuruthTriggerSet {
+				passive,
+				common,
+				specific,
+			}) = &data.triggers
+			{
+				(
+					text_input("", passive, |passive| {
+						Event::KuruthTriggerChanged(KuruthTrigger::Passive, passive)
+					})
+					.into(),
+					text_input("", common, |common| {
+						Event::KuruthTriggerChanged(KuruthTrigger::Common, common)
+					})
+					.into(),
+					text_input("", specific, |specific| {
+						Event::KuruthTriggerChanged(KuruthTrigger::Specific, specific)
+					})
+					.into(),
+				)
+			} else {
+				let triggers = data.triggers.get_triggers();
+
+				(
+					text(triggers.passive).into(),
+					text(triggers.common).into(),
+					text(triggers.specific).into(),
+				)
+			};
+
+			column![
+				text(fl("werewolf", Some("kuruth-triggers")).unwrap()),
+				column![
+					pick_list(
+						KuruthTriggers::all().to_vec(),
+						Some(data.triggers.clone()),
+						Event::KuruthTriggersChanged,
+					).width(Length::Fill).padding(0),
+					row![
+						text(format!("{}:", fl("werewolf", Some("passive")).unwrap())),
+						passive
+					],
+					row![
+						text(format!("{}:", fl("werewolf", Some("common")).unwrap())),
+						common
+					],
+					row![
+						text(format!("{}:", fl("werewolf", Some("specific")).unwrap())),
+						specific
+					]
+				]
+			]
+			.align_items(Alignment::Center)
+			.spacing(TITLE_SPACING)
+			.max_width(MAX_INPUT_WIDTH)
+		} else {
+			column![]
+		};
+
 		let mut col1 = Column::new()
 			.align_items(Alignment::Center)
 			.width(Length::Fill)
@@ -452,26 +524,6 @@ where
 				let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
 
 				let seeming_regalia = text(fl(character.splat.name(), Some(sg.name())).unwrap());
-				// if let Seeming::_Custom(_, sg) = seeming {
-				// 	let reg: Vec<Regalia> = all_regalia
-				// 		.iter()
-				// 		.cloned()
-				// 		.filter(|reg| {
-				// 			if let Some(regalia) = &data.regalia {
-				// 				*reg != *regalia
-				// 			} else {
-				// 				true
-				// 			}
-				// 		})
-				// 		.collect();
-
-				// 	pick_list(reg, Some(sg.clone()), |val| {
-				// 		Event::RegaliaChanged(val, true)
-				// 	})
-				// 	.into()
-				// } else {
-				// text(fl(character.splat.name(), Some(sg.name()))).into()
-				// };
 
 				let regalia: Element<Event, Renderer> =
 					if let Some(Regalia::_Custom(name)) = &data.regalia {
@@ -554,7 +606,8 @@ where
 							integrity,
 							conditions,
 							aspirations,
-							obsessions
+							obsessions,
+							kuruth_triggers
 						]
 						.spacing(COMPONENT_SPACING)
 						.align_items(Alignment::Center)

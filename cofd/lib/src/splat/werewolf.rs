@@ -1,4 +1,7 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
+use serde_variant::to_variant_name;
 
 use crate::character::{
 	Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait,
@@ -7,10 +10,108 @@ use crate::character::{
 use super::{ability::Ability, Merit, XSplat, YSplat, ZSplat};
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct KuruthTriggerSet {
+	pub passive: String,
+	pub common: String,
+	pub specific: String,
+}
+
+#[derive(Clone)]
+pub enum KuruthTrigger {
+	Passive,
+	Common,
+	Specific,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+
+pub enum KuruthTriggers {
+	Blood,
+	Moon,
+	TheOther,
+	Pack,
+	Territory,
+	Wound,
+	_Custom(KuruthTriggerSet),
+}
+
+impl Display for KuruthTriggers {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		if let KuruthTriggers::_Custom(_) = self {
+			f.write_str("Custom")
+		} else {
+			f.write_str(to_variant_name(self).unwrap())
+		}
+	}
+}
+
+impl Default for KuruthTriggers {
+	fn default() -> Self {
+		Self::_Custom(Default::default())
+	}
+}
+
+impl KuruthTriggers {
+	pub fn all() -> [Self; 7] {
+		[
+			Self::Blood,
+			Self::Moon,
+			Self::TheOther,
+			Self::Pack,
+			Self::Territory,
+			Self::Wound,
+			Default::default(),
+		]
+	}
+
+	pub fn get_triggers(&self) -> KuruthTriggerSet {
+		match self {
+			KuruthTriggers::Blood => KuruthTriggerSet {
+				passive: "Smelling human blood.".to_owned(),
+				common: "Tasting human blood.".to_owned(),
+				specific: "Swallowing human blood.".to_owned(),
+			},
+			KuruthTriggers::Moon => KuruthTriggerSet {
+				passive: "Your auspice moon is in the sky.".to_owned(),
+				common: "You witness your auspice moon in the sky.".to_owned(),
+				specific: "Hear a wolf or werewolf howl when your auspice moon is in the sky."
+					.to_owned(),
+			},
+			KuruthTriggers::TheOther => KuruthTriggerSet {
+				passive: "You come within 10 yards of a supernatural creature.".to_owned(),
+				common: "You witness a supernatural creature doing something obviously inhuman."
+					.to_owned(),
+				specific: "You are the target of a supernatural power.".to_owned(),
+			},
+			KuruthTriggers::Pack => KuruthTriggerSet {
+				passive: "A pack member takes lethal damage.".to_owned(),
+				common: "Seeing someone attack a pack member.".to_owned(),
+				specific: "You cause lethal damage to a pack member.".to_owned(),
+			},
+			KuruthTriggers::Territory => KuruthTriggerSet {
+				passive: "A werewolf you don't know enters your territory without permission."
+					.to_owned(),
+				common: "You see a werewolf you don't know in your territory.".to_owned(),
+				specific:
+					"A werewolf you don't know challenges your pack's ability to do its duty."
+						.to_owned(),
+			},
+			KuruthTriggers::Wound => KuruthTriggerSet {
+				passive: "Being in the area of a Wound.".to_owned(),
+				common: "Interacting with a Wound-born spirit.".to_owned(),
+				specific: "Being attacked by a Wound-born spirit.".to_owned(),
+			},
+			KuruthTriggers::_Custom(set) => set.clone(),
+		}
+	}
+}
+
+#[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct WerewolfData {
 	pub skill_bonus: Option<Skill>,
 	pub form: Form,
 	// pub moon_gifts: BTreeMap<MoonGift, AbilityVal>,
+	pub triggers: KuruthTriggers,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]

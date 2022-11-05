@@ -87,7 +87,10 @@ where
 		vec.push(Merit::_Custom(String::from("--- Social Merits ---")));
 		vec.extend(Merit::social());
 
-		vec.push(Merit::_Custom(format!("--- {} Merits ---", self.splat.name())));
+		vec.push(Merit::_Custom(format!(
+			"--- {} Merits ---",
+			self.splat.name()
+		)));
 		vec.extend(Merit::get(self.splat));
 
 		vec.push(Merit::_Custom(String::from("Custom")));
@@ -99,7 +102,6 @@ where
 			.collect();
 
 		for (i, (merit, val)) in self.merits.iter().enumerate() {
-			// if let Ability::Merit(merit) = merit {
 			if let Merit::_Custom(str) = merit {
 				col1 = col1.push(text_input("", &str, move |key| {
 					Event(i, Merit::_Custom(key), val.clone())
@@ -116,7 +118,6 @@ where
 					)
 					.spacing(1);
 			}
-			// }
 
 			col2 = col2.push(SheetDots::new(val.clone(), 0, 5, Shape::Dots, None, {
 				let key = merit.clone();
