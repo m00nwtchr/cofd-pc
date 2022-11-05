@@ -7,9 +7,8 @@ use iced_native::Element;
 
 use crate::{
 	fl,
-	widget::{
-		self,
-	}, H3_SIZE,
+	widget::{self},
+	H3_SIZE, TITLE_SPACING,
 };
 
 pub struct List<'a, T, Message, Renderer> {
@@ -91,6 +90,7 @@ where
 		}
 
 		column![text(self.str.clone()).size(H3_SIZE), col]
+			.spacing(TITLE_SPACING)
 			.align_items(Alignment::Center)
 			.into()
 	}

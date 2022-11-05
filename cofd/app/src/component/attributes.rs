@@ -19,7 +19,7 @@ use crate::{
 		self,
 		dots::{Shape, SheetDots},
 	},
-	H2_SIZE,
+	H2_SIZE, TITLE_SPACING,
 };
 
 pub struct AttributeBar<Message> {
@@ -123,6 +123,7 @@ where
 			]
 			.spacing(10)
 		]
+		.spacing(TITLE_SPACING)
 		.align_items(Alignment::Center)
 		.into()
 	}

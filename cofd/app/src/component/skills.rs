@@ -20,7 +20,7 @@ use crate::{
 		self,
 		dots::{Shape, SheetDots},
 	},
-	H2_SIZE, H3_SIZE,
+	H2_SIZE, H3_SIZE, TITLE_SPACING,
 };
 
 pub struct SkillsComponent<Message> {
@@ -112,6 +112,7 @@ impl<Message> SkillsComponent<Message> {
 			text(flt!("unskilled", num = cat.unskilled())).size(17),
 			row![col0, col1, col2].spacing(5)
 		]
+		.spacing(TITLE_SPACING)
 		.align_items(Alignment::Center)
 		.into()
 	}

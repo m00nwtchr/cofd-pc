@@ -14,7 +14,7 @@ use crate::{
 		self,
 		dots::{Shape, SheetDots},
 	},
-	H2_SIZE, H3_SIZE,
+	H2_SIZE, H3_SIZE, TITLE_SPACING,
 };
 
 pub struct MeritComponent<Message> {
@@ -133,6 +133,7 @@ where
 			text(fl!("merits")).size(H3_SIZE),
 			column![row![col1, col2], new]
 		]
+		.spacing(TITLE_SPACING)
 		.align_items(Alignment::Center)
 		.into()
 	}

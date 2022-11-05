@@ -12,7 +12,7 @@
 	clippy::default_trait_access
 )]
 
-use std::{cell::RefCell, fs::File, io::Write, mem, rc::Rc};
+use std::{cell::RefCell, fs::File, io::Write, mem, rc::Rc, path::PathBuf};
 
 use directories::ProjectDirs;
 use iced::{
@@ -68,6 +68,9 @@ const H3_SIZE: u16 = 20;
 
 const MAX_INPUT_WIDTH: u32 = 200;
 
+const TITLE_SPACING: u16 = 3;
+const COMPONENT_SPACING: u16 = 5;
+
 // const LANGS: [Locale; 4] = [
 // 	Locale::System,
 // 	Locale::Lang(langid!("en-GB")),
@@ -103,13 +106,14 @@ impl PlayerCompanionApp {
 			.map(|rip| rip.borrow().clone())
 			.collect();
 
-		let data_dir = self.project_dirs.data_dir();
-		if !data_dir.exists() {
-			std::fs::create_dir_all(data_dir)?;
+		let path = self.save_path();
+		let dir = path.parent();
+		if dir.is_some() && !dir.unwrap().exists() {
+			std::fs::create_dir_all(dir.unwrap())?;
 		}
 
 		let val = ron::ser::to_string_pretty(&vec, PrettyConfig::default())?;
-		let mut file = File::create(data_dir.join("characters.ron"))?;
+		let mut file = File::create(path)?;
 
 		file.write_all(val.as_bytes())?;
 
@@ -117,7 +121,7 @@ impl PlayerCompanionApp {
 	}
 
 	pub fn load(&mut self) -> anyhow::Result<()> {
-		let str = std::fs::read_to_string(self.project_dirs.data_dir().join("characters.ron"))?;
+		let str = std::fs::read_to_string(self.save_path())?;
 		let characters: Vec<Character> = ron::de::from_str(&str)?;
 
 		self.characters = characters
@@ -130,6 +134,10 @@ impl PlayerCompanionApp {
 			.collect();
 
 		Ok(())
+	}
+
+	fn save_path(&self) -> PathBuf {
+		self.project_dirs.data_dir().join("characters.ron")
 	}
 }
 

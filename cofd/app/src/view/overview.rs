@@ -25,9 +25,11 @@ use crate::{
 	fl,
 	// i18n::fl,
 	widget::{self, dots::Shape, dots::SheetDots, track::HealthTrack},
+	COMPONENT_SPACING,
 	H2_SIZE,
 	H3_SIZE,
 	MAX_INPUT_WIDTH,
+	TITLE_SPACING,
 };
 
 pub struct OverviewTab<Message> {
@@ -168,7 +170,9 @@ impl<Message> OverviewTab<Message> {
 			);
 		}
 
-		let mut col = Column::new().align_items(Alignment::Center);
+		let mut col = Column::new()
+			.align_items(Alignment::Center)
+			.spacing(TITLE_SPACING);
 		if let Some(name) = character.splat.ability_name() {
 			col = col
 				.push(text(fl(splat_name, Some(name)).unwrap()).size(H3_SIZE))
@@ -333,6 +337,7 @@ where
 				text(label).size(H3_SIZE),
 				track // text(format!("{:?}", character.health_track))
 			]
+			.spacing(TITLE_SPACING)
 			.align_items(Alignment::Center)
 		};
 
@@ -346,7 +351,9 @@ where
 				|val| Event::TraitChanged(val as u16, Trait::Willpower),
 			);
 
-			column![text(fl!("willpower")).size(H3_SIZE), dots].align_items(Alignment::Center)
+			column![text(fl!("willpower")).size(H3_SIZE), dots]
+				.spacing(TITLE_SPACING)
+				.align_items(Alignment::Center)
 		};
 
 		let st = if let Some(st) = character.splat.supernatural_tolerance() {
@@ -358,6 +365,7 @@ where
 				text(fl(character.splat.name(), Some(st)).unwrap()).size(H3_SIZE),
 				dots
 			]
+			.spacing(TITLE_SPACING)
 			.align_items(Alignment::Center)
 		} else {
 			column![]
@@ -377,6 +385,7 @@ where
 				text(fl(character.splat.name(), Some(fuel)).unwrap()).size(H3_SIZE),
 				boxes
 			]
+			.spacing(TITLE_SPACING)
 			.align_items(Alignment::Center)
 		} else {
 			column![]
@@ -445,22 +454,22 @@ where
 			let mut col = Column::new().align_items(Alignment::Center);
 
 			if let Splat::Werewolf(_, _, _, _) = character.splat {
-				col = col
-					.push(
+				col = col.push(
+					column![
 						text(fl(character.splat.name(), Some("flesh-touchstone")).unwrap())
 							.size(H3_SIZE),
-					)
-					.push(
 						column![text_input(
 							"",
 							character.touchstones.get(0).unwrap_or(&String::new()),
 							|str| Event::TouchstoneChanged(0, str),
 						)]
 						.max_width(MAX_INPUT_WIDTH),
-					);
+					]
+					.spacing(TITLE_SPACING),
+				);
 			}
 
-			col = col.push(label).push(dots);
+			col = col.push(column![label, dots].spacing(TITLE_SPACING));
 
 			match character.splat {
 				Splat::Werewolf(_, _, _, _) => {
@@ -503,7 +512,7 @@ where
 			character.conditions.clone(),
 			|i, val| text_input("", &val, move |val| Event::ConditionChanged(i, val)).into()
 		)]
-		.max_width(200);
+		.max_width(MAX_INPUT_WIDTH);
 
 		let aspirations = column![list(
 			fl!("aspirations"),
@@ -511,7 +520,7 @@ where
 			character.aspirations.clone(),
 			|i, val| text_input("", &val, move |val| Event::AspirationChanged(i, val)).into()
 		)]
-		.max_width(200);
+		.max_width(MAX_INPUT_WIDTH);
 
 		let obsessions = if let Splat::Mage(_, _, _, data) = &character.splat {
 			column![list(
@@ -527,14 +536,15 @@ where
 				data.obsessions.clone(),
 				|i, val| text_input("", &val, move |val| Event::SplatThingChanged(i, val)).into()
 			)]
-			.max_width(200)
+			.max_width(MAX_INPUT_WIDTH)
 		} else {
 			column![]
 		};
 
 		let mut col1 = Column::new()
 			.align_items(Alignment::Center)
-			.width(Length::Fill);
+			.width(Length::Fill)
+			.spacing(COMPONENT_SPACING);
 
 		match &character.splat {
 			Splat::Mortal => {}
@@ -687,10 +697,12 @@ where
 							aspirations,
 							obsessions
 						]
+						.spacing(COMPONENT_SPACING)
 						.align_items(Alignment::Center)
 						.width(Length::Fill)
 					]
 				]
+				.spacing(crate::TITLE_SPACING)
 				.align_items(Alignment::Center)
 				.padding(15)
 				.width(Length::FillPortion(2))
