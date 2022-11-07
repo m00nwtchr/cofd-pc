@@ -1,14 +1,16 @@
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use iced::{
 	alignment,
-	widget::{button, column, text, Row},
+	widget::{button, column, text, text_input, Column, Row},
 	Element, Length,
 };
 use iced_lazy::Component;
+use iced_native::row;
 
 use crate::fl;
 use cofd::{
+	character::{ModifierTarget, Trait},
 	prelude::*,
 	splat::{werewolf::Form, Splat},
 };
@@ -28,6 +30,8 @@ pub fn form_tab<Message>(
 #[derive(Clone)]
 pub enum Event {
 	FormChanged(Form),
+
+	Msg,
 }
 
 impl<Message> FormTab<Message> {
@@ -38,20 +42,96 @@ impl<Message> FormTab<Message> {
 		}
 	}
 
-	fn mk_col<Renderer>(&self, form: Form, character: &Character) -> Element<Event, Renderer>
+	fn mk_col<Renderer>(
+		&self,
+		form: Form,
+		character: &Character,
+		current_form: &Form,
+	) -> Element<Event, Renderer>
 	where
 		Renderer: iced_native::text::Renderer + 'static,
 		Renderer::Theme: iced::widget::text::StyleSheet
 			+ iced::widget::text_input::StyleSheet
 			+ iced::widget::button::StyleSheet,
 	{
-		column![button(
-			text(fl("werewolf", Some(form.name())).unwrap())
-				.width(Length::Fill)
-				.horizontal_alignment(alignment::Horizontal::Center)
-		)
-		.on_press(Event::FormChanged(form))
-		.width(Length::Fill)]
+		let attrs = character.attributes();
+
+		let mut col = Column::new();
+
+		let cur_mods = current_form.get_modifiers();
+		let mods = form.get_modifiers();
+
+		let mut vec: Vec<ModifierTarget> = vec![
+			Attribute::Strength.into(),
+			Attribute::Dexterity.into(),
+			Attribute::Stamina.into(),
+			Attribute::Manipulation.into(),
+		];
+
+		let iter: Vec<_> = mods
+			.iter()
+			.filter_map(|mod_| {
+				if let ModifierTarget::Attribute(_) = mod_.target && !vec.contains(&mod_.target) {
+				Some(mod_.target)
+			} else {
+				None
+			}
+			})
+			.collect();
+
+		vec.extend(iter);
+		vec.extend(vec![
+			ModifierTarget::Trait(Trait::Size),
+			ModifierTarget::Trait(Trait::Defense),
+			ModifierTarget::Trait(Trait::Initative),
+			ModifierTarget::Trait(Trait::Speed),
+			ModifierTarget::Trait(Trait::Armor(None)),
+			ModifierTarget::Trait(Trait::Perception)
+		]);
+
+		for target in vec {
+			let (base, name) = match target {
+				ModifierTarget::BaseAttribute(_)
+				| ModifierTarget::BaseSkill(_)
+				| ModifierTarget::Skill(_) => unreachable!(),
+				ModifierTarget::Attribute(attr) => (*attrs.get(attr) as i16, fl("attribute", Some(attr.name())).unwrap()),
+				ModifierTarget::Trait(trait_) => (character.get_trait(&trait_) as i16, fl(trait_.name().unwrap(), None).unwrap()),
+			};
+
+			let val: i16 = if !form.eq(current_form) {
+				let cur_mod_ = cur_mods
+					.iter()
+					.filter(|el| el.target.eq(&target))
+					.find_map(|el| el.val())
+					.unwrap_or(0);
+
+				let mod_ = mods
+					.iter()
+					.filter(|el| el.target.eq(&target))
+					.find_map(|el| el.val())
+					.unwrap_or(0);
+
+				base - cur_mod_ + mod_
+			} else {
+				base
+			};
+
+			col = col.push(row![
+				text(name),
+				text_input("", &val.to_string(), |val| Event::Msg)
+			]);
+		}
+
+		column![
+			button(
+				text(fl("werewolf", Some(form.name())).unwrap())
+					.width(Length::Fill)
+					.horizontal_alignment(alignment::Horizontal::Center)
+			)
+			.on_press(Event::FormChanged(form))
+			.width(Length::Fill),
+			col
+		]
 		.width(Length::Fill)
 		.into()
 	}
@@ -79,6 +159,7 @@ where
 					character.calc_mod_map();
 					Some(self.on_change.clone())
 				}
+				Event::Msg => None,
 			}
 		} else {
 			None
@@ -90,8 +171,10 @@ where
 
 		let mut row = Row::new();
 
-		for form in Form::all() {
-			row = row.push(self.mk_col(form, &character));
+		if let Splat::Werewolf(_, _, _, data) = &character.splat {
+			for form in Form::all() {
+				row = row.push(self.mk_col(form, &character, &data.form));
+			}
 		}
 
 		row.into()

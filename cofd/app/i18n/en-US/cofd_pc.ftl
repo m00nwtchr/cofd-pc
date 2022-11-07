@@ -78,6 +78,7 @@ armor = Armor
 initative = Initative
 beats = Beats
 experience = Experience
+perception = Perception
 
 conditions = Conditions
 aspirations = Aspirations

@@ -74,6 +74,7 @@ armor = Zbroja
 initative = Inicjatywa
 beats = Beats
 experience = Doświadczenie
+perception = Percepcja
 
 vampire = Wampir
     .mask = Maska

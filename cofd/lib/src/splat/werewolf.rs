@@ -449,7 +449,7 @@ impl Form {
 	pub fn get_modifiers(&self) -> Vec<Modifier> {
 		match self {
 			Form::Hishu => vec![Modifier::new(
-				ModifierTarget::Trait(Trait::Preception),
+				ModifierTarget::Trait(Trait::Perception),
 				ModifierValue::Num(1),
 				ModifierOp::Add,
 			)],
@@ -475,7 +475,7 @@ impl Form {
 					ModifierOp::Add,
 				),
 				Modifier::new(
-					ModifierTarget::Trait(Trait::Preception),
+					ModifierTarget::Trait(Trait::Perception),
 					ModifierValue::Num(2),
 					ModifierOp::Add,
 				),
@@ -502,7 +502,7 @@ impl Form {
 					ModifierOp::Add,
 				),
 				Modifier::new(
-					ModifierTarget::Trait(Trait::Preception),
+					ModifierTarget::Trait(Trait::Perception),
 					ModifierValue::Num(3),
 					ModifierOp::Add,
 				),
@@ -539,7 +539,7 @@ impl Form {
 					ModifierOp::Add,
 				),
 				Modifier::new(
-					ModifierTarget::Trait(Trait::Preception),
+					ModifierTarget::Trait(Trait::Perception),
 					ModifierValue::Num(3),
 					ModifierOp::Add,
 				),
@@ -571,7 +571,7 @@ impl Form {
 					ModifierOp::Add,
 				),
 				Modifier::new(
-					ModifierTarget::Trait(Trait::Preception),
+					ModifierTarget::Trait(Trait::Perception),
 					ModifierValue::Num(4),
 					ModifierOp::Add,
 				),

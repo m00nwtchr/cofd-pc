@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
-use std::{cmp::min, collections::HashMap};
+use std::{
+	cmp::min,
+	collections::HashMap,
+	ops::{Add, Sub},
+};
 
 use crate::splat::{ability::Ability, Merit, Splat};
 
@@ -361,6 +365,28 @@ impl Character {
 		self.merits.get_mut(i)
 	}
 
+	pub fn get_trait(&self, trait_: &Trait) -> u16 {
+		match trait_ {
+			Trait::Speed => self.speed(),
+			Trait::Defense => self.defense(),
+			Trait::DefenseSkill => 0,
+			Trait::Initative => self.initative(),
+			Trait::Perception => self.perception(),
+			Trait::Health => self.max_health(),
+			Trait::Size => self.size(),
+			Trait::Beats => self.beats,
+			Trait::Armor(Some(armor)) => match armor {
+				Armor::General => self.armor().general,
+				Armor::Ballistic => self.armor().ballistic,
+			},
+			Trait::Willpower => self.max_willpower(),
+			Trait::Power => self.power,
+			Trait::Fuel => self.fuel,
+			Trait::Integrity => self.integrity,
+			_ => 0,
+		}
+	}
+
 	pub fn calc_mod_map(&mut self) {
 		self._mod_map.clear();
 
@@ -600,7 +626,7 @@ impl Character {
 
 		add(
 			attributes.wits + attributes.composure,
-			self._mod(ModifierTarget::Trait(Trait::Preception)),
+			self._mod(ModifierTarget::Trait(Trait::Perception)),
 		)
 	}
 	pub fn experience(&self) -> u16 {
@@ -925,6 +951,42 @@ impl Default for Attributes {
 	}
 }
 
+impl Sub for Attributes {
+	type Output = Self;
+
+	fn sub(self, rhs: Attributes) -> Self::Output {
+		Self {
+			intelligence: self.intelligence - rhs.intelligence,
+			wits: self.wits - rhs.wits,
+			resolve: self.resolve - rhs.resolve,
+			strength: self.strength - rhs.strength,
+			dexterity: self.dexterity - rhs.dexterity,
+			stamina: self.stamina - rhs.stamina,
+			presence: self.presence - rhs.presence,
+			manipulation: self.manipulation - rhs.manipulation,
+			composure: self.composure - rhs.composure,
+		}
+	}
+}
+
+impl Add for Attributes {
+	type Output = Self;
+
+	fn add(self, rhs: Self) -> Self::Output {
+		Self {
+			intelligence: self.intelligence + rhs.intelligence,
+			wits: self.wits + rhs.wits,
+			resolve: self.resolve + rhs.resolve,
+			strength: self.strength + rhs.strength,
+			dexterity: self.dexterity + rhs.dexterity,
+			stamina: self.stamina + rhs.stamina,
+			presence: self.presence + rhs.presence,
+			manipulation: self.manipulation + rhs.manipulation,
+			composure: self.composure + rhs.composure,
+		}
+	}
+}
+
 #[allow(clippy::trivially_copy_pass_by_ref)]
 fn is_zero(n: &u16) -> bool {
 	*n == 0
@@ -1056,7 +1118,7 @@ impl Skills {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Modifier {
-	target: ModifierTarget,
+	pub target: ModifierTarget,
 	value: ModifierValue,
 	op: ModifierOp,
 }
@@ -1064,6 +1126,13 @@ pub struct Modifier {
 impl Modifier {
 	pub fn new(target: ModifierTarget, value: ModifierValue, op: ModifierOp) -> Self {
 		Self { target, value, op }
+	}
+
+	pub fn val(&self) -> Option<i16> {
+		match self.value {
+			ModifierValue::Num(val) => Some(val),
+			ModifierValue::Skill(_) | ModifierValue::Ability(_) => None,
+		}
 	}
 }
 
@@ -1074,6 +1143,12 @@ pub enum ModifierTarget {
 	Attribute(Attribute),
 	Skill(Skill),
 	Trait(Trait),
+}
+
+impl From<Attribute> for ModifierTarget {
+	fn from(attr: Attribute) -> Self {
+		ModifierTarget::Attribute(attr)
+	}
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -1395,18 +1470,38 @@ pub enum Trait {
 	Defense,
 	DefenseSkill,
 	Initative,
-	Preception,
+	Perception,
 	Health,
 	Size,
 
 	Beats,
 
-	Armor(Armor),
+	Armor(Option<Armor>),
 
 	Willpower,
 	Power,
 	Fuel,
 	Integrity,
+}
+
+impl Trait {
+	pub fn name(&self) -> Option<&str> {
+		match self {
+			Trait::Speed => Some("speed"),
+			Trait::Defense => Some("defense"),
+			Trait::DefenseSkill => None,
+			Trait::Initative => Some("initative"),
+			Trait::Perception => Some("perception"),
+			Trait::Health => Some("health"),
+			Trait::Size => Some("size"),
+			Trait::Beats => Some("beats"),
+			Trait::Armor(_) => Some("armor"),
+			Trait::Willpower => Some("willpower"),
+			Trait::Power => None,
+			Trait::Fuel => None,
+			Trait::Integrity => None,
+		}
+	}
 }
 
 // enum VirtueAnchor {
