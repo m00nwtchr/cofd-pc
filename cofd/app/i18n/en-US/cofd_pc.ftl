@@ -180,7 +180,7 @@ werewolf = Werewolf
     .renown = Renown
     .moon_gifts = Moon Gifts
     .shadow_gifts = Shadow Gifts
-    .wolf_gifts = Dary Wilka
+    .wolf_gifts = Wolf Gifts
     
     .primal_urge = Primal Urge
     .essence = Essence

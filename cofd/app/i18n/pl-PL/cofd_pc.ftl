@@ -67,6 +67,8 @@ group_name = Nazwa grupy
 health = Zdrowie
 willpower = Siła woli
 
+merits = Talent
+
 size = Rozmiar
 speed = Prędkość
 defense = Obrona
@@ -76,17 +78,22 @@ beats = Beats
 experience = Doświadczenie
 perception = Percepcja
 
+conditions = Stany
+aspirations = Aspiracje
+
+mortal
+    .integrity = Integralność
+
 vampire = Wampir
     .mask = Maska
     .dirge = Lament
 
     .clan = Klan
     .covenant = Przymierze
-    .bloodline = Bloodline
+    .bloodline = Rodowód
 
     .disciplines = Dyscypliny
-#    .devotions = Devotions
-    
+
     .blood_potency = Moc Krwi
     .vitae = Żywot
     .humanity = Człowieczeństwo
@@ -104,19 +111,23 @@ vampire = Wampir
     .resilience = Odporność
     .vigor = Wigor
 
+    .carthian_movement = Ruch Kartów
+    .circle_of_the_crone = Krąg Wiedźmy
+
 mage = Mag
-    .shadow_name = Imie Cienia
+    .shadow_name = Imię cienia
     
     .path = Ścieżka
     .order = Zakon
     .legacy = Dziedzictwo
 
+    .arcana = Arkana
+    
     .gnosis = Gnoza
     .wisdom = Mądrość
     .obsession = Obsesje
     
-    .arcana = Arkana
-    
+
     .death = Śmierć
     .fate = Los
     .forces = Siły
@@ -129,8 +140,6 @@ mage = Mag
     .time = Czas
 
     .adamantine_arrow = Adamantowa Strzała
-    .guardians_of_the_veil = Guardians of the Veil
-    .mysterium = Mysterium
     .silver_ladder = Srebrna Drabina
     .free_council = Wolna Rada
 
@@ -155,9 +164,6 @@ werewolf = Wilkołak
     .essence = Esencja
     .harmony = Harmoniia
 
-#    .flesh-touchstone = Flesh Touchstone
-#    .spirit-touchstone = Spirit Touchstone
-
     .passive = Pasywne
     .common = Zwyczajne
     .specific = Specyficzne
@@ -170,13 +176,12 @@ werewolf = Wilkołak
     .blood_talons = Krwawe Szpony
     .bone_shadows = Cienie Kości
     .hunters_in_darkness = Łowcy w Ciemności
-    .iron_masters = Iron Masters
-    .storm_lords = Panowie Burzy
-    .ghost_wolves = Ghost Wolves
+    .iron_masters = Żelazni Mistrzowie
+    .storm_lords = Władcy Burzy
+    .ghost_wolves = Widmowe Wilki
     
-    .fire_touched = Fire-Touched # Dotknięci ogniem?
-    .ivory_claws = Pazury
-    .predator_kings = Królowie Predator
+    .fire_touched = Dotknięci Ogniem
+    .predator_kings = Królowie Drapieżników
 
     .hishu-desc = Człowiek
     .dalu-desc = Prawie-Człowiek
@@ -184,41 +189,41 @@ werewolf = Wilkołak
     .urshul-desc = Prawie-Wilk
     .urhan-desc = Wilk
 
-#kuruth-triggers = Kuruth Triggers
-#    .blood-passive  = Smelling human blood.
-#    .blood-common   = Tasting human blood.
-#    .blood-specific = Swallowing human blood.
+kuruth-triggers = Kuruth Triggers
+    .blood-passive  = Smelling human blood.
+    .blood-common   = Tasting human blood.
+    .blood-specific = Połykanie ludzkiej krwi.
 
-#    .moon-passive = Your auspice moon is in the sky.
-#    .moon-common   = You witness your auspice moon in the sky.
-#    .moon-specific = Hear a wolf or werewolf howl when your auspice moon is in the sky.
+    .moon-passive = Księżyc twojej łaski jest na niebie.
+    .moon-common  = Widzisz księźyc twojej łaski na niebie.
+    .moon-specific = Słysysz wycie wilka lub wilkołaka, gdy księżyc twojej łaski jest na niebie.
     
-#    .theother-passive  = You come within 10 yards of a supernatural creature.
-#    .theother-common   = You witness a supernatural creature doing something obviously inhuman.
-#    .theother-specific = You are the target of a supernatural power.
+    .theother-passive   = Zbliżasz się w odległości 10 metrów od nadprzyrodzonej istoty.
+    .theother-common   = Widzisz, jak nadprzyrodzona istota robi coś wyraźnie nieludzkiego.
+    .theother-specific = Jesteś celem nadprzyrodzonej mocy.
 
-#    .pack-passive  = A pack member takes lethal damage.
-#    .pack-common   = Seeing someone attack a pack member.
-#    .pack-specific = You cause lethal damage to a pack member.
+    .pack-passive  = Członek stada odnosi śmiertelne obrażenia.
+    .pack-common   = Widzisz, jak ktoś atakuje członka stada.
+    .pack-specific = Zadajesz śmiertelne obrażenia członkowi stada.
 
-#    .territory-passive  = A werewolf you don't know enters your territory without permission.
-#    .territory-common   = You see a werewolf you don't know in your territory.
-#    .territory-specific = A werewolf you don't know challenges your pack's ability to do its duty.
+    .territory-passive  = Wilkołak, którego nie znasz, wkracza na twoje terytorium bez pozwolenia.
+    .territory-common   = Na swoim terytorium widzisz wilkołaka, którego nie znasz.
+    .territory-specific = Nieznany wilkołak stawia w wątpliwość zdolność twojego stada do wypełniania swoich obowiązków.
 
-#    .wound-passive  = Being in the area of a Wound.
-#    .wound-common   = Interacting with a Wound-born spirit.
-#    .wound-specific = Being attacked by a Wound-born spirit.
+    .wound-passive  = Przebywanie w okolicy Rany.
+    .wound-common   = Interakcja z duchem zrodzonym z Rany.
+    .wound-specific = Bycie zaatakowanym przez ducha zrodzonego z Rany.
 
 changeling = Podmieńca
     .needle = Igła
     .thread = Nić
 
-#    .seeming = Seeming # Pozór?
+    .seeming = Pozór    
     .court = Dwór
 
     .frailties = Słabości
     
-#    .glamour = Glamour
+    .glamour = Urok
     .clarity = Klarowność
     
     .crown = Korona
@@ -229,16 +234,18 @@ changeling = Podmieńca
     .sword = Miecz
 
     .beast = Bestia
-#    .darkling = Darkling
+    .darkling = Ciemniak
     .elemental = Żywiołak
     .fairest = Piękny
     .ogre = Ogr
-#    .wizened = Wizened
+    .wizened = Zmądrzały
 
     .spring = Wiosna
     .summer = Lato
     .autumn = Jesień
     .winter = Zima
+
+favored-regalia = Regalia
 
 age = Wiek
 dob = Data Urodzenia
