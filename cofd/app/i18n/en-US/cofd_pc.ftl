@@ -182,6 +182,8 @@ werewolf = Werewolf
     .shadow_gifts = Shadow Gifts
     .wolf_gifts = Wolf Gifts
     
+    .hunters_aspect = Hunter's Aspect
+    
     .primal_urge = Primal Urge
     .essence = Essence
     .harmony = Harmony
@@ -216,6 +218,16 @@ werewolf = Werewolf
     .ivory_claws = Ivory Claws
     .predator_kings = Predator Kings
 
+    .monstrous = Monstrous
+    .isolating = Isolating
+    .blissful = Blissful
+    .mystic = Mystic
+    .dominant = Dominant
+    .agnoized = Agonized
+    .insidious = Insidious
+    .implacable = Implacable
+    .primal = Primal
+    
     .hishu = Hishu
     .dalu = Dalu
     .gauru = Gauru

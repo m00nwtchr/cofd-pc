@@ -14,7 +14,9 @@ use cofd::{
 		ability::Ability,
 		changeling::Regalia,
 		mage::{Ministry, Order},
-		werewolf::{KuruthTrigger, KuruthTriggerSet, KuruthTriggers, WerewolfData},
+		werewolf::{
+			HuntersAspect, KuruthTrigger, KuruthTriggerSet, KuruthTriggers, Tribe, WerewolfData,
+		},
 		Merit, Splat, SplatType,
 	},
 };
@@ -67,6 +69,7 @@ pub enum Event {
 
 	KuruthTriggersChanged(KuruthTriggers),
 	KuruthTriggerChanged(KuruthTrigger, String),
+	HuntersAspectChanged(HuntersAspect),
 
 	RoteSkillChanged(Skill),
 
@@ -321,6 +324,11 @@ where
 						KuruthTrigger::Common => *common = val,
 						KuruthTrigger::Specific => *specific = val,
 					}
+				}
+			}
+			Event::HuntersAspectChanged(val) => {
+				if let Splat::Werewolf(_, _, _, data) = &mut character.splat {
+					data.hunters_aspect = Some(val);
 				}
 			}
 		}
@@ -595,6 +603,29 @@ where
 							.into()
 					},
 				));
+			}
+			Splat::Werewolf(auspice, tribe, _, data) => {
+				let mut vec = Vec::new();
+
+				if let Some(auspice) = auspice {
+					vec.push(auspice.get_hunters_aspect().clone());
+				} else if let Some(Tribe::Pure(tribe)) = tribe {
+					vec.extend(tribe.get_hunters_aspects().clone());
+				}
+
+				vec.push(HuntersAspect::_Custom("Custom".to_owned()));
+
+				col1 = col1.push(
+					column![
+						text(fl("werewolf", Some("hunters_aspect")).unwrap()),
+						pick_list(vec, data.hunters_aspect.clone(), |val| {
+							Event::HuntersAspectChanged(val)
+						})
+						.width(Length::Fill)
+						.padding(INPUT_PADDING)
+					].align_items(Alignment::Center)
+					.spacing(TITLE_SPACING),
+				);
 			}
 			_ => {}
 		}

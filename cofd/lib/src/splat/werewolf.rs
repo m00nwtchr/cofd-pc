@@ -138,6 +138,50 @@ pub struct WerewolfData {
 	pub form: Form,
 	// pub moon_gifts: BTreeMap<MoonGift, AbilityVal>,
 	pub triggers: KuruthTriggers,
+	pub hunters_aspect: Option<HuntersAspect>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub enum HuntersAspect {
+	Monstrous,
+	Isolating,
+	Blissful,
+	Mystic,
+	Dominant,
+
+	Fanatical,
+	Frenzied,
+	Agnoized,
+	Insidious,
+	Implacable,
+	Primal,
+
+	_Custom(String),
+}
+
+impl HuntersAspect {
+	pub fn name(&self) -> &str {
+		match self {
+			HuntersAspect::Monstrous => "monstrous",
+			HuntersAspect::Isolating => "isolating",
+			HuntersAspect::Blissful => "blissful",
+			HuntersAspect::Mystic => "mystic",
+			HuntersAspect::Dominant => "dominant",
+			HuntersAspect::Fanatical => "fanatical",
+			HuntersAspect::Frenzied => "frenzied",
+			HuntersAspect::Agnoized => "agonized",
+			HuntersAspect::Insidious => "insidious",
+			HuntersAspect::Implacable => "implacable",
+			HuntersAspect::Primal => "primal",
+			HuntersAspect::_Custom(name) => name,
+		}
+	}
+}
+
+impl Display for HuntersAspect {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str(self.name())
+	}
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
@@ -147,7 +191,14 @@ pub enum Auspice {
 	Irraka,
 	Ithaeur,
 	Rahu,
-	_Custom(String, [Skill; 3], Renown, MoonGift, [ShadowGift; 2]),
+	_Custom(
+		String,
+		[Skill; 3],
+		Renown,
+		MoonGift,
+		[ShadowGift; 2],
+		HuntersAspect,
+	),
 }
 
 impl Auspice {
@@ -168,7 +219,7 @@ impl Auspice {
 			Auspice::Irraka => "irraka",
 			Auspice::Ithaeur => "ithaeur",
 			Auspice::Rahu => "rahu",
-			Auspice::_Custom(name, _, _, _, _) => name,
+			Auspice::_Custom(name, ..) => name,
 		}
 	}
 
@@ -179,7 +230,7 @@ impl Auspice {
 			Auspice::Irraka => &[Skill::Larceny, Skill::Stealth, Skill::Subterfuge],
 			Auspice::Ithaeur => &[Skill::AnimalKen, Skill::Medicine, Skill::Occult],
 			Auspice::Rahu => &[Skill::Brawl, Skill::Intimidation, Skill::Survival],
-			Auspice::_Custom(_, skills, _, _, _) => skills,
+			Auspice::_Custom(_, skills, ..) => skills,
 		}
 	}
 
@@ -190,7 +241,7 @@ impl Auspice {
 			Auspice::Irraka => &Renown::Cunning,
 			Auspice::Ithaeur => &Renown::Wisdom,
 			Auspice::Rahu => &Renown::Purity,
-			Auspice::_Custom(_, _, renown, _, _) => renown,
+			Auspice::_Custom(_, _, renown, ..) => renown,
 		}
 	}
 
@@ -201,7 +252,7 @@ impl Auspice {
 			Auspice::Irraka => &[ShadowGift::Evasion, ShadowGift::Stealth],
 			Auspice::Ithaeur => &[ShadowGift::Elemental, ShadowGift::Shaping],
 			Auspice::Rahu => &[ShadowGift::Dominance, ShadowGift::Strength],
-			Auspice::_Custom(_, _, _, _, gifts) => gifts,
+			Auspice::_Custom(_, _, _, _, gifts, ..) => gifts,
 		}
 	}
 
@@ -212,7 +263,18 @@ impl Auspice {
 			Auspice::Irraka => &MoonGift::New,
 			Auspice::Ithaeur => &MoonGift::Crescent,
 			Auspice::Rahu => &MoonGift::Full,
-			Auspice::_Custom(_, _, _, moon_gift, _) => moon_gift,
+			Auspice::_Custom(_, _, _, moon_gift, ..) => moon_gift,
+		}
+	}
+
+	pub fn get_hunters_aspect(&self) -> &HuntersAspect {
+		match self {
+			Auspice::Cahalith => &HuntersAspect::Monstrous,
+			Auspice::Elodoth => &HuntersAspect::Isolating,
+			Auspice::Irraka => &HuntersAspect::Blissful,
+			Auspice::Ithaeur => &HuntersAspect::Mystic,
+			Auspice::Rahu => &HuntersAspect::Dominant,
+			Auspice::_Custom(_, _, _, _, _, aspect) => &aspect,
 		}
 	}
 }
@@ -224,55 +286,127 @@ impl From<Auspice> for XSplat {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub enum PureTribe {
+	FireTouched,
+	IvoryClaws,
+	PredatorKings,
+	_Custom(
+		String,
+		Renown,
+		[Renown; 2],
+		[Skill; 3],
+		[HuntersAspect; 2],
+		[ShadowGift; 4],
+	),
+}
+
+impl PureTribe {
+	pub fn get_secondary_renown(&self) -> &[Renown; 2] {
+		match self {
+			Self::FireTouched => &[Renown::Cunning, Renown::Glory],
+			Self::IvoryClaws => &[Renown::Glory, Renown::Honor],
+			Self::PredatorKings => &[Renown::Purity, Renown::Wisdom],
+			Self::_Custom(_, _, renown, ..) => renown,
+		}
+	}
+
+	pub fn get_skills(&self) -> &[Skill; 3] {
+		match self {
+			Self::FireTouched => &[Skill::Expression, Skill::Occult, Skill::Subterfuge],
+			Self::IvoryClaws => &[Skill::Intimidation, Skill::Persuasion, Skill::Politics],
+			Self::PredatorKings => &[Skill::AnimalKen, Skill::Brawl, Skill::Crafts],
+			Self::_Custom(_, _, _, skills, ..) => skills,
+		}
+	}
+
+	pub fn get_hunters_aspects(&self) -> &[HuntersAspect; 2] {
+		match self {
+			Self::FireTouched => &[HuntersAspect::Fanatical, HuntersAspect::Frenzied],
+			Self::IvoryClaws => &[HuntersAspect::Agnoized, HuntersAspect::Insidious],
+			Self::PredatorKings => &[HuntersAspect::Implacable, HuntersAspect::Primal],
+			Self::_Custom(_, _, _, _, aspects, ..) => aspects,
+		}
+	}
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Tribe {
 	BloodTalons,
 	BoneShadows,
 	HuntersInDarkness,
 	IronMasters,
 	StormLords,
+	Pure(PureTribe),
 	_Custom(String, Renown, [ShadowGift; 3]),
 }
 
 impl Tribe {
 	pub fn get_renown(&self) -> &Renown {
 		match self {
-			Tribe::BloodTalons => &Renown::Glory,
-			Tribe::BoneShadows => &Renown::Wisdom,
-			Tribe::HuntersInDarkness => &Renown::Purity,
-			Tribe::IronMasters => &Renown::Cunning,
-			Tribe::StormLords => &Renown::Honor,
+			Self::BloodTalons => &Renown::Glory,
+			Self::BoneShadows => &Renown::Wisdom,
+			Self::HuntersInDarkness => &Renown::Purity,
+			Self::IronMasters => &Renown::Cunning,
+			Self::StormLords => &Renown::Honor,
 			// Tribe::GhostWolves => &None,
-			Tribe::_Custom(_, renown, _) => renown,
+			Self::Pure(tribe) => match tribe {
+				PureTribe::FireTouched => &Renown::Wisdom,
+				PureTribe::IvoryClaws => &Renown::Purity,
+				PureTribe::PredatorKings => &Renown::Glory,
+				PureTribe::_Custom(_, renown, ..) => renown,
+			},
+			Self::_Custom(_, renown, _) => renown,
 		}
 	}
 
-	pub fn get_gifts(&self) -> &[ShadowGift; 3] {
+	pub fn get_gifts(&self) -> Vec<ShadowGift> {
 		match self {
-			Tribe::BloodTalons => &[
+			Tribe::BloodTalons => vec![
 				ShadowGift::Inspiration,
 				ShadowGift::Rage,
 				ShadowGift::Strength,
 			],
-			Tribe::BoneShadows => &[
+			Tribe::BoneShadows => vec![
 				ShadowGift::Death,
 				ShadowGift::Elemental,
 				ShadowGift::Insight,
 			],
 			Tribe::HuntersInDarkness => {
-				&[ShadowGift::Nature, ShadowGift::Stealth, ShadowGift::Warding]
+				vec![ShadowGift::Nature, ShadowGift::Stealth, ShadowGift::Warding]
 			}
-			Tribe::IronMasters => &[
+			Tribe::IronMasters => vec![
 				ShadowGift::Knowledge,
 				ShadowGift::Shaping,
 				ShadowGift::Technology,
 			],
-			Tribe::StormLords => &[
+			Tribe::StormLords => vec![
 				ShadowGift::Evasion,
 				ShadowGift::Dominance,
 				ShadowGift::Weather,
 			],
+			Tribe::Pure(tribe) => match tribe {
+				PureTribe::FireTouched => vec![
+					ShadowGift::Disease,
+					ShadowGift::Fervor,
+					ShadowGift::Insight,
+					ShadowGift::Inspiration,
+				],
+				PureTribe::IvoryClaws => vec![
+					ShadowGift::Agony,
+					ShadowGift::Blood,
+					ShadowGift::Dominance,
+					ShadowGift::Warding,
+				],
+				PureTribe::PredatorKings => vec![
+					ShadowGift::Hunger,
+					ShadowGift::Nature,
+					ShadowGift::Rage,
+					ShadowGift::Strength,
+				],
+				PureTribe::_Custom(_, _, _, _, _, gifts) => gifts.to_vec(),
+			},
 			// Tribe::GhostWolves => &None,
-			Tribe::_Custom(_, _, gifts) => gifts,
+			Tribe::_Custom(_, _, gifts) => gifts.to_vec(),
 		}
 	}
 
@@ -283,17 +417,26 @@ impl Tribe {
 			Tribe::HuntersInDarkness => "hunters_in_darkness",
 			Tribe::IronMasters => "iron_masters",
 			Tribe::StormLords => "storm_lords",
+			Tribe::Pure(tribe) => match tribe {
+				PureTribe::FireTouched => "fire_touched",
+				PureTribe::IvoryClaws => "ivory_claws",
+				PureTribe::PredatorKings => "predator_kings",
+				PureTribe::_Custom(name, ..) => name,
+			},
 			Tribe::_Custom(name, _, _) => name,
 		}
 	}
 
-	pub fn all() -> [Tribe; 5] {
+	pub fn all() -> [Tribe; 8] {
 		[
 			Tribe::BloodTalons,
 			Tribe::BoneShadows,
 			Tribe::HuntersInDarkness,
 			Tribe::IronMasters,
 			Tribe::StormLords,
+			Tribe::Pure(PureTribe::FireTouched),
+			Tribe::Pure(PureTribe::IvoryClaws),
+			Tribe::Pure(PureTribe::PredatorKings),
 		]
 	}
 }
@@ -430,6 +573,12 @@ pub enum ShadowGift {
 	Warding,
 	Weather,
 	_Custom(String),
+
+	Agony,
+	Blood,
+	Disease,
+	Fervor,
+	Hunger,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]

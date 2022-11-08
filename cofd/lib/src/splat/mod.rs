@@ -196,6 +196,7 @@ impl Splat {
 					Renown::Cunning,
 					MoonGift::_Custom(String::from("Custom")),
 					[ShadowGift::Death, ShadowGift::Dominance],
+					HuntersAspect::Monstrous,
 				)
 				.into(),
 			),
