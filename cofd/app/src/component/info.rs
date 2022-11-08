@@ -13,7 +13,7 @@ use cofd::{
 	splat::{Splat, XSplat, YSplat, ZSplat},
 };
 
-use crate::{i18n::fl, widget};
+use crate::{i18n::fl, widget, INPUT_PADDING};
 
 pub struct InfoBar<Message> {
 	character: Rc<RefCell<Character>>,
@@ -83,9 +83,12 @@ impl<Message> InfoBar<Message> {
 			};
 
 			col1 = col1.push(text(format!("{}:", fl(msg, attribute).unwrap())));
-			col2 = col2.push(text_input("", character.info.get(_trait), move |val| {
-				Event::InfoTraitChanged(val, _trait)
-			}));
+			col2 = col2.push(
+				text_input("", character.info.get(_trait), move |val| {
+					Event::InfoTraitChanged(val, _trait)
+				})
+				.padding(INPUT_PADDING),
+			);
 		}
 
 		row![col1, col2].width(Length::Fill).spacing(5)
@@ -175,11 +178,11 @@ where
 							*xsplat.name_mut().unwrap() = val;
 							Event::XSplatChanged(xsplat)
 						}
-					})
+					}).padding(INPUT_PADDING)
 					.into()
 				} else {
 					pick_list(xsplats, xsplat, Event::XSplatChanged)
-					.padding(1)
+					.padding(INPUT_PADDING)
 					.width(Length::Fill).into()
 				};
 
@@ -191,11 +194,11 @@ where
 							*ysplat.name_mut().unwrap() = val;
 							Event::YSplatChanged(ysplat)
 						}
-					})
+					}).padding(INPUT_PADDING)
 					.into()
 				} else {
 					pick_list(ysplats, ysplat, Event::YSplatChanged)
-					.padding(1)
+					.padding(INPUT_PADDING)
 					.width(Length::Fill).into()
 				};
 
@@ -207,11 +210,11 @@ where
 							*zsplat.name_mut().unwrap() = val;
 							Event::ZSplatChanged(zsplat)
 						}
-					})
+					}).padding(INPUT_PADDING)
 					.into()
 				} else {
 					pick_list(zsplats, zsplat, Event::ZSplatChanged)
-						.padding(1)
+						.padding(INPUT_PADDING)
 						.width(Length::Fill)
 						.into()
 				};

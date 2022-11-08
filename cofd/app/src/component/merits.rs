@@ -14,7 +14,7 @@ use crate::{
 		self,
 		dots::{Shape, SheetDots},
 	},
-	H2_SIZE, H3_SIZE, TITLE_SPACING,
+	H2_SIZE, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
 };
 
 pub struct MeritComponent<Message> {
@@ -103,16 +103,19 @@ where
 
 		for (i, (merit, val)) in self.merits.iter().enumerate() {
 			if let Merit::_Custom(str) = merit {
-				col1 = col1.push(text_input("", &str, move |key| {
-					Event(i, Merit::_Custom(key), val.clone())
-				}));
+				col1 = col1.push(
+					text_input("", &str, move |key| {
+						Event(i, Merit::_Custom(key), val.clone())
+					})
+					.padding(INPUT_PADDING),
+				);
 			} else {
 				col1 = col1
 					.push(
 						pick_list(vec.clone(), Some(merit.clone()), move |key| {
 							Event(i, key, val.clone())
 						})
-						.padding(1)
+						.padding(INPUT_PADDING)
 						.text_size(20)
 						.width(Length::Fill),
 					)
@@ -126,7 +129,7 @@ where
 		}
 
 		let new = pick_list(vec, None, |key| Event(self.merits.len(), key, 0))
-			.padding(1)
+			.padding(INPUT_PADDING)
 			.text_size(20)
 			.width(Length::Fill);
 

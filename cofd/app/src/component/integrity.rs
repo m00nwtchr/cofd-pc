@@ -20,7 +20,7 @@ use crate::{
 		dots::{Shape, SheetDots},
 		track::HealthTrack,
 	},
-	COMPONENT_SPACING, H2_SIZE, H3_SIZE, MAX_INPUT_WIDTH, TITLE_SPACING,
+	COMPONENT_SPACING, H2_SIZE, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
 };
 
 use super::list;
@@ -114,8 +114,13 @@ where
 								"",
 								character.touchstones.get(i).unwrap_or(&String::new()),
 								move |val| Event::TouchstoneChanged(i, val),
-							)]
-							.max_width(MAX_INPUT_WIDTH),
+							)
+							.padding(INPUT_PADDING)]
+							.max_width(
+								MAX_INPUT_WIDTH
+									- SheetDots::<Event, Renderer>::DEFAULT_SIZE as u32
+									- SheetDots::<Event, Renderer>::DEFAULT_SPACING as u32,
+							),
 						);
 					}
 				}
@@ -156,9 +161,11 @@ where
 						"",
 						character.touchstones.get(0).unwrap_or(&String::new()),
 						|str| Event::TouchstoneChanged(0, str),
-					)]
+					)
+					.padding(INPUT_PADDING)]
 					.max_width(MAX_INPUT_WIDTH),
 				]
+				.align_items(Alignment::Center)
 				.spacing(TITLE_SPACING),
 			);
 		}
@@ -171,19 +178,21 @@ where
 
 		match character.splat {
 			Splat::Werewolf(_, _, _, _) => {
-				col = col
-					.push(
+				col = col.push(
+					column![
 						text(fl(character.splat.name(), Some("spirit-touchstone")).unwrap())
 							.size(H3_SIZE),
-					)
-					.push(
 						column![text_input(
 							"",
 							character.touchstones.get(1).unwrap_or(&String::new()),
 							|str| Event::TouchstoneChanged(1, str),
-						)]
+						)
+						.padding(INPUT_PADDING)]
 						.max_width(MAX_INPUT_WIDTH),
-					);
+					]
+					.align_items(Alignment::Center)
+					.spacing(TITLE_SPACING),
+				);
 			}
 			Splat::Changeling(_, _, _, _) => {
 				col = col.push(
@@ -192,7 +201,9 @@ where
 						10,
 						character.touchstones.clone() as Vec<String>,
 						|i, val: String| {
-							text_input("", &val, move |val| Event::TouchstoneChanged(i, val)).into()
+							text_input("", &val, move |val| Event::TouchstoneChanged(i, val))
+								.padding(INPUT_PADDING)
+								.into()
 						},
 					)
 					.max_width(MAX_INPUT_WIDTH),

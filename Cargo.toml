@@ -2,6 +2,9 @@
 members = [ "cofd/*" ]
 resolver = "2"
 
+[profile.dev]
+incremental = false
+
 [profile.release]
 lto = true
 

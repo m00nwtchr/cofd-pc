@@ -10,7 +10,7 @@ use cofd::{
 	prelude::Character,
 };
 
-use crate::fl;
+use crate::{fl, INPUT_PADDING};
 
 struct Traits {
 	size: u16,
@@ -118,6 +118,7 @@ where
 					Event(val, Trait::Beats)
 					// }
 				})
+				.padding(INPUT_PADDING)
 			],
 			row![
 				text(format!("{}: {}", fl!("experience"), self.traits.experience)),

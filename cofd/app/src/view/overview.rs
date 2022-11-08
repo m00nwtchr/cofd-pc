@@ -1,6 +1,7 @@
 use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use iced::{
+	alignment::Horizontal,
 	widget::{column, pick_list, row, text, text_input, Column},
 	Alignment, Element, Length,
 };
@@ -29,6 +30,7 @@ use crate::{
 	COMPONENT_SPACING,
 	H2_SIZE,
 	H3_SIZE,
+	INPUT_PADDING,
 	MAX_INPUT_WIDTH,
 	TITLE_SPACING,
 };
@@ -137,14 +139,17 @@ impl<Message> OverviewTab<Message> {
 
 			for (ability, val) in &character.abilities {
 				if ability.is_custom() {
-					col1 = col1.push(text_input("", ability.name(), {
-						let ab = ability.clone();
-						move |val| {
-							let mut new = ab.clone();
-							*new.name_mut().unwrap() = val;
-							Event::AbilityChanged(ab.clone(), new)
-						}
-					}));
+					col1 = col1.push(
+						text_input("", ability.name(), {
+							let ab = ability.clone();
+							move |val| {
+								let mut new = ab.clone();
+								*new.name_mut().unwrap() = val;
+								Event::AbilityChanged(ab.clone(), new)
+							}
+						})
+						.padding(INPUT_PADDING),
+					);
 				} else {
 					col1 = col1
 						.push(
@@ -153,7 +158,7 @@ impl<Message> OverviewTab<Message> {
 								move |val| Event::AbilityChanged(ability.clone(), val)
 							})
 							.width(Length::Fill)
-							.padding(1)
+							.padding(INPUT_PADDING)
 							.text_size(20),
 						)
 						.spacing(1);
@@ -168,7 +173,7 @@ impl<Message> OverviewTab<Message> {
 			new = new.push(
 				pick_list(e, None, |key| Event::AbilityValChanged(key, 0))
 					.width(Length::Fill)
-					.padding(1)
+					.padding(INPUT_PADDING)
 					.text_size(20),
 			);
 		}
@@ -404,7 +409,11 @@ where
 			fl!("conditions"),
 			character.conditions.len() + 1,
 			character.conditions.clone(),
-			|i, val| text_input("", &val, move |val| Event::ConditionChanged(i, val)).into(),
+			|i, val| {
+				text_input("", &val, move |val| Event::ConditionChanged(i, val))
+					.padding(INPUT_PADDING)
+					.into()
+			},
 		)
 		.max_width(MAX_INPUT_WIDTH);
 
@@ -412,7 +421,11 @@ where
 			fl!("aspirations"),
 			character.aspirations.len() + 1,
 			character.aspirations.clone(),
-			|i, val| text_input("", &val, move |val| Event::AspirationChanged(i, val)).into(),
+			|i, val| {
+				text_input("", &val, move |val| Event::AspirationChanged(i, val))
+					.padding(INPUT_PADDING)
+					.into()
+			},
 		)
 		.max_width(MAX_INPUT_WIDTH);
 
@@ -428,7 +441,9 @@ where
 				// 	_ => 1,
 				// },
 				data.obsessions.clone(),
-				|i, val| text_input("", &val, move |val| Event::SplatThingChanged(i, val)).into()
+				|i, val| text_input("", &val, move |val| Event::SplatThingChanged(i, val))
+					.padding(INPUT_PADDING)
+					.into()
 			)]
 			.max_width(MAX_INPUT_WIDTH)
 		} else {
@@ -450,14 +465,17 @@ where
 					text_input("", passive, |passive| {
 						Event::KuruthTriggerChanged(KuruthTrigger::Passive, passive)
 					})
+					.padding(INPUT_PADDING)
 					.into(),
 					text_input("", common, |common| {
 						Event::KuruthTriggerChanged(KuruthTrigger::Common, common)
 					})
+					.padding(INPUT_PADDING)
 					.into(),
 					text_input("", specific, |specific| {
 						Event::KuruthTriggerChanged(KuruthTrigger::Specific, specific)
 					})
+					.padding(INPUT_PADDING)
 					.into(),
 				)
 			} else {
@@ -477,20 +495,17 @@ where
 						KuruthTriggers::all().to_vec(),
 						Some(data.triggers.clone()),
 						Event::KuruthTriggersChanged,
-					).width(Length::Fill).padding(0),
-					row![
-						text(format!("{}:", fl("werewolf", Some("passive")).unwrap())),
-						passive
-					],
-					row![
-						text(format!("{}:", fl("werewolf", Some("common")).unwrap())),
-						common
-					],
-					row![
-						text(format!("{}:", fl("werewolf", Some("specific")).unwrap())),
-						specific
-					]
+					)
+					.width(Length::Fill)
+					.padding(INPUT_PADDING),
+					text(fl("werewolf", Some("passive")).unwrap()),
+					passive,
+					text(fl("werewolf", Some("common")).unwrap()),
+					common,
+					text(fl("werewolf", Some("specific")).unwrap()),
+					specific
 				]
+				.align_items(Alignment::Center)
 			]
 			.align_items(Alignment::Center)
 			.spacing(TITLE_SPACING)
@@ -529,6 +544,7 @@ where
 					if let Some(Regalia::_Custom(name)) = &data.regalia {
 						text_input("", name, |val| Event::RegaliaChanged(Regalia::_Custom(val)))
 							.width(Length::Fill)
+							.padding(INPUT_PADDING)
 							.into()
 					} else {
 						let reg: Vec<Regalia> = all_regalia
@@ -547,7 +563,9 @@ where
 					3,
 					data.frailties.clone(),
 					|i, val| {
-						text_input("", &val, move |val| Event::SplatThingChanged(i, val)).into()
+						text_input("", &val, move |val| Event::SplatThingChanged(i, val))
+							.padding(INPUT_PADDING)
+							.into()
 					},
 				);
 
@@ -568,7 +586,9 @@ where
 					3,
 					data.banes.clone(),
 					|i, val| {
-						text_input("", &val, move |val| Event::SplatThingChanged(i, val)).into()
+						text_input("", &val, move |val| Event::SplatThingChanged(i, val))
+							.padding(INPUT_PADDING)
+							.into()
 					},
 				));
 			}
