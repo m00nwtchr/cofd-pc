@@ -179,7 +179,9 @@ werewolf = Werewolf
 
     .renown = Renown
     .moon_gifts = Moon Gifts
-
+    .shadow_gifts = Shadow Gifts
+    .wolf_gifts = Dary Wilka
+    
     .primal_urge = Primal Urge
     .essence = Essence
     .harmony = Harmony
@@ -219,6 +221,12 @@ werewolf = Werewolf
     .gauru = Gauru
     .urshul = Urshul
     .urhan = Urhan
+    
+    .hishu-desc = Human
+    .dalu-desc = Near-Human
+    .gauru-desc = Wolf-Man
+    .urshul-desc = Near-Wolf
+    .urhan-desc = Wolf
 
 kuruth-triggers = Kuruth Triggers
     .blood-passive  = Smelling human blood.
@@ -267,11 +275,11 @@ changeling = Changeling
     .steed = Steed
     .sword = Sword
 
-    .beasts = Beasts
-    .darklings = Darklings
-    .elementals = Elementals
+    .beast = Beast
+    .darkling = Darkling
+    .elemental = Elemental
     .fairest = Fairest
-    .ogres = Ogres
+    .ogre = Ogre
     .wizened = Wizened
 
     .spring = Spring
