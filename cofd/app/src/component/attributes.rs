@@ -9,7 +9,7 @@ use iced_native::Element;
 
 use cofd::{
 	character::{AttributeCategory, ModifierTarget, TraitCategory},
-	prelude::{Attribute, Attributes, Character},
+	prelude::{Attribute, Character},
 };
 
 use crate::{

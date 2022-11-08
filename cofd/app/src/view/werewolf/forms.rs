@@ -8,7 +8,7 @@ use iced::{
 use iced_lazy::Component;
 use iced_native::row;
 
-use crate::fl;
+use crate::{fl, INPUT_PADDING};
 use cofd::{
 	character::{ModifierTarget, Trait},
 	prelude::*,
@@ -85,8 +85,8 @@ impl<Message> FormTab<Message> {
 			ModifierTarget::Trait(Trait::Defense),
 			ModifierTarget::Trait(Trait::Initative),
 			ModifierTarget::Trait(Trait::Speed),
-			ModifierTarget::Trait(Trait::Armor(None)),
-			ModifierTarget::Trait(Trait::Perception)
+			// ModifierTarget::Trait(Trait::Armor(None)),
+			ModifierTarget::Trait(Trait::Perception),
 		]);
 
 		for target in vec {
@@ -94,8 +94,14 @@ impl<Message> FormTab<Message> {
 				ModifierTarget::BaseAttribute(_)
 				| ModifierTarget::BaseSkill(_)
 				| ModifierTarget::Skill(_) => unreachable!(),
-				ModifierTarget::Attribute(attr) => (*attrs.get(attr) as i16, fl("attribute", Some(attr.name())).unwrap()),
-				ModifierTarget::Trait(trait_) => (character.get_trait(&trait_) as i16, fl(trait_.name().unwrap(), None).unwrap()),
+				ModifierTarget::Attribute(attr) => (
+					*attrs.get(attr) as i16,
+					fl("attribute", Some(attr.name())).unwrap(),
+				),
+				ModifierTarget::Trait(trait_) => (
+					character.get_trait(&trait_) as i16,
+					fl(trait_.name().unwrap(), None).unwrap(),
+				),
 			};
 
 			let val: i16 = if !form.eq(current_form) {
@@ -117,8 +123,8 @@ impl<Message> FormTab<Message> {
 			};
 
 			col = col.push(row![
-				text(name),
-				text_input("", &val.to_string(), |val| Event::Msg)
+				text(format!("{}: ", name)),
+				text_input("", &val.to_string(), |val| Event::Msg).padding(INPUT_PADDING)
 			]);
 		}
 
@@ -133,6 +139,7 @@ impl<Message> FormTab<Message> {
 			col
 		]
 		.width(Length::Fill)
+		.padding(4)
 		.into()
 	}
 }

@@ -479,17 +479,21 @@ where
 					.into(),
 				)
 			} else {
-				let triggers = data.triggers.get_triggers();
+				let name = data.triggers.name().unwrap();
+
+				let passive = fl("kuruth-triggers", Some(&format!("{}-passive", name))).unwrap();
+				let common = fl("kuruth-triggers", Some(&format!("{}-common", name))).unwrap();
+				let specific = fl("kuruth-triggers", Some(&format!("{}-specific", name))).unwrap();
 
 				(
-					text(triggers.passive).into(),
-					text(triggers.common).into(),
-					text(triggers.specific).into(),
+					text(passive).into(),
+					text(common).into(),
+					text(specific).into(),
 				)
 			};
 
 			column![
-				text(fl("werewolf", Some("kuruth-triggers")).unwrap()),
+				text(fl!("kuruth-triggers")),
 				column![
 					pick_list(
 						KuruthTriggers::all().to_vec(),

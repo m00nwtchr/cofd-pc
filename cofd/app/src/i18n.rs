@@ -34,8 +34,7 @@ macro_rules! fl {
 }
 
 pub fn fl(message_id: &str, attribute: Option<&str>) -> Option<String> {
-	let message = Rc::new(OnceCell::new());
-	let message_clone = message.clone();
+	let mut message = OnceCell::new();
 	LANGUAGE_LOADER.with_bundles_mut(|bundle| {
 		if message.get().is_none() {
 			if let Some(msg) = bundle.get_message(message_id) {
@@ -56,7 +55,7 @@ pub fn fl(message_id: &str, attribute: Option<&str>) -> Option<String> {
 		}
 	});
 	// println!("{}.{:?}", message_id, attribute);
-	message_clone.get().cloned()
+	message.take()
 }
 
 // #[derive(Debug, Clone, PartialEq, Eq)]

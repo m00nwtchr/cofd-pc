@@ -23,6 +23,20 @@ pub enum KuruthTrigger {
 	Specific,
 }
 
+impl KuruthTrigger {
+	pub fn all(&self) -> [KuruthTrigger; 3] {
+		[Self::Passive, Self::Common, Self::Specific]
+	}
+
+	pub fn name(&self) -> &str {
+		match self {
+			KuruthTrigger::Passive => "passive",
+			KuruthTrigger::Common => "common",
+			KuruthTrigger::Specific => "specific",
+		}
+	}
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 
 pub enum KuruthTriggers {
@@ -62,6 +76,18 @@ impl KuruthTriggers {
 			Self::Wound,
 			Default::default(),
 		]
+	}
+
+	pub fn name(&self) -> Option<&str> {
+		match self {
+			KuruthTriggers::Blood => Some("blood"),
+			KuruthTriggers::Moon => Some("moon"),
+			KuruthTriggers::TheOther => Some("theother"),
+			KuruthTriggers::Pack => Some("pack"),
+			KuruthTriggers::Territory => Some("territory"),
+			KuruthTriggers::Wound => Some("wound"),
+			KuruthTriggers::_Custom(_) => None,
+		}
 	}
 
 	pub fn get_triggers(&self) -> KuruthTriggerSet {

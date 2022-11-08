@@ -187,7 +187,6 @@ werewolf = Werewolf
     .flesh-touchstone = Flesh Touchstone
     .spirit-touchstone = Spirit Touchstone
 
-    .kuruth-triggers = Kuruth Triggers
     .passive = Passive
     .common = Common
     .specific = Specific
@@ -220,6 +219,31 @@ werewolf = Werewolf
     .gauru = Gauru
     .urshul = Urshul
     .urhan = Urhan
+
+kuruth-triggers = Kuruth Triggers
+    .blood-passive  = Smelling human blood.
+    .blood-common   = Tasting human blood.
+    .blood-specific = Swallowing human blood.
+
+    .moon-passive = Your auspice moon is in the sky.
+    .moon-common   = You witness your auspice moon in the sky.
+    .moon-specific = Hear a wolf or werewolf howl when your auspice moon is in the sky.
+    
+    .theother-passive  = You come within 10 yards of a supernatural creature.
+    .theother-common   = You witness a supernatural creature doing something obviously inhuman.
+    .theother-specific = You are the target of a supernatural power.
+
+    .pack-passive  = A pack member takes lethal damage.
+    .pack-common   = Seeing someone attack a pack member.
+    .pack-specific = You cause lethal damage to a pack member.
+
+    .territory-passive  = A werewolf you don't know enters your territory without permission.
+    .territory-common   = You see a werewolf you don't know in your territory.
+    .territory-specific = A werewolf you don't know challenges your pack's ability to do its duty.
+
+    .wound-passive  = Being in the area of a Wound.
+    .wound-common   = Interacting with a Wound-born spirit.
+    .wound-specific = Being attacked by a Wound-born spirit.
 
 changeling = Changeling
     .needle = Needle
