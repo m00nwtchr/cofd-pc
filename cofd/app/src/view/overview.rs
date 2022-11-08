@@ -1,7 +1,6 @@
 use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use iced::{
-	alignment::Horizontal,
 	widget::{column, pick_list, row, text, text_input, Column},
 	Alignment, Element, Length,
 };
@@ -623,7 +622,8 @@ where
 						})
 						.width(Length::Fill)
 						.padding(INPUT_PADDING)
-					].align_items(Alignment::Center)
+					]
+					.align_items(Alignment::Center)
 					.spacing(TITLE_SPACING),
 				);
 			}

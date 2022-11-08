@@ -274,7 +274,7 @@ impl Auspice {
 			Auspice::Irraka => &HuntersAspect::Blissful,
 			Auspice::Ithaeur => &HuntersAspect::Mystic,
 			Auspice::Rahu => &HuntersAspect::Dominant,
-			Auspice::_Custom(_, _, _, _, _, aspect) => &aspect,
+			Auspice::_Custom(_, _, _, _, _, aspect) => aspect,
 		}
 	}
 }

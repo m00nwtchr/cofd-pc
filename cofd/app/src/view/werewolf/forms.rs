@@ -99,7 +99,7 @@ impl<Message> FormTab<Message> {
 					fl("attribute", Some(attr.name())).unwrap(),
 				),
 				ModifierTarget::Trait(trait_) => (
-					character.get_trait(&trait_) as i16,
+					character.get_trait(trait_) as i16,
 					fl(trait_.name().unwrap(), None).unwrap(),
 				),
 			};

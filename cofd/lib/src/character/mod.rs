@@ -365,7 +365,7 @@ impl Character {
 		self.merits.get_mut(i)
 	}
 
-	pub fn get_trait(&self, trait_: &Trait) -> u16 {
+	pub fn get_trait(&self, trait_: Trait) -> u16 {
 		match trait_ {
 			Trait::Speed => self.speed(),
 			Trait::Defense => self.defense(),
