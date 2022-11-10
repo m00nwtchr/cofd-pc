@@ -1,8 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{character::Skill, prelude::Attribute};
+use crate::{
+	character::Skill,
+	prelude::{Attribute, Character},
+};
 
-use super::{ability::Ability, Merit, XSplat, YSplat, ZSplat};
+use super::{ability::Ability, Merit, XSplat, YSplat, ZSplat, Splat};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MageData {
@@ -237,6 +240,16 @@ pub enum MageMerit {
 impl MageMerit {
 	pub fn all() -> Vec<MageMerit> {
 		vec![Self::HighSpeech]
+	}
+
+	pub fn is_available(&self, character: &Character) -> bool {
+		if let Splat::Mage(_, _, _, _) = character.splat {
+			match self {
+				_ => true,
+			}
+		} else {
+			false
+		}
 	}
 }
 

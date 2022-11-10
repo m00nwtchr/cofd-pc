@@ -69,8 +69,6 @@ willpower = Willpower
 
 touchstones = Touchstones
 
-merits = Merits
-
 size = Size
 speed = Speed
 defense = Defense
@@ -82,6 +80,8 @@ perception = Perception
 
 conditions = Conditions
 aspirations = Aspirations
+
+custom = Custom
 
 mortal = Mortal
     .integrity = Integrity
@@ -204,7 +204,7 @@ werewolf = Werewolf
     .cahalith = Cahalith
     .elodoth = Elodoth
     .irraka = Irraka
-    .itheur = Itheur
+    .ithaeur = Ithaeur
     .rahu = Rahu
 
     .blood_talons = Blood Talons
@@ -310,3 +310,115 @@ nationality = Nationality
 height = Height
 weight = Weight
 sex = Sex
+
+merits = Merit
+    .area_of_expertise = Area of Expertise
+    .common_sense = Common Sense
+    .danger_sense = Danger Sense
+    .direction_sense = Direction Sense
+    .eidetic_memory = Eidetic Memory
+    .encyclopedic_knowledge = Encyclopedic Knowledge
+    .eye_for_the_strange = Eye for the Strange
+    .fast_reflexes = Fast Reflexes
+    .good_time_management = Good Time Management
+    .holistic_awareness = Holistic Awareness
+    .human_prey = Human Prey
+    .hypervigilance = Hypervigilance
+    .indomitable = Indomitable
+    .interdiscilpinary_specialty = Interdisciplinary Specialty
+    .investigative_aide = Investigative Aide
+    .investigative_prodigy = Investigative Prodigy
+    .language = Language
+    .library = Library
+    .library_advanced = Library, Advanced
+    .lucid_dreamer = Lucid Dreamer
+    .meditative_mind = Meditative Mind
+    .multilingual = Multilingual
+    .object_fetishism = Object Fetishism
+    .patient = Patient
+    .renowned_artisan = Renowned Artisam
+    .scarred = Scarred
+    .tolerance_for_biology = Tolerance for Biology
+    .trained_observer = Trained Observer,
+    .vice_ridden = Vice-Ridden
+    .virtuous = Virtuous
+    
+    .ambidextrous = Ambidextrous
+    .automotive_genius = Automotive Genius
+    .covert_operative = Covert Operative
+    .crack_driver = Crack Driver
+    .demolisher = Demolisher
+    .double_jointed = Double Jointed
+    .fleet_of_foot = Fleet of Foot
+    .freediving = Freediving
+    .giant = Giant
+    .hardy = Hardy
+    .greyhound = Greyhound
+    .iron_skin = Iron Skin
+    .iron_stamina = Iron Stamina
+    .quick_draw = Quick Draw
+    .punch_drunk = Punch Drunk
+    .relentless = Relentless
+    .roadkill = Roadkill
+    .seizing_the_edge = Seizing the Edge
+    .sleight_of_hand = Sleight of Hand
+    .small_framed = Small Framed
+    .survivalist = Survivalist
+    
+    .air_of_menace = Air of Menace
+    .allies = Allies
+    .alternate_identity = Alternate Identity
+    .anonymity = Anonymity
+    .barfly = Barfly
+    .closed_book = Closed Book
+    .cohesive_unit = Cohesive Unit
+    .contacts = Contacts
+    .defender = Defender
+    .empath = Empath
+    .fame = Fame
+    .fixer = Fixer
+    .hobbyist_clique = Hobbyist Clique
+    .inspiring = Inspiring
+    .iron_will = Iron Will
+    .mentor = Mentor
+    .peacemaker = Peacemaker
+    .pusher = Pusher
+    .resources = Resources
+    .retainer = Retainer
+    .safe_place = Safe Place
+    .small_unit_tactics = Small Unit Tactics
+    .spin_doctor = Spin Doctor
+    .staff = Staff
+    .status = Status
+    .striking_looks = Striking Looks
+    .support_network = Support Network
+    .sympathetic = Sympathetic
+    .table_turner = Table Turner
+    .takes_one_to_know_one = Takes One to Know One
+    .taste = Taste
+    .true_friend = True Friend
+    .untouchable = Untouchable
+    
+    .professional_training = Professional Training
+    .aggressive_driving = Aggressive Driving
+    .drone_control = Drone Control
+    .falconry = Falconry
+    .k9 = K9
+    .parkour = Parkour
+    .stunt_driver = Stunt Driver
+    
+    .etiquette = Etiquette
+    .fast_talking = Fast Talking
+    .mystery_cult_initation = Mystery Cult Initation
+    .scorpion_cult_initation = Scorpion Cult Initation
+    
+    .defensive_combat = Defensive Combat
+    
+    .relentless_assault = Relentless Assault
+    
+    .high_speech = High Speech
+    
+    
+    
+    .efficient_killer = Efficient Killer
+    .totem = Totem

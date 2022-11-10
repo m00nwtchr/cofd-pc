@@ -130,6 +130,10 @@ impl CharacterBuilder {
 
 		character.willpower = character.max_willpower();
 
+		if let Splat::Werewolf(Some(auspice), _, _, data) = &mut character.splat {
+			data.hunters_aspect = Some(auspice.get_hunters_aspect().clone());
+		}
+
 		character
 	}
 }

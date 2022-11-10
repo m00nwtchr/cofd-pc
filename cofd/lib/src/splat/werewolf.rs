@@ -7,7 +7,7 @@ use crate::character::{
 	Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait,
 };
 
-use super::{ability::Ability, Merit, XSplat, YSplat, ZSplat};
+use super::{ability::Ability, Merit, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct KuruthTriggerSet {
@@ -765,6 +765,16 @@ pub enum WerewolfMerit {
 impl WerewolfMerit {
 	pub fn all() -> Vec<WerewolfMerit> {
 		vec![Self::FavoredForm(None), Self::EfficientKiller, Self::Totem]
+	}
+
+	pub fn is_available(&self, character: &crate::prelude::Character) -> bool {
+		if let Splat::Werewolf(_, _, _, _) = character.splat {
+			match self {
+				_ => true,
+			}
+		} else {
+			false
+		}
 	}
 }
 

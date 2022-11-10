@@ -12,7 +12,7 @@
 	clippy::default_trait_access
 )]
 
-use std::{cell::RefCell, fs::File, io::Write, mem, path::PathBuf, rc::Rc};
+use std::{cell::RefCell, fmt::Display, fs::File, io::Write, mem, path::PathBuf, rc::Rc};
 
 use directories::ProjectDirs;
 use iced::{
@@ -24,7 +24,10 @@ use iced::{
 #[cfg(target_arch = "wasm32")]
 use log::Level;
 
-use cofd::{prelude::*, splat::Splat};
+use cofd::{
+	prelude::*,
+	splat::{Merit, Splat},
+};
 
 mod component;
 mod i18n;

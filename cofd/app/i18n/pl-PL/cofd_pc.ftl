@@ -67,8 +67,6 @@ group_name = Nazwa grupy
 health = Zdrowie
 willpower = Siła woli
 
-merits = Talent
-
 size = Rozmiar
 speed = Prędkość
 defense = Obrona
@@ -81,7 +79,9 @@ perception = Percepcja
 conditions = Stany
 aspirations = Aspiracje
 
-mortal
+custom = Własne
+
+mortal = Śmiertelnik
     .integrity = Integralność
 
 vampire = Wampir
@@ -125,7 +125,7 @@ mage = Mag
     
     .gnosis = Gnoza
     .wisdom = Mądrość
-    .obsession = Obsesje
+    .obsessions = Obsesje
     
 
     .death = Śmierć
@@ -256,3 +256,7 @@ nationality = Narodowość
 height = Wysokość
 weight = Waga
 sex = Płeć
+
+
+merits = Talenty
+    .giant = Gigant

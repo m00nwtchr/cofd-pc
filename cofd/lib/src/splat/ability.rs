@@ -21,13 +21,13 @@ pub enum Ability {
 }
 
 impl Ability {
-	pub fn name(&self) -> &str {
+	pub fn name(&self) -> String {
 		match self {
 			Ability::Merit(merit) => merit.name(),
-			Ability::Discipline(discipline) => discipline.name(),
-			Ability::Renown(renown) => renown.name(),
-			Ability::MoonGift(moon_gift) => moon_gift.name(),
-			Ability::Arcanum(arcanum) => arcanum.name(),
+			Ability::Discipline(discipline) => discipline.name().to_string(),
+			Ability::Renown(renown) => renown.name().to_string(),
+			Ability::MoonGift(moon_gift) => moon_gift.name().to_string(),
+			Ability::Arcanum(arcanum) => arcanum.name().to_string(),
 		}
 	}
 
@@ -62,7 +62,7 @@ impl Ability {
 
 impl Display for Ability {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.name())
+		f.write_str(&self.name())
 	}
 }
 

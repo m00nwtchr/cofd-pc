@@ -7,7 +7,7 @@ use crate::{
 	prelude::Attribute,
 };
 
-use super::{Merit, XSplat, YSplat, ZSplat};
+use super::{Merit, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ChangelingData {
@@ -229,6 +229,16 @@ pub enum ChangelingMerit {}
 impl ChangelingMerit {
 	pub fn all() -> Vec<ChangelingMerit> {
 		vec![]
+	}
+
+	pub fn is_available(&self, character: &Character) -> bool {
+		if let Splat::Changeling(_, _, _, _) = character.splat {
+			match self {
+				_ => true,
+			}
+		} else {
+			false
+		}
 	}
 }
 

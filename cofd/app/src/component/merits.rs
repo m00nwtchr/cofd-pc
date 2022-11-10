@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use iced::{
 	widget::{column, pick_list, row, text, text_input, Column},
 	Alignment, Length,
@@ -5,30 +7,28 @@ use iced::{
 use iced_lazy::Component;
 use iced_native::Element;
 
-use cofd::splat::{ability::Ability, Merit, SplatType};
-use itertools::Itertools;
+use cofd::{prelude::Character, splat::Merit};
 
 use crate::{
 	fl,
+	i18n::Translated,
 	widget::{
 		self,
 		dots::{Shape, SheetDots},
 	},
-	H2_SIZE, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
+	H3_SIZE, INPUT_PADDING, TITLE_SPACING,
 };
 
 pub struct MeritComponent<Message> {
-	splat: SplatType,
-	merits: Vec<(Merit, u16)>,
+	character: Rc<RefCell<Character>>,
 	on_change: Box<dyn Fn(usize, Merit, u16) -> Message>,
 }
 
 pub fn merit_component<Message>(
-	splat: SplatType,
-	merits: Vec<(Merit, u16)>,
+	character: Rc<RefCell<Character>>,
 	on_change: impl Fn(usize, Merit, u16) -> Message + 'static,
 ) -> MeritComponent<Message> {
-	MeritComponent::new(splat, merits, on_change)
+	MeritComponent::new(character, on_change)
 }
 
 #[derive(Clone)]
@@ -36,13 +36,11 @@ pub struct Event(usize, Merit, u16);
 
 impl<Message> MeritComponent<Message> {
 	fn new(
-		splat: SplatType,
-		merits: Vec<(Merit, u16)>,
+		character: Rc<RefCell<Character>>,
 		on_change: impl Fn(usize, Merit, u16) -> Message + 'static,
 	) -> Self {
 		Self {
-			splat,
-			merits,
+			character,
 			on_change: Box::new(on_change),
 		}
 	}
@@ -70,6 +68,8 @@ where
 	}
 
 	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
+		let character = self.character.borrow();
+
 		let mut col1 = Column::new().spacing(3).width(Length::Fill);
 		let mut col2 = Column::new()
 			.spacing(4)
@@ -89,22 +89,29 @@ where
 
 		vec.push(Merit::_Custom(format!(
 			"--- {} Merits ---",
-			self.splat.name()
+			character.splat.name()
 		)));
-		vec.extend(Merit::get(self.splat));
+		vec.extend(character.splat.merits());
 
-		vec.push(Merit::_Custom(String::from("Custom")));
+		vec.push(Merit::_Custom(fl!("custom")));
 
-		let vec: Vec<Merit> = vec
+		let vec: Vec<Translated> = vec
 			.iter()
 			.cloned()
-			.filter(|e| self.merits.iter().filter(|(merit, _)| *merit == *e).count() == 0)
+			.filter(|e| {
+				character
+					.merits
+					.iter()
+					.filter(|(merit, _)| *merit == *e)
+					.count() == 0 && e.is_available(&character)
+			})
+			.map(Into::into)
 			.collect();
 
-		for (i, (merit, val)) in self.merits.iter().enumerate() {
-			if let Merit::_Custom(str) = merit {
+		for (i, (merit, val)) in character.merits.iter().cloned().enumerate() {
+			if let Merit::_Custom(str) = &merit {
 				col1 = col1.push(
-					text_input("", &str, move |key| {
+					text_input("", str, move |key| {
 						Event(i, Merit::_Custom(key), val.clone())
 					})
 					.padding(INPUT_PADDING),
@@ -112,8 +119,12 @@ where
 			} else {
 				col1 = col1
 					.push(
-						pick_list(vec.clone(), Some(merit.clone()), move |key| {
-							Event(i, key, val.clone())
+						pick_list(vec.clone(), Some(merit.clone().into()), move |key| {
+							if let Translated::Merit(key) = key {
+								Event(i, key.clone(), val.clone())
+							} else {
+								unreachable!()
+							}
 						})
 						.padding(INPUT_PADDING)
 						.text_size(20)
@@ -123,15 +134,21 @@ where
 			}
 
 			col2 = col2.push(SheetDots::new(val.clone(), 0, 5, Shape::Dots, None, {
-				let key = merit.clone();
-				move |val| Event(i, key.clone(), val)
+				let merit = merit.clone();
+				move |val| Event(i, merit.clone(), val)
 			}));
 		}
 
-		let new = pick_list(vec, None, |key| Event(self.merits.len(), key, 0))
-			.padding(INPUT_PADDING)
-			.text_size(20)
-			.width(Length::Fill);
+		let new = pick_list(vec, None, |key| {
+			if let Translated::Merit(key) = key {
+				Event(self.character.borrow().merits.len(), key, 0)
+			} else {
+				unreachable!()
+			}
+		})
+		.padding(INPUT_PADDING)
+		.text_size(20)
+		.width(Length::Fill);
 
 		column![
 			text(fl!("merits")).size(H3_SIZE),

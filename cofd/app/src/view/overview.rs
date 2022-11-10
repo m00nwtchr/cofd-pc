@@ -26,6 +26,7 @@ use crate::{
 		traits_component,
 	},
 	fl,
+	i18n::Translated,
 	// i18n::fl,
 	widget::{self, dots::Shape, dots::SheetDots, track::HealthTrack},
 	COMPONENT_SPACING,
@@ -114,7 +115,7 @@ impl<Message> OverviewTab<Message> {
 				for ability in abilities {
 					let val = character.get_ability_value(&ability).unwrap_or(&0);
 
-					col1 = col1.push(text(fl(splat_name, Some(ability.name())).unwrap()));
+					col1 = col1.push(text(fl(splat_name, Some(&ability.name())).unwrap()));
 					col2 = col2.push(SheetDots::new(
 						val.clone(),
 						0,
@@ -135,14 +136,16 @@ impl<Message> OverviewTab<Message> {
 				.cloned()
 				.collect();
 
-			if let Some(ability) = character.splat.custom_ability("Custom".to_string()) {
+			if let Some(ability) = character.splat.custom_ability(fl!("custom")) {
 				e.push(ability);
 			}
+
+			let e: Vec<Translated> = e.into_iter().map(Into::into).collect();
 
 			for (ability, val) in &character.abilities {
 				if ability.is_custom() {
 					col1 = col1.push(
-						text_input("", ability.name(), {
+						text_input("", &ability.name(), {
 							let ab = ability.clone();
 							move |val| {
 								let mut new = ab.clone();
@@ -155,9 +158,15 @@ impl<Message> OverviewTab<Message> {
 				} else {
 					col1 = col1
 						.push(
-							pick_list(e.clone(), Some(ability.clone()), {
+							pick_list(e.clone(), Some(ability.clone().into()), {
 								let ability = ability.clone();
-								move |val| Event::AbilityChanged(ability.clone(), val)
+								move |val| {
+									if let Translated::Ability(val) = val {
+										Event::AbilityChanged(ability.clone(), val)
+									} else {
+										unreachable!()
+									}
+								}
 							})
 							.width(Length::Fill)
 							.padding(INPUT_PADDING)
@@ -173,10 +182,16 @@ impl<Message> OverviewTab<Message> {
 			}
 
 			new = new.push(
-				pick_list(e, None, |key| Event::AbilityValChanged(key, 0))
-					.width(Length::Fill)
-					.padding(INPUT_PADDING)
-					.text_size(20),
+				pick_list(e, None, |key| {
+					if let Translated::Ability(key) = key {
+						Event::AbilityValChanged(key, 0)
+					} else {
+						unreachable!()
+					}
+				})
+				.width(Length::Fill)
+				.padding(INPUT_PADDING)
+				.text_size(20),
 			);
 		}
 
@@ -538,11 +553,7 @@ where
 			}
 		}
 
-		col1 = col1.push(merit_component(
-			character.splat._type(),
-			character.merits.clone(),
-			Event::MeritChanged,
-		));
+		col1 = col1.push(merit_component(self.character.clone(), Event::MeritChanged));
 
 		match &character.splat {
 			Splat::Changeling(seeming, _, _, data) => {
@@ -558,15 +569,22 @@ where
 							.padding(INPUT_PADDING)
 							.into()
 					} else {
-						let reg: Vec<Regalia> = all_regalia
+						let reg: Vec<Translated> = all_regalia
 							.iter()
 							.cloned()
 							.filter(|reg| reg != sg)
+							.map(Into::into)
 							.collect();
 
-						pick_list(reg, data.regalia.clone(), Event::RegaliaChanged)
-							.width(Length::Fill)
-							.into()
+						pick_list(reg, data.regalia.clone().map(Into::into), |val| {
+							if let Translated::Regalia(val) = val {
+								Event::RegaliaChanged(val)
+							} else {
+								unreachable!()
+							}
+						})
+						.width(Length::Fill)
+						.into()
 					};
 
 				let frailties = list(
@@ -612,7 +630,7 @@ where
 					vec.extend(tribe.get_hunters_aspects().clone());
 				}
 
-				vec.push(HuntersAspect::_Custom("Custom".to_owned()));
+				vec.push(HuntersAspect::_Custom(fl!("custom")));
 
 				col1 = col1.push(
 					column![

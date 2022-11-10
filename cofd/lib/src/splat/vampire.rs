@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Trait};
 
-use super::{ability::Ability, Merit, XSplat, YSplat, ZSplat};
+use super::{ability::Ability, Merit, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct VampireData {
@@ -369,6 +369,16 @@ impl VampireMerit {
 			Self::TwilightJudge, // SotC
 			Self::NestGuardian,
 		]
+	}
+
+	pub fn is_available(&self, character: &crate::prelude::Character) -> bool {
+		if let Splat::Vampire(_, _, _, _) = character.splat {
+			match self {
+				_ => true,
+			}
+		} else {
+			false
+		}
 	}
 }
 

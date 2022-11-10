@@ -2,10 +2,12 @@ use serde::{Deserialize, Serialize};
 use serde_variant::to_variant_name;
 use std::fmt::Display;
 
+use convert_case::{Case, Casing};
+
 use self::ability::Ability;
 use crate::{
 	character::{AttributeType, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait},
-	prelude::Attribute,
+	prelude::{Attribute, Character},
 };
 
 pub mod ability;
@@ -417,6 +419,16 @@ impl Splat {
 			Splat::Werewolf(_, _, _, _) => "harmony",
 			Splat::Mage(_, _, _, _) => "wisdom",
 			Splat::Changeling(_, _, _, _) => "clarity",
+		}
+	}
+
+	pub fn merits(&self) -> Vec<Merit> {
+		match self {
+			Self::Mortal => Merit::all(),
+			Self::Vampire(..) => VampireMerit::all().into_iter().map(Into::into).collect(),
+			Self::Werewolf(..) => WerewolfMerit::all().into_iter().map(Into::into).collect(),
+			Self::Mage(..) => MageMerit::all().into_iter().map(Into::into).collect(),
+			Self::Changeling(..) => ChangelingMerit::all().into_iter().map(Into::into).collect(),
 		}
 	}
 }
@@ -909,23 +921,13 @@ impl Merit {
 		]
 	}
 
-	pub fn get(splat: SplatType) -> Vec<Merit> {
-		match splat {
-			SplatType::Mortal => Merit::all(),
-			SplatType::Vampire => VampireMerit::all().into_iter().map(Into::into).collect(),
-			SplatType::Werewolf => WerewolfMerit::all().into_iter().map(Into::into).collect(),
-			SplatType::Mage => MageMerit::all().into_iter().map(Into::into).collect(),
-			SplatType::Changeling => ChangelingMerit::all().into_iter().map(Into::into).collect(),
-		}
-	}
-
-	fn name(&self) -> &str {
+	pub fn name(&self) -> String {
 		match self {
-			Merit::Mage(merit) => to_variant_name(merit).unwrap(),
-			Merit::Vampire(merit) => to_variant_name(merit).unwrap(),
-			Merit::Werewolf(merit) => to_variant_name(merit).unwrap(),
-			Merit::_Custom(name) => name,
-			_ => to_variant_name(self).unwrap(),
+			Merit::Mage(merit) => to_variant_name(merit).unwrap().to_case(Case::Snake),
+			Merit::Vampire(merit) => to_variant_name(merit).unwrap().to_case(Case::Snake),
+			Merit::Werewolf(merit) => to_variant_name(merit).unwrap().to_case(Case::Snake),
+			Merit::_Custom(name) => name.to_owned(),
+			_ => to_variant_name(self).unwrap().to_case(Case::Snake),
 		}
 	}
 
@@ -952,11 +954,123 @@ impl Merit {
 			_ => vec![],
 		}
 	}
+
+	pub fn is_available(&self, character: &Character) -> bool {
+		match self {
+			Merit::_Custom(_) => true,
+
+			Merit::AreaOfExpertise(_) => character.attributes().resolve > 1,
+			Merit::EyeForTheStrange => {
+				character.attributes().resolve > 1 && character.skills().occult > 0
+			}
+			Merit::FastReflexes => {
+				let attr = character.attributes();
+				attr.wits > 2 || attr.dexterity > 2
+			}
+			Merit::GoodTimeManagement => {
+				let skills = character.skills();
+				skills.academics > 1 || skills.science > 1
+			}
+			Self::Indomitable => character.attributes().resolve > 2,
+			Self::InterdisciplinarySpecialty(_, Some(skill)) => *character.skills().get(*skill) > 2,
+			Self::InvestigativeAide(Some(skill)) => *character.skills().get(*skill) > 2,
+			Self::InvestigativeProdigy => {
+				character.attributes().wits > 2 && character.skills().investigation > 2
+			}
+			// Self::LibraryAdvanced() // Library 3 + <= Safe Place
+			Self::Scarred(_) => character.integrity <= 5,
+			Self::ToleranceForBiology => character.attributes().resolve > 2,
+			Self::TrainedObserver => {
+				let attrs = character.attributes();
+				attrs.wits > 2 || attrs.composure > 2
+			}
+			Self::ViceRidden(_) if character.splat.vice_anchor() != "vice" => false,
+			Self::Virtuous(_) if character.splat.virtue_anchor() != "virtue" => false,
+
+			// Self::Ambidextrous // Character creation only
+			Self::AutomotiveGenius => {
+				let skills = character.skills();
+				skills.crafts > 2 && skills.drive > 0 && skills.science > 0
+			}
+			Self::CovertOperative => {
+				let attr = character.attributes();
+				attr.wits > 2 && attr.dexterity > 2 && character.skills().stealth > 1
+			}
+			Self::CrackDriver => character.skills().drive > 2,
+			Self::Demolisher => {
+				let attr = character.attributes();
+				attr.strength > 2 || attr.intelligence > 2
+			}
+			Self::DoubleJointed => character.attributes().dexterity > 2,
+			Self::FleetOfFoot => character.skills().athletics > 1,
+			Self::Freediving => character.skills().athletics > 1,
+			// Self::Giant // Character Creation OR Strength Performance
+			Self::Hardy => character.attributes().stamina > 2,
+			Self::Greyhound => {
+				let attr = character.attributes();
+				character.skills().athletics > 2 && attr.wits > 2 && attr.stamina > 2
+			}
+			// IronSkin
+			Self::IronStamina => {
+				let attr = character.attributes();
+				attr.stamina > 2 || attr.resolve > 2
+			}
+			Self::QuickDraw(_) => character.attributes().wits > 2,
+			Self::PunchDrunk => character.max_willpower() > 5,
+			Self::Relentless => {
+				character.skills().athletics > 1 && character.attributes().stamina > 2
+			}
+			// Self::Roadkill // Merit Dep Aggresive Driving 2
+			Self::SeizingTheEdge => {
+				let attr = character.attributes();
+				attr.wits > 2 && attr.composure > 2
+			}
+			Self::SleightOfHand => character.skills().larceny > 2,
+			// Self::SmallFramed // Character Creation
+			// Self::Survivalist => character.skills().survival > 2 // Iron Stamina 3 dependency
+			Self::AirOfMenace => character.skills().intimidation > 1,
+			// Self::Anonymity // No Fame Merit
+			Self::Barfly => character.skills().socialize > 1,
+			Self::ClosedBook => {
+				let attr = character.attributes();
+				attr.manipulation > 2 && attr.resolve > 2
+			}
+			Self::CohesiveUnit => character.attributes().presence > 2,
+			Self::Empath => character.skills().empathy > 1,
+			// Self::Fame // No Anonimity Merit
+			// Self::Fixer => character.attributes().wits > 2 // Contacts 2
+			Self::HobbyistClique(_, Some(skill)) => *character.skills().get(*skill) > 1,
+			Self::Inspiring => character.attributes().presence > 2,
+			Self::IronWill => character.attributes().resolve > 3,
+			Self::Peacemaker => character.attributes().wits > 2 && character.skills().empathy > 2,
+			Self::Pusher => character.skills().persuasion > 1,
+			Self::SmallUnitTactics => character.attributes().presence > 2,
+			Self::SpinDoctor => {
+				character.attributes().manipulation > 2 && character.skills().subterfuge > 1
+			}
+			Self::TableTurner => {
+				let attr = character.attributes();
+				attr.composure > 2 && attr.manipulation > 2 && attr.wits > 2
+			}
+			Self::TakesOneToKnowOne if character.splat.vice_anchor() != "vice" => false,
+			Self::Taste(_, _) => character.skills().crafts > 1,
+			Self::Untouchable => {
+				character.attributes().manipulation > 2 && character.skills().subterfuge > 1
+			}
+
+			Merit::Mage(merit) => merit.is_available(character),
+			Merit::Vampire(merit) => merit.is_available(character),
+			Merit::Werewolf(merit) => merit.is_available(character),
+			Merit::Changeling(merit) => merit.is_available(character),
+
+			_ => true,
+		}
+	}
 }
 
 impl Display for Merit {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.name())
+		f.write_str(&self.name())
 	}
 }
 
