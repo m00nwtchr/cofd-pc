@@ -223,6 +223,8 @@ werewolf = Werewolf
     .blissful = Blissful
     .mystic = Mystic
     .dominant = Dominant
+    .fanatical = Fanatical
+    .frenzied = Frenzied
     .agnoized = Agonized
     .insidious = Insidious
     .implacable = Implacable
@@ -241,26 +243,32 @@ werewolf = Werewolf
     .urhan-desc = Wolf
 
 kuruth-triggers = Kuruth Triggers
+    .blood = Blood
     .blood-passive  = Smelling human blood.
     .blood-common   = Tasting human blood.
     .blood-specific = Swallowing human blood.
 
+    .moon = Moon
     .moon-passive = Your auspice moon is in the sky.
     .moon-common   = You witness your auspice moon in the sky.
     .moon-specific = Hear a wolf or werewolf howl when your auspice moon is in the sky.
     
-    .theother-passive  = You come within 10 yards of a supernatural creature.
-    .theother-common   = You witness a supernatural creature doing something obviously inhuman.
-    .theother-specific = You are the target of a supernatural power.
+    .the_other = The Other
+    .the_other-passive  = You come within 10 yards of a supernatural creature.
+    .the_other-common   = You witness a supernatural creature doing something obviously inhuman.
+    .the_other-specific = You are the target of a supernatural power.
 
+    .pack = Pack
     .pack-passive  = A pack member takes lethal damage.
     .pack-common   = Seeing someone attack a pack member.
     .pack-specific = You cause lethal damage to a pack member.
 
+    .territory = Territory
     .territory-passive  = A werewolf you don't know enters your territory without permission.
     .territory-common   = You see a werewolf you don't know in your territory.
     .territory-specific = A werewolf you don't know challenges your pack's ability to do its duty.
 
+    .wound = Wound
     .wound-passive  = Being in the area of a Wound.
     .wound-common   = Interacting with a Wound-born spirit.
     .wound-specific = Being attacked by a Wound-born spirit.

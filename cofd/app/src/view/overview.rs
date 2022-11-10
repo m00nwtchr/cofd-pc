@@ -127,25 +127,23 @@ impl<Message> OverviewTab<Message> {
 				}
 			}
 		} else {
-			let mut e: Vec<Ability> = character
-				.splat
-				.all_abilities()
-				.unwrap()
+			let mut vec = character.splat.all_abilities().unwrap();
+
+			if let Some(ability) = character.splat.custom_ability(fl!("custom")) {
+				vec.push(ability);
+			}
+
+			let vec: Vec<Translated<Ability>> = vec
 				.iter()
 				.filter(|e| !character.has_ability(e))
 				.cloned()
+				.map(Into::into)
 				.collect();
-
-			if let Some(ability) = character.splat.custom_ability(fl!("custom")) {
-				e.push(ability);
-			}
-
-			let e: Vec<Translated<Ability>> = e.into_iter().map(Into::into).collect();
 
 			for (ability, val) in &character.abilities {
 				if ability.is_custom() {
 					col1 = col1.push(
-						text_input("", ability.name(), {
+						text_input("", &ability.name(), {
 							let ab = ability.clone();
 							move |val| {
 								let mut new = ab.clone();
@@ -158,7 +156,7 @@ impl<Message> OverviewTab<Message> {
 				} else {
 					col1 = col1
 						.push(
-							pick_list(e.clone(), Some(ability.clone().into()), {
+							pick_list(vec.clone(), Some(ability.clone().into()), {
 								let ability = ability.clone();
 								move |val| Event::AbilityChanged(ability.clone(), val.unwrap())
 							})
@@ -176,7 +174,7 @@ impl<Message> OverviewTab<Message> {
 			}
 
 			new = new.push(
-				pick_list(e, None, |key| Event::AbilityValChanged(key.unwrap(), 0))
+				pick_list(vec, None, |key| Event::AbilityValChanged(key.unwrap(), 0))
 					.width(Length::Fill)
 					.padding(INPUT_PADDING)
 					.text_size(20),
@@ -502,14 +500,15 @@ where
 				)
 			};
 
+			let vec: Vec<Translated<KuruthTriggers>> =
+				KuruthTriggers::all().into_iter().map(Into::into).collect();
+
 			column![
 				text(fl!("kuruth-triggers")),
 				column![
-					pick_list(
-						KuruthTriggers::all().to_vec(),
-						Some(data.triggers.clone()),
-						Event::KuruthTriggersChanged,
-					)
+					pick_list(vec, Some(data.triggers.clone().into()), |val| {
+						Event::KuruthTriggersChanged(val.unwrap())
+					})
 					.width(Length::Fill)
 					.padding(INPUT_PADDING),
 					text(fl("werewolf", Some("passive")).unwrap()),
@@ -606,21 +605,27 @@ where
 				));
 			}
 			Splat::Werewolf(auspice, tribe, _, data) => {
-				let mut vec = Vec::new();
+				let mut vec: Vec<Translated<HuntersAspect>> = Vec::new();
 
 				if let Some(auspice) = auspice {
-					vec.push(auspice.get_hunters_aspect().clone());
+					vec.push(auspice.get_hunters_aspect().clone().into());
 				} else if let Some(Tribe::Pure(tribe)) = tribe {
-					vec.extend(tribe.get_hunters_aspects().clone());
+					vec.extend(
+						tribe
+							.get_hunters_aspects()
+							.into_iter()
+							.cloned()
+							.map(Into::into),
+					);
 				}
 
-				vec.push(HuntersAspect::_Custom(fl!("custom")));
+				vec.push(HuntersAspect::_Custom(fl!("custom")).into());
 
 				col1 = col1.push(
 					column![
 						text(fl("werewolf", Some("hunters_aspect")).unwrap()),
-						pick_list(vec, data.hunters_aspect.clone(), |val| {
-							Event::HuntersAspectChanged(val)
+						pick_list(vec, data.hunters_aspect.clone().map(Into::into), |val| {
+							Event::HuntersAspectChanged(val.unwrap())
 						})
 						.width(Length::Fill)
 						.padding(INPUT_PADDING)

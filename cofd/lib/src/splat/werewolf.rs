@@ -7,7 +7,7 @@ use crate::character::{
 	Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait,
 };
 
-use super::{ability::Ability, Merit, Splat, XSplat, YSplat, ZSplat};
+use super::{ability::Ability, Merit, NameKey, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct KuruthTriggerSet {
@@ -49,12 +49,12 @@ pub enum KuruthTriggers {
 	_Custom(KuruthTriggerSet),
 }
 
-impl Display for KuruthTriggers {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		if let KuruthTriggers::_Custom(_) = self {
-			f.write_str("Custom")
+impl NameKey for KuruthTriggers {
+	fn name_key(&self) -> String {
+		if let Some(name) = self.name() {
+			format!("kuruth-triggers.{}", name)
 		} else {
-			f.write_str(to_variant_name(self).unwrap())
+			format!("custom")
 		}
 	}
 }
@@ -82,7 +82,7 @@ impl KuruthTriggers {
 		match self {
 			KuruthTriggers::Blood => Some("blood"),
 			KuruthTriggers::Moon => Some("moon"),
-			KuruthTriggers::TheOther => Some("theother"),
+			KuruthTriggers::TheOther => Some("the_other"),
 			KuruthTriggers::Pack => Some("pack"),
 			KuruthTriggers::Territory => Some("territory"),
 			KuruthTriggers::Wound => Some("wound"),
@@ -178,9 +178,9 @@ impl HuntersAspect {
 	}
 }
 
-impl Display for HuntersAspect {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.name())
+impl NameKey for HuntersAspect {
+	fn name_key(&self) -> String {
+		format!("werewolf.{}", self.name())
 	}
 }
 
@@ -572,13 +572,14 @@ pub enum ShadowGift {
 	Technology,
 	Warding,
 	Weather,
-	_Custom(String),
 
 	Agony,
 	Blood,
 	Disease,
 	Fervor,
 	Hunger,
+
+	_Custom(String),
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]

@@ -238,7 +238,6 @@ changeling = Podmieńca
     .elemental = Żywiołak
     .fairest = Piękny
     .ogre = Ogr
-    .wizened = Zmądrzały
 
     .spring = Wiosna
     .summer = Lato
