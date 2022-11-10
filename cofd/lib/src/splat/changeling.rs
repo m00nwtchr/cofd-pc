@@ -7,7 +7,7 @@ use crate::{
 	prelude::Attribute,
 };
 
-use super::{Merit, Splat, XSplat, YSplat, ZSplat};
+use super::{Merit, NameKey, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ChangelingData {
@@ -193,6 +193,17 @@ pub enum Regalia {
 }
 
 impl Regalia {
+	pub fn all() -> [Regalia; 6] {
+		[
+			Regalia::Crown,
+			Regalia::Jewels,
+			Regalia::Mirror,
+			Regalia::Shield,
+			Regalia::Steed,
+			Regalia::Sword,
+		]
+	}
+
 	pub fn name(&self) -> &str {
 		match self {
 			Regalia::Crown => "crown",
@@ -204,22 +215,11 @@ impl Regalia {
 			Regalia::_Custom(name) => name,
 		}
 	}
-
-	pub fn all() -> [Regalia; 6] {
-		[
-			Regalia::Crown,
-			Regalia::Jewels,
-			Regalia::Mirror,
-			Regalia::Shield,
-			Regalia::Steed,
-			Regalia::Sword,
-		]
-	}
 }
 
-impl Display for Regalia {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.name())
+impl NameKey for Regalia {
+	fn name_key(&self) -> String {
+		format!("changeling.{}", self.name())
 	}
 }
 

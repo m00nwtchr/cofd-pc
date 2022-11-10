@@ -5,7 +5,7 @@ use crate::{
 	prelude::{Attribute, Character},
 };
 
-use super::{ability::Ability, Merit, XSplat, YSplat, ZSplat, Splat};
+use super::{ability::Ability, Merit, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MageData {

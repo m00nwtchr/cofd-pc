@@ -8,7 +8,7 @@ use super::{
 	mage::Arcanum,
 	vampire::Discipline,
 	werewolf::{MoonGift, Renown},
-	Merit,
+	Merit, NameKey,
 };
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
@@ -24,10 +24,10 @@ impl Ability {
 	pub fn name(&self) -> String {
 		match self {
 			Ability::Merit(merit) => merit.name(),
-			Ability::Discipline(discipline) => discipline.name().to_string(),
-			Ability::Renown(renown) => renown.name().to_string(),
-			Ability::MoonGift(moon_gift) => moon_gift.name().to_string(),
-			Ability::Arcanum(arcanum) => arcanum.name().to_string(),
+			Ability::Discipline(discipline) => discipline.name().to_owned(),
+			Ability::Renown(renown) => renown.name().to_owned(),
+			Ability::MoonGift(moon_gift) => moon_gift.name().to_owned(),
+			Ability::Arcanum(arcanum) => arcanum.name().to_owned(),
 		}
 	}
 
@@ -60,12 +60,17 @@ impl Ability {
 	}
 }
 
-impl Display for Ability {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(&self.name())
+impl NameKey for Ability {
+	fn name_key(&self) -> String {
+		match self {
+			Ability::Merit(merit) => format!("merit.{}", merit.name()),
+			Ability::Discipline(discipline) => format!("vampire.{}", discipline.name()),
+			Ability::Renown(renown) => format!("werewolf.{}", renown.name()),
+			Ability::MoonGift(moon_gift) => format!("werewolf.{}", moon_gift.name()),
+			Ability::Arcanum(arcanum) => format!("mage.{}", arcanum.name()),
+		}
 	}
 }
-
 // #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 // pub struct AbilityVal(pub Ability, pub u16);
 

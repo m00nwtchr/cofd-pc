@@ -16,7 +16,7 @@ use cofd::{
 		werewolf::{
 			HuntersAspect, KuruthTrigger, KuruthTriggerSet, KuruthTriggers, Tribe, WerewolfData,
 		},
-		Merit, Splat, SplatType,
+		Merit, NameKey, Splat, SplatType,
 	},
 };
 
@@ -140,12 +140,12 @@ impl<Message> OverviewTab<Message> {
 				e.push(ability);
 			}
 
-			let e: Vec<Translated> = e.into_iter().map(Into::into).collect();
+			let e: Vec<Translated<Ability>> = e.into_iter().map(Into::into).collect();
 
 			for (ability, val) in &character.abilities {
 				if ability.is_custom() {
 					col1 = col1.push(
-						text_input("", &ability.name(), {
+						text_input("", ability.name(), {
 							let ab = ability.clone();
 							move |val| {
 								let mut new = ab.clone();
@@ -160,13 +160,7 @@ impl<Message> OverviewTab<Message> {
 						.push(
 							pick_list(e.clone(), Some(ability.clone().into()), {
 								let ability = ability.clone();
-								move |val| {
-									if let Translated::Ability(val) = val {
-										Event::AbilityChanged(ability.clone(), val)
-									} else {
-										unreachable!()
-									}
-								}
+								move |val| Event::AbilityChanged(ability.clone(), val.unwrap())
 							})
 							.width(Length::Fill)
 							.padding(INPUT_PADDING)
@@ -182,16 +176,10 @@ impl<Message> OverviewTab<Message> {
 			}
 
 			new = new.push(
-				pick_list(e, None, |key| {
-					if let Translated::Ability(key) = key {
-						Event::AbilityValChanged(key, 0)
-					} else {
-						unreachable!()
-					}
-				})
-				.width(Length::Fill)
-				.padding(INPUT_PADDING)
-				.text_size(20),
+				pick_list(e, None, |key| Event::AbilityValChanged(key.unwrap(), 0))
+					.width(Length::Fill)
+					.padding(INPUT_PADDING)
+					.text_size(20),
 			);
 		}
 
@@ -560,7 +548,7 @@ where
 				let sg = seeming.get_favored_regalia();
 				let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
 
-				let seeming_regalia = text(fl(character.splat.name(), Some(sg.name())).unwrap());
+				let seeming_regalia = text(fl(character.splat.name(), Some(&sg.name())).unwrap());
 
 				let regalia: Element<Event, Renderer> =
 					if let Some(Regalia::_Custom(name)) = &data.regalia {
@@ -569,7 +557,7 @@ where
 							.padding(INPUT_PADDING)
 							.into()
 					} else {
-						let reg: Vec<Translated> = all_regalia
+						let reg: Vec<Translated<Regalia>> = all_regalia
 							.iter()
 							.cloned()
 							.filter(|reg| reg != sg)
@@ -577,11 +565,7 @@ where
 							.collect();
 
 						pick_list(reg, data.regalia.clone().map(Into::into), |val| {
-							if let Translated::Regalia(val) = val {
-								Event::RegaliaChanged(val)
-							} else {
-								unreachable!()
-							}
+							Event::RegaliaChanged(val.unwrap())
 						})
 						.width(Length::Fill)
 						.into()

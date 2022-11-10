@@ -95,7 +95,7 @@ where
 
 		vec.push(Merit::_Custom(fl!("custom")));
 
-		let vec: Vec<Translated> = vec
+		let vec: Vec<Translated<Merit>> = vec
 			.iter()
 			.cloned()
 			.filter(|e| {
@@ -120,11 +120,7 @@ where
 				col1 = col1
 					.push(
 						pick_list(vec.clone(), Some(merit.clone().into()), move |key| {
-							if let Translated::Merit(key) = key {
-								Event(i, key.clone(), val.clone())
-							} else {
-								unreachable!()
-							}
+							Event(i, key.unwrap().clone(), val.clone())
 						})
 						.padding(INPUT_PADDING)
 						.text_size(20)
@@ -140,11 +136,7 @@ where
 		}
 
 		let new = pick_list(vec, None, |key| {
-			if let Translated::Merit(key) = key {
-				Event(self.character.borrow().merits.len(), key, 0)
-			} else {
-				unreachable!()
-			}
+			Event(self.character.borrow().merits.len(), key.unwrap(), 0)
 		})
 		.padding(INPUT_PADDING)
 		.text_size(20)

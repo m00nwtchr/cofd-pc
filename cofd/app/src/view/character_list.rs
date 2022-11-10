@@ -6,7 +6,7 @@ use iced::{
 };
 use iced_lazy::Component;
 
-use cofd::prelude::*;
+use cofd::{prelude::*, splat::NameKey};
 
 use crate::fl;
 

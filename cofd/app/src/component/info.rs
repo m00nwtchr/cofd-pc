@@ -10,12 +10,13 @@ use iced_native::Element;
 use cofd::{
 	character::InfoTrait,
 	prelude::Character,
-	splat::{Splat, XSplat, YSplat, ZSplat},
+	splat::{NameKey, Splat, XSplat, YSplat, ZSplat},
 };
 
 use crate::{
+	fl as fll,
 	i18n::{fl, Translated},
-	widget, INPUT_PADDING, fl as fll
+	widget, INPUT_PADDING,
 };
 
 pub struct InfoBar<Message> {
@@ -169,9 +170,12 @@ where
 					zsplats.push(zsplat);
 				}
 
-				let xsplats: Vec<Translated> = xsplats.into_iter().map(Into::into).collect();
-				let ysplats: Vec<Translated> = ysplats.into_iter().map(Into::into).collect();
-				let zsplats: Vec<Translated> = zsplats.into_iter().map(Into::into).collect();
+				let xsplats: Vec<Translated<XSplat>> =
+					xsplats.into_iter().map(Into::into).collect();
+				let ysplats: Vec<Translated<YSplat>> =
+					ysplats.into_iter().map(Into::into).collect();
+				let zsplats: Vec<Translated<ZSplat>> =
+					zsplats.into_iter().map(Into::into).collect();
 
 				let xsplat = character.splat.xsplat();
 				let ysplat = character.splat.ysplat();
@@ -188,7 +192,7 @@ where
 					}).padding(INPUT_PADDING)
 					.into()
 				} else {
-					pick_list(xsplats, xsplat.map(Into::into), |val| if let Translated::XSplat(val) = val { Event::XSplatChanged(val) } else {unreachable!()})
+					pick_list(xsplats, xsplat.map(Into::into), |val| Event::XSplatChanged(val.unwrap()))
 					.padding(INPUT_PADDING)
 					.width(Length::Fill).into()
 				};
@@ -204,7 +208,7 @@ where
 					}).padding(INPUT_PADDING)
 					.into()
 				} else {
-					pick_list(ysplats, ysplat.map(Into::into), |val| if let Translated::YSplat(val) = val { Event::YSplatChanged(val) } else {unreachable!()})
+					pick_list(ysplats, ysplat.map(Into::into), |val| Event::YSplatChanged(val.unwrap()))
 					.padding(INPUT_PADDING)
 					.width(Length::Fill).into()
 				};
@@ -220,7 +224,7 @@ where
 					}).padding(INPUT_PADDING)
 					.into()
 				} else {
-					pick_list(zsplats, zsplat.map(Into::into), |val| if let Translated::XSplat(val) = val { Event::XSplatChanged(val) } else {unreachable!()})
+					pick_list(zsplats, zsplat.map(Into::into), |val| Event::ZSplatChanged(val.unwrap()))
 						.padding(INPUT_PADDING)
 						.width(Length::Fill)
 						.into()

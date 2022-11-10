@@ -482,9 +482,14 @@ impl XSplat {
 	}
 }
 
-impl Display for XSplat {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.name())
+impl NameKey for XSplat {
+	fn name_key(&self) -> String {
+		match self {
+			XSplat::Vampire(clan) => format!("vampire.{}", clan.name()),
+			XSplat::Werewolf(auspice) => format!("werewolf.{}", auspice.name()),
+			XSplat::Mage(path) => format!("mage.{}", path.name()),
+			XSplat::Changeling(seeming) => format!("changeling.{}", seeming.name()),
+		}
 	}
 }
 
@@ -540,9 +545,14 @@ impl YSplat {
 	}
 }
 
-impl Display for YSplat {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.name())
+impl NameKey for YSplat {
+	fn name_key(&self) -> String {
+		match self {
+			YSplat::Vampire(covenant) => format!("vampire.{}", covenant.name()),
+			YSplat::Werewolf(tribe) => format!("werewolf.{}", tribe.name()),
+			YSplat::Mage(order) => format!("mage.{}", order.name()),
+			YSplat::Changeling(court) => format!("changeling.{}", court.name()),
+		}
 	}
 }
 
@@ -592,9 +602,14 @@ impl ZSplat {
 	}
 }
 
-impl Display for ZSplat {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.name())
+impl NameKey for ZSplat {
+	fn name_key(&self) -> String {
+		match self {
+			Self::Vampire(bloodline) => format!("vampire.{}", bloodline.name()),
+			Self::Werewolf(lodge) => format!("werewolf.{}", lodge.name()),
+			Self::Mage(legacy) => format!("mage.{}", legacy.name()),
+			Self::Changeling(kith) => format!("changeling.{}", kith.name()),
+		}
 	}
 }
 
@@ -1058,19 +1073,19 @@ impl Merit {
 				character.attributes().manipulation > 2 && character.skills().subterfuge > 1
 			}
 
-			Merit::Mage(merit) => merit.is_available(character),
-			Merit::Vampire(merit) => merit.is_available(character),
-			Merit::Werewolf(merit) => merit.is_available(character),
-			Merit::Changeling(merit) => merit.is_available(character),
+			Self::Mage(merit) => merit.is_available(character),
+			Self::Vampire(merit) => merit.is_available(character),
+			Self::Werewolf(merit) => merit.is_available(character),
+			Self::Changeling(merit) => merit.is_available(character),
 
 			_ => true,
 		}
 	}
 }
 
-impl Display for Merit {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(&self.name())
+impl NameKey for Merit {
+	fn name_key(&self) -> String {
+		format!("merits.{}", self.name())
 	}
 }
 
@@ -1078,4 +1093,8 @@ impl From<Merit> for Ability {
 	fn from(merit: Merit) -> Self {
 		Ability::Merit(merit)
 	}
+}
+
+pub trait NameKey {
+	fn name_key(&self) -> String;
 }
