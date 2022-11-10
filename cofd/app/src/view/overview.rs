@@ -328,7 +328,11 @@ where
 			}
 			Event::HuntersAspectChanged(val) => {
 				if let Splat::Werewolf(_, _, _, data) = &mut character.splat {
-					data.hunters_aspect = Some(val);
+					if let HuntersAspect::_Custom(name) = &val && name.eq("") {
+						data.hunters_aspect = None;
+					} else {
+						data.hunters_aspect = Some(val);
+					}
 				}
 			}
 		}
@@ -621,18 +625,28 @@ where
 
 				vec.push(HuntersAspect::_Custom(fl!("custom")).into());
 
-				col1 = col1.push(
-					column![
-						text(fl("werewolf", Some("hunters_aspect")).unwrap()),
+				let mut col = column![text(fl("werewolf", Some("hunters_aspect")).unwrap()),]
+					.align_items(Alignment::Center)
+					.spacing(TITLE_SPACING);
+
+				if let Some(HuntersAspect::_Custom(name)) = &data.hunters_aspect {
+					col = col.push(
+						text_input("", name, |val| {
+							Event::HuntersAspectChanged(HuntersAspect::_Custom(val))
+						})
+						.padding(INPUT_PADDING),
+					);
+				} else {
+					col = col.push(
 						pick_list(vec, data.hunters_aspect.clone().map(Into::into), |val| {
 							Event::HuntersAspectChanged(val.unwrap())
 						})
 						.width(Length::Fill)
-						.padding(INPUT_PADDING)
-					]
-					.align_items(Alignment::Center)
-					.spacing(TITLE_SPACING),
-				);
+						.padding(INPUT_PADDING),
+					);
+				}
+
+				col1 = col1.push(col);
 			}
 			_ => {}
 		}
