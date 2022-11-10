@@ -36,7 +36,7 @@ jobs:
       - name: Build (trunk)
         working-directory: './cofd/app/'
         run: |
-          trunk build --release
+          trunk build --release --public-url /cofd-pc-rs
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
