@@ -93,7 +93,7 @@ pub fn fll(key: &str) -> Option<String> {
 // 	}
 // }
 
-pub fn setup() -> Box<dyn LanguageRequester<'static>> {
+pub fn setup() -> anyhow::Result<Box<dyn LanguageRequester<'static>>> {
 	let localizer = DefaultLocalizer::new(&*LANGUAGE_LOADER, &Localizations);
 	let localizer_arc: Arc<dyn Localizer> = Arc::new(localizer);
 
@@ -108,11 +108,11 @@ pub fn setup() -> Box<dyn LanguageRequester<'static>> {
 	});
 
 	language_requester.add_listener(Arc::downgrade(&localizer_arc));
-	language_requester.poll().unwrap();
+	language_requester.poll()?;
 
 	LANGUAGE_LOADER.set_use_isolating(false);
 
-	language_requester
+	Ok(language_requester)
 }
 
 #[derive(Clone, PartialEq, Eq)]

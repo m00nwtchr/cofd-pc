@@ -15,7 +15,6 @@
 use std::{cell::RefCell, fmt::Display, fs::File, io::Write, mem, path::PathBuf, rc::Rc};
 
 use cfg_if::cfg_if;
-use directories::ProjectDirs;
 use iced::{
 	executor,
 	widget::{button, row, Column},
@@ -30,9 +29,9 @@ use cofd::{
 	splat::{Merit, Splat},
 };
 
-mod store;
 mod component;
 mod i18n;
+mod store;
 mod view;
 mod widget;
 
@@ -62,7 +61,6 @@ struct PlayerCompanionApp {
 	prev_state: Option<State>,
 	characters: Vec<Rc<RefCell<Character>>>,
 
-	project_dirs: ProjectDirs,
 	store: Store,
 	// character: Rc<RefCell<Character>>,
 	// custom_xsplats: Vec<XSplat>,
@@ -114,30 +112,15 @@ impl PlayerCompanionApp {
 			.map(|rip| rip.borrow().clone())
 			.collect();
 
-		let val = ron::ser::to_string_pretty(&vec, PrettyConfig::default())?;
-
-		cfg_if! {
-			if #[cfg(target_arch = "wasm32")] {
-			} else {
-				let path = self.save_path();
-				let dir = path.parent();
-				if dir.is_some() && !dir.unwrap().exists() {
-					std::fs::create_dir_all(dir.unwrap())?;
-				}
-
-				let mut file = File::create(path)?;
-
-				file.write_all(val.as_bytes())?;
-			}
-		}
-
+		self.store.set("characters", &vec)?;
 		Ok(())
 	}
 
 	pub fn load(&mut self) -> anyhow::Result<()> {
-		let str = self.store.get("characters");
-
-		let characters: Vec<Character> = ron::de::from_str(&str)?;
+		let characters: Vec<Character> = self
+			.store
+			.get("characters")?
+			.unwrap_or_else(|| demo::characters().to_vec());
 
 		self.characters = characters
 			.into_iter()
@@ -150,10 +133,6 @@ impl PlayerCompanionApp {
 
 		Ok(())
 	}
-
-	fn save_path(&self) -> PathBuf {
-		self.project_dirs.data_dir().join("characters.ron")
-	}
 }
 
 impl Application for PlayerCompanionApp {
@@ -165,12 +144,17 @@ impl Application for PlayerCompanionApp {
 	fn new(_flags: ()) -> (Self, Command<Self::Message>) {
 		let _language_requester = i18n::setup();
 
+		if let Err(err) = _language_requester {
+			println!("{:?}", err);
+		}
+
+		let store = Store::new().expect("Data store not available");
+
 		let mut self_ = Self {
 			state: State::CharacterList,
 			prev_state: Default::default(),
 			characters: demo::characters().map(|f| Rc::new(RefCell::new(f))).into(),
-			project_dirs: ProjectDirs::from("", "", "cofd-pc").unwrap(),
-			store: Store::new().unwrap(),
+			store,
 			// custom_xsplats: vec![
 			// 	// My OC (Original Clan) (Do Not Steal)
 			// 	// XSplat::Vampire(Clan::_Custom(
@@ -267,7 +251,7 @@ fn main() -> iced::Result {
 	#[cfg(not(target_arch = "wasm32"))]
 	env_logger::init();
 	#[cfg(target_arch = "wasm32")]
-	console_log::init_with_level(Level::Info);
+	console_log::init_with_level(Level::Warn);
 
 	PlayerCompanionApp::run(Settings {
 		..Default::default()

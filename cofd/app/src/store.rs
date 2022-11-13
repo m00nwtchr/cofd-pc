@@ -1,12 +1,22 @@
-use std::fs::File;
+#[cfg(not(target_arch = "wasm32"))]
+use directories::ProjectDirs;
+#[cfg(not(target_arch = "wasm32"))]
+use std::{
+	fs::File,
+	io::{Read, Write},
+	path::PathBuf,
+};
 
+use serde::{Deserialize, Serialize};
+
+use anyhow::anyhow;
 use cfg_if::cfg_if;
 
 pub struct Store {
 	#[cfg(target_arch = "wasm32")]
 	local_storage: web_sys::Storage,
 	#[cfg(not(target_arch = "wasm32"))]
-	file: File,
+	path: PathBuf,
 }
 
 impl Store {
@@ -24,42 +34,57 @@ impl Store {
 					store = None;
 				}
 			} else {
-				let path = self.save_path();
+				let path = Store::save_path();
 
 				let dir = path.parent();
 				if dir.is_some() && !dir.unwrap().exists() {
 					std::fs::create_dir_all(dir.unwrap()).ok()?;
 				}
-				let file = File::create(path).ok()?;
+				// let file = File::create(path).ok()?;
 
 				store = Some(Self {
-					file
+					path
 				});
 			}
 		}
 
-
-
 		store
 	}
 
-	#[cfg(not(target_arch = "wasm32"))]
-	pub fn get(&self, name: &str) -> String {
-    	use std::io::Read;
+	pub fn get<T: for<'a> Deserialize<'a>>(&self, name: &str) -> anyhow::Result<Option<T>> {
+		let mut str;
 
-		let mut str = String::new();
-		self.file.read_to_string(&mut str);
+		cfg_if! {
+			if #[cfg(target_arch = "wasm32")] {
+				str = self.local_storage.get_item(name).map_err(|err| anyhow!("{:?}", err))?
+			} else {
+				str = Some(std::fs::read_to_string(self.path.clone())?);
+			}
+		}
 
-		str
+		if let Some(str) = str {
+			Ok(Some(ron::de::from_str(&str)?))
+		} else {
+			Ok(None)
+		}
 	}
 
-	#[cfg(target_arch = "wasm32")]
-	pub fn get(&self, name: &str) -> String {
-		self.local_storage.
+	pub fn set<T: Serialize>(&self, name: &str, value: &T) -> anyhow::Result<()> {
+		let str = ron::ser::to_string(value)?;
+
+		cfg_if! {
+			if #[cfg(target_arch = "wasm32")] {
+				self.local_storage.set_item(name, &str).map_err(|err| anyhow!("{:?}", err))?;
+			} else {
+				std::fs::write(self.path.clone(), str)?;
+			}
+		}
+
+		Ok(())
 	}
 
 	#[cfg(not(target_arch = "wasm32"))]
-	fn save_path(&self) -> PathBuf {
+	fn save_path() -> PathBuf {
 		ProjectDirs::from("", "", "cofd-pc")
 			.unwrap()
 			.data_dir()

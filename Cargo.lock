@@ -351,6 +351,7 @@ dependencies = [
  "once_cell",
  "ron",
  "rust-embed",
+ "serde",
  "unic-langid",
  "web-sys",
 ]
