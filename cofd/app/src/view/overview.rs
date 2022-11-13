@@ -50,6 +50,7 @@ pub fn overview_tab<Message>(character: Rc<RefCell<Character>>) -> OverviewTab<M
 pub enum Event {
 	AttrChanged(u16, Attribute),
 	SkillChanged(u16, Skill),
+	SpecialtyChanged(Skill, usize, String),
 	TraitChanged(u16, Trait),
 	// InfoTraitChanged(String, InfoTrait),
 	// XSplatChanged(XSplat),
@@ -99,7 +100,9 @@ impl<Message> OverviewTab<Message> {
 		Renderer::Theme: iced::widget::text::StyleSheet
 			+ widget::dots::StyleSheet
 			+ iced::widget::text_input::StyleSheet
-			+ iced::widget::pick_list::StyleSheet,
+			+ iced::widget::pick_list::StyleSheet + iced::widget::scrollable::StyleSheet + iced::overlay::menu::StyleSheet + iced::widget::container::StyleSheet,
+		<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style>
+
 	{
 		let splat_name = character.splat.name();
 		let mut col1 = Column::new().spacing(3).width(Length::Fill);
@@ -204,7 +207,13 @@ where
 		+ iced::widget::button::StyleSheet
 		+ widget::dots::StyleSheet
 		+ widget::track::StyleSheet
-		+ iced::widget::checkbox::StyleSheet,
+		+ iced::widget::checkbox::StyleSheet
+		+ iced::widget::scrollable::StyleSheet
+		+ iced::overlay::menu::StyleSheet
+		+ iced::widget::container::StyleSheet,
+	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
+		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
+	>,
 {
 	type State = ();
 
@@ -219,6 +228,13 @@ where
 		match event {
 			Event::AttrChanged(val, attr) => *character.base_attributes_mut().get_mut(attr) = val,
 			Event::SkillChanged(val, skill) => *character.base_skills_mut().get_mut(skill) = val,
+			Event::SpecialtyChanged(skill, i, val) => {
+				if let Some(vec) = character.specialties.get_mut(&skill) {
+					vec_changed(i, val, vec)
+				} else {
+					character.specialties.insert(skill, vec![val]);
+				}
+			}
 			Event::AbilityValChanged(ability, val) => {
 				if let Some(val_) = character.get_ability_value_mut(&ability) {
 					*val_ = val;
@@ -668,7 +684,8 @@ where
 				skills_component(
 					self.character.clone(),
 					Event::SkillChanged,
-					Event::RoteSkillChanged
+					Event::RoteSkillChanged,
+					Event::SpecialtyChanged,
 				),
 				column![
 					text("Other Traits".to_uppercase()).size(H2_SIZE),
@@ -720,7 +737,13 @@ where
 		+ iced::widget::button::StyleSheet
 		+ widget::dots::StyleSheet
 		+ widget::track::StyleSheet
-		+ iced::widget::checkbox::StyleSheet,
+		+ iced::widget::checkbox::StyleSheet
+		+ iced::widget::scrollable::StyleSheet
+		+ iced::overlay::menu::StyleSheet
+		+ iced::widget::container::StyleSheet,
+	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
+		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
+	>,
 {
 	fn from(overview_tab: OverviewTab<Message>) -> Self {
 		iced_lazy::component(overview_tab)

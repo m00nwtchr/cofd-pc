@@ -52,7 +52,13 @@ where
 	Renderer::Theme: iced::widget::text::StyleSheet
 		+ iced::widget::pick_list::StyleSheet
 		+ iced::widget::text_input::StyleSheet
-		+ widget::dots::StyleSheet,
+		+ widget::dots::StyleSheet
+		+ iced::widget::scrollable::StyleSheet
+		+ iced::overlay::menu::StyleSheet
+		+ iced::widget::container::StyleSheet,
+	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
+		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
+	>,
 {
 	type State = ();
 	type Event = Event;
@@ -159,7 +165,13 @@ where
 	Renderer::Theme: iced::widget::text::StyleSheet
 		+ iced::widget::pick_list::StyleSheet
 		+ iced::widget::text_input::StyleSheet
-		+ widget::dots::StyleSheet,
+		+ widget::dots::StyleSheet
+		+ iced::widget::scrollable::StyleSheet
+		+ iced::overlay::menu::StyleSheet
+		+ iced::widget::container::StyleSheet,
+	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
+		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
+	>,
 {
 	fn from(info_bar: MeritComponent<Message>) -> Self {
 		iced_lazy::component(info_bar)

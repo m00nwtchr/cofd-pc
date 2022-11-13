@@ -14,6 +14,7 @@
 
 use std::{cell::RefCell, fmt::Display, fs::File, io::Write, mem, path::PathBuf, rc::Rc};
 
+use cfg_if::cfg_if;
 use directories::ProjectDirs;
 use iced::{
 	executor,
@@ -29,6 +30,7 @@ use cofd::{
 	splat::{Merit, Splat},
 };
 
+mod store;
 mod component;
 mod i18n;
 mod view;
@@ -36,6 +38,7 @@ mod widget;
 
 use i18n::fl;
 use ron::ser::PrettyConfig;
+use store::Store;
 
 #[derive(Debug, Clone)]
 pub enum Tab {
@@ -60,6 +63,7 @@ struct PlayerCompanionApp {
 	characters: Vec<Rc<RefCell<Character>>>,
 
 	project_dirs: ProjectDirs,
+	store: Store,
 	// character: Rc<RefCell<Character>>,
 	// custom_xsplats: Vec<XSplat>,
 	// locale: Locale,
@@ -110,22 +114,29 @@ impl PlayerCompanionApp {
 			.map(|rip| rip.borrow().clone())
 			.collect();
 
-		let path = self.save_path();
-		let dir = path.parent();
-		if dir.is_some() && !dir.unwrap().exists() {
-			std::fs::create_dir_all(dir.unwrap())?;
-		}
-
 		let val = ron::ser::to_string_pretty(&vec, PrettyConfig::default())?;
-		let mut file = File::create(path)?;
 
-		file.write_all(val.as_bytes())?;
+		cfg_if! {
+			if #[cfg(target_arch = "wasm32")] {
+			} else {
+				let path = self.save_path();
+				let dir = path.parent();
+				if dir.is_some() && !dir.unwrap().exists() {
+					std::fs::create_dir_all(dir.unwrap())?;
+				}
+
+				let mut file = File::create(path)?;
+
+				file.write_all(val.as_bytes())?;
+			}
+		}
 
 		Ok(())
 	}
 
 	pub fn load(&mut self) -> anyhow::Result<()> {
-		let str = std::fs::read_to_string(self.save_path())?;
+		let str = self.store.get("characters");
+
 		let characters: Vec<Character> = ron::de::from_str(&str)?;
 
 		self.characters = characters
@@ -159,6 +170,7 @@ impl Application for PlayerCompanionApp {
 			prev_state: Default::default(),
 			characters: demo::characters().map(|f| Rc::new(RefCell::new(f))).into(),
 			project_dirs: ProjectDirs::from("", "", "cofd-pc").unwrap(),
+			store: Store::new().unwrap(),
 			// custom_xsplats: vec![
 			// 	// My OC (Original Clan) (Do Not Steal)
 			// 	// XSplat::Vampire(Clan::_Custom(

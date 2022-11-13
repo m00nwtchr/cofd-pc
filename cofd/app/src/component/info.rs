@@ -104,7 +104,13 @@ where
 	Renderer: iced_native::text::Renderer + 'static,
 	Renderer::Theme: iced::widget::pick_list::StyleSheet
 		+ iced::widget::text_input::StyleSheet
-		+ iced::widget::text::StyleSheet,
+		+ iced::widget::text::StyleSheet
+		+ iced::widget::container::StyleSheet
+		+ iced::overlay::menu::StyleSheet
+		+ iced::widget::scrollable::StyleSheet,
+	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
+		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
+	>,
 {
 	type State = ();
 	type Event = Event;
@@ -286,7 +292,13 @@ where
 	Renderer::Theme: iced::widget::pick_list::StyleSheet
 		+ iced::widget::text_input::StyleSheet
 		+ iced::widget::text::StyleSheet
-		+ widget::dots::StyleSheet,
+		+ widget::dots::StyleSheet
+		+ iced::widget::container::StyleSheet
+		+ iced::overlay::menu::StyleSheet
+		+ iced::widget::scrollable::StyleSheet,
+	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
+		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
+	>,
 {
 	fn from(info_bar: InfoBar<Message>) -> Self {
 		iced_lazy::component(info_bar)
