@@ -123,6 +123,9 @@ mage = Mag
 
     .arcana = Arkana
     
+    .beats = Tajemne { beats }
+    .experience Tajemne { experience }
+    
     .gnosis = Gnoza
     .wisdom = Mądrość
     .obsessions = Obsesje

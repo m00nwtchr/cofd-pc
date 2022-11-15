@@ -318,6 +318,7 @@ pub struct Character {
 	pub base_size: u16,
 	base_armor: ArmorStruct,
 	pub beats: u16,
+	pub alternate_beats: u16,
 
 	pub conditions: Vec<String>,
 	pub aspirations: Vec<String>,
@@ -636,6 +637,9 @@ impl Character {
 	pub fn experience(&self) -> u16 {
 		self.beats / 5
 	}
+	pub fn alternate_experience(&self) -> u16 {
+		self.alternate_beats / 5
+	}
 
 	pub fn max_fuel(&self) -> u16 {
 		match self.power {
@@ -723,6 +727,7 @@ impl Default for Character {
 			_defense_skill: Skill::Athletics,
 			willpower: Default::default(),
 			beats: Default::default(),
+			alternate_beats: Default::default(),
 			base_armor: Default::default(),
 			specialties: Default::default(),
 			touchstones: Default::default(),
@@ -1479,6 +1484,7 @@ pub enum Trait {
 	Size,
 
 	Beats,
+	AlternateBeats,
 
 	Armor(Option<Armor>),
 
@@ -1504,6 +1510,7 @@ impl Trait {
 			Trait::Power => None,
 			Trait::Fuel => None,
 			Trait::Integrity => None,
+			Trait::AlternateBeats => None,
 		}
 	}
 }

@@ -392,6 +392,25 @@ impl Splat {
 		}
 	}
 
+	pub fn alternate_beats(&self) -> Option<&str> {
+		match self {
+			Splat::Mortal => None,
+			Splat::Vampire(_, _, _, _) => Some("blood"),
+			Splat::Werewolf(_, _, _, _) => None,
+			Splat::Mage(_, _, _, _) => Some("arcane"),
+			Splat::Changeling(_, _, _, _) => None,
+		}
+	}
+
+	pub fn alternate_beats_optional(&self) -> bool {
+		match self {
+			Self::Mage(..) => false,
+			// Promethean
+			// Demon
+			_ => true,
+		}
+	}
+
 	pub fn supernatural_tolerance(&self) -> Option<&str> {
 		match self {
 			Splat::Mortal => None,

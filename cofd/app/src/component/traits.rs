@@ -19,7 +19,13 @@ struct Traits {
 	armor: ArmorStruct,
 	initative: u16,
 	beats: u16,
+	alternate_beats: u16,
+	alternate_experience: u16,
 	experience: u16,
+
+	alt_opt: bool,
+	splat: String,
+	// alt_name: Option<String>,
 }
 
 pub struct TraitsComponent<Message> {
@@ -47,7 +53,13 @@ impl<Message> TraitsComponent<Message> {
 				initative: character.initative(),
 				beats: character.beats,
 				experience: character.experience(),
+				alternate_beats: character.alternate_beats,
+				alternate_experience: character.alternate_experience(),
 				armor: character.armor(),
+
+				alt_opt: character.splat.alternate_beats_optional(),
+				splat: character.splat.name().to_string(),
+				// alt_name: character.splat.alternate_beats().map(|el| el.to_string()),
 			},
 			on_change: Box::new(on_change),
 		}
@@ -73,6 +85,41 @@ where
 	}
 
 	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
+		let beats = row![
+			text(format!("{}:", fl!("beats"))),
+			text_input("", &format!("{}", self.traits.beats), |val| {
+				// if let Some(val) = val.parse() {
+				Event(val, Trait::Beats)
+				// }
+			})
+			.padding(INPUT_PADDING)
+		];
+
+		let alternate_beats = if !self.traits.alt_opt {
+			row![
+				text(format!(
+					"{}:",
+					fl(&self.traits.splat, Some("beats")).unwrap()
+				)),
+				text_input("", &format!("{}", self.traits.alternate_beats), |val| {
+					Event(val, Trait::AlternateBeats)
+				})
+				.padding(INPUT_PADDING)
+			]
+		} else {
+			row![]
+		};
+
+		let alternate_xp = if !self.traits.alt_opt {
+			row![text(format!(
+				"{}: {}",
+				fl(&self.traits.splat, Some("experience")).unwrap(),
+				self.traits.alternate_experience
+			)),]
+		} else {
+			row![]
+		};
+
 		column![
 			row![
 				text(format!("{}: {}", fl!("size"), self.traits.size)),
@@ -111,19 +158,13 @@ where
 				text(format!("{}: {}", fl!("initative"), self.traits.initative)),
 				// text(self.traits.initative)
 			],
-			row![
-				text(format!("{}:", fl!("beats"))),
-				text_input("", &format!("{}", self.traits.beats), |val| {
-					// if let Some(val) = val.parse() {
-					Event(val, Trait::Beats)
-					// }
-				})
-				.padding(INPUT_PADDING)
-			],
+			beats,
 			row![
 				text(format!("{}: {}", fl!("experience"), self.traits.experience)),
 				// text(self.traits.experience)
-			]
+			],
+			alternate_beats,
+			alternate_xp
 		]
 		// .padding(0)
 		.width(Length::Fill)

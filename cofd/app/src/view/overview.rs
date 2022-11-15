@@ -281,6 +281,7 @@ where
 				Trait::Fuel => character.fuel = val as u16,
 				Trait::Integrity => character.integrity = val as u16,
 				Trait::Beats => character.beats = val,
+				Trait::AlternateBeats => character.alternate_beats = val,
 				_ => {}
 			},
 			Event::HealthChanged(wound) => character.health_mut().poke(&wound),

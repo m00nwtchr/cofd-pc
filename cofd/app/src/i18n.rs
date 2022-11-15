@@ -1,4 +1,5 @@
 use std::{
+	collections::HashMap,
 	fmt::{self, Display},
 	rc::Rc,
 	sync::Arc,

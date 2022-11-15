@@ -97,6 +97,9 @@ vampire = Vampire
     .disciplines = Disciplines
     .devotions = Devotions
 
+    .beats = Blood { beats }
+    .experience = Blood { experience }
+    
     .blood_potency = Blood Potency
     .vitae = Vitae
     .humanity = Humanity
@@ -135,6 +138,9 @@ mage = Mage
 
     .arcana = Arcana
 
+    .beats = Arcane { beats }
+    .experience = Arcane { experience }
+        
     .gnosis = Gnosis
     .mana = Mana
     .wisdom = Wisdom
