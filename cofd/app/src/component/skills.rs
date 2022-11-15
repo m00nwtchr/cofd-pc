@@ -195,7 +195,7 @@ where
 			self.mk_skill_col(state, &character, &TraitCategory::Social),
 		]
 		.spacing(10)
-		.padding(15)
+		// .padding(15)
 		.align_items(Alignment::Center)
 		.width(Length::Fill)
 		.into()

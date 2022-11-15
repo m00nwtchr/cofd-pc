@@ -443,8 +443,8 @@ where
 					.padding(INPUT_PADDING)
 					.into()
 			},
-		)
-		.max_width(MAX_INPUT_WIDTH);
+		);
+		// .max_width(MAX_INPUT_WIDTH);
 
 		let aspirations = list(
 			fl!("aspirations"),
@@ -455,8 +455,8 @@ where
 					.padding(INPUT_PADDING)
 					.into()
 			},
-		)
-		.max_width(MAX_INPUT_WIDTH);
+		);
+		// .max_width(MAX_INPUT_WIDTH);
 
 		let obsessions = if let Splat::Mage(_, _, _, data) = &character.splat {
 			column![list(
@@ -548,50 +548,50 @@ where
 			column![]
 		};
 
-		let mut col1 = Column::new()
+		let abilities = self.abilities(&character);
+		let merits = merit_component(self.character.clone(), Event::MeritChanged);
+		let traits = traits_component(&character, Event::TraitChanged);
+
+		let regalia = if let Splat::Changeling(seeming, _, _, data) = &character.splat {
+			let sg = seeming.get_favored_regalia();
+			let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
+
+			let seeming_regalia = text(fl(character.splat.name(), Some(&sg.name())).unwrap());
+
+			let regalia: Element<Event, Renderer> =
+				if let Some(Regalia::_Custom(name)) = &data.regalia {
+					text_input("", name, |val| Event::RegaliaChanged(Regalia::_Custom(val)))
+						.width(Length::Fill)
+						.padding(INPUT_PADDING)
+						.into()
+				} else {
+					let reg: Vec<Translated<Regalia>> = all_regalia
+						.iter()
+						.cloned()
+						.filter(|reg| reg != sg)
+						.map(Into::into)
+						.collect();
+
+					pick_list(reg, data.regalia.clone().map(Into::into), |val| {
+						Event::RegaliaChanged(val.unwrap())
+					})
+					.width(Length::Fill)
+					.into()
+				};
+
+			column![
+				text(fl!("favored-regalia")).size(H3_SIZE),
+				column![seeming_regalia, regalia].width(Length::Fill)
+			]
 			.align_items(Alignment::Center)
 			.width(Length::Fill)
-			.spacing(COMPONENT_SPACING);
+		} else {
+			column![]
+		};
 
-		match &character.splat {
-			Splat::Mortal => {}
-			Splat::Changeling(_, _, _, _) => {}
-			_ => {
-				col1 = col1.push(self.abilities(&character));
-			}
-		}
-
-		col1 = col1.push(merit_component(self.character.clone(), Event::MeritChanged));
-
-		match &character.splat {
-			Splat::Changeling(seeming, _, _, data) => {
-				let sg = seeming.get_favored_regalia();
-				let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
-
-				let seeming_regalia = text(fl(character.splat.name(), Some(&sg.name())).unwrap());
-
-				let regalia: Element<Event, Renderer> =
-					if let Some(Regalia::_Custom(name)) = &data.regalia {
-						text_input("", name, |val| Event::RegaliaChanged(Regalia::_Custom(val)))
-							.width(Length::Fill)
-							.padding(INPUT_PADDING)
-							.into()
-					} else {
-						let reg: Vec<Translated<Regalia>> = all_regalia
-							.iter()
-							.cloned()
-							.filter(|reg| reg != sg)
-							.map(Into::into)
-							.collect();
-
-						pick_list(reg, data.regalia.clone().map(Into::into), |val| {
-							Event::RegaliaChanged(val.unwrap())
-						})
-						.width(Length::Fill)
-						.into()
-					};
-
-				let frailties = list(
+		let frailties: Element<Self::Event, Renderer> =
+			if let Splat::Changeling(seeming, _, _, data) = &character.splat {
+				list(
 					fl("changeling", Some("frailties")).unwrap(),
 					3,
 					data.frailties.clone(),
@@ -600,21 +600,15 @@ where
 							.padding(INPUT_PADDING)
 							.into()
 					},
-				);
+				)
+				.into()
+			} else {
+				column![].into()
+			};
 
-				col1 = col1
-					.push(
-						column![
-							text(fl!("favored-regalia")).size(H3_SIZE),
-							column![seeming_regalia, regalia].width(Length::Fill)
-						]
-						.align_items(Alignment::Center)
-						.width(Length::Fill),
-					)
-					.push(frailties);
-			}
-			Splat::Vampire(_, _, _, data) => {
-				col1 = col1.push(list(
+		let banes: Element<Self::Event, Renderer> =
+			if let Splat::Vampire(_, _, _, data) = &character.splat {
+				list(
 					fl("vampire", Some("banes")).unwrap(),
 					3,
 					data.banes.clone(),
@@ -623,22 +617,26 @@ where
 							.padding(INPUT_PADDING)
 							.into()
 					},
-				));
-			}
-			Splat::Werewolf(auspice, tribe, _, data) => {
-				let mut vec: Vec<Translated<HuntersAspect>> = Vec::new();
+				)
+				.into()
+			} else {
+				column![].into()
+			};
 
-				if let Some(auspice) = auspice {
-					vec.push(auspice.get_hunters_aspect().clone().into());
+		let hunters_aspect: Element<Self::Event, Renderer> =
+			if let Splat::Werewolf(auspice, tribe, _, data) = &character.splat {
+				let mut vec: Vec<Translated<HuntersAspect>> = if let Some(auspice) = auspice {
+					vec![auspice.get_hunters_aspect().clone().into()]
 				} else if let Some(Tribe::Pure(tribe)) = tribe {
-					vec.extend(
-						tribe
-							.get_hunters_aspects()
-							.into_iter()
-							.cloned()
-							.map(Into::into),
-					);
-				}
+					tribe
+						.get_hunters_aspects()
+						.into_iter()
+						.cloned()
+						.map(Into::into)
+						.collect()
+				} else {
+					Vec::new()
+				};
 
 				vec.push(HuntersAspect::_Custom(fl!("custom")).into());
 
@@ -663,17 +661,73 @@ where
 					);
 				}
 
-				col1 = col1.push(col);
+				col.into()
+			} else {
+				column![].into()
+			};
+
+		let mut col1 = Column::new()
+			.align_items(Alignment::Center)
+			.width(Length::Fill)
+			.spacing(COMPONENT_SPACING);
+
+		let mut col2 = Column::new()
+			.push(health)
+			.push(willpower)
+			// .push(st)
+			// .push(fuel)
+			// .push(integrity)
+			.spacing(COMPONENT_SPACING)
+			.align_items(Alignment::Center)
+			.width(Length::Fill);
+
+		match &character.splat {
+			Splat::Mortal => {}
+			_ => {
+				col2 = col2.push(st).push(fuel);
 			}
-			_ => {}
 		}
 
-		col1 = col1.push(traits_component(&character, Event::TraitChanged));
+		col2 = col2.push(integrity);
 
-		// let margin_col = || Column::new();
+		match &character.splat {
+			Splat::Vampire(..) => {
+				col1 = col1
+					.push(abilities)
+					.push(merits)
+					.push(aspirations)
+					.push(banes)
+					.push(conditions);
+				col2 = col2.push(traits);
+			}
+			Splat::Werewolf(..) => {
+				col1 = col1
+					.push(merits)
+					.push(abilities)
+					.push(aspirations)
+					.push(hunters_aspect)
+					.push(conditions);
+				col2 = col2.push(kuruth_triggers);
+			}
+			Splat::Mage(..) => {
+				col1 = col1.push(abilities).push(merits).push(traits);
+				col2 = col2.push(conditions).push(aspirations).push(obsessions);
+			}
+			Splat::Changeling(..) => {
+				col1 = col1
+					.push(merits)
+					.push(regalia)
+					.push(frailties)
+					.push(aspirations)
+					.push(conditions);
+				col2 = col2.push(traits);
+			}
+			_ => {
+				col1 = col1.push(merits).push(traits);
+				col2 = col2.push(conditions).push(aspirations);
+			}
+		}
 
-		// row![
-		// (margin_col)(),
 		column![
 			column![
 				info_bar(self.character.clone(), || Event::Msg),
@@ -690,40 +744,23 @@ where
 				),
 				column![
 					text("Other Traits".to_uppercase()).size(H2_SIZE),
-					row![
-						col1,
-						column![
-							health,
-							willpower,
-							st,
-							fuel,
-							integrity,
-							conditions,
-							aspirations,
-							obsessions,
-							kuruth_triggers
-						]
-						.spacing(COMPONENT_SPACING)
-						.align_items(Alignment::Center)
-						.width(Length::Fill)
-					]
+					row![col1, col2].spacing(20)
 				]
 				.spacing(crate::TITLE_SPACING)
 				.align_items(Alignment::Center)
-				.padding(15)
+				// .padding(11)
 				.width(Length::FillPortion(2))
-			],
+			]
+			.spacing(20)
+			.padding(20),
 			// pick_list(
 			// 	Vec::from(LANGS),
 			// 	Some(self.locale.clone()),
 			// 	Event::LocaleChanged
 			// )
 		]
+		// .spacing(10)
 		.width(Length::Fill)
-		// (margin_col)()
-		// ]
-		// .width(Length::Fill)
-		// .padding(10)
 		.into()
 	}
 }
