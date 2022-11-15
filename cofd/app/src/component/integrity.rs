@@ -117,9 +117,7 @@ where
 							)
 							.padding(INPUT_PADDING)]
 							.max_width(
-								MAX_INPUT_WIDTH
-									- SheetDots::<Event, Renderer>::DEFAULT_SIZE as u32
-									- SheetDots::<Event, Renderer>::DEFAULT_SPACING as u32,
+								MAX_INPUT_WIDTH - SheetDots::<Event, Renderer>::DEFAULT_SIZE as u32, // - SheetDots::<Event, Renderer>::DEFAULT_SPACING as u32,
 							),
 						);
 					}
@@ -134,6 +132,11 @@ where
 							widget::dots::Axis::Vertical
 						} else {
 							widget::dots::Axis::Horizontal
+						})
+						.spacing(if flag {
+							4
+						} else {
+							SheetDots::<Event, Renderer>::DEFAULT_SPACING
 						}),
 					]
 					.align_items(if flag {

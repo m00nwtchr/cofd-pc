@@ -76,10 +76,10 @@ where
 	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
 		let character = self.character.borrow();
 
-		let mut col1 = Column::new().spacing(3).width(Length::Fill);
+		let mut col1 = Column::new().spacing(3).width(Length::FillPortion(3));
 		let mut col2 = Column::new()
 			.spacing(4)
-			.width(Length::Fill)
+			.width(Length::FillPortion(2))
 			.align_items(Alignment::End);
 
 		let mut vec = Vec::new();

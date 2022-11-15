@@ -105,16 +105,21 @@ impl<Message> OverviewTab<Message> {
 
 	{
 		let splat_name = character.splat.name();
-		let mut col1 = Column::new().spacing(3).width(Length::Fill);
-		let mut col2 = Column::new()
-			.spacing(4)
-			.width(Length::Fill)
-			.align_items(Alignment::End);
 
-		let mut new = Column::new().width(Length::Fill);
+		let mut col = Column::new()
+			.align_items(Alignment::Center)
+			.spacing(TITLE_SPACING);
 
-		if character.splat.are_abilities_finite() {
-			if let Some(abilities) = character.splat.all_abilities() {
+		if let Some(abilities) = character.splat.all_abilities() {
+			let mut col1 = Column::new().spacing(3).width(Length::FillPortion(3));
+			let mut col2 = Column::new()
+				.spacing(4)
+				.width(Length::FillPortion(2))
+				.align_items(Alignment::End);
+
+			let mut new = Column::new().width(Length::Fill);
+
+			if character.splat.are_abilities_finite() {
 				for ability in abilities {
 					let val = character.get_ability_value(&ability).unwrap_or(&0);
 
@@ -128,69 +133,66 @@ impl<Message> OverviewTab<Message> {
 						move |val| Event::AbilityValChanged(ability.clone(), val),
 					));
 				}
-			}
-		} else {
-			let mut vec = character.splat.all_abilities().unwrap();
+			} else {
+				let mut vec = character.splat.all_abilities().unwrap();
 
-			if let Some(ability) = character.splat.custom_ability(fl!("custom")) {
-				vec.push(ability);
-			}
-
-			let vec: Vec<Translated<Ability>> = vec
-				.iter()
-				.filter(|e| !character.has_ability(e))
-				.cloned()
-				.map(Into::into)
-				.collect();
-
-			for (ability, val) in &character.abilities {
-				if ability.is_custom() {
-					col1 = col1.push(
-						text_input("", &ability.name(), {
-							let ab = ability.clone();
-							move |val| {
-								let mut new = ab.clone();
-								*new.name_mut().unwrap() = val;
-								Event::AbilityChanged(ab.clone(), new)
-							}
-						})
-						.padding(INPUT_PADDING),
-					);
-				} else {
-					col1 = col1
-						.push(
-							pick_list(vec.clone(), Some(ability.clone().into()), {
-								let ability = ability.clone();
-								move |val| Event::AbilityChanged(ability.clone(), val.unwrap())
-							})
-							.width(Length::Fill)
-							.padding(INPUT_PADDING)
-							.text_size(20),
-						)
-						.spacing(1);
+				if let Some(ability) = character.splat.custom_ability(fl!("custom")) {
+					vec.push(ability);
 				}
 
-				col2 = col2.push(SheetDots::new(val.clone(), 0, 5, Shape::Dots, None, {
-					let ability = ability.clone();
-					move |val| Event::AbilityValChanged(ability.clone(), val)
-				}));
+				let vec: Vec<Translated<Ability>> = vec
+					.iter()
+					.filter(|e| !character.has_ability(e))
+					.cloned()
+					.map(Into::into)
+					.collect();
+
+				for (ability, val) in &character.abilities {
+					if ability.is_custom() {
+						col1 = col1.push(
+							text_input("", &ability.name(), {
+								let ab = ability.clone();
+								move |val| {
+									let mut new = ab.clone();
+									*new.name_mut().unwrap() = val;
+									Event::AbilityChanged(ab.clone(), new)
+								}
+							})
+							.padding(INPUT_PADDING),
+						);
+					} else {
+						col1 = col1
+							.push(
+								pick_list(vec.clone(), Some(ability.clone().into()), {
+									let ability = ability.clone();
+									move |val| Event::AbilityChanged(ability.clone(), val.unwrap())
+								})
+								.width(Length::Fill)
+								.padding(INPUT_PADDING)
+								.text_size(20),
+							)
+							.spacing(1);
+					}
+
+					col2 = col2.push(SheetDots::new(val.clone(), 0, 5, Shape::Dots, None, {
+						let ability = ability.clone();
+						move |val| Event::AbilityValChanged(ability.clone(), val)
+					}));
+				}
+
+				new = new.push(
+					pick_list(vec, None, |key| Event::AbilityValChanged(key.unwrap(), 0))
+						.width(Length::Fill)
+						.padding(INPUT_PADDING)
+						.text_size(20),
+				);
 			}
 
-			new = new.push(
-				pick_list(vec, None, |key| Event::AbilityValChanged(key.unwrap(), 0))
-					.width(Length::Fill)
-					.padding(INPUT_PADDING)
-					.text_size(20),
-			);
-		}
-
-		let mut col = Column::new()
-			.align_items(Alignment::Center)
-			.spacing(TITLE_SPACING);
-		if let Some(name) = character.splat.ability_name() {
-			col = col
-				.push(text(fl(splat_name, Some(name)).unwrap()).size(H3_SIZE))
-				.push(column![row![col1, col2], new]);
+			if let Some(name) = character.splat.ability_name() {
+				col = col
+					.push(text(fl(splat_name, Some(name)).unwrap()).size(H3_SIZE))
+					.push(column![row![col1, col2], new]);
+			}
 		}
 
 		col.into()
@@ -590,7 +592,7 @@ where
 		};
 
 		let frailties: Element<Self::Event, Renderer> =
-			if let Splat::Changeling(seeming, _, _, data) = &character.splat {
+			if let Splat::Changeling(_, _, _, data) = &character.splat {
 				list(
 					fl("changeling", Some("frailties")).unwrap(),
 					3,

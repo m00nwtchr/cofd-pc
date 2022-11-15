@@ -129,6 +129,11 @@ where
 		self.width = width;
 		self
 	}
+
+	pub fn spacing(mut self, spacing: u16) -> Self {
+		self.spacing = spacing;
+		self
+	}
 }
 
 impl<'a, Message, Renderer> Widget<Message, Renderer> for SheetDots<'a, Message, Renderer>
