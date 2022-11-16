@@ -5,13 +5,8 @@ use iced::{
 	Alignment, Length,
 };
 use iced_lazy::Component;
-use iced_native::Element;
 
-use cofd::{
-	character::Wound,
-	prelude::Character,
-	splat::{ability::Ability, Merit, Splat, SplatType},
-};
+use cofd::{character::Wound, prelude::Character, splat::Splat};
 
 use crate::{
 	fl,
@@ -20,7 +15,7 @@ use crate::{
 		dots::{Shape, SheetDots},
 		track::HealthTrack,
 	},
-	COMPONENT_SPACING, H2_SIZE, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
+	Element, COMPONENT_SPACING, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
 };
 
 use super::list;
@@ -46,14 +41,7 @@ impl IntegrityComponent {
 	}
 }
 
-impl<Message, Renderer> Component<Message, Renderer> for IntegrityComponent
-where
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ widget::dots::StyleSheet
-		+ widget::track::StyleSheet,
-{
+impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 	type State = ();
 	type Event = Event;
 
@@ -83,74 +71,74 @@ where
 		None
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
+	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let character = self.character.borrow();
 
 		let mut col = Column::new()
 			.align_items(Alignment::Center)
 			.spacing(COMPONENT_SPACING);
 
-		let dots: Element<Event, Renderer> =
-			if let Splat::Changeling(_, _, _, data) = &character.splat {
-				HealthTrack::new(
-					data.clarity.clone(),
-					data.max_clarity(&character) as usize,
-					|wound| Event::IntegrityDamage(wound),
-				)
-				.into()
-			} else {
-				let mut coll = Column::new();
+		let dots: Element<Event> = if let Splat::Changeling(_, _, _, data) = &character.splat {
+			HealthTrack::new(
+				data.clarity.clone(),
+				data.max_clarity(&character) as usize,
+				|wound| Event::IntegrityDamage(wound),
+			)
+			.into()
+		} else {
+			let mut coll = Column::new();
 
-				let mut flag = false;
+			let mut flag = false;
 
-				if let Splat::Vampire(_, _, _, _) = &character.splat {
-					flag = true;
+			if let Splat::Vampire(_, _, _, _) = &character.splat {
+				flag = true;
 
-					coll = coll.width(Length::FillPortion(4)).spacing(1);
+				coll = coll.width(Length::FillPortion(4)).spacing(1);
 
-					for i in 0..10 {
-						coll = coll.push(
-							column![text_input(
-								"",
-								character.touchstones.get(i).unwrap_or(&String::new()),
-								move |val| Event::TouchstoneChanged(i, val),
-							)
-							.padding(INPUT_PADDING)]
-							.max_width(
-								MAX_INPUT_WIDTH - SheetDots::<Event, Renderer>::DEFAULT_SIZE as u32, // - SheetDots::<Event, Renderer>::DEFAULT_SPACING as u32,
-							),
-						);
-					}
+				for i in 0..10 {
+					coll = coll.push(
+						column![text_input(
+							"",
+							character.touchstones.get(i).unwrap_or(&String::new()),
+							move |val| Event::TouchstoneChanged(i, val),
+						)
+						.padding(INPUT_PADDING)]
+						.max_width(
+							MAX_INPUT_WIDTH
+								- SheetDots::<Event, iced::Renderer>::DEFAULT_SIZE as u32, // - SheetDots::<Event, Renderer>::DEFAULT_SPACING as u32,
+						),
+					);
 				}
+			}
 
-				row![
-					column![
-						SheetDots::new(character.integrity, 1, 10, Shape::Dots, None, |val| {
-							Event::IntegrityChanged(val as u16)
-						})
-						.axis(if flag {
-							widget::dots::Axis::Vertical
-						} else {
-							widget::dots::Axis::Horizontal
-						})
-						.spacing(if flag {
-							4
-						} else {
-							SheetDots::<Event, Renderer>::DEFAULT_SPACING
-						}),
-					]
-					.align_items(if flag {
-						Alignment::End
-					} else {
-						Alignment::Center
+			row![
+				column![
+					SheetDots::new(character.integrity, 1, 10, Shape::Dots, None, |val| {
+						Event::IntegrityChanged(val as u16)
 					})
-					.width(Length::Fill),
-					coll
+					.axis(if flag {
+						widget::dots::Axis::Vertical
+					} else {
+						widget::dots::Axis::Horizontal
+					})
+					.spacing(if flag {
+						4
+					} else {
+						SheetDots::<Event, iced::Renderer>::DEFAULT_SPACING
+					}),
 				]
-				.align_items(Alignment::Center)
-				.spacing(5)
-				.into()
-			};
+				.align_items(if flag {
+					Alignment::End
+				} else {
+					Alignment::Center
+				})
+				.width(Length::Fill),
+				coll
+			]
+			.align_items(Alignment::Center)
+			.spacing(5)
+			.into()
+		};
 
 		let label = text(fl(character.splat.name(), Some(character.splat.integrity())).unwrap())
 			.size(H3_SIZE);
@@ -219,14 +207,9 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> From<IntegrityComponent> for Element<'a, Message, Renderer>
+impl<'a, Message> From<IntegrityComponent> for Element<'a, Message>
 where
 	Message: 'a,
-	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::text::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ widget::dots::StyleSheet
-		+ widget::track::StyleSheet,
 {
 	fn from(integrity: IntegrityComponent) -> Self {
 		iced_lazy::component(integrity)

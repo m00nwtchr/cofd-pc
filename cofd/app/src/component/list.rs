@@ -3,45 +3,36 @@ use iced::{
 	Alignment,
 };
 use iced_lazy::Component;
-use iced_native::Element;
 
-use crate::{fl, widget, H3_SIZE, TITLE_SPACING};
+use crate::{Element, H3_SIZE, TITLE_SPACING};
 
-pub struct List<'a, T, Message, Renderer> {
+pub struct List<'a, T, Message> {
 	str: String,
 	min: usize,
 	vec: Vec<T>,
-	f: Box<dyn Fn(usize, T) -> Element<'a, Message, Renderer>>,
+	f: Box<dyn Fn(usize, T) -> Element<'a, Message>>,
 	max_width: Option<u32>, // on_change: Box<dyn Fn(usize, T) -> Message>,
 }
 
-pub fn list<'a, T, Message, Renderer>(
+pub fn list<'a, T, Message>(
 	str: String,
 	min: usize,
 	vec: Vec<T>,
-	f: impl Fn(usize, T) -> Element<'a, Message, Renderer> + 'static,
+	f: impl Fn(usize, T) -> Element<'a, Message> + 'static,
 	// on_change: impl Fn(usize, T) -> Message + 'static,
-) -> List<'a, T, Message, Renderer>
-where
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::text_input::StyleSheet,
-{
+) -> List<'a, T, Message> {
 	List::new(str, min, vec, f)
 }
 
 // #[derive(Clone)]
 // pub struct Event<Message>(Message);
 
-impl<'a, T, Message, Renderer> List<'a, T, Message, Renderer>
-where
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::text_input::StyleSheet,
-{
+impl<'a, T, Message> List<'a, T, Message> {
 	fn new(
 		str: String,
 		min: usize,
 		vec: Vec<T>,
-		f: impl Fn(usize, T) -> Element<'a, Message, Renderer> + 'static,
+		f: impl Fn(usize, T) -> Element<'a, Message> + 'static,
 		// on_change: impl Fn(usize, T) -> Message + 'static,
 	) -> Self {
 		Self {
@@ -60,10 +51,8 @@ where
 	}
 }
 
-impl<'a, T, Message, Renderer> Component<Message, Renderer> for List<'a, T, Message, Renderer>
+impl<'a, T, Message> Component<Message, iced::Renderer> for List<'a, T, Message>
 where
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::text_input::StyleSheet,
 	T: Clone + Default,
 {
 	type State = ();
@@ -73,7 +62,7 @@ where
 		Some(event)
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
+	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let mut col = Column::new();
 
 		for i in 0..self.min {
@@ -96,15 +85,12 @@ where
 	}
 }
 
-impl<'a, T, Message, Renderer> From<List<'a, T, Message, Renderer>>
-	for Element<'a, Message, Renderer>
+impl<'a, T, Message> From<List<'a, T, Message>> for Element<'a, Message>
 where
 	T: 'a + Clone + Default,
 	Message: 'a,
-	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::text_input::StyleSheet,
 {
-	fn from(list: List<'a, T, Message, Renderer>) -> Self {
+	fn from(list: List<'a, T, Message>) -> Self {
 		iced_lazy::component(list)
 	}
 }

@@ -1,20 +1,20 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use iced::{
 	widget::{button, column, row, text, Column},
-	Alignment, Element, Length,
+	Alignment, Length,
 };
 use iced_lazy::Component;
 
-use cofd::{prelude::*, splat::NameKey};
+use cofd::prelude::*;
 
-use crate::fl;
+use crate::{fl, Element};
 
 pub struct CharacterList<Message> {
 	characters: Vec<Rc<RefCell<Character>>>,
 	on_pick: Box<dyn Fn(usize) -> Message + 'static>,
 
-	_c: Option<Message>,
+	phantom: PhantomData<Message>,
 }
 
 pub fn character_list<Message>(
@@ -36,16 +36,12 @@ impl<Message> CharacterList<Message> {
 	) -> Self {
 		Self {
 			characters,
-			_c: None,
+			phantom: PhantomData,
 			on_pick: Box::new(on_pick),
 		}
 	}
 
-	fn mk_char<Renderer>(&self, i: usize, character: &Character) -> Element<Event, Renderer>
-	where
-		Renderer: iced_native::text::Renderer + 'static,
-		Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::button::StyleSheet,
-	{
+	fn mk_char(&self, i: usize, character: &Character) -> Element<Event> {
 		let mut subtitle = fl(character.splat.name(), None).unwrap();
 
 		if let Some(ysplat) = character.splat.ysplat() {
@@ -69,11 +65,7 @@ impl<Message> CharacterList<Message> {
 	}
 }
 
-impl<Message, Renderer> Component<Message, Renderer> for CharacterList<Message>
-where
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::button::StyleSheet,
-{
+impl<Message> Component<Message, iced::Renderer> for CharacterList<Message> {
 	type State = ();
 
 	type Event = Event;
@@ -87,7 +79,7 @@ where
 	}
 
 	#[allow(clippy::too_many_lines)]
-	fn view(&self, _state: &Self::State) -> iced_native::Element<Self::Event, Renderer> {
+	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let mut list = Column::new().width(Length::FillPortion(4)).spacing(5);
 
 		for (i, character) in self.characters.iter().enumerate() {
@@ -106,11 +98,9 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> From<CharacterList<Message>> for Element<'a, Message, Renderer>
+impl<'a, Message> From<CharacterList<Message>> for Element<'a, Message>
 where
 	Message: 'a,
-	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::button::StyleSheet,
 {
 	fn from(character_list: CharacterList<Message>) -> Self {
 		iced_lazy::component(character_list)

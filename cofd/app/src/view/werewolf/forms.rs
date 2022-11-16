@@ -2,18 +2,18 @@ use std::{cell::RefCell, rc::Rc};
 
 use iced::{
 	alignment,
-	widget::{button, column, text, text_input, Column, Row},
-	Element, Length,
+	widget::{button, column, row, text, text_input, Column, Row},
+	Length,
 };
 use iced_lazy::Component;
-use iced_native::row;
 
-use crate::{fl, INPUT_PADDING};
 use cofd::{
 	character::{ModifierTarget, Trait},
 	prelude::*,
 	splat::{werewolf::Form, Splat},
 };
+
+use crate::{fl, Element, INPUT_PADDING};
 
 pub struct FormTab<Message> {
 	character: Rc<RefCell<Character>>,
@@ -42,18 +42,7 @@ impl<Message> FormTab<Message> {
 		}
 	}
 
-	fn mk_col<Renderer>(
-		&self,
-		form: Form,
-		character: &Character,
-		current_form: &Form,
-	) -> Element<Event, Renderer>
-	where
-		Renderer: iced_native::text::Renderer + 'static,
-		Renderer::Theme: iced::widget::text::StyleSheet
-			+ iced::widget::text_input::StyleSheet
-			+ iced::widget::button::StyleSheet,
-	{
+	fn mk_col(&self, form: Form, character: &Character, current_form: &Form) -> Element<Event> {
 		let attrs = character.attributes();
 
 		let mut col = Column::new();
@@ -144,13 +133,9 @@ impl<Message> FormTab<Message> {
 	}
 }
 
-impl<Message, Renderer> Component<Message, Renderer> for FormTab<Message>
+impl<Message> Component<Message, iced::Renderer> for FormTab<Message>
 where
 	Message: Clone,
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text_input::StyleSheet
-		+ iced::widget::text::StyleSheet
-		+ iced::widget::button::StyleSheet,
 {
 	type State = ();
 
@@ -173,7 +158,7 @@ where
 		}
 	}
 
-	fn view(&self, _state: &Self::State) -> iced_native::Element<Self::Event, Renderer> {
+	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let character = self.character.borrow();
 
 		let mut row = Row::new();
@@ -188,13 +173,9 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> From<FormTab<Message>> for Element<'a, Message, Renderer>
+impl<'a, Message> From<FormTab<Message>> for Element<'a, Message>
 where
 	Message: 'a + Clone,
-	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::text_input::StyleSheet
-		+ iced::widget::text::StyleSheet
-		+ iced::widget::button::StyleSheet,
 {
 	fn from(form_tab: FormTab<Message>) -> Self {
 		iced_lazy::component(form_tab)

@@ -5,7 +5,6 @@ use iced::{
 	Alignment, Length,
 };
 use iced_lazy::Component;
-use iced_native::Element;
 
 use cofd::{prelude::Character, splat::Merit};
 
@@ -16,7 +15,7 @@ use crate::{
 		self,
 		dots::{Shape, SheetDots},
 	},
-	H3_SIZE, INPUT_PADDING, TITLE_SPACING,
+	Element, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
 };
 
 pub struct MeritComponent<Message> {
@@ -46,20 +45,7 @@ impl<Message> MeritComponent<Message> {
 	}
 }
 
-impl<Message, Renderer> Component<Message, Renderer> for MeritComponent<Message>
-where
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet
-		+ iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ widget::dots::StyleSheet
-		+ iced::widget::scrollable::StyleSheet
-		+ iced::overlay::menu::StyleSheet
-		+ iced::widget::container::StyleSheet,
-	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
-		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
-	>,
-{
+impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
 	type State = ();
 	type Event = Event;
 
@@ -73,7 +59,7 @@ where
 		Some((self.on_change)(event.0, event.1, event.2))
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
+	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let character = self.character.borrow();
 
 		let mut col1 = Column::new().spacing(3).width(Length::FillPortion(3));
@@ -158,20 +144,9 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> From<MeritComponent<Message>> for Element<'a, Message, Renderer>
+impl<'a, Message> From<MeritComponent<Message>> for Element<'a, Message>
 where
 	Message: 'a,
-	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::text::StyleSheet
-		+ iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ widget::dots::StyleSheet
-		+ iced::widget::scrollable::StyleSheet
-		+ iced::overlay::menu::StyleSheet
-		+ iced::widget::container::StyleSheet,
-	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
-		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
-	>,
 {
 	fn from(info_bar: MeritComponent<Message>) -> Self {
 		iced_lazy::component(info_bar)

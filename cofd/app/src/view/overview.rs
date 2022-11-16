@@ -2,7 +2,7 @@ use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use iced::{
 	widget::{column, pick_list, row, text, text_input, Column},
-	Alignment, Element, Length,
+	Alignment, Length,
 };
 use iced_lazy::Component;
 
@@ -16,7 +16,7 @@ use cofd::{
 		werewolf::{
 			HuntersAspect, KuruthTrigger, KuruthTriggerSet, KuruthTriggers, Tribe, WerewolfData,
 		},
-		Merit, NameKey, Splat, SplatType,
+		Merit, Splat,
 	},
 };
 
@@ -29,6 +29,7 @@ use crate::{
 	i18n::Translated,
 	// i18n::fl,
 	widget::{self, dots::Shape, dots::SheetDots, track::HealthTrack},
+	Element,
 	COMPONENT_SPACING,
 	H2_SIZE,
 	H3_SIZE,
@@ -94,16 +95,7 @@ impl<Message> OverviewTab<Message> {
 		}
 	}
 
-	fn abilities<Renderer>(&self, character: &Character) -> Element<Event, Renderer>
-	where
-		Renderer: iced_native::text::Renderer + 'static,
-		Renderer::Theme: iced::widget::text::StyleSheet
-			+ widget::dots::StyleSheet
-			+ iced::widget::text_input::StyleSheet
-			+ iced::widget::pick_list::StyleSheet + iced::widget::scrollable::StyleSheet + iced::overlay::menu::StyleSheet + iced::widget::container::StyleSheet,
-		<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style>
-
-	{
+	fn abilities(&self, character: &Character) -> Element<Event> {
 		let splat_name = character.splat.name();
 
 		let mut col = Column::new()
@@ -199,23 +191,9 @@ impl<Message> OverviewTab<Message> {
 	}
 }
 
-impl<Message, Renderer> Component<Message, Renderer> for OverviewTab<Message>
+impl<Message> Component<Message, iced::Renderer> for OverviewTab<Message>
 where
 	Message: Clone,
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ iced::widget::text::StyleSheet
-		+ iced::widget::button::StyleSheet
-		+ widget::dots::StyleSheet
-		+ widget::track::StyleSheet
-		+ iced::widget::checkbox::StyleSheet
-		+ iced::widget::scrollable::StyleSheet
-		+ iced::overlay::menu::StyleSheet
-		+ iced::widget::container::StyleSheet,
-	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
-		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
-	>,
 {
 	type State = ();
 
@@ -360,7 +338,7 @@ where
 	}
 
 	#[allow(clippy::too_many_lines)]
-	fn view(&self, _state: &Self::State) -> iced_native::Element<Self::Event, Renderer> {
+	fn view(&self, _state: &Self::State) -> iced_native::Element<Self::Event, iced::Renderer> {
 		let character = self.character.borrow();
 
 		let health = {
@@ -482,46 +460,45 @@ where
 		};
 
 		let kuruth_triggers = if let Splat::Werewolf(_, _, _, data) = &character.splat {
-			let (passive, common, specific): (
-				Element<Event, Renderer>,
-				Element<Event, Renderer>,
-				Element<Event, Renderer>,
-			) = if let KuruthTriggers::_Custom(KuruthTriggerSet {
-				passive,
-				common,
-				specific,
-			}) = &data.triggers
-			{
-				(
-					text_input("", passive, |passive| {
-						Event::KuruthTriggerChanged(KuruthTrigger::Passive, passive)
-					})
-					.padding(INPUT_PADDING)
-					.into(),
-					text_input("", common, |common| {
-						Event::KuruthTriggerChanged(KuruthTrigger::Common, common)
-					})
-					.padding(INPUT_PADDING)
-					.into(),
-					text_input("", specific, |specific| {
-						Event::KuruthTriggerChanged(KuruthTrigger::Specific, specific)
-					})
-					.padding(INPUT_PADDING)
-					.into(),
-				)
-			} else {
-				let name = data.triggers.name().unwrap();
+			let (passive, common, specific): (Element<Event>, Element<Event>, Element<Event>) =
+				if let KuruthTriggers::_Custom(KuruthTriggerSet {
+					passive,
+					common,
+					specific,
+				}) = &data.triggers
+				{
+					(
+						text_input("", passive, |passive| {
+							Event::KuruthTriggerChanged(KuruthTrigger::Passive, passive)
+						})
+						.padding(INPUT_PADDING)
+						.into(),
+						text_input("", common, |common| {
+							Event::KuruthTriggerChanged(KuruthTrigger::Common, common)
+						})
+						.padding(INPUT_PADDING)
+						.into(),
+						text_input("", specific, |specific| {
+							Event::KuruthTriggerChanged(KuruthTrigger::Specific, specific)
+						})
+						.padding(INPUT_PADDING)
+						.into(),
+					)
+				} else {
+					let name = data.triggers.name().unwrap();
 
-				let passive = fl("kuruth-triggers", Some(&format!("{}-passive", name))).unwrap();
-				let common = fl("kuruth-triggers", Some(&format!("{}-common", name))).unwrap();
-				let specific = fl("kuruth-triggers", Some(&format!("{}-specific", name))).unwrap();
+					let passive =
+						fl("kuruth-triggers", Some(&format!("{}-passive", name))).unwrap();
+					let common = fl("kuruth-triggers", Some(&format!("{}-common", name))).unwrap();
+					let specific =
+						fl("kuruth-triggers", Some(&format!("{}-specific", name))).unwrap();
 
-				(
-					text(passive).into(),
-					text(common).into(),
-					text(specific).into(),
-				)
-			};
+					(
+						text(passive).into(),
+						text(common).into(),
+						text(specific).into(),
+					)
+				};
 
 			let vec: Vec<Translated<KuruthTriggers>> =
 				KuruthTriggers::all().into_iter().map(Into::into).collect();
@@ -560,26 +537,25 @@ where
 
 			let seeming_regalia = text(fl(character.splat.name(), Some(&sg.name())).unwrap());
 
-			let regalia: Element<Event, Renderer> =
-				if let Some(Regalia::_Custom(name)) = &data.regalia {
-					text_input("", name, |val| Event::RegaliaChanged(Regalia::_Custom(val)))
-						.width(Length::Fill)
-						.padding(INPUT_PADDING)
-						.into()
-				} else {
-					let reg: Vec<Translated<Regalia>> = all_regalia
-						.iter()
-						.cloned()
-						.filter(|reg| reg != sg)
-						.map(Into::into)
-						.collect();
-
-					pick_list(reg, data.regalia.clone().map(Into::into), |val| {
-						Event::RegaliaChanged(val.unwrap())
-					})
+			let regalia: Element<Event> = if let Some(Regalia::_Custom(name)) = &data.regalia {
+				text_input("", name, |val| Event::RegaliaChanged(Regalia::_Custom(val)))
 					.width(Length::Fill)
+					.padding(INPUT_PADDING)
 					.into()
-				};
+			} else {
+				let reg: Vec<Translated<Regalia>> = all_regalia
+					.iter()
+					.cloned()
+					.filter(|reg| reg != sg)
+					.map(Into::into)
+					.collect();
+
+				pick_list(reg, data.regalia.clone().map(Into::into), |val| {
+					Event::RegaliaChanged(val.unwrap())
+				})
+				.width(Length::Fill)
+				.into()
+			};
 
 			column![
 				text(fl!("favored-regalia")).size(H3_SIZE),
@@ -591,7 +567,7 @@ where
 			column![]
 		};
 
-		let frailties: Element<Self::Event, Renderer> =
+		let frailties: Element<Self::Event> =
 			if let Splat::Changeling(_, _, _, data) = &character.splat {
 				list(
 					fl("changeling", Some("frailties")).unwrap(),
@@ -608,24 +584,23 @@ where
 				column![].into()
 			};
 
-		let banes: Element<Self::Event, Renderer> =
-			if let Splat::Vampire(_, _, _, data) = &character.splat {
-				list(
-					fl("vampire", Some("banes")).unwrap(),
-					3,
-					data.banes.clone(),
-					|i, val| {
-						text_input("", &val, move |val| Event::SplatThingChanged(i, val))
-							.padding(INPUT_PADDING)
-							.into()
-					},
-				)
-				.into()
-			} else {
-				column![].into()
-			};
+		let banes: Element<Self::Event> = if let Splat::Vampire(_, _, _, data) = &character.splat {
+			list(
+				fl("vampire", Some("banes")).unwrap(),
+				3,
+				data.banes.clone(),
+				|i, val| {
+					text_input("", &val, move |val| Event::SplatThingChanged(i, val))
+						.padding(INPUT_PADDING)
+						.into()
+				},
+			)
+			.into()
+		} else {
+			column![].into()
+		};
 
-		let hunters_aspect: Element<Self::Event, Renderer> =
+		let hunters_aspect: Element<Self::Event> =
 			if let Splat::Werewolf(auspice, tribe, _, data) = &character.splat {
 				let mut vec: Vec<Translated<HuntersAspect>> = if let Some(auspice) = auspice {
 					vec![auspice.get_hunters_aspect().clone().into()]
@@ -767,23 +742,9 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> From<OverviewTab<Message>> for Element<'a, Message, Renderer>
+impl<'a, Message> From<OverviewTab<Message>> for Element<'a, Message>
 where
 	Message: 'a + Clone,
-	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ iced::widget::text::StyleSheet
-		+ iced::widget::button::StyleSheet
-		+ widget::dots::StyleSheet
-		+ widget::track::StyleSheet
-		+ iced::widget::checkbox::StyleSheet
-		+ iced::widget::scrollable::StyleSheet
-		+ iced::overlay::menu::StyleSheet
-		+ iced::widget::container::StyleSheet,
-	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
-		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
-	>,
 {
 	fn from(overview_tab: OverviewTab<Message>) -> Self {
 		iced_lazy::component(overview_tab)

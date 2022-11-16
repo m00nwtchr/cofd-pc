@@ -1,11 +1,10 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use iced::{
 	widget::{column, row, text, Column},
 	Alignment, Length,
 };
 use iced_lazy::Component;
-use iced_native::Element;
 
 use cofd::{
 	character::{AttributeCategory, ModifierTarget, TraitCategory},
@@ -15,11 +14,8 @@ use cofd::{
 use crate::{
 	fl as flt,
 	i18n::fl,
-	widget::{
-		self,
-		dots::{Shape, SheetDots},
-	},
-	H2_SIZE, TITLE_SPACING,
+	widget::dots::{Shape, SheetDots},
+	Element, H2_SIZE, TITLE_SPACING,
 };
 
 pub struct AttributeBar<Message> {
@@ -52,15 +48,7 @@ impl<Message> AttributeBar<Message> {
 		}
 	}
 
-	fn mk_attr_col<Renderer>(
-		&self,
-		character: &Character,
-		cat: TraitCategory,
-	) -> Element<Event, Renderer>
-	where
-		Renderer: iced_native::text::Renderer + 'static,
-		Renderer::Theme: iced::widget::text::StyleSheet + widget::dots::StyleSheet,
-	{
+	fn mk_attr_col(&self, character: &Character, cat: TraitCategory) -> Element<Event> {
 		let mut col1 = Column::new().spacing(3);
 		let mut col2 = Column::new()
 			.spacing(5)
@@ -90,11 +78,7 @@ impl<Message> AttributeBar<Message> {
 	}
 }
 
-impl<Message, Renderer> Component<Message, Renderer> for AttributeBar<Message>
-where
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet + widget::dots::StyleSheet,
-{
+impl<Message> Component<Message, iced::Renderer> for AttributeBar<Message> {
 	type State = ();
 	type Event = Event;
 
@@ -102,7 +86,7 @@ where
 		Some((self.on_change)(event.0, event.1))
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
+	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let character = self.character.borrow();
 
 		column![
@@ -129,11 +113,9 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> From<AttributeBar<Message>> for Element<'a, Message, Renderer>
+impl<'a, Message> From<AttributeBar<Message>> for Element<'a, Message>
 where
 	Message: 'a,
-	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::text::StyleSheet + widget::dots::StyleSheet,
 {
 	fn from(info_bar: AttributeBar<Message>) -> Self {
 		iced_lazy::component(info_bar)

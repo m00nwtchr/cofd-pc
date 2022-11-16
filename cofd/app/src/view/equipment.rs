@@ -1,25 +1,11 @@
 use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
-use iced::{
-	widget::{column, pick_list, row, text, text_input, Column},
-	Alignment, Element, Length,
-};
+use iced::widget::column;
 use iced_lazy::Component;
 
-use cofd::{
-	character::{ModifierTarget, Trait, Wound},
-	prelude::*,
-	splat::{ability::Ability, changeling::Regalia, Splat, SplatType},
-};
+use cofd::prelude::*;
 
-use crate::{
-	component::{attribute_bar, info_bar, merit_component, skills_component, traits_component},
-	fl,
-	// i18n::fl,
-	widget::{self, dots::Shape, dots::SheetDots, track::HealthTrack},
-	H2_SIZE,
-	H3_SIZE,
-};
+use crate::Element;
 
 pub struct EquipmentTab<Message> {
 	character: Rc<RefCell<Character>>,
@@ -41,28 +27,14 @@ impl<Message> EquipmentTab<Message> {
 		}
 	}
 
-	fn abilities<Renderer>(&self, character: &Character) -> Element<Event, Renderer>
-	where
-		Renderer: iced_native::text::Renderer + 'static,
-		Renderer::Theme: iced::widget::text::StyleSheet
-			+ widget::dots::StyleSheet
-			+ iced::widget::text_input::StyleSheet
-			+ iced::widget::pick_list::StyleSheet,
-	{
+	fn abilities(&self, character: &Character) -> Element<Event> {
 		todo!()
 	}
 }
 
-impl<Message, Renderer> Component<Message, Renderer> for EquipmentTab<Message>
+impl<Message> Component<Message, iced::Renderer> for EquipmentTab<Message>
 where
 	Message: Clone,
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ iced::widget::text::StyleSheet
-		+ iced::widget::button::StyleSheet
-		+ widget::dots::StyleSheet
-		+ widget::track::StyleSheet,
 {
 	type State = ();
 
@@ -79,23 +51,16 @@ where
 	}
 
 	#[allow(clippy::too_many_lines)]
-	fn view(&self, _state: &Self::State) -> iced_native::Element<Self::Event, Renderer> {
+	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let character = self.character.borrow();
 
 		column![].into()
 	}
 }
 
-impl<'a, Message, Renderer> From<EquipmentTab<Message>> for Element<'a, Message, Renderer>
+impl<'a, Message> From<EquipmentTab<Message>> for Element<'a, Message>
 where
 	Message: 'a + Clone,
-	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ iced::widget::text::StyleSheet
-		+ iced::widget::button::StyleSheet
-		+ widget::dots::StyleSheet
-		+ widget::track::StyleSheet,
 {
 	fn from(equipment_tab: EquipmentTab<Message>) -> Self {
 		iced_lazy::component(equipment_tab)

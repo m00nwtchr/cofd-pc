@@ -3,14 +3,13 @@ use iced::{
 	Length,
 };
 use iced_lazy::Component;
-use iced_native::Element;
 
 use cofd::{
 	character::{ArmorStruct, Trait},
 	prelude::Character,
 };
 
-use crate::{fl, INPUT_PADDING};
+use crate::{fl, Element, INPUT_PADDING};
 
 struct Traits {
 	size: u16,
@@ -66,11 +65,7 @@ impl<Message> TraitsComponent<Message> {
 	}
 }
 
-impl<Message, Renderer> Component<Message, Renderer> for TraitsComponent<Message>
-where
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::text_input::StyleSheet,
-{
+impl<Message> Component<Message, iced::Renderer> for TraitsComponent<Message> {
 	type State = ();
 	type Event = Event;
 
@@ -84,7 +79,7 @@ where
 		}
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
+	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let beats = row![
 			text(format!("{}:", fl!("beats"))),
 			text_input("", &format!("{}", self.traits.beats), |val| {
@@ -172,11 +167,9 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> From<TraitsComponent<Message>> for Element<'a, Message, Renderer>
+impl<'a, Message> From<TraitsComponent<Message>> for Element<'a, Message>
 where
 	Message: 'a,
-	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::text::StyleSheet + iced::widget::text_input::StyleSheet,
 {
 	fn from(info_bar: TraitsComponent<Message>) -> Self {
 		iced_lazy::component(info_bar)

@@ -5,7 +5,6 @@ use iced::{
 	Alignment, Length,
 };
 use iced_lazy::Component;
-use iced_native::Element;
 
 use cofd::{
 	character::InfoTrait,
@@ -16,7 +15,7 @@ use cofd::{
 use crate::{
 	fl as fll,
 	i18n::{fl, Translated},
-	widget, INPUT_PADDING,
+	widget, Element, INPUT_PADDING,
 };
 
 pub struct InfoBar<Message> {
@@ -48,17 +47,7 @@ impl<Message> InfoBar<Message> {
 		}
 	}
 
-	fn mk_info_col<Renderer>(
-		&self,
-		info: Vec<InfoTrait>,
-		character: &Character,
-	) -> Row<Event, Renderer>
-	where
-		Renderer: iced_native::text::Renderer + 'static,
-		Renderer::Theme: iced::widget::pick_list::StyleSheet
-			+ iced::widget::text_input::StyleSheet
-			+ iced::widget::text::StyleSheet,
-	{
+	fn mk_info_col(&self, info: Vec<InfoTrait>, character: &Character) -> Element<Event> {
 		let mut col1 = Column::new().spacing(3);
 		let mut col2 = Column::new()
 			.spacing(3)
@@ -95,23 +84,11 @@ impl<Message> InfoBar<Message> {
 			);
 		}
 
-		row![col1, col2].width(Length::Fill).spacing(5)
+		row![col1, col2].width(Length::Fill).spacing(5).into()
 	}
 }
 
-impl<Message, Renderer> Component<Message, Renderer> for InfoBar<Message>
-where
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ iced::widget::text::StyleSheet
-		+ iced::widget::container::StyleSheet
-		+ iced::overlay::menu::StyleSheet
-		+ iced::widget::scrollable::StyleSheet,
-	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
-		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
-	>,
-{
+impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
 	type State = ();
 	type Event = Event;
 
@@ -151,10 +128,10 @@ where
 		clippy::single_match_else,
 		clippy::too_many_lines
 	)]
-	fn view(&self, _state: &Self::State) -> Element<Self::Event, Renderer> {
+	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let character = self.character.borrow();
 
-		let col3: Element<Self::Event, Renderer> = match character.splat {
+		let col3: Element<Self::Event> = match character.splat {
 			Splat::Mortal => self
 				.mk_info_col(
 					vec![InfoTrait::Age, InfoTrait::Faction, InfoTrait::GroupName],
@@ -187,7 +164,7 @@ where
 				let ysplat = character.splat.ysplat();
 				let zsplat = character.splat.zsplat();
 
-				let xsplat: Element<Self::Event, Renderer> = if let Some(xsplat) = xsplat.clone() && xsplat.is_custom() {
+				let xsplat: Element<Self::Event> = if let Some(xsplat) = xsplat.clone() && xsplat.is_custom() {
 					text_input("", xsplat.name(), {
 						let xsplat = xsplat.clone();
 						move |val| {
@@ -203,7 +180,7 @@ where
 					.width(Length::Fill).into()
 				};
 
-				let ysplat: Element<Self::Event, Renderer> = if let Some(ysplat) = ysplat.clone() && ysplat.is_custom() {
+				let ysplat: Element<Self::Event> = if let Some(ysplat) = ysplat.clone() && ysplat.is_custom() {
 					text_input("", ysplat.name(), {
 						let ysplat = ysplat.clone();
 						move |val| {
@@ -219,7 +196,7 @@ where
 					.width(Length::Fill).into()
 				};
 
-				let zsplat: Element<Self::Event, Renderer> = if let Some(zsplat) = zsplat.clone() && zsplat.is_custom() {
+				let zsplat: Element<Self::Event> = if let Some(zsplat) = zsplat.clone() && zsplat.is_custom() {
 					text_input("", zsplat.name(), {
 						let zsplat = zsplat.clone();
 						move |val| {
@@ -285,20 +262,9 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> From<InfoBar<Message>> for Element<'a, Message, Renderer>
+impl<'a, Message> From<InfoBar<Message>> for Element<'a, Message>
 where
 	Message: 'a,
-	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::pick_list::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ iced::widget::text::StyleSheet
-		+ widget::dots::StyleSheet
-		+ iced::widget::container::StyleSheet
-		+ iced::overlay::menu::StyleSheet
-		+ iced::widget::scrollable::StyleSheet,
-	<<Renderer as iced_native::Renderer>::Theme as iced::overlay::menu::StyleSheet>::Style: From<
-		<<Renderer as iced_native::Renderer>::Theme as iced::widget::pick_list::StyleSheet>::Style,
-	>,
 {
 	fn from(info_bar: InfoBar<Message>) -> Self {
 		iced_lazy::component(info_bar)

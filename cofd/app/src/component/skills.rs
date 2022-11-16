@@ -1,27 +1,23 @@
 use std::{cell::RefCell, rc::Rc};
 
 use iced::{
-	theme::{self, Button},
-	widget::{button, button::StyleSheet, checkbox, column, row, text, text_input, Column, Row},
+	theme::{self},
+	widget::{button, checkbox, column, row, text, text_input, Column},
 	Alignment, Length,
 };
 use iced_lazy::Component;
-use iced_native::Element;
 
 use cofd::{
 	character::{ModifierTarget, TraitCategory},
-	prelude::{Character, Skill, Skills},
-	splat::{mage::Order, Splat},
+	prelude::{Character, Skill},
+	splat::Splat,
 };
 
 use crate::{
 	fl as flt,
 	i18n::fl,
-	widget::{
-		self,
-		dots::{Shape, SheetDots},
-	},
-	H2_SIZE, H3_SIZE, TITLE_SPACING,
+	widget::dots::{Shape, SheetDots},
+	Element, H2_SIZE, H3_SIZE, TITLE_SPACING,
 };
 
 use super::list;
@@ -70,20 +66,12 @@ impl<Message> SkillsComponent<Message> {
 		}
 	}
 
-	fn mk_skill_col<Renderer>(
+	fn mk_skill_col(
 		&self,
 		state: &State,
 		character: &Character,
 		cat: &TraitCategory,
-	) -> Element<Event, Renderer>
-	where
-		Renderer: iced_native::text::Renderer + 'static,
-		Renderer::Theme: iced::widget::text::StyleSheet
-			+ widget::dots::StyleSheet
-			+ iced::widget::checkbox::StyleSheet
-			+ iced::widget::text_input::StyleSheet
-			+ iced::widget::button::StyleSheet,
-	{
+	) -> Element<Event> {
 		let mut col = Column::new();
 
 		let mut col0 = Column::new().spacing(3);
@@ -113,7 +101,7 @@ impl<Message> SkillsComponent<Message> {
 			col1 = col1.push(
 				button(text(fl("skill", Some(skill.name())).unwrap()))
 					.padding(0)
-					// .style(theme::Button::Text)
+					.style(theme::Button::Text)
 					.on_press(Event::SpecialtySkillChanged(skill)),
 			);
 
@@ -158,15 +146,7 @@ impl<Message> SkillsComponent<Message> {
 	}
 }
 
-impl<Message, Renderer> Component<Message, Renderer> for SkillsComponent<Message>
-where
-	Renderer: iced_native::text::Renderer + 'static,
-	Renderer::Theme: iced::widget::text::StyleSheet
-		+ widget::dots::StyleSheet
-		+ iced::widget::checkbox::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ iced::widget::button::StyleSheet,
-{
+impl<Message> Component<Message, iced::Renderer> for SkillsComponent<Message> {
 	type State = State;
 	type Event = Event;
 
@@ -185,7 +165,7 @@ where
 		}
 	}
 
-	fn view(&self, state: &Self::State) -> Element<Self::Event, Renderer> {
+	fn view(&self, state: &Self::State) -> Element<Self::Event> {
 		let character = self.character.borrow();
 
 		column![
@@ -202,15 +182,9 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> From<SkillsComponent<Message>> for Element<'a, Message, Renderer>
+impl<'a, Message> From<SkillsComponent<Message>> for Element<'a, Message>
 where
 	Message: 'a,
-	Renderer: 'static + iced_native::text::Renderer,
-	Renderer::Theme: iced::widget::text::StyleSheet
-		+ widget::dots::StyleSheet
-		+ iced::widget::checkbox::StyleSheet
-		+ iced::widget::text_input::StyleSheet
-		+ iced::widget::button::StyleSheet,
 {
 	fn from(info_bar: SkillsComponent<Message>) -> Self {
 		iced_lazy::component(info_bar)
