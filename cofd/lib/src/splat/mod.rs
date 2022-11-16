@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use serde_variant::to_variant_name;
-use std::fmt::Display;
 
 use convert_case::{Case, Casing};
 

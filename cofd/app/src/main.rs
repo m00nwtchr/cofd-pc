@@ -12,22 +12,18 @@
 	clippy::default_trait_access
 )]
 
-use std::{cell::RefCell, fmt::Display, fs::File, io::Write, mem, path::PathBuf, rc::Rc};
+use std::{cell::RefCell, mem, rc::Rc};
 
-use cfg_if::cfg_if;
 use iced::{
 	executor,
 	widget::{button, row, Column},
-	Application, Command, Element, Settings, Theme,
+	Application, Command, Settings, Theme,
 };
 
 #[cfg(target_arch = "wasm32")]
 use log::Level;
 
-use cofd::{
-	prelude::*,
-	splat::{Merit, Splat},
-};
+use cofd::{prelude::*, splat::Splat};
 
 mod component;
 mod i18n;
@@ -36,15 +32,14 @@ mod view;
 mod widget;
 
 use i18n::fl;
-use ron::ser::PrettyConfig;
 use store::Store;
 
 #[derive(Debug, Clone)]
 pub enum Tab {
 	Overview,
 	Equipment,
-
 	Forms,
+	SplatExtras,
 }
 
 // #[derive(Clone)]
@@ -55,6 +50,8 @@ pub enum State {
 		character: Rc<RefCell<Character>>,
 	},
 }
+
+pub type Element<'a, Message> = iced::Element<'a, Message, iced::Renderer>;
 
 struct PlayerCompanionApp {
 	state: State,
@@ -227,19 +224,21 @@ impl Application for PlayerCompanionApp {
 							unreachable!()
 						}
 					}
+					Tab::SplatExtras => view::splat_extras_tab(character.clone()).into(),
 				};
 
 				let mut row = row![
 					button("Back").on_press(Message::Previous),
 					button("Save").on_press(Message::Save),
 					button("Home").on_press(Message::TabSelected(Tab::Overview)),
+					button("Splat").on_press(Message::TabSelected(Tab::SplatExtras)),
 				];
 
 				if let Splat::Werewolf(_, _, _, data) = &brw.splat {
 					row = row.push(button("Forms").on_press(Message::TabSelected(Tab::Forms)));
 				}
 
-				row = row.push(button("Equipment").on_press(Message::TabSelected(Tab::Equipment)));
+				// row = row.push(button("Equipment").on_press(Message::TabSelected(Tab::Equipment)));
 
 				Column::new().push(row).spacing(1).push(tab).into()
 			}
@@ -429,14 +428,37 @@ mod demo {
 			])
 			.build();
 
-		let mage_character = Character::builder()
+		let mut mage_character = Character::builder()
 			.with_splat(Splat::Mage(
 				Path::Mastigos,
 				Some(Order::Mysterium),
 				None,
 				MageData {
 					attr_bonus: Attribute::Resolve,
-					obsessions: vec![],
+					obsessions: vec!["Open the Gate".to_string()],
+					rotes: vec![
+						Rote {
+							arcanum: Arcanum::Space,
+							level: 3,
+							spell: "Co-Location".to_string(),
+							creator: "".to_string(),
+							skill: Skill::Occult,
+						},
+						Rote {
+							arcanum: Arcanum::Prime,
+							level: 2,
+							spell: "Supernal Veil".to_string(),
+							creator: "".to_string(),
+							skill: Skill::Occult,
+						},
+						Rote {
+							arcanum: Arcanum::Space,
+							level: 3,
+							spell: "Perfect Sympathy".to_string(),
+							creator: "".to_string(),
+							skill: Skill::Occult,
+						},
+					],
 				},
 			))
 			.with_info(CharacterInfo {
@@ -502,6 +524,8 @@ mod demo {
 				//
 			])
 			.build();
+
+		mage_character.aspirations = vec!["Solve the Mentor's riddle (Long Term)".to_string()];
 
 		let changeling_character = Character::builder()
 			.with_splat(Splat::Changeling(

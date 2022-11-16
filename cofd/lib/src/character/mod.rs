@@ -5,7 +5,7 @@ use std::{
 	ops::{Add, Sub},
 };
 
-use crate::splat::{ability::Ability, Merit, Splat};
+use crate::splat::{ability::Ability, Merit, NameKey, Splat};
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn add(a: u16, b: i16) -> u16 {
@@ -1363,7 +1363,7 @@ pub enum Skill {
 }
 
 impl Skill {
-	fn all() -> [Skill; 24] {
+	pub fn all() -> [Skill; 24] {
 		[
 			Self::Academics,
 			Self::Computer,
@@ -1470,6 +1470,12 @@ impl Skill {
 			Skill::Streetwise => "streetwise",
 			Skill::Subterfuge => "subterfuge",
 		}
+	}
+}
+
+impl NameKey for Skill {
+	fn name_key(&self) -> String {
+		format!("skill.{}", self.name())
 	}
 }
 

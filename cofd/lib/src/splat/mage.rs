@@ -5,12 +5,13 @@ use crate::{
 	prelude::{Attribute, Character},
 };
 
-use super::{ability::Ability, Merit, Splat, XSplat, YSplat, ZSplat};
+use super::{ability::Ability, Merit, NameKey, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct MageData {
 	pub attr_bonus: Attribute,
 	pub obsessions: Vec<String>,
+	pub rotes: Vec<Rote>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
@@ -225,6 +226,12 @@ impl Arcanum {
 	}
 }
 
+impl NameKey for Arcanum {
+	fn name_key(&self) -> String {
+		format!("mage.{}", self.name())
+	}
+}
+
 impl From<Arcanum> for Ability {
 	fn from(val: Arcanum) -> Self {
 		Ability::Arcanum(val)
@@ -257,4 +264,13 @@ impl From<MageMerit> for Merit {
 	fn from(merit: MageMerit) -> Self {
 		Merit::Mage(merit)
 	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct Rote {
+	pub arcanum: Arcanum,
+	pub level: u16,
+	pub spell: String,
+	pub creator: String,
+	pub skill: Skill,
 }

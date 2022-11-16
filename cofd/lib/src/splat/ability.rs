@@ -67,7 +67,7 @@ impl NameKey for Ability {
 			Ability::Discipline(discipline) => format!("vampire.{}", discipline.name()),
 			Ability::Renown(renown) => format!("werewolf.{}", renown.name()),
 			Ability::MoonGift(moon_gift) => format!("werewolf.{}", moon_gift.name()),
-			Ability::Arcanum(arcanum) => format!("mage.{}", arcanum.name()),
+			Ability::Arcanum(arcanum) => arcanum.name_key(),
 		}
 	}
 }
