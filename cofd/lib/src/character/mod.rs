@@ -1183,7 +1183,9 @@ pub enum AttributeCategory {
 	Trait(TraitCategory),
 }
 
-#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize, AllVariants, VariantName)]
+#[derive(
+	PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize, AllVariants, VariantName,
+)]
 pub enum Attribute {
 	Intelligence,
 	Wits,
@@ -1275,7 +1277,18 @@ impl Attribute {
 }
 
 #[derive(
-	Clone, Copy, Debug, Hash, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, AllVariants, VariantName
+	Clone,
+	Copy,
+	Debug,
+	Hash,
+	PartialEq,
+	PartialOrd,
+	Eq,
+	Ord,
+	Serialize,
+	Deserialize,
+	AllVariants,
+	VariantName,
 )]
 pub enum Skill {
 	Academics,

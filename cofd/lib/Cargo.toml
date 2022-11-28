@@ -9,7 +9,6 @@ license = "MIT"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
-serde_variant = "0.1"
 erased-serde = "0.3"
 convert_case = "0.6"
 

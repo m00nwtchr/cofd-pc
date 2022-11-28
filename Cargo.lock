@@ -335,7 +335,6 @@ dependencies = [
  "erased-serde",
  "ron",
  "serde",
- "serde_variant",
 ]
 
 [[package]]
@@ -2313,15 +2312,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "serde_variant"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f988d71f968b960b45cf71e3210662f0b23906256c87820077e4f101225c494"
-dependencies = [
- "serde",
 ]
 
 [[package]]

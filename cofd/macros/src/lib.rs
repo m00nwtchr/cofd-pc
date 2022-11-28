@@ -46,6 +46,28 @@ fn variant_fields(variant: &Variant) -> TokenStream {
 	}
 }
 
+fn parse_variant_field(
+	variant: &Variant,
+	iter: &mut syn::punctuated::Iter<syn::Field>,
+	stream: &mut TokenStream,
+) {
+	let variant_name = &variant.ident;
+	if let Some(field) = iter.next() {
+		if let Type::Path(ty) = &field.ty {
+			if let Some(segment) = ty.path.segments.first() {
+				let ty: TokenStream = if let PathArguments::AngleBracketed(arguments) = &segment.arguments && !arguments.args.is_empty() &&
+								let Some(GenericArgument::Type(ty)) = arguments.args.first()
+							{ quote!{ #ty } } else { quote! { #ty } };
+
+				stream.extend(quote_spanned! { ty.span()=>
+					#[expand]
+					#variant_name(#ty),
+				});
+			}
+		}
+	}
+}
+
 #[proc_macro_derive(SplatEnum, attributes(splat))]
 pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
@@ -53,89 +75,70 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 	let name = &input.ident;
 	let data = &input.data;
 
-	let mut virtue_fun_variants = TokenStream::new();
-	let mut vice_fun_variants = TokenStream::new();
+	let mut splat_idents = TokenStream::new();
+	let mut xsplats = TokenStream::new();
+	let mut ysplats = TokenStream::new();
+	let mut zsplats = TokenStream::new();
 
-	let mut xsplat_fun_variants = TokenStream::new();
-	let mut ysplat_fun_variants = TokenStream::new();
-	let mut zsplat_fun_variants = TokenStream::new();
-
-	let mut ability_fun_variants = TokenStream::new();
-	let mut st_fun_variants = TokenStream::new();
-	let mut alt_beats_fun_variants = TokenStream::new();
-	let mut fuel_fun_variants = TokenStream::new();
-	let mut integrity_fun_variants = TokenStream::new();
+	let mut variants_map = HashMap::new();
 
 	if let Data::Enum(data_enum) = data {
 		let mut args = HashMap::new();
 
 		for variant in &data_enum.variants {
 			let variant_name = &variant.ident;
-			// let attrs = &variant.attrs;
+
 			args.clear();
 			parse_args(variant, &mut args);
 
 			let fields_in_variant = variant_fields(variant);
 
-			if let Some(virtue) = args.get("virtue") {
-				virtue_fun_variants.extend(quote_spanned! {variant.span()=>
-					#name::#variant_name #fields_in_variant => #virtue,
-				});
+			splat_idents.extend(quote_spanned! {variant.span()=>
+				#variant_name,
+			});
+
+			if let Fields::Unnamed(fields) = &variant.fields {
+				let mut iter = fields.unnamed.iter();
+
+				parse_variant_field(variant, &mut iter, &mut xsplats);
+				parse_variant_field(variant, &mut iter, &mut ysplats);
+				parse_variant_field(variant, &mut iter, &mut zsplats);
 			}
 
-			if let Some(vice) = args.get("vice") {
-				vice_fun_variants.extend(quote_spanned! {variant.span()=>
-					#name::#variant_name #fields_in_variant => #vice,
-				});
-			}
+			let mut gen_match_arm = |key: &str, b: bool| {
+				if let Some(val) = args.get(key) {
+					let v = if b {
+						quote_spanned! { variant.span()=> Some(#val) }
+					} else {
+						quote_spanned! { variant.span()=> #val }
+					};
 
-			if let Some(xsplat) = args.get("xsplat") {
-				xsplat_fun_variants.extend(quote_spanned! {variant.span()=>
-					#name::#variant_name #fields_in_variant => Some(#xsplat),
-				});
-			}
+					if !variants_map.contains_key(key) {
+						variants_map.insert(key.to_string(), TokenStream::new());
+					}
+					variants_map
+						.get_mut(key)
+						.unwrap()
+						.extend(quote_spanned! {variant.span()=>
+							#name::#variant_name #fields_in_variant => #v,
+						});
+				}
+			};
 
-			if let Some(ysplat) = args.get("ysplat") {
-				ysplat_fun_variants.extend(quote_spanned! {variant.span()=>
-					#name::#variant_name #fields_in_variant => Some(#ysplat),
-				});
-			}
+			gen_match_arm("virtue_anchor", false);
+			gen_match_arm("vice_anchor", false);
 
-			if let Some(zsplat) = args.get("zsplat") {
-				zsplat_fun_variants.extend(quote_spanned! {variant.span()=>
-					#name::#variant_name #fields_in_variant => Some(#zsplat),
-				});
-			}
+			gen_match_arm("xsplat", true);
+			gen_match_arm("ysplat", true);
+			gen_match_arm("zsplat", true);
 
-			if let Some(ability) = args.get("ability") {
-				ability_fun_variants.extend(quote_spanned! {variant.span()=>
-					#name::#variant_name #fields_in_variant => Some(#ability),
-				});
-			}
+			gen_match_arm("ability", true);
 
-			if let Some(st) = args.get("st") {
-				st_fun_variants.extend(quote_spanned! {variant.span()=>
-					#name::#variant_name #fields_in_variant => Some(#st),
-				});
-			}
+			gen_match_arm("st", true);
+			gen_match_arm("alt_beats", true);
 
-			if let Some(alt_beats) = args.get("alt_beats") {
-				alt_beats_fun_variants.extend(quote_spanned! {variant.span()=>
-					#name::#variant_name #fields_in_variant => Some(#alt_beats),
-				});
-			}
-
-			if let Some(fuel) = args.get("fuel") {
-				fuel_fun_variants.extend(quote_spanned! {variant.span()=>
-					#name::#variant_name #fields_in_variant => Some(#fuel),
-				});
-			}
-
-			if let Some(integrity) = args.get("integrity") {
-				integrity_fun_variants.extend(quote_spanned! {variant.span()=>
-					#name::#variant_name #fields_in_variant => #integrity,
-				});
-			}
+			gen_match_arm("fuel", true);
+			gen_match_arm("integrity", false);
 		}
 	} else {
 		return derive_error!("SplatEnum is only implemented for enums");
@@ -143,79 +146,76 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
 	let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
-	let expanded = quote! {
-		impl #impl_generics #name #ty_generics #where_clause {
-			pub fn virtue_anchor(&self) -> &str {
-				match self {
-					#virtue_fun_variants
-					_ => "virtue",
-				}
-			}
+	let mut funcs = TokenStream::new();
 
-			pub fn vice_anchor(&self) -> &str {
-				match self {
-					#vice_fun_variants
-					_ => "vice",
-				}
-			}
+	let mut gen_func = |key: &str, name: &str, b: bool, default: Option<&str>| {
+		if let Some(val) = variants_map.get(key) {
+			let ident: syn::Ident = syn::Ident::new(name, Span::call_site());
+			let o = if b {
+				quote! { Option<&str> }
+			} else {
+				quote! { &str }
+			};
 
-			pub fn xsplat_name(&self) -> Option<&str> {
-				match self {
-					#xsplat_fun_variants
-					_ => None,
-				}
-			}
+			let def_match = if b {
+				quote! { None }
+			} else if let Some(default) = default {
+				quote! { #default }
+			} else {
+				quote! { "" }
+			};
 
-			pub fn ysplat_name(&self) -> Option<&str> {
-				match self {
-					#ysplat_fun_variants
-					_ => None,
+			funcs.extend(quote! {
+				pub fn #ident(&self) -> #o {
+					match self {
+						#val
+						_ => #def_match
+					}
 				}
-			}
-
-			pub fn zsplat_name(&self) -> Option<&str> {
-				match self {
-					#zsplat_fun_variants
-					_ => None,
-				}
-			}
-
-			pub fn ability_name(&self) -> Option<&str> {
-				match self {
-					#ability_fun_variants
-					_ => None,
-				}
-			}
-
-			pub fn supernatural_tolerance(&self) -> Option<&str> {
-				match self {
-					#st_fun_variants
-					_ => None,
-				}
-			}
-
-			pub fn alternate_beats(&self) -> Option<&str> {
-				match self {
-					#alt_beats_fun_variants
-					_ => None,
-				}
-			}
-
-			pub fn fuel(&self) -> Option<&str> {
-				match self {
-					#fuel_fun_variants
-					_ => None,
-				}
-			}
-
-			pub fn integrity(&self) -> &str {
-				match self {
-					#integrity_fun_variants
-					_ => "integrity",
-				}
-			}
+			});
 		}
 	};
+
+	gen_func("virtue_anchor", "virtue_anchor", false, Some("virtue"));
+	gen_func("vice_anchor", "vice_anchor", false, Some("vice"));
+
+	gen_func("xsplat", "xsplat_name", true, None);
+	gen_func("ysplat", "ysplat_name", true, None);
+	gen_func("zsplat", "zsplat_name", true, None);
+
+	gen_func("ability", "ability_name", true, None);
+
+	gen_func("st", "supernatural_tolerance", true, None);
+	gen_func("alt_beats", "alternate_beats", true, None);
+
+	gen_func("fuel", "fuel", true, None);
+	gen_func("integrity", "integrity", false, Some("integrity"));
+
+	let expanded = quote! {
+		#[derive(Debug, Clone, Copy, VariantName, AllVariants)]
+		pub enum SplatType {
+			#splat_idents
+		}
+
+		impl #impl_generics #name #ty_generics #where_clause {
+			#funcs
+		}
+
+		#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
+		pub enum XSplat {
+			#xsplats
+		}
+		#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
+		pub enum YSplat {
+			#ysplats
+		}
+		#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
+		pub enum ZSplat {
+			#zsplats
+		}
+	};
+
+	println!("{expanded}");
 
 	proc_macro::TokenStream::from(expanded)
 }

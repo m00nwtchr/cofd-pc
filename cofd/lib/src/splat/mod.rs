@@ -1,7 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_variant::to_variant_name;
-
-use convert_case::{Case, Casing};
 
 use self::ability::Ability;
 use crate::{
@@ -36,24 +33,6 @@ use changeling::*;
 // use demon::*;
 // use beast::*;
 // use deviant:*;
-
-#[derive(Debug, Clone, Copy, Serialize, VariantName)]
-pub enum SplatType {
-	Mortal,
-	Vampire,
-	Werewolf,
-	Mage,
-	// Promethean,
-	Changeling,
-	// Hunter,
-	// Geist,
-	// Mummy,
-	// Demon,
-	// Beast,
-	// Deviant,
-}
-
-impl SplatType {}
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, VariantName, SplatEnum)]
 pub enum Splat {
@@ -380,18 +359,6 @@ impl Splat {
 	}
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
-pub enum XSplat {
-	#[expand]
-	Vampire(Clan),
-	#[expand]
-	Werewolf(Auspice),
-	#[expand]
-	Mage(Path),
-	#[expand]
-	Changeling(Seeming),
-}
-
 impl XSplat {
 	pub fn name_mut(&mut self) -> Option<&mut String> {
 		match self {
@@ -433,18 +400,6 @@ impl NameKey for XSplat {
 			XSplat::Changeling(seeming) => format!("changeling.{}", seeming.name()),
 		}
 	}
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
-pub enum YSplat {
-	#[expand]
-	Vampire(Covenant),
-	#[expand]
-	Werewolf(Tribe),
-	#[expand]
-	Mage(Order),
-	#[expand]
-	Changeling(Court),
 }
 
 impl YSplat {
@@ -491,18 +446,6 @@ impl NameKey for YSplat {
 			YSplat::Changeling(court) => format!("changeling.{}", court.name()),
 		}
 	}
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
-pub enum ZSplat {
-	#[expand]
-	Vampire(Bloodline),
-	#[expand]
-	Werewolf(Lodge),
-	#[expand]
-	Mage(Legacy),
-	#[expand]
-	Changeling(Kith),
 }
 
 impl ZSplat {
