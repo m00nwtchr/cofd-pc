@@ -1,4 +1,4 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use convert_case::{Case, Casing};
 use serde::{Deserialize, Serialize};
