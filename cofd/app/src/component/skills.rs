@@ -1,5 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
+use closure::closure;
 use iced::{
 	theme::{self},
 	widget::{button, checkbox, column, row, text, text_input, Column},
@@ -122,10 +123,11 @@ impl<Message> SkillsComponent<Message> {
 				let specialties = character.specialties.get(&skill).cloned().unwrap_or(vec![]);
 
 				col = col.push(row![col0, col1, col2].spacing(5))
-					.push(list("".to_string(), specialties.len()+1, specialties, {
-						let skill = skill.clone();
-						move |i, val| text_input("", &val.unwrap_or_default(), move |val| Event::SpecialtyChanged(skill, i, val)).padding(0).into()
-					}));
+				.push(list("".to_string(), specialties.len()+1, specialties,
+					closure!(clone skill,
+					 	|i, val| text_input("", &val.unwrap_or_default(),
+					 		move |val| Event::SpecialtyChanged(skill, i, val)).padding(0).into()
+				)));
 
 				col0 = Column::new().spacing(3);
 				col1 = Column::new().width(Length::Fill).spacing(3);

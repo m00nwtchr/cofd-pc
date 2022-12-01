@@ -229,12 +229,12 @@ impl Application for PlayerCompanionApp {
 					Tab::SplatExtras => view::splat_extras_tab(character.clone()).into(),
 				};
 
-				let mut row = row![
-					button("Back").on_press(Message::Previous),
-					button("Save").on_press(Message::Save),
-					button("Home").on_press(Message::TabSelected(Tab::Overview)),
-					button("Splat").on_press(Message::TabSelected(Tab::SplatExtras)),
-				];
+				// let mut row = row![
+				// 	button("Back").on_press(Message::Previous),
+				// 	button("Save").on_press(Message::Save),
+				// 	button("Home").on_press(Message::TabSelected(Tab::Overview)),
+				// 	button("Splat").on_press(Message::TabSelected(Tab::SplatExtras)),
+				// ];
 
 				// if let Splat::Werewolf(_, _, _, data) = &brw.splat {
 				// row = row.push(button("Forms").on_press(Message::TabSelected(Tab::Forms)));
@@ -242,7 +242,17 @@ impl Application for PlayerCompanionApp {
 
 				// row = row.push(button("Equipment").on_press(Message::TabSelected(Tab::Equipment)));
 
-				Column::new().push(row).spacing(1).push(tab).into()
+				Column::new()
+					.push(row![
+						button("Back").on_press(Message::Previous),
+						button("Save").on_press(Message::Save),
+						button("Home").on_press(Message::TabSelected(Tab::Overview)),
+						button("Equipment").on_press(Message::TabSelected(Tab::Equipment)),
+						button("Splat").on_press(Message::TabSelected(Tab::SplatExtras)),
+					])
+					.spacing(1)
+					.push(tab)
+					.into()
 			}
 		}
 	}

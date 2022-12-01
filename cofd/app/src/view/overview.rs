@@ -1,5 +1,6 @@
 use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
+use closure::closure;
 use iced::{
 	widget::{column, pick_list, row, text, text_input, Column},
 	Alignment, Length,
@@ -142,23 +143,25 @@ impl<Message> OverviewTab<Message> {
 				for (ability, val) in &character.abilities {
 					if ability.is_custom() {
 						col1 = col1.push(
-							text_input("", &ability.name(), {
-								let ab = ability.clone();
-								move |val| {
-									let mut new = ab.clone();
+							text_input(
+								"",
+								&ability.name(),
+								closure!(clone ability, |val| {
+									let mut new = ability.clone();
 									*new.name_mut().unwrap() = val;
-									Event::AbilityChanged(ab.clone(), new)
-								}
-							})
+									Event::AbilityChanged(ability.clone(), new)
+								}),
+							)
 							.padding(INPUT_PADDING),
 						);
 					} else {
 						col1 = col1
 							.push(
-								pick_list(vec.clone(), Some(ability.clone().into()), {
-									let ability = ability.clone();
-									move |val| Event::AbilityChanged(ability.clone(), val.unwrap())
-								})
+								pick_list(
+									vec.clone(),
+									Some(ability.clone().into()),
+									closure!(clone ability, |val| Event::AbilityChanged(ability.clone(), val.unwrap())),
+								)
 								.width(Length::Fill)
 								.padding(INPUT_PADDING)
 								.text_size(20),
@@ -166,10 +169,14 @@ impl<Message> OverviewTab<Message> {
 							.spacing(1);
 					}
 
-					col2 = col2.push(SheetDots::new(val.clone(), 0, 5, Shape::Dots, None, {
-						let ability = ability.clone();
-						move |val| Event::AbilityValChanged(ability.clone(), val)
-					}));
+					col2 = col2.push(SheetDots::new(
+						val.clone(),
+						0,
+						5,
+						Shape::Dots,
+						None,
+						closure!(clone ability, |val| Event::AbilityValChanged(ability.clone(), val)),
+					));
 				}
 
 				new = new.push(

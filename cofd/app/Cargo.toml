@@ -21,6 +21,8 @@ iced_native = "0.6"
 # iced_aw = {git = "https://github.com/iced-rs/iced_aw", features = ["pure", "tabs"]}
 # iced_aw = { git = "https://github.com/genusistimelord/iced_aw", features = ["tabs"] }
 
+closure = "0.3"
+
 directories = "4"
 ron = "0.8"
 serde = "1"

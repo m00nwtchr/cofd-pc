@@ -314,6 +314,8 @@ pub struct Character {
 	// #[serde(skip)]
 	pub merits: Vec<(Merit, u16)>,
 
+	pub weapons: Vec<Weapon>,
+
 	#[serde(skip_serializing_if = "is_five")]
 	pub base_size: u16,
 	base_armor: ArmorStruct,
@@ -735,6 +737,7 @@ impl Default for Character {
 			touchstones: Default::default(),
 			conditions: Default::default(),
 			aspirations: Default::default(),
+			weapons: Default::default(),
 		}
 	}
 }
@@ -1545,4 +1548,14 @@ pub struct ArmorStruct {
 pub enum Armor {
 	General,
 	Ballistic,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct Weapon {
+	pub name: String,
+	pub dice_pool: String,
+	pub damage: String,
+	pub range: String,
+	pub initative: i16,
+	pub size: u16,
 }
