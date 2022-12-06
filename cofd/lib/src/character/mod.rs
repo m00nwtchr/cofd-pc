@@ -7,6 +7,8 @@ use std::{
 
 use crate::splat::{ability::Ability, Merit, NameKey, Splat};
 
+mod dice_pool;
+
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn add(a: u16, b: i16) -> u16 {
 	let res = i32::from(a) + i32::from(b);

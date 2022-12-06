@@ -9,7 +9,7 @@ use iced_lazy::Component;
 
 use cofd::{character::Weapon, prelude::*};
 
-use crate::Element;
+use crate::{Element, H2_SIZE, TITLE_SPACING};
 
 use super::overview::vec_changed;
 
@@ -65,12 +65,30 @@ where
 		let character = self.character.borrow();
 
 		let weapons = {
-			let mut name = column![text("Weapon/Attack")].width(Length::Fill);
-			let mut pool = column![text("Dice Pool")].width(Length::Fill);
-			let mut damage = column![text("Damage")].width(Length::Fill);
-			let mut range = column![text("Range")].width(Length::Fill);
-			let mut initative = column![text("Initative")].width(Length::Fill);
-			let mut size = column![text("Size")].width(Length::Fill);
+			let mut name = column![text("Weapon/Attack")]
+				.width(Length::Fill)
+				.align_items(Alignment::Center)
+				.spacing(3);
+			let mut pool = column![text("Dice Pool")]
+				.width(Length::Fill)
+				.align_items(Alignment::Center)
+				.spacing(3);
+			let mut damage = column![text("Damage")]
+				.width(Length::Fill)
+				.align_items(Alignment::Center)
+				.spacing(3);
+			let mut range = column![text("Range")]
+				.width(Length::Fill)
+				.align_items(Alignment::Center)
+				.spacing(3);
+			let mut initative = column![text("Initative")]
+				.width(Length::Fill)
+				.align_items(Alignment::Center)
+				.spacing(3);
+			let mut size = column![text("Size")]
+				.width(Length::FillPortion(4))
+				.align_items(Alignment::Center)
+				.spacing(3);
 
 			let mut vec = character.weapons.clone();
 			vec.push(Default::default());
@@ -136,12 +154,17 @@ where
 				));
 			}
 
-			row![name, pool, damage, range, initative, size]
+			column![
+				text("Combat").size(H2_SIZE),
+				row![name, pool, damage, range, initative, size]
+					.spacing(5)
+					.padding(5)
+			]
+			.align_items(Alignment::Center)
+			.spacing(TITLE_SPACING)
 		};
 
-		column![text("Combat"), weapons]
-			.align_items(Alignment::Center)
-			.into()
+		column![weapons].align_items(Alignment::Center).into()
 	}
 }
 
