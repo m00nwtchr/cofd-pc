@@ -51,7 +51,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 		match event {
 			Event::IntegrityChanged(val) => character.integrity = val,
 			Event::IntegrityDamage(wound) => match &mut character.splat {
-				Splat::Changeling(_, _, _, data) => {
+				Splat::Changeling(.., data) => {
 					data.clarity.poke(&wound);
 					if let Wound::Lethal = wound {
 						data.clarity.poke(&Wound::Aggravated);
@@ -78,7 +78,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 			.align_items(Alignment::Center)
 			.spacing(COMPONENT_SPACING);
 
-		let dots: Element<Event> = if let Splat::Changeling(_, _, _, data) = &character.splat {
+		let dots: Element<Event> = if let Splat::Changeling(.., data) = &character.splat {
 			HealthTrack::new(
 				data.clarity.clone(),
 				data.max_clarity(&character) as usize,
@@ -90,7 +90,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 
 			let mut flag = false;
 
-			if let Splat::Vampire(_, _, _, _) = &character.splat {
+			if let Splat::Vampire(..) = &character.splat {
 				flag = true;
 
 				coll = coll.width(Length::FillPortion(4)).spacing(1);
@@ -143,7 +143,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 		let label = text(fl(character.splat.name(), Some(character.splat.integrity())).unwrap())
 			.size(H3_SIZE);
 
-		if let Splat::Werewolf(_, _, _, _) = character.splat {
+		if let Splat::Werewolf(..) = character.splat {
 			col = col.push(
 				column![
 					text(fl(character.splat.name(), Some("flesh-touchstone")).unwrap())
@@ -168,7 +168,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 		);
 
 		match character.splat {
-			Splat::Werewolf(_, _, _, _) => {
+			Splat::Werewolf(..) => {
 				col = col.push(
 					column![
 						text(fl(character.splat.name(), Some("spirit-touchstone")).unwrap())
@@ -185,7 +185,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 					.spacing(TITLE_SPACING),
 				);
 			}
-			Splat::Changeling(_, _, _, _) => {
+			Splat::Changeling(..) => {
 				col = col.push(
 					list(
 						fl!("touchstones"),

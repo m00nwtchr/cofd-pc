@@ -81,13 +81,13 @@ where
 
 		match event {
 			Event::RoteChanged(i, rote) => {
-				if let Splat::Mage(_, _, _, data) = &mut character.splat {
+				if let Splat::Mage(.., data) = &mut character.splat {
 					data.rotes.push(rote);
 					data.rotes.swap_remove(i);
 				}
 			}
 			Event::ShadowGiftChanged(i, val) => {
-				if let Splat::Werewolf(_, _, _, data) = &mut character.splat {
+				if let Splat::Werewolf(.., data) = &mut character.splat {
 					if let Some(m) = data.shadow_gifts.get_mut(i) {
 						*m = val;
 					} else {
@@ -97,7 +97,7 @@ where
 			}
 
 			Event::WolfGiftChanged(i, val) => {
-				if let Splat::Werewolf(_, _, _, data) = &mut character.splat {
+				if let Splat::Werewolf(.., data) = &mut character.splat {
 					if let Some(m) = data.wolf_gifts.get_mut(i) {
 						*m = val;
 					} else {
@@ -108,7 +108,7 @@ where
 
 			Event::Msg => {}
 			Event::RiteChanged(i, val) => {
-				if let Splat::Werewolf(_, _, _, data) = &mut character.splat {
+				if let Splat::Werewolf(.., data) = &mut character.splat {
 					if let Rite::_Custom(name) = &val && name.eq("") {
 						data.rites.remove(i);
 					} else if let Some(m) = data.rites.get_mut(i) {
@@ -119,7 +119,7 @@ where
 				}
 			}
 			Event::ContractChanged(i, rote) => {
-				if let Splat::Changeling(_, _, _, data) = &mut character.splat {
+				if let Splat::Changeling(.., data) = &mut character.splat {
 					data.contracts.push(rote);
 					data.contracts.swap_remove(i);
 				}
@@ -133,7 +133,7 @@ where
 	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let character = self.character.borrow();
 
-		let rotes: Element<Self::Event> = if let Splat::Mage(_, _, _, data) = &character.splat {
+		let rotes: Element<Self::Event> = if let Splat::Mage(.., data) = &character.splat {
 			let col = |txt, ratio| -> Column<Event, iced::Renderer> {
 				column![text(txt)]
 					.align_items(Alignment::Center)
@@ -291,7 +291,7 @@ where
 			column![]
 		};
 
-		let rites = if let Splat::Werewolf(_, _, _, data) = &character.splat {
+		let rites = if let Splat::Werewolf(.., data) = &character.splat {
 			let list = list(fll!("rites"), data.rites.len() + 1, data.rites.clone(), {
 				move |i, rite| {
 					if let Some(Rite::_Custom(name)) = rite {
@@ -316,7 +316,7 @@ where
 			row![]
 		};
 
-		let contracts = if let Splat::Changeling(_, _, _, data) = &character.splat {
+		let contracts = if let Splat::Changeling(.., data) = &character.splat {
 			let col = |txt, ratio| -> Column<Event, iced::Renderer> {
 				column![text(txt)]
 					.align_items(Alignment::Center)
@@ -431,7 +431,7 @@ where
 		let mut row = Column::new().width(Length::Fill);
 
 		match &character.splat {
-			Splat::Vampire(_, _, _, _) => {}
+			Splat::Vampire(..) => {}
 			Splat::Werewolf(..) => {
 				row = row
 					.align_items(Alignment::Center)
@@ -443,7 +443,7 @@ where
 			Splat::Mage(..) => {
 				row = row.push(rotes);
 			}
-			Splat::Changeling(_, _, _, _) => row = row.push(contracts),
+			Splat::Changeling(..) => row = row.push(contracts),
 			_ => {}
 		}
 

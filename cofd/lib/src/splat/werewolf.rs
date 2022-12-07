@@ -200,7 +200,7 @@ impl Auspice {
 			Auspice::Irraka => &[ShadowGift::Evasion, ShadowGift::Stealth],
 			Auspice::Ithaeur => &[ShadowGift::Elemental, ShadowGift::Shaping],
 			Auspice::Rahu => &[ShadowGift::Dominance, ShadowGift::Strength],
-			Auspice::_Custom(_, _, _, _, gifts, ..) => gifts,
+			Auspice::_Custom(.., gifts, _) => gifts,
 		}
 	}
 
@@ -211,7 +211,7 @@ impl Auspice {
 			Auspice::Irraka => &MoonGift::New,
 			Auspice::Ithaeur => &MoonGift::Crescent,
 			Auspice::Rahu => &MoonGift::Full,
-			Auspice::_Custom(_, _, _, moon_gift, ..) => moon_gift,
+			Auspice::_Custom(.., moon_gift, _, _) => moon_gift,
 		}
 	}
 
@@ -222,7 +222,7 @@ impl Auspice {
 			Auspice::Irraka => &HuntersAspect::Blissful,
 			Auspice::Ithaeur => &HuntersAspect::Mystic,
 			Auspice::Rahu => &HuntersAspect::Dominant,
-			Auspice::_Custom(_, _, _, _, _, aspect) => aspect,
+			Auspice::_Custom(.., aspect) => aspect,
 		}
 	}
 }
@@ -263,7 +263,7 @@ impl PureTribe {
 			Self::FireTouched => &[Skill::Expression, Skill::Occult, Skill::Subterfuge],
 			Self::IvoryClaws => &[Skill::Intimidation, Skill::Persuasion, Skill::Politics],
 			Self::PredatorKings => &[Skill::AnimalKen, Skill::Brawl, Skill::Crafts],
-			Self::_Custom(_, _, _, skills, ..) => skills,
+			Self::_Custom(.., skills, _, _) => skills,
 		}
 	}
 
@@ -272,7 +272,7 @@ impl PureTribe {
 			Self::FireTouched => &[HuntersAspect::Fanatical, HuntersAspect::Frenzied],
 			Self::IvoryClaws => &[HuntersAspect::Agnoized, HuntersAspect::Insidious],
 			Self::PredatorKings => &[HuntersAspect::Implacable, HuntersAspect::Primal],
-			Self::_Custom(_, _, _, _, aspects, ..) => aspects,
+			Self::_Custom(.., aspects, _) => aspects,
 		}
 	}
 }
@@ -351,10 +351,10 @@ impl Tribe {
 					ShadowGift::Rage,
 					ShadowGift::Strength,
 				],
-				PureTribe::_Custom(_, _, _, _, _, gifts) => gifts.to_vec(),
+				PureTribe::_Custom(.., gifts) => gifts.to_vec(),
 			},
 			// Tribe::GhostWolves => &None,
-			Tribe::_Custom(_, _, gifts) => gifts.to_vec(),
+			Tribe::_Custom(.., gifts) => gifts.to_vec(),
 		}
 	}
 

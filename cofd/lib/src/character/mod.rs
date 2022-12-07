@@ -131,7 +131,7 @@ impl CharacterBuilder {
 
 		character.willpower = character.max_willpower();
 
-		if let Splat::Werewolf(Some(auspice), _, _, data) = &mut character.splat {
+		if let Splat::Werewolf(Some(auspice), .., data) = &mut character.splat {
 			data.hunters_aspect = Some(auspice.get_hunters_aspect().clone());
 		}
 
@@ -412,7 +412,7 @@ impl Character {
 		);
 
 		match &self.splat {
-			Splat::Werewolf(auspice, _, _, data) => {
+			Splat::Werewolf(auspice, .., data) => {
 				modifiers.extend(data.form.get_modifiers());
 				if let Some(auspice) = auspice {
 					modifiers.extend(
@@ -454,7 +454,7 @@ impl Character {
 					}
 				}
 			}
-			Splat::Vampire(clan, _, _, data) => {
+			Splat::Vampire(clan, .., data) => {
 				if let Some(attr_bonus) = data.attr_bonus {
 					if clan.get_favored_attributes().contains(&attr_bonus) {
 						modifiers.push(Modifier::new(
@@ -465,7 +465,7 @@ impl Character {
 					}
 				}
 			}
-			Splat::Changeling(seeming, _, _, data) => {
+			Splat::Changeling(seeming, .., data) => {
 				if let Some(attr_bonus) = data.attr_bonus {
 					if seeming.get_favored_attributes().contains(&attr_bonus) {
 						modifiers.push(Modifier::new(

@@ -57,7 +57,7 @@ impl Seeming {
 			Seeming::Fairest => AttributeType::Power,
 			Seeming::Ogre => AttributeType::Power,
 			Seeming::Wizened => AttributeType::Finesse,
-			Seeming::_Custom(_, _, _type) => _type.clone(),
+			Seeming::_Custom(.., _type) => _type.clone(),
 		}))
 	}
 }

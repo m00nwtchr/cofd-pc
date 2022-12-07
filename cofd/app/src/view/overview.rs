@@ -270,9 +270,9 @@ where
 			Event::ConditionChanged(i, val) => vec_changed(i, val, &mut character.conditions),
 			Event::AspirationChanged(i, val) => vec_changed(i, val, &mut character.aspirations),
 			Event::SplatThingChanged(i, val) => match &mut character.splat {
-				Splat::Changeling(_, _, _, data) => vec_changed(i, val, &mut data.frailties),
-				Splat::Vampire(_, _, _, data) => vec_changed(i, val, &mut data.banes),
-				Splat::Mage(_, _, _, data) => vec_changed(i, val, &mut data.obsessions),
+				Splat::Changeling(.., data) => vec_changed(i, val, &mut data.frailties),
+				Splat::Vampire(.., data) => vec_changed(i, val, &mut data.banes),
+				Splat::Mage(.., data) => vec_changed(i, val, &mut data.obsessions),
 				_ => (),
 			},
 			Event::RoteSkillChanged(skill) => {
@@ -293,40 +293,30 @@ where
 				}
 			}
 			Event::RegaliaChanged(regalia) => {
-				if let Splat::Changeling(_seeming, _, _, data) = &mut character.splat {
+				if let Splat::Changeling(_seeming, .., data) = &mut character.splat {
 					data.regalia = Some(regalia);
 				}
 			}
 
 			Event::Msg => {}
 			Event::KuruthTriggersChanged(triggers) => {
-				if let Splat::Werewolf(_, _, _, data) = &mut character.splat {
+				if let Splat::Werewolf(.., data) = &mut character.splat {
 					data.triggers = triggers;
 				}
 			}
 			Event::KuruthTriggerChanged(trigger, val) => {
-				if let Splat::Werewolf(
-					..,
-					WerewolfData {
-						triggers:
-							KuruthTriggers::_Custom(KuruthTriggerSet {
-								passive,
-								common,
-								specific,
-							}),
-						..
-					},
-				) = &mut character.splat
-				{
-					match trigger {
-						KuruthTrigger::Passive => *passive = val,
-						KuruthTrigger::Common => *common = val,
-						KuruthTrigger::Specific => *specific = val,
+				if let Splat::Werewolf(.., data) = &mut character.splat {
+					if let KuruthTriggers::_Custom(triggers) = &mut data.triggers {
+						match trigger {
+							KuruthTrigger::Passive => triggers.passive = val,
+							KuruthTrigger::Common => triggers.common = val,
+							KuruthTrigger::Specific => triggers.specific = val,
+						}
 					}
 				}
 			}
 			Event::HuntersAspectChanged(val) => {
-				if let Splat::Werewolf(_, _, _, data) = &mut character.splat {
+				if let Splat::Werewolf(.., data) = &mut character.splat {
 					if let HuntersAspect::_Custom(name) = &val && name.eq("") {
 						data.hunters_aspect = None;
 					} else {
@@ -444,7 +434,7 @@ where
 		);
 		// .max_width(MAX_INPUT_WIDTH);
 
-		let obsessions = if let Splat::Mage(_, _, _, data) = &character.splat {
+		let obsessions = if let Splat::Mage(.., data) = &character.splat {
 			column![list(
 				fl("mage", Some("obsessions")).unwrap(),
 				5,
@@ -467,7 +457,7 @@ where
 			column![]
 		};
 
-		let kuruth_triggers = if let Splat::Werewolf(_, _, _, data) = &character.splat {
+		let kuruth_triggers = if let Splat::Werewolf(.., data) = &character.splat {
 			let (passive, common, specific): (Element<Event>, Element<Event>, Element<Event>) =
 				if let KuruthTriggers::_Custom(KuruthTriggerSet {
 					passive,
@@ -539,7 +529,7 @@ where
 		let merits = merit_component(self.character.clone(), Event::MeritChanged);
 		let traits = traits_component(&character, Event::TraitChanged);
 
-		let regalia = if let Splat::Changeling(seeming, _, _, data) = &character.splat {
+		let regalia = if let Splat::Changeling(seeming, .., data) = &character.splat {
 			let sg = seeming.get_favored_regalia();
 			let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
 
@@ -576,7 +566,7 @@ where
 		};
 
 		let frailties: Element<Self::Event> =
-			if let Splat::Changeling(_, _, _, data) = &character.splat {
+			if let Splat::Changeling(.., data) = &character.splat {
 				list(
 					fl("changeling", Some("frailties")).unwrap(),
 					3,
@@ -594,7 +584,7 @@ where
 				column![].into()
 			};
 
-		let banes: Element<Self::Event> = if let Splat::Vampire(_, _, _, data) = &character.splat {
+		let banes: Element<Self::Event> = if let Splat::Vampire(.., data) = &character.splat {
 			list(
 				fl("vampire", Some("banes")).unwrap(),
 				3,

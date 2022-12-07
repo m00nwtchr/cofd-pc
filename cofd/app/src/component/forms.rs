@@ -141,7 +141,7 @@ impl<Message: Clone> Component<Message, iced::Renderer> for FormsComponent<Messa
 	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
 		let mut character = self.character.borrow_mut();
 
-		if let Splat::Werewolf(_, _, _, data) = &mut character.splat {
+		if let Splat::Werewolf(.., data) = &mut character.splat {
 			match event {
 				Event::FormChanged(form) => {
 					data.form = form;
@@ -160,7 +160,7 @@ impl<Message: Clone> Component<Message, iced::Renderer> for FormsComponent<Messa
 
 		let mut row = Row::new();
 
-		if let Splat::Werewolf(_, _, _, data) = &character.splat {
+		if let Splat::Werewolf(.., data) = &character.splat {
 			for form in Form::all() {
 				row = row.push(self.mk_col(form, &character, &data.form));
 			}

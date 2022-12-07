@@ -192,7 +192,7 @@ mod tests {
 		assert_eq!(werewolf_character.perception(), 7);
 		assert_eq!(werewolf_character.max_health(), 12);
 
-		if let Splat::Werewolf(_, _, _, ww) = &mut werewolf_character.splat {
+		if let Splat::Werewolf(.., ww) = &mut werewolf_character.splat {
 			ww.form = Form::Gauru;
 		}
 
@@ -209,11 +209,11 @@ mod tests {
 				Path::Mastigos,
 				Some(Order::Mysterium),
 				None,
-				MageData {
+				Box::new(MageData {
 					attr_bonus: Some(Attribute::Intelligence),
 					obsessions: vec![],
 					rotes: vec![],
-				},
+				}),
 			))
 			.with_info(CharacterInfo {
 				name: String::from("Polaris"),
@@ -281,7 +281,7 @@ mod tests {
 
 		mage_character.calc_mod_map();
 
-		if let Splat::Mage(_, _, _, data) = &mut mage_character.splat {
+		if let Splat::Mage(.., data) = &mut mage_character.splat {
 			data.attr_bonus = Some(Attribute::Resolve);
 		}
 

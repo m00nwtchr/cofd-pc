@@ -312,10 +312,10 @@ mod demo {
 						Discipline::Auspex,
 					]),
 				)),
-				VampireData {
+				Box::new(VampireData {
 					attr_bonus: Some(Attribute::Presence),
 					..Default::default()
-				},
+				}),
 			))
 			.with_info(CharacterInfo {
 				name: String::from("Darren Webb"),
@@ -386,7 +386,7 @@ mod demo {
 				Some(Auspice::Rahu),
 				Some(Tribe::BloodTalons),
 				None,
-				WerewolfData {
+				Box::new(WerewolfData {
 					skill_bonus: Some(Skill::Brawl),
 					triggers: KuruthTriggers::Moon,
 					shadow_gifts: vec![
@@ -398,7 +398,7 @@ mod demo {
 					],
 					rites: vec![Rite::SacredHunt],
 					..Default::default()
-				},
+				}),
 			))
 			.with_info(CharacterInfo {
 				name: String::from("Amos Gray"),
@@ -450,7 +450,7 @@ mod demo {
 				Path::Mastigos,
 				Some(Order::Mysterium),
 				None,
-				MageData {
+				Box::new(MageData {
 					attr_bonus: Some(Attribute::Resolve),
 					obsessions: vec!["Open the Gate".to_string()],
 					rotes: vec![
@@ -476,7 +476,7 @@ mod demo {
 							skill: Skill::Occult,
 						},
 					],
-				},
+				}),
 			))
 			.with_info(CharacterInfo {
 				name: String::from("Polaris"),
@@ -549,12 +549,12 @@ mod demo {
 				Seeming::Wizened,
 				Some(Court::Autumn),
 				None,
-				ChangelingData {
+				Box::new(ChangelingData {
 					attr_bonus: Some(Attribute::Dexterity),
 					regalia: Some(Regalia::Crown),
 					contracts: vec![Default::default()],
 					..Default::default()
-				},
+				}),
 			))
 			.with_info(CharacterInfo {
 				// name: String::from("Darren Webb"),
