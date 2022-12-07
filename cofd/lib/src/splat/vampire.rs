@@ -91,7 +91,6 @@ pub enum Bloodline {
 	_Custom(String, Option<[Discipline; 4]>),
 }
 
-impl Bloodline {}
 impl From<Bloodline> for ZSplat {
 	fn from(bloodline: Bloodline) -> Self {
 		ZSplat::Vampire(bloodline)
@@ -188,7 +187,7 @@ pub enum MaskDirge {
 	_Custom(String),
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash, AllVariants, VariantName)]
 pub enum VampireMerit {
 	AcuteSenses,
 	Atrocious,
@@ -248,65 +247,6 @@ pub enum VampireMerit {
 }
 
 impl VampireMerit {
-	pub fn all() -> Vec<VampireMerit> {
-		vec![
-			Self::AcuteSenses,
-			Self::Atrocious,
-			Self::Bloodhound,
-			Self::ClawsOfTheUnholy,
-			Self::CloseFamily,
-			Self::Cutthroat,
-			Self::DistinguishedPalate,
-			Self::DreamVisions, // Mekhet
-			Self::Enticing,
-			Self::FeedingGrounds(String::new()),
-			Self::Herd,
-			Self::HoneyTrap,
-			Self::KindredStatus(String::new()), // Status?
-			Self::KissOfTheSuccubus,            // Daeva
-			Self::Lineage(String::new()),
-			Self::LingeringDreams, // DE2
-			Self::PackAlpha,       // Gangrel
-			// RevenantImpostor, // HD
-			Self::SwarmForm,
-			Self::Touchstone,
-			Self::UndeadMenses,
-			Self::UnnaturalAffinity,
-			Self::UnsettlingGaze,
-			// Style Merits
-			Self::CacophonySavvy,
-			Self::Courtoisie,
-			Self::Crusade,
-			Self::DynastyMembership,
-			Self::KindredDueling,
-			Self::MobilizeOutrage, // SotC, Carthian
-			Self::RidingTheWave,
-			Self::RitesOfTheImpaled, // SotC, Ordo, Sworn
-			Self::TempleGuardian,    // SotC, Crone
-			// Elder Merits,
-			// Beloved, // TY
-			// CallTheBeast // TY
-			// HeartOfStone, // TY
-			// MajorDomo, // TY
-			// MarriedByBlood, // TY
-			// ReceptiveMind, // TY
-
-			// SaviorOfTheLost, // TY
-			// SpecialTreat, // TY
-
-			// Revenant Merits
-
-			// Covenant Merits
-
-			// Ordo Dracul
-			Self::IndependentStudy, // SotC
-			Self::SecretSocietyJunkie,
-			Self::Sworn(String::new()),
-			Self::TwilightJudge, // SotC
-			Self::NestGuardian,
-		]
-	}
-
 	pub fn is_available(&self, character: &crate::prelude::Character) -> bool {
 		matches!(character.splat, Splat::Vampire(..))
 	}

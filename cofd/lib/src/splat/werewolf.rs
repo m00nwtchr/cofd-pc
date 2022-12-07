@@ -233,7 +233,7 @@ impl From<Auspice> for XSplat {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]
 pub enum PureTribe {
 	FireTouched,
 	IvoryClaws,
@@ -365,12 +365,7 @@ impl Tribe {
 			Tribe::HuntersInDarkness => "hunters_in_darkness",
 			Tribe::IronMasters => "iron_masters",
 			Tribe::StormLords => "storm_lords",
-			Tribe::Pure(tribe) => match tribe {
-				PureTribe::FireTouched => "fire_touched",
-				PureTribe::IvoryClaws => "ivory_claws",
-				PureTribe::PredatorKings => "predator_kings",
-				PureTribe::_Custom(name, ..) => name,
-			},
+			Tribe::Pure(tribe) => tribe.name(),
 			Tribe::_Custom(name, _, _) => name,
 		}
 	}
@@ -399,8 +394,6 @@ impl From<Tribe> for YSplat {
 pub enum Lodge {
 	_Custom(String),
 }
-
-impl Lodge {}
 
 impl From<Lodge> for ZSplat {
 	fn from(lodge: Lodge) -> Self {
@@ -688,15 +681,13 @@ pub enum Rite {
 	_Custom(String),
 }
 
-impl Rite {}
-
 impl NameKey for Rite {
 	fn name_key(&self) -> String {
 		format!("werewolf.{}", self.name())
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash, AllVariants, VariantName)]
 pub enum WerewolfMerit {
 	FavoredForm(Option<Form>),
 	EfficientKiller,
@@ -704,10 +695,6 @@ pub enum WerewolfMerit {
 }
 
 impl WerewolfMerit {
-	pub fn all() -> Vec<WerewolfMerit> {
-		vec![Self::FavoredForm(None), Self::EfficientKiller, Self::Totem]
-	}
-
 	pub fn is_available(&self, character: &crate::prelude::Character) -> bool {
 		matches!(character.splat, Splat::Werewolf(..))
 	}

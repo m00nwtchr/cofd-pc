@@ -565,24 +565,24 @@ where
 			column![]
 		};
 
-		let frailties: Element<Self::Event> =
-			if let Splat::Changeling(.., data) = &character.splat {
-				list(
-					fl("changeling", Some("frailties")).unwrap(),
-					3,
-					data.frailties.clone(),
-					|i, val| {
-						text_input("", &val.unwrap_or_default(), move |val| {
-							Event::SplatThingChanged(i, val)
-						})
-						.padding(INPUT_PADDING)
-						.into()
-					},
-				)
-				.into()
-			} else {
-				column![].into()
-			};
+		let frailties: Element<Self::Event> = if let Splat::Changeling(.., data) = &character.splat
+		{
+			list(
+				fl("changeling", Some("frailties")).unwrap(),
+				3,
+				data.frailties.clone(),
+				|i, val| {
+					text_input("", &val.unwrap_or_default(), move |val| {
+						Event::SplatThingChanged(i, val)
+					})
+					.padding(INPUT_PADDING)
+					.into()
+				},
+			)
+			.into()
+		} else {
+			column![].into()
+		};
 
 		let banes: Element<Self::Event> = if let Splat::Vampire(.., data) = &character.splat {
 			list(

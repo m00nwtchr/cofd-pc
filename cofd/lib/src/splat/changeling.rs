@@ -123,14 +123,12 @@ impl NameKey for Regalia {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
-pub enum ChangelingMerit {}
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash, AllVariants, VariantName)]
+pub enum ChangelingMerit {
+	Mantle,
+}
 
 impl ChangelingMerit {
-	pub fn all() -> Vec<ChangelingMerit> {
-		vec![]
-	}
-
 	pub fn is_available(&self, character: &Character) -> bool {
 		matches!(character.splat, Splat::Changeling(..))
 	}

@@ -67,7 +67,7 @@ pub enum Order {
 	_Custom(String, [Skill; 3]),
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, AllVariants, VariantName)]
 pub enum Ministry {
 	Hegemony,
 	Panopticon,
@@ -110,13 +110,7 @@ impl Order {
 			Order::SilverLadder => "silver_ladder",
 			Order::FreeCouncil => "free_council",
 			Order::SeersOfTheThrone(ministry) => match ministry {
-				Some(ministry) => match ministry {
-					Ministry::Hegemony => "hegemony",
-					Ministry::Panopticon => "panopticon",
-					Ministry::Paternoster => "paternoster",
-					Ministry::Praetorian => "praetorian",
-					Ministry::_Custom(name, _) => name,
-				},
+				Some(ministry) => ministry.name(),
 				None => "seers_of_the_throne",
 			},
 			Order::_Custom(name, _) => name,
@@ -150,7 +144,6 @@ pub enum Legacy {
 	_Custom(String, Option<Arcanum>),
 }
 
-impl Legacy {}
 impl From<Legacy> for ZSplat {
 	fn from(legacy: Legacy) -> Self {
 		ZSplat::Mage(legacy)
@@ -183,8 +176,7 @@ impl From<Arcanum> for Ability {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
-
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Hash, AllVariants, VariantName)]
 pub enum MageMerit {
 	HighSpeech,
 }

@@ -884,9 +884,9 @@ impl Merit {
 
 	pub fn name(&self) -> String {
 		match self {
-			Merit::Mage(merit) => to_variant_name(merit).unwrap().to_case(Case::Snake),
-			Merit::Vampire(merit) => to_variant_name(merit).unwrap().to_case(Case::Snake),
-			Merit::Werewolf(merit) => to_variant_name(merit).unwrap().to_case(Case::Snake),
+			Merit::Mage(merit) => String::from(merit.name()),
+			Merit::Vampire(merit) => String::from(merit.name()),
+			Merit::Werewolf(merit) => String::from(merit.name()),
 			Merit::_Custom(name) => name.clone(),
 			_ => to_variant_name(self).unwrap().to_case(Case::Snake),
 		}
