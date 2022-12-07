@@ -1,21 +1,21 @@
 use std::{cell::RefCell, rc::Rc};
 
 use iced::{
-	widget::{column, pick_list, row, text, text_input, Column, Row},
+	widget::{column, pick_list, row, text, text_input, Column},
 	Alignment, Length,
 };
 use iced_lazy::Component;
 
 use cofd::{
 	character::InfoTrait,
-	prelude::Character,
-	splat::{NameKey, Splat, XSplat, YSplat, ZSplat},
+	prelude::*,
+	splat::{Splat, XSplat, YSplat, ZSplat},
 };
 
 use crate::{
 	fl as fll,
 	i18n::{fl, Translated},
-	widget, Element, INPUT_PADDING,
+	Element, INPUT_PADDING,
 };
 
 pub struct InfoBar<Message> {
@@ -132,12 +132,10 @@ impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
 		let character = self.character.borrow();
 
 		let col3: Element<Self::Event> = match character.splat {
-			Splat::Mortal => self
-				.mk_info_col(
-					vec![InfoTrait::Age, InfoTrait::Faction, InfoTrait::GroupName],
-					&character,
-				)
-				.into(),
+			Splat::Mortal => self.mk_info_col(
+				vec![InfoTrait::Age, InfoTrait::Faction, InfoTrait::GroupName],
+				&character,
+			),
 			_ => {
 				let mut xsplats = XSplat::all(character.splat._type());
 				let mut ysplats = YSplat::all(character.splat._type());
@@ -217,18 +215,15 @@ impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
 					column![
 						text(format!(
 							"{}:",
-							fl(character.splat.name(), Some(character.splat.xsplat_name()))
-								.unwrap()
+							fl(character.splat.name(), character.splat.xsplat_name()).unwrap()
 						)),
 						text(format!(
 							"{}:",
-							fl(character.splat.name(), Some(character.splat.ysplat_name()))
-								.unwrap()
+							fl(character.splat.name(), character.splat.ysplat_name()).unwrap()
 						)),
 						text(format!(
 							"{}:",
-							fl(character.splat.name(), Some(character.splat.zsplat_name()))
-								.unwrap()
+							fl(character.splat.name(), character.splat.zsplat_name()).unwrap()
 						))
 					]
 					.spacing(3),

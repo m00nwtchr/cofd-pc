@@ -7,13 +7,12 @@ use iced::{
 };
 use iced_lazy::Component;
 
+use crate::{fl, Element, INPUT_PADDING};
 use cofd::{
-	character::{ArmorStruct, ModifierTarget, Trait},
-	prelude::{Attribute, Character},
+	character::{ModifierTarget, Trait},
+	prelude::*,
 	splat::{werewolf::Form, Splat},
 };
-
-use crate::{fl, Element, INPUT_PADDING};
 
 pub struct FormsComponent<Message> {
 	character: Rc<RefCell<Character>>,
@@ -99,13 +98,13 @@ impl<Message> FormsComponent<Message> {
 				let cur_mod_ = cur_mods
 					.iter()
 					.filter(|el| el.target.eq(&target))
-					.find_map(|el| el.val())
+					.find_map(cofd::character::Modifier::val)
 					.unwrap_or(0);
 
 				let mod_ = mods
 					.iter()
 					.filter(|el| el.target.eq(&target))
-					.find_map(|el| el.val())
+					.find_map(cofd::character::Modifier::val)
 					.unwrap_or(0);
 
 				base - cur_mod_ + mod_
@@ -115,7 +114,7 @@ impl<Message> FormsComponent<Message> {
 
 			col = col.push(row![
 				text(format!("{}: ", name)),
-				text_input("", &val.to_string(), |val| Event::Msg).padding(INPUT_PADDING)
+				text_input("", &val.to_string(), |_val| Event::Msg).padding(INPUT_PADDING)
 			]);
 		}
 

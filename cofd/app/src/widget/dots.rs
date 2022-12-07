@@ -1,5 +1,3 @@
-use std::cmp::min;
-
 use iced::{
 	event, mouse, widget::Column, Alignment, Background, Color, Element, Event, Length, Point,
 	Rectangle, Theme,
@@ -7,7 +5,7 @@ use iced::{
 use iced_native::{
 	layout, renderer, text, touch,
 	widget::{self, Column as Col, Row, Tree},
-	Clipboard, Element as El, Layout, Shell, Widget,
+	Clipboard, Layout, Shell, Widget,
 };
 
 pub enum Shape {

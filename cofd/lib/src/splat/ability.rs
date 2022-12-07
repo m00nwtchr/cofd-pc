@@ -1,15 +1,15 @@
 use serde::{Deserialize, Serialize};
 
-use crate::character::Modifier;
-
 use super::{
 	mage::Arcanum,
 	vampire::Discipline,
 	werewolf::{MoonGift, Renown},
 	Merit, NameKey,
 };
+use crate::character::Modifier;
+use cofd_traits::VariantName;
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub enum Ability {
 	Merit(Merit),
 	Discipline(Discipline),

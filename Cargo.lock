@@ -330,11 +330,22 @@ dependencies = [
 name = "cofd"
 version = "0.1.0"
 dependencies = [
+ "cofd-traits",
  "convert_case",
  "erased-serde",
  "ron",
  "serde",
  "serde_variant",
+]
+
+[[package]]
+name = "cofd-macros"
+version = "0.1.0"
+dependencies = [
+ "convert_case",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -361,6 +372,13 @@ dependencies = [
  "serde",
  "unic-langid",
  "web-sys",
+]
+
+[[package]]
+name = "cofd-traits"
+version = "0.1.0"
+dependencies = [
+ "cofd-macros",
 ]
 
 [[package]]

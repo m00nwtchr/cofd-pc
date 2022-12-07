@@ -1,16 +1,11 @@
 #[cfg(not(target_arch = "wasm32"))]
 use directories::ProjectDirs;
-use ron::Options;
+
 #[cfg(not(target_arch = "wasm32"))]
-use std::{
-	fs::File,
-	io::{Read, Write},
-	path::PathBuf,
-};
+use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use anyhow::anyhow;
 use cfg_if::cfg_if;
 
 pub struct Store {
@@ -22,7 +17,7 @@ pub struct Store {
 
 impl Store {
 	pub fn new() -> Option<Store> {
-		let mut store;
+		let store;
 
 		cfg_if! {
 			if #[cfg(target_arch = "wasm32")] {
@@ -52,8 +47,8 @@ impl Store {
 		store
 	}
 
-	pub fn get<T: for<'a> Deserialize<'a>>(&self, name: &str) -> anyhow::Result<Option<T>> {
-		let mut str;
+	pub fn get<T: for<'a> Deserialize<'a>>(&self, _name: &str) -> anyhow::Result<Option<T>> {
+		let str;
 
 		cfg_if! {
 			if #[cfg(target_arch = "wasm32")] {
@@ -70,7 +65,7 @@ impl Store {
 		}
 	}
 
-	pub fn set<T: Serialize>(&self, name: &str, value: &T) -> anyhow::Result<()> {
+	pub fn set<T: Serialize>(&self, _name: &str, value: &T) -> anyhow::Result<()> {
 		let str = ron::ser::to_string(value)?;
 
 		cfg_if! {

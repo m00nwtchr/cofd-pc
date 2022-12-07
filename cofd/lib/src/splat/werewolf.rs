@@ -1,11 +1,12 @@
 use std::collections::HashMap;
 
-use convert_case::{Case, Casing};
-use serde::{Deserialize, Serialize};
-use serde_variant::to_variant_name;
+use cofd_traits::VariantName;
 
-use crate::character::{
-	Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait,
+use serde::{Deserialize, Serialize};
+
+use crate::{
+	character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait},
+	prelude::*,
 };
 
 use super::{ability::Ability, Merit, NameKey, Splat, XSplat, YSplat, ZSplat};
@@ -17,7 +18,7 @@ pub struct KuruthTriggerSet {
 	pub specific: String,
 }
 
-#[derive(Clone)]
+#[derive(Clone, VariantName)]
 pub enum KuruthTrigger {
 	Passive,
 	Common,
@@ -28,18 +29,9 @@ impl KuruthTrigger {
 	pub fn all(&self) -> [KuruthTrigger; 3] {
 		[Self::Passive, Self::Common, Self::Specific]
 	}
-
-	pub fn name(&self) -> &str {
-		match self {
-			KuruthTrigger::Passive => "passive",
-			KuruthTrigger::Common => "common",
-			KuruthTrigger::Specific => "specific",
-		}
-	}
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, AllVariants)]
 pub enum KuruthTriggers {
 	Blood,
 	Moon,
@@ -67,18 +59,6 @@ impl Default for KuruthTriggers {
 }
 
 impl KuruthTriggers {
-	pub fn all() -> [Self; 7] {
-		[
-			Self::Blood,
-			Self::Moon,
-			Self::TheOther,
-			Self::Pack,
-			Self::Territory,
-			Self::Wound,
-			Default::default(),
-		]
-	}
-
 	pub fn name(&self) -> Option<&str> {
 		match self {
 			KuruthTriggers::Blood => Some("blood"),
@@ -147,7 +127,7 @@ pub struct WerewolfData {
 	pub rites: Vec<Rite>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, VariantName)]
 pub enum HuntersAspect {
 	Monstrous,
 	Isolating,
@@ -165,24 +145,7 @@ pub enum HuntersAspect {
 	_Custom(String),
 }
 
-impl HuntersAspect {
-	pub fn name(&self) -> &str {
-		match self {
-			HuntersAspect::Monstrous => "monstrous",
-			HuntersAspect::Isolating => "isolating",
-			HuntersAspect::Blissful => "blissful",
-			HuntersAspect::Mystic => "mystic",
-			HuntersAspect::Dominant => "dominant",
-			HuntersAspect::Fanatical => "fanatical",
-			HuntersAspect::Frenzied => "frenzied",
-			HuntersAspect::Agnoized => "agonized",
-			HuntersAspect::Insidious => "insidious",
-			HuntersAspect::Implacable => "implacable",
-			HuntersAspect::Primal => "primal",
-			HuntersAspect::_Custom(name) => name,
-		}
-	}
-}
+impl HuntersAspect {}
 
 impl NameKey for HuntersAspect {
 	fn name_key(&self) -> String {
@@ -190,7 +153,7 @@ impl NameKey for HuntersAspect {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]
 pub enum Auspice {
 	Cahalith,
 	Elodoth,
@@ -208,27 +171,6 @@ pub enum Auspice {
 }
 
 impl Auspice {
-	pub fn all() -> [Auspice; 5] {
-		[
-			Auspice::Cahalith,
-			Auspice::Elodoth,
-			Auspice::Irraka,
-			Auspice::Ithaeur,
-			Auspice::Rahu,
-		]
-	}
-
-	pub fn name(&self) -> &str {
-		match self {
-			Auspice::Cahalith => "cahalith",
-			Auspice::Elodoth => "elodoth",
-			Auspice::Irraka => "irraka",
-			Auspice::Ithaeur => "ithaeur",
-			Auspice::Rahu => "rahu",
-			Auspice::_Custom(name, ..) => name,
-		}
-	}
-
 	pub fn get_skills(&self) -> &[Skill; 3] {
 		match self {
 			Auspice::Cahalith => &[Skill::Crafts, Skill::Expression, Skill::Persuasion],
@@ -453,18 +395,12 @@ impl From<Tribe> for YSplat {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName)]
 pub enum Lodge {
 	_Custom(String),
 }
 
-impl Lodge {
-	pub fn name(&self) -> &str {
-		match self {
-			Self::_Custom(name) => name,
-		}
-	}
-}
+impl Lodge {}
 
 impl From<Lodge> for ZSplat {
 	fn from(lodge: Lodge) -> Self {
@@ -472,35 +408,13 @@ impl From<Lodge> for ZSplat {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash, VariantName, AllVariants)]
 pub enum Renown {
 	Purity,
 	Glory,
 	Honor,
 	Wisdom,
 	Cunning,
-}
-
-impl Renown {
-	pub fn all() -> [Renown; 5] {
-		[
-			Renown::Purity,
-			Renown::Glory,
-			Renown::Honor,
-			Renown::Wisdom,
-			Renown::Cunning,
-		]
-	}
-
-	pub fn name(&self) -> &str {
-		match self {
-			Renown::Purity => "purity",
-			Renown::Glory => "glory",
-			Renown::Honor => "honor",
-			Renown::Wisdom => "wisdom",
-			Renown::Cunning => "cunning",
-		}
-	}
 }
 
 impl From<Renown> for Ability {
@@ -516,7 +430,9 @@ pub enum Gift {
 	Wolf(WolfGift),
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
+#[derive(
+	Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash, VariantName,
+)]
 pub enum MoonGift {
 	Crescent,
 	Full,
@@ -548,17 +464,6 @@ impl MoonGift {
 			_ => vec![],
 		}
 	}
-
-	pub fn name(&self) -> &str {
-		match self {
-			MoonGift::Crescent => "crescent",
-			MoonGift::Full => "full",
-			MoonGift::Gibbous => "gibbous",
-			MoonGift::Half => "half",
-			MoonGift::New => "new",
-			MoonGift::_Custom(name) => name,
-		}
-	}
 }
 
 impl NameKey for MoonGift {
@@ -567,7 +472,9 @@ impl NameKey for MoonGift {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(
+	Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, VariantName, AllVariants,
+)]
 pub enum ShadowGift {
 	Death,
 	Dominance,
@@ -594,63 +501,20 @@ pub enum ShadowGift {
 	_Custom(String),
 }
 
-impl ShadowGift {
-	pub fn all() -> [ShadowGift; 20] {
-		[
-			Self::Death,
-			Self::Dominance,
-			Self::Elemental,
-			Self::Evasion,
-			Self::Insight,
-			Self::Inspiration,
-			Self::Knowledge,
-			Self::Nature,
-			Self::Rage,
-			Self::Shaping,
-			Self::Stealth,
-			Self::Strength,
-			Self::Technology,
-			Self::Warding,
-			Self::Weather,
-			Self::Agony,
-			Self::Blood,
-			Self::Disease,
-			Self::Fervor,
-			Self::Hunger,
-		]
-	}
-
-	pub fn name(&self) -> String {
-		to_variant_name(self).unwrap().to_lowercase()
-	}
-}
-
 impl NameKey for ShadowGift {
 	fn name_key(&self) -> String {
 		format!("shadow-gifts.{}", self.name())
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(
+	Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, VariantName, AllVariants,
+)]
 pub enum WolfGift {
 	Change,
 	Hunting,
 	Pack,
 	_Custom(String),
-}
-
-impl WolfGift {
-	pub fn all() -> [WolfGift; 3] {
-		[Self::Change, Self::Hunting, Self::Pack]
-	}
-
-	pub fn name(&self) -> String {
-		if let Self::_Custom(name) = self {
-			name.clone()
-		} else {
-			to_variant_name(self).unwrap().to_lowercase()
-		}
-	}
 }
 
 impl NameKey for WolfGift {
@@ -659,7 +523,20 @@ impl NameKey for WolfGift {
 	}
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+	Clone,
+	Debug,
+	Serialize,
+	Deserialize,
+	Default,
+	PartialEq,
+	Eq,
+	PartialOrd,
+	Ord,
+	Hash,
+	VariantName,
+	AllVariants,
+)]
 pub enum Form {
 	#[default]
 	Hishu,
@@ -670,26 +547,6 @@ pub enum Form {
 }
 
 impl Form {
-	pub fn all() -> [Form; 5] {
-		[
-			Self::Hishu,
-			Self::Dalu,
-			Self::Gauru,
-			Self::Urshul,
-			Self::Urhan,
-		]
-	}
-
-	pub fn name(&self) -> &str {
-		match self {
-			Form::Hishu => "hishu",
-			Form::Dalu => "dalu",
-			Form::Gauru => "gauru",
-			Form::Urshul => "urshul",
-			Form::Urhan => "urhan",
-		}
-	}
-
 	#[allow(clippy::too_many_lines)]
 	pub fn get_modifiers(&self) -> Vec<Modifier> {
 		match self {
@@ -825,21 +682,13 @@ impl Form {
 	}
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, VariantName)]
 pub enum Rite {
 	SacredHunt,
 	_Custom(String),
 }
 
-impl Rite {
-	pub fn name(&self) -> String {
-		if let Rite::_Custom(name) = self {
-			name.clone()
-		} else {
-			to_variant_name(&self).unwrap().to_case(Case::Snake)
-		}
-	}
-}
+impl Rite {}
 
 impl NameKey for Rite {
 	fn name_key(&self) -> String {
@@ -860,11 +709,7 @@ impl WerewolfMerit {
 	}
 
 	pub fn is_available(&self, character: &crate::prelude::Character) -> bool {
-		if let Splat::Werewolf(_, _, _, _) = character.splat {
-			true
-		} else {
-			false
-		}
+		matches!(character.splat, Splat::Werewolf(..))
 	}
 }
 

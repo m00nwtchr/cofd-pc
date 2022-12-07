@@ -5,9 +5,8 @@ use std::{
 	ops::{Add, Sub},
 };
 
+use crate::prelude::VariantName;
 use crate::splat::{ability::Ability, Merit, NameKey, Splat};
-
-mod dice_pool;
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn add(a: u16, b: i16) -> u16 {
@@ -1216,7 +1215,7 @@ pub enum AttributeCategory {
 	Trait(TraitCategory),
 }
 
-#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize, AllVariants)]
 pub enum Attribute {
 	Intelligence,
 	Wits,
@@ -1232,22 +1231,6 @@ pub enum Attribute {
 }
 
 impl Attribute {
-	pub fn all() -> [Attribute; 9] {
-		[
-			Self::Intelligence,
-			Self::Wits,
-			Self::Resolve,
-			//
-			Self::Strength,
-			Self::Dexterity,
-			Self::Stamina,
-			//
-			Self::Presence,
-			Self::Manipulation,
-			Self::Composure,
-		]
-	}
-
 	pub fn mental() -> [Attribute; 3] {
 		[Self::Intelligence, Self::Wits, Self::Resolve]
 	}
@@ -1339,7 +1322,9 @@ impl Attribute {
 	}
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+#[derive(
+	Clone, Copy, Debug, Hash, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, AllVariants,
+)]
 pub enum Skill {
 	Academics,
 	Computer,
@@ -1370,37 +1355,6 @@ pub enum Skill {
 }
 
 impl Skill {
-	pub fn all() -> [Skill; 24] {
-		[
-			Self::Academics,
-			Self::Computer,
-			Self::Crafts,
-			Self::Investigation,
-			Self::Medicine,
-			Self::Occult,
-			Self::Politics,
-			Self::Science,
-			//
-			Self::Athletics,
-			Self::Brawl,
-			Self::Drive,
-			Self::Firearms,
-			Self::Larceny,
-			Self::Stealth,
-			Self::Survival,
-			Self::Weaponry,
-			//
-			Self::AnimalKen,
-			Self::Empathy,
-			Self::Expression,
-			Self::Intimidation,
-			Self::Persuasion,
-			Self::Socialize,
-			Self::Streetwise,
-			Self::Subterfuge,
-		]
-	}
-
 	fn mental() -> [Skill; 8] {
 		[
 			Self::Academics,

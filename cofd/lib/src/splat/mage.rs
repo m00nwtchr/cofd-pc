@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use cofd_traits::VariantName;
+
 use crate::{
 	character::Skill,
 	prelude::{Attribute, Character},
@@ -15,7 +17,7 @@ pub struct MageData {
 	pub rotes: Vec<Rote>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]
 pub enum Path {
 	Acanthus,
 	Mastigos,
@@ -26,27 +28,6 @@ pub enum Path {
 }
 
 impl Path {
-	pub fn all() -> [Path; 5] {
-		[
-			Path::Acanthus,
-			Path::Mastigos,
-			Path::Moros,
-			Path::Obrimos,
-			Path::Thyrsus,
-		]
-	}
-
-	pub fn name(&self) -> &str {
-		match self {
-			Path::Acanthus => "acanthus",
-			Path::Mastigos => "mastigos",
-			Path::Moros => "moros",
-			Path::Obrimos => "obrimos",
-			Path::Thyrsus => "thyrsus",
-			Path::_Custom(name, _, _) => name,
-		}
-	}
-
 	fn get_ruling_arcana(&self) -> &[Arcanum; 2] {
 		match self {
 			Path::Acanthus => &[Arcanum::Time, Arcanum::Fate],
@@ -164,25 +145,19 @@ impl From<Order> for YSplat {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName)]
 pub enum Legacy {
 	_Custom(String, Option<Arcanum>),
 }
 
-impl Legacy {
-	pub fn name(&self) -> &str {
-		match self {
-			Self::_Custom(name, _) => name,
-		}
-	}
-}
+impl Legacy {}
 impl From<Legacy> for ZSplat {
 	fn from(legacy: Legacy) -> Self {
 		ZSplat::Mage(legacy)
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, VariantName, AllVariants)]
 pub enum Arcanum {
 	Death,
 	Fate,
@@ -194,37 +169,6 @@ pub enum Arcanum {
 	Space,
 	Spirit,
 	Time,
-}
-impl Arcanum {
-	pub fn all() -> [Arcanum; 10] {
-		[
-			Arcanum::Death,
-			Arcanum::Fate,
-			Arcanum::Forces,
-			Arcanum::Life,
-			Arcanum::Matter,
-			Arcanum::Mind,
-			Arcanum::Prime,
-			Arcanum::Space,
-			Arcanum::Spirit,
-			Arcanum::Time,
-		]
-	}
-
-	pub fn name(&self) -> &str {
-		match self {
-			Arcanum::Death => "death",
-			Arcanum::Fate => "fate",
-			Arcanum::Forces => "forces",
-			Arcanum::Life => "life",
-			Arcanum::Matter => "matter",
-			Arcanum::Mind => "mind",
-			Arcanum::Prime => "prime",
-			Arcanum::Space => "space",
-			Arcanum::Spirit => "spirit",
-			Arcanum::Time => "time",
-		}
-	}
 }
 
 impl NameKey for Arcanum {
@@ -251,11 +195,7 @@ impl MageMerit {
 	}
 
 	pub fn is_available(&self, character: &Character) -> bool {
-		if let Splat::Mage(_, _, _, _) = character.splat {
-			true
-		} else {
-			false
-		}
+		matches!(character.splat, Splat::Mage(..))
 	}
 }
 

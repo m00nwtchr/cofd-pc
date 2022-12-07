@@ -6,7 +6,7 @@ use iced::{
 };
 use iced_lazy::Component;
 
-use cofd::{character::Wound, prelude::Character, splat::Splat};
+use cofd::{character::Wound, prelude::*, splat::Splat};
 
 use crate::{
 	fl,
@@ -82,7 +82,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 			HealthTrack::new(
 				data.clarity.clone(),
 				data.max_clarity(&character) as usize,
-				|wound| Event::IntegrityDamage(wound),
+				Event::IntegrityDamage,
 			)
 			.into()
 		} else {
@@ -105,7 +105,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 						.padding(INPUT_PADDING)]
 						.max_width(
 							MAX_INPUT_WIDTH
-								- SheetDots::<Event, iced::Renderer>::DEFAULT_SIZE as u32, // - SheetDots::<Event, Renderer>::DEFAULT_SPACING as u32,
+								- u32::from(SheetDots::<Event, iced::Renderer>::DEFAULT_SIZE), // - SheetDots::<Event, Renderer>::DEFAULT_SPACING as u32,
 						),
 					);
 				}

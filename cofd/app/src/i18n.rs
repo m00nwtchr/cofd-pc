@@ -1,11 +1,9 @@
 use std::{
-	collections::HashMap,
-	fmt::{self, Display},
-	rc::Rc,
+	fmt::{self},
 	sync::Arc,
 };
 
-use cofd::splat::{ability::Ability, changeling::Regalia, Merit, NameKey, XSplat, YSplat, ZSplat};
+use cofd::splat::NameKey;
 use i18n_embed::{
 	fluent::{fluent_language_loader, FluentLanguageLoader},
 	DefaultLocalizer, LanguageRequester, Localizer,
@@ -20,7 +18,6 @@ cfg_if! {
 use cfg_if::cfg_if;
 use once_cell::sync::{Lazy, OnceCell};
 use rust_embed::RustEmbed;
-use unic_langid::langid;
 
 #[derive(RustEmbed)]
 #[folder = "i18n"] // path to the compiled localization resources
@@ -65,7 +62,7 @@ pub fn fl(message_id: &str, attribute: Option<&str>) -> Option<String> {
 }
 
 pub fn fll(key: &str) -> Option<String> {
-	let mut iter = key.split(".");
+	let mut iter = key.split('.');
 
 	let message_id = iter.next().unwrap();
 	let attribute = iter.next();
@@ -128,7 +125,7 @@ impl<T: NameKey> Translated<T> {
 impl<T: NameKey> fmt::Display for Translated<T> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		let name_key = self.0.name_key();
-		let mut iter = name_key.split(".");
+		let mut iter = name_key.split('.');
 
 		let msg_id = iter.next().unwrap();
 		let attr = iter.next();

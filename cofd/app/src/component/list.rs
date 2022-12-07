@@ -1,5 +1,5 @@
 use iced::{
-	widget::{column, text, Column},
+	widget::{text, Column},
 	Alignment,
 };
 use iced_lazy::Component;

@@ -9,6 +9,8 @@ use crate::{
 	prelude::{Attribute, Character},
 };
 
+use cofd_traits::{AllVariants, SplatEnum, VariantName};
+
 pub mod ability;
 
 pub mod mage;
@@ -35,7 +37,7 @@ use changeling::*;
 // use beast::*;
 // use deviant:*;
 
-#[derive(Debug, Clone, Copy, Serialize)]
+#[derive(Debug, Clone, Copy, Serialize, VariantName)]
 pub enum SplatType {
 	Mortal,
 	Vampire,
@@ -51,30 +53,60 @@ pub enum SplatType {
 	// Deviant,
 }
 
-impl SplatType {
-	pub fn name(&self) -> &str {
-		to_variant_name(self).unwrap()
-	}
-}
+impl SplatType {}
 
-#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Default, Serialize, Deserialize, Debug, VariantName, SplatEnum)]
 pub enum Splat {
 	#[default]
 	Mortal,
-	// #[splat(
-	// 	name = "vampire",
-	// 	xsplat = "clan",
-	// 	ysplat = "covenant",
-	// 	zsplat = "bloodline",
-	// 	virtue_anchor = "mask",
-	// 	vice_anchor = "dirge",
-	// 	ability = "disciplines",
-	// 	st = "blood_potency"
-	// )]
+	#[splat(
+		xsplat = "clan",
+		ysplat = "covenant",
+		zsplat = "bloodline",
+		virtue_anchor = "mask",
+		vice_anchor = "dirge",
+		ability = "disciplines",
+		st = "blood_potency",
+		alt_beats = "blood",
+		fuel = "vitae",
+		integrity = "humanity"
+	)]
 	Vampire(Clan, Option<Covenant>, Option<Bloodline>, VampireData),
+	#[splat(
+		xsplat = "auspice",
+		ysplat = "tribe",
+		zsplat = "lodge",
+		virtue_anchor = "blood",
+		vice_anchor = "bone",
+		ability = "renown",
+		st = "primal_urge",
+		fuel = "essence",
+		integrity = "harmony"
+	)]
 	Werewolf(Option<Auspice>, Option<Tribe>, Option<Lodge>, WerewolfData),
+	#[splat(
+		xsplat = "path",
+		ysplat = "order",
+		zsplat = "legacy",
+		ability = "arcana",
+		st = "gnosis",
+		alt_beats = "arcane",
+		fuel = "mana",
+		integrity = "wisdom"
+	)]
 	Mage(Path, Option<Order>, Option<Legacy>, MageData), // TODO: Order = free order status, high speech merit
 	// Promethean,
+	#[splat(
+		xsplat = "seeming",
+		ysplat = "court",
+		zsplat = "kith",
+		virtue_anchor = "thread",
+		vice_anchor = "needle",
+		ability = "disciplines",
+		st = "wyrd",
+		fuel = "glamour",
+		integrity = "clarity"
+	)]
 	Changeling(Seeming, Option<Court>, Option<Kith>, ChangelingData),
 	// Hunter,
 	// Geist,
@@ -85,16 +117,6 @@ pub enum Splat {
 }
 
 impl Splat {
-	pub fn name(&self) -> &str {
-		match self {
-			Splat::Mortal => "mortal",
-			Splat::Vampire(_, _, _, _) => "vampire",
-			Splat::Werewolf(_, _, _, _) => "werewolf",
-			Splat::Mage(_, _, _, _) => "mage",
-			Splat::Changeling(_, _, _, _) => "changeling",
-		}
-	}
-
 	pub fn _type(&self) -> SplatType {
 		match self {
 			Splat::Mortal => SplatType::Mortal,
@@ -102,34 +124,6 @@ impl Splat {
 			Splat::Werewolf(_, _, _, _) => SplatType::Werewolf,
 			Splat::Mage(_, _, _, _) => SplatType::Mage,
 			Splat::Changeling(_, _, _, _) => SplatType::Changeling,
-		}
-	}
-
-	pub fn virtue_anchor(&self) -> &str {
-		match self {
-			Splat::Vampire(_, _, _, _) => "mask",
-			Splat::Werewolf(_, _, _, _) => "blood",
-			Splat::Changeling(_, _, _, _) => "thread",
-			_ => "virtue",
-		}
-	}
-
-	pub fn vice_anchor(&self) -> &str {
-		match self {
-			Splat::Vampire(_, _, _, _) => "dirge",
-			Splat::Werewolf(_, _, _, _) => "bone",
-			Splat::Changeling(_, _, _, _) => "needle",
-			_ => "vice",
-		}
-	}
-
-	pub fn xsplat_name(&self) -> &str {
-		match self {
-			Splat::Mortal => "",
-			Splat::Vampire(_, _, _, _) => "clan",
-			Splat::Werewolf(_, _, _, _) => "auspice",
-			Splat::Mage(_, _, _, _) => "path",
-			Splat::Changeling(_, _, _, _) => "seeming",
 		}
 	}
 
@@ -210,16 +204,6 @@ impl Splat {
 		}
 	}
 
-	pub fn ysplat_name(&self) -> &str {
-		match self {
-			Splat::Mortal => "faction",
-			Splat::Vampire(_, _, _, _) => "covenant",
-			Splat::Werewolf(_, _, _, _) => "tribe",
-			Splat::Mage(_, _, _, _) => "order",
-			Splat::Changeling(_, _, _, _) => "court",
-		}
-	}
-
 	pub fn ysplat(&self) -> Option<YSplat> {
 		match self {
 			Splat::Mortal => None,
@@ -287,16 +271,6 @@ impl Splat {
 		}
 	}
 
-	pub fn zsplat_name(&self) -> &str {
-		match self {
-			Splat::Mortal => "",
-			Splat::Vampire(_, _, _, _) => "bloodline",
-			Splat::Werewolf(_, _, _, _) => "lodge",
-			Splat::Mage(_, _, _, _) => "legacy",
-			Splat::Changeling(_, _, _, _) => "kith",
-		}
-	}
-
 	pub fn zsplat(&self) -> Option<ZSplat> {
 		match self {
 			Splat::Mortal => None,
@@ -351,16 +325,6 @@ impl Splat {
 		}
 	}
 
-	pub fn ability_name(&self) -> Option<&str> {
-		match self {
-			Splat::Mortal => None,
-			Splat::Vampire(_, _, _, _) => Some("disciplines"),
-			Splat::Werewolf(_, _, _, _) => Some("renown"),
-			Splat::Mage(_, _, _, _) => Some("arcana"),
-			Splat::Changeling(_, _, _, _) => None,
-		}
-	}
-
 	pub fn are_abilities_finite(&self) -> bool {
 		match self {
 			Splat::Mortal => true,
@@ -391,52 +355,12 @@ impl Splat {
 		}
 	}
 
-	pub fn alternate_beats(&self) -> Option<&str> {
-		match self {
-			Splat::Mortal => None,
-			Splat::Vampire(_, _, _, _) => Some("blood"),
-			Splat::Werewolf(_, _, _, _) => None,
-			Splat::Mage(_, _, _, _) => Some("arcane"),
-			Splat::Changeling(_, _, _, _) => None,
-		}
-	}
-
 	pub fn alternate_beats_optional(&self) -> bool {
 		match self {
 			Self::Mage(..) => false,
 			// Promethean
 			// Demon
 			_ => true,
-		}
-	}
-
-	pub fn supernatural_tolerance(&self) -> Option<&str> {
-		match self {
-			Splat::Mortal => None,
-			Splat::Vampire(_, _, _, _) => Some("blood_potency"),
-			Splat::Werewolf(_, _, _, _) => Some("primal_urge"),
-			Splat::Mage(_, _, _, _) => Some("gnosis"),
-			Splat::Changeling(_, _, _, _) => Some("wyrd"),
-		}
-	}
-
-	pub fn fuel(&self) -> Option<&str> {
-		match self {
-			Splat::Mortal => None,
-			Splat::Vampire(_, _, _, _) => Some("vitae"),
-			Splat::Werewolf(_, _, _, _) => Some("essence"),
-			Splat::Mage(_, _, _, _) => Some("mana"),
-			Splat::Changeling(_, _, _, _) => Some("glamour"),
-		}
-	}
-
-	pub fn integrity(&self) -> &str {
-		match self {
-			Splat::Mortal => "integrity",
-			Splat::Vampire(_, _, _, _) => "humanity",
-			Splat::Werewolf(_, _, _, _) => "harmony",
-			Splat::Mage(_, _, _, _) => "wisdom",
-			Splat::Changeling(_, _, _, _) => "clarity",
 		}
 	}
 

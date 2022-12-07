@@ -42,6 +42,7 @@ impl<Message> CharacterList<Message> {
 	}
 
 	fn mk_char(&self, i: usize, character: &Character) -> Element<Event> {
+		println!("{}", character.splat.name());
 		let mut subtitle = fl(character.splat.name(), None).unwrap();
 
 		if let Some(ysplat) = character.splat.ysplat() {

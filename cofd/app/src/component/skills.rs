@@ -10,7 +10,7 @@ use iced_lazy::Component;
 
 use cofd::{
 	character::{ModifierTarget, TraitCategory},
-	prelude::{Character, Skill},
+	prelude::*,
 	splat::Splat,
 };
 
@@ -92,8 +92,8 @@ impl<Message> SkillsComponent<Message> {
 
 				col0 = col0.push(
 					checkbox("", flag, {
-						let skill = skill.clone();
-						move |_| Event::RoteSkillChanged(skill.clone())
+						let skill = skill;
+						move |_| Event::RoteSkillChanged(skill)
 					})
 					.spacing(0),
 				);
@@ -116,14 +116,14 @@ impl<Message> SkillsComponent<Message> {
 				5,
 				Shape::Dots,
 				None,
-				move |val| Event::SkillChanged(val - mod_, skill.clone()),
+				move |val| Event::SkillChanged(val - mod_, skill),
 			));
 
 			if let Some(specialty_skill) = state.specialty_skill && skill.eq(&specialty_skill) {
-				let specialties = character.specialties.get(&skill).cloned().unwrap_or(vec![]);
+				let specialties = character.specialties.get(&skill).cloned().unwrap_or_default();
 
 				col = col.push(row![col0, col1, col2].spacing(5))
-				.push(list("".to_string(), specialties.len()+1, specialties,
+				.push(list(String::new(), specialties.len()+1, specialties,
 					closure!(clone skill,
 					 	|i, val| text_input("", &val.unwrap_or_default(),
 					 		move |val| Event::SpecialtyChanged(skill, i, val)).padding(0).into()

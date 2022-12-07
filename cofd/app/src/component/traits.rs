@@ -6,7 +6,7 @@ use iced_lazy::Component;
 
 use cofd::{
 	character::{ArmorStruct, Trait},
-	prelude::Character,
+	prelude::*,
 };
 
 use crate::{fl, Element, INPUT_PADDING};

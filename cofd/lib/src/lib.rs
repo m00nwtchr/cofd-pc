@@ -11,10 +11,15 @@
 )]
 
 pub mod character;
+pub mod dice_pool;
 pub mod splat;
+
+#[macro_use]
+extern crate cofd_traits;
 
 pub mod prelude {
 	pub use crate::character::{Attribute, Attributes, Character, Skill, Skills};
+	pub use cofd_traits::{AllVariants, VariantName};
 }
 
 #[cfg(test)]
@@ -205,8 +210,9 @@ mod tests {
 				Some(Order::Mysterium),
 				None,
 				MageData {
-					attr_bonus: Attribute::Intelligence,
+					attr_bonus: Some(Attribute::Intelligence),
 					obsessions: vec![],
+					rotes: vec![],
 				},
 			))
 			.with_info(CharacterInfo {
@@ -276,7 +282,7 @@ mod tests {
 		mage_character.calc_mod_map();
 
 		if let Splat::Mage(_, _, _, data) = &mut mage_character.splat {
-			data.attr_bonus = Attribute::Resolve;
+			data.attr_bonus = Some(Attribute::Resolve);
 		}
 
 		mage_character.calc_mod_map();

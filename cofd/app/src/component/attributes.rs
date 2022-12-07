@@ -8,7 +8,7 @@ use iced_lazy::Component;
 
 use cofd::{
 	character::{AttributeCategory, ModifierTarget, TraitCategory},
-	prelude::{Attribute, Character},
+	prelude::*,
 };
 
 use crate::{

@@ -17,13 +17,13 @@ use std::{cell::RefCell, mem, rc::Rc};
 use iced::{
 	executor,
 	widget::{button, row, Column},
-	Application, Color, Command, Settings, Theme,
+	Application, Command, Settings, Theme,
 };
 
 #[cfg(target_arch = "wasm32")]
 use log::Level;
 
-use cofd::{prelude::*, splat::Splat};
+use cofd::prelude::*;
 
 mod component;
 mod i18n;
@@ -214,7 +214,7 @@ impl Application for PlayerCompanionApp {
 				active_tab,
 				character,
 			} => {
-				let brw = character.borrow();
+				let _brw = character.borrow();
 
 				let tab: Element<Self::Message> = match active_tab {
 					Tab::Overview => view::overview_tab(character.clone()).into(),
@@ -271,15 +271,12 @@ fn main() -> iced::Result {
 
 // TODO: Add demo mortal.
 mod demo {
-	use std::{fs::File, io::Write};
 
 	use cofd::{
 		character::CharacterInfo,
 		prelude::*,
 		splat::{changeling::*, mage::*, vampire::*, werewolf::*, Merit, Splat},
 	};
-	use directories::ProjectDirs;
-	use ron::ser::PrettyConfig;
 
 	#[test]
 	pub fn save() -> anyhow::Result<()> {
@@ -461,21 +458,21 @@ mod demo {
 							arcanum: Arcanum::Space,
 							level: 3,
 							spell: "Co-Location".to_string(),
-							creator: "".to_string(),
+							creator: String::new(),
 							skill: Skill::Occult,
 						},
 						Rote {
 							arcanum: Arcanum::Prime,
 							level: 2,
 							spell: "Supernal Veil".to_string(),
-							creator: "".to_string(),
+							creator: String::new(),
 							skill: Skill::Occult,
 						},
 						Rote {
 							arcanum: Arcanum::Space,
 							level: 3,
 							spell: "Perfect Sympathy".to_string(),
-							creator: "".to_string(),
+							creator: String::new(),
 							skill: Skill::Occult,
 						},
 					],

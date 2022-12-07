@@ -1,13 +1,13 @@
 use std::{cell::RefCell, rc::Rc};
 
 use iced::{
-	widget::{checkbox, column, pick_list, row, text, text_input, Column, Row},
+	widget::{checkbox, column, pick_list, row, text, text_input, Column},
 	Alignment, Length,
 };
 use iced_lazy::Component;
 
 use cofd::{
-	prelude::{Character, Skill},
+	prelude::*,
 	splat::{
 		changeling::Contract,
 		mage::{Arcanum, Rote},
@@ -24,11 +24,9 @@ use crate::{
 	Element, H2_SIZE, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
 };
 
-use super::overview::vec_changed;
-
 fn func<C: Clone, T, Message>(
 	c: C,
-	f: impl Fn(&mut C, T) -> (),
+	f: impl Fn(&mut C, T),
 	msg: impl Fn(C) -> Message,
 ) -> impl Fn(T) -> Message {
 	move |val: T| {
@@ -113,13 +111,11 @@ where
 				if let Splat::Werewolf(_, _, _, data) = &mut character.splat {
 					if let Rite::_Custom(name) = &val && name.eq("") {
 						data.rites.remove(i);
-					} else {
-						if let Some(m) = data.rites.get_mut(i) {
-								*m = val;
-						} else {
-							data.rites.push(val);
-						}
-					}
+					} else if let Some(m) = data.rites.get_mut(i) {
+     								*m = val;
+     						} else {
+     							data.rites.push(val);
+     						}
 				}
 			}
 			Event::ContractChanged(i, rote) => {
@@ -238,7 +234,7 @@ where
 				data.shadow_gifts.len() + 1,
 				data.shadow_gifts.clone(),
 				{
-					let shadow_gifts = shadow_gifts.clone();
+					let shadow_gifts = shadow_gifts;
 					move |i, val| {
 						pick_list(shadow_gifts.clone(), val.map(Into::into), move |val| {
 							Event::ShadowGiftChanged(i, val.unwrap())
@@ -254,7 +250,7 @@ where
 				data.wolf_gifts.len() + 1,
 				data.wolf_gifts.clone(),
 				{
-					let wolf_gifts = wolf_gifts.clone();
+					let wolf_gifts = wolf_gifts;
 					move |i, val| {
 						pick_list(wolf_gifts.clone(), val.map(Into::into), move |val| {
 							Event::WolfGiftChanged(i, val.unwrap())
@@ -290,9 +286,7 @@ where
 				column![]
 			};
 
-			column![m, row![shadow_gifts, wolf_gifts]]
-				.align_items(Alignment::Center)
-				.into()
+			column![m, row![shadow_gifts, wolf_gifts]].align_items(Alignment::Center)
 		} else {
 			column![]
 		};

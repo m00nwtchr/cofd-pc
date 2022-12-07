@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-use crate::character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Trait};
+use crate::{
+	character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Trait},
+	dice_pool::DicePool,
+};
+use cofd_traits::VariantName;
 
 use super::{ability::Ability, Merit, Splat, XSplat, YSplat, ZSplat};
 
@@ -11,7 +15,7 @@ pub struct VampireData {
 	pub banes: Vec<String>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]
 pub enum Clan {
 	Daeva,
 	Gangrel,
@@ -22,27 +26,6 @@ pub enum Clan {
 }
 
 impl Clan {
-	pub fn name(&self) -> &str {
-		match self {
-			Clan::Daeva => "daeva",
-			Clan::Gangrel => "gangrel",
-			Clan::Mekhet => "mekhet",
-			Clan::Nosferatu => "nosferatu",
-			Clan::Ventrue => "ventrue",
-			Clan::_Custom(name, _, _) => name,
-		}
-	}
-
-	pub fn all() -> [Clan; 5] {
-		[
-			Clan::Daeva,
-			Clan::Gangrel,
-			Clan::Mekhet,
-			Clan::Nosferatu,
-			Clan::Ventrue,
-		]
-	}
-
 	pub fn get_disciplines(&self) -> &[Discipline; 3] {
 		match self {
 			Clan::Daeva => &[Discipline::Celerity, Discipline::Majesty, Discipline::Vigor],
@@ -87,7 +70,7 @@ impl From<Clan> for XSplat {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]
 pub enum Covenant {
 	CarthianMovement,
 	CircleOfTheCrone,
@@ -97,54 +80,37 @@ pub enum Covenant {
 	_Custom(String),
 }
 
-impl Covenant {
-	pub fn name(&self) -> &str {
-		match self {
-			Covenant::CarthianMovement => "carthian_movement",
-			Covenant::CircleOfTheCrone => "circle_of_the_crone",
-			Covenant::Invictus => "invictus",
-			Covenant::LanceaEtSanctum => "lancea_et_sanctum",
-			Covenant::OrdoDracul => "ordo_dracul",
-			Covenant::_Custom(name) => name,
-		}
-	}
-
-	pub fn all() -> [Covenant; 5] {
-		[
-			Covenant::CarthianMovement,
-			Covenant::CircleOfTheCrone,
-			Covenant::Invictus,
-			Covenant::LanceaEtSanctum,
-			Covenant::OrdoDracul,
-		]
-	}
-}
-
 impl From<Covenant> for YSplat {
 	fn from(covenant: Covenant) -> Self {
 		YSplat::Vampire(covenant)
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName)]
 pub enum Bloodline {
 	_Custom(String, Option<[Discipline; 4]>),
 }
 
-impl Bloodline {
-	pub fn name(&self) -> &str {
-		match self {
-			Bloodline::_Custom(name, _) => name,
-		}
-	}
-}
+impl Bloodline {}
 impl From<Bloodline> for ZSplat {
 	fn from(bloodline: Bloodline) -> Self {
 		ZSplat::Vampire(bloodline)
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash)]
+#[derive(
+	Clone,
+	Debug,
+	PartialEq,
+	PartialOrd,
+	Eq,
+	Ord,
+	Serialize,
+	Deserialize,
+	Hash,
+	VariantName,
+	AllVariants,
+)]
 pub enum Discipline {
 	Animalism,
 	Auspex,
@@ -160,37 +126,6 @@ pub enum Discipline {
 }
 
 impl Discipline {
-	pub fn all() -> [Discipline; 10] {
-		[
-			Discipline::Animalism,
-			Discipline::Auspex,
-			Discipline::Celerity,
-			Discipline::Dominate,
-			Discipline::Majesty,
-			Discipline::Nightmare,
-			Discipline::Obfuscate,
-			Discipline::Protean,
-			Discipline::Resilience,
-			Discipline::Vigor,
-		]
-	}
-
-	pub fn name(&self) -> &str {
-		match self {
-			Discipline::Animalism => "animalism",
-			Discipline::Auspex => "auspex",
-			Discipline::Celerity => "celerity",
-			Discipline::Dominate => "dominate",
-			Discipline::Majesty => "majesty",
-			Discipline::Nightmare => "nightmare",
-			Discipline::Obfuscate => "obfuscate",
-			Discipline::Protean => "protean",
-			Discipline::Resilience => "resilience",
-			Discipline::Vigor => "vigor",
-			Discipline::_Custom(name) => name,
-		}
-	}
-
 	#[warn(clippy::cast_possible_wrap)]
 	pub fn get_modifiers(&self, value: u16) -> Vec<crate::character::Modifier> {
 		match self {
@@ -373,11 +308,7 @@ impl VampireMerit {
 	}
 
 	pub fn is_available(&self, character: &crate::prelude::Character) -> bool {
-		if let Splat::Vampire(_, _, _, _) = character.splat {
-			true
-		} else {
-			false
-		}
+		matches!(character.splat, Splat::Vampire(..))
 	}
 }
 
@@ -387,12 +318,12 @@ impl From<VampireMerit> for Merit {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Devotion {
 	name: String,
 	cost: String,
 	disciplines: Vec<(Discipline, u16)>,
-	dice_pool: String,
+	dice_pool: DicePool,
 	book: String,
 	page: u16,
 }

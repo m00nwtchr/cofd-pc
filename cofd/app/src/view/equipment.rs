@@ -35,7 +35,7 @@ impl<Message> EquipmentTab<Message> {
 		}
 	}
 
-	fn abilities(&self, character: &Character) -> Element<Event> {
+	fn abilities(&self, _character: &Character) -> Element<Event> {
 		todo!()
 	}
 }

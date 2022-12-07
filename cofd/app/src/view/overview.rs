@@ -29,7 +29,7 @@ use crate::{
 	fl,
 	i18n::Translated,
 	// i18n::fl,
-	widget::{self, dots::Shape, dots::SheetDots, track::HealthTrack},
+	widget::{dots::Shape, dots::SheetDots, track::HealthTrack},
 	Element,
 	COMPONENT_SPACING,
 	H2_SIZE,
@@ -117,14 +117,9 @@ impl<Message> OverviewTab<Message> {
 					let val = character.get_ability_value(&ability).unwrap_or(&0);
 
 					col1 = col1.push(text(fl(splat_name, Some(&ability.name())).unwrap()));
-					col2 = col2.push(SheetDots::new(
-						val.clone(),
-						0,
-						5,
-						Shape::Dots,
-						None,
-						move |val| Event::AbilityValChanged(ability.clone(), val),
-					));
+					col2 = col2.push(SheetDots::new(*val, 0, 5, Shape::Dots, None, move |val| {
+						Event::AbilityValChanged(ability.clone(), val)
+					}));
 				}
 			} else {
 				let mut vec = character.splat.all_abilities().unwrap();
@@ -170,7 +165,7 @@ impl<Message> OverviewTab<Message> {
 					}
 
 					col2 = col2.push(SheetDots::new(
-						val.clone(),
+						*val,
 						0,
 						5,
 						Shape::Dots,
@@ -210,7 +205,7 @@ where
 	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
 		let mut character = self.character.borrow_mut();
 
-		let mut res = None;
+		let res = None;
 
 		match event {
 			Event::AttrChanged(val, attr) => *character.base_attributes_mut().get_mut(attr) = val,
@@ -548,7 +543,7 @@ where
 			let sg = seeming.get_favored_regalia();
 			let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
 
-			let seeming_regalia = text(fl(character.splat.name(), Some(&sg.name())).unwrap());
+			let seeming_regalia = text(fl(character.splat.name(), Some(sg.name())).unwrap());
 
 			let regalia: Element<Event> = if let Some(Regalia::_Custom(name)) = &data.regalia {
 				text_input("", name, |val| Event::RegaliaChanged(Regalia::_Custom(val)))
@@ -624,7 +619,7 @@ where
 				} else if let Some(Tribe::Pure(tribe)) = tribe {
 					tribe
 						.get_hunters_aspects()
-						.into_iter()
+						.iter()
 						.cloned()
 						.map(Into::into)
 						.collect()

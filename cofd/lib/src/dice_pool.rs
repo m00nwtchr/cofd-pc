@@ -1,8 +1,15 @@
 use std::ops::{Add, Sub};
 
-use super::{Attribute, Character, Skill, Trait};
+use serde::{Deserialize, Serialize};
 
+use crate::{
+	character::Trait,
+	prelude::{Attribute, Character, Skill},
+};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum PoolComponent {
+	Mod(u16),
 	Attribute(Attribute),
 	Skill(Skill),
 	Trait(Trait),
@@ -14,12 +21,19 @@ pub enum PoolComponent {
 impl PoolComponent {
 	pub fn value(&self, character: &Character) -> i16 {
 		match self {
+			Self::Mod(val) => *val as i16,
 			Self::Attribute(attr) => *character.attributes().get(*attr) as i16,
 			Self::Skill(skill) => *character.skills().get(*skill) as i16,
 			Self::Trait(trait_) => character.get_trait(*trait_) as i16,
 			Self::Neg(n) => -n.value(character),
 			Self::Pool(pool) => pool.total(character),
 		}
+	}
+}
+
+impl Default for PoolComponent {
+	fn default() -> Self {
+		Self::Mod(0)
 	}
 }
 
@@ -39,7 +53,14 @@ impl Sub for PoolComponent {
 	}
 }
 
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct DicePool(PoolComponent, PoolComponent);
+
+impl DicePool {
+	pub fn total(&self, character: &Character) -> i16 {
+		self.0.value(character) + self.1.value(character)
+	}
+}
 
 impl Add for DicePool {
 	type Output = Self;
@@ -63,12 +84,6 @@ impl Sub for DicePool {
 	}
 }
 
-impl DicePool {
-	pub fn total(&self, character: &Character) -> i16 {
-		self.0.value(character) + self.1.value(character)
-	}
-}
-
 impl From<Attribute> for PoolComponent {
 	fn from(attr: Attribute) -> Self {
 		PoolComponent::Attribute(attr)
@@ -87,17 +102,30 @@ impl From<Trait> for PoolComponent {
 	}
 }
 
+impl From<DicePool> for PoolComponent {
+	fn from(pool: DicePool) -> Self {
+		PoolComponent::Pool(Box::new(pool))
+	}
+}
+
+impl From<u16> for PoolComponent {
+	fn from(val: u16) -> Self {
+		PoolComponent::Mod(val)
+	}
+}
+
 impl Add for Attribute {
 	type Output = DicePool;
 
 	fn add(self, rhs: Self) -> Self::Output {
-		DicePool(
-			PoolComponent::Attribute(self),
-			PoolComponent::Attribute(rhs),
-		)
+		PoolComponent::Attribute(self) + PoolComponent::Attribute(rhs)
 	}
 }
 
-pub fn uwu() {
-	let dice_pool: DicePool = Attribute::Resolve + Attribute::Composure;
+impl Add<Skill> for Attribute {
+	type Output = DicePool;
+
+	fn add(self, rhs: Skill) -> Self::Output {
+		PoolComponent::Attribute(self) + PoolComponent::Skill(rhs)
+	}
 }

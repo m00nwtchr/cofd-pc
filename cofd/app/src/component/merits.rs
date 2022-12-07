@@ -6,15 +6,12 @@ use iced::{
 };
 use iced_lazy::Component;
 
-use cofd::{prelude::Character, splat::Merit};
+use cofd::{prelude::*, splat::Merit};
 
 use crate::{
 	fl,
 	i18n::Translated,
-	widget::{
-		self,
-		dots::{Shape, SheetDots},
-	},
+	widget::dots::{Shape, SheetDots},
 	Element, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
 };
 
@@ -103,16 +100,14 @@ impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
 		for (i, (merit, val)) in character.merits.iter().cloned().enumerate() {
 			if let Merit::_Custom(str) = &merit {
 				col1 = col1.push(
-					text_input("", str, move |key| {
-						Event(i, Merit::_Custom(key), val.clone())
-					})
-					.padding(INPUT_PADDING),
+					text_input("", str, move |key| Event(i, Merit::_Custom(key), val))
+						.padding(INPUT_PADDING),
 				);
 			} else {
 				col1 = col1
 					.push(
 						pick_list(vec.clone(), Some(merit.clone().into()), move |key| {
-							Event(i, key.unwrap().clone(), val.clone())
+							Event(i, key.unwrap(), val)
 						})
 						.padding(INPUT_PADDING)
 						.text_size(20)
@@ -121,7 +116,7 @@ impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
 					.spacing(1);
 			}
 
-			col2 = col2.push(SheetDots::new(val.clone(), 0, 5, Shape::Dots, None, {
+			col2 = col2.push(SheetDots::new(val, 0, 5, Shape::Dots, None, {
 				let merit = merit.clone();
 				move |val| Event(i, merit.clone(), val)
 			}));
