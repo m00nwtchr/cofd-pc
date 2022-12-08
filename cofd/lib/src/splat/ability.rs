@@ -9,26 +9,21 @@ use super::{
 use crate::character::Modifier;
 use cofd_traits::VariantName;
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash, VariantName)]
 pub enum Ability {
+	#[expand]
 	Merit(Merit),
+	#[expand]
 	Discipline(Discipline),
+	#[expand]
 	Renown(Renown),
+	#[expand]
 	MoonGift(MoonGift),
+	#[expand]
 	Arcanum(Arcanum),
 }
 
 impl Ability {
-	pub fn name(&self) -> String {
-		match self {
-			Ability::Merit(merit) => merit.name(),
-			Ability::Discipline(discipline) => discipline.name().to_owned(),
-			Ability::Renown(renown) => renown.name().to_owned(),
-			Ability::MoonGift(moon_gift) => moon_gift.name().to_owned(),
-			Ability::Arcanum(arcanum) => arcanum.name().to_owned(),
-		}
-	}
-
 	pub fn name_mut(&mut self) -> Option<&mut String> {
 		match self {
 			Ability::Merit(Merit::_Custom(name))

@@ -372,32 +372,27 @@ impl Splat {
 	pub fn merits(&self) -> Vec<Merit> {
 		match self {
 			Self::Mortal => Merit::all(),
-			Self::Vampire(..) => VampireMerit::all().into_iter().map(Into::into).collect(),
-			Self::Werewolf(..) => WerewolfMerit::all().into_iter().map(Into::into).collect(),
-			Self::Mage(..) => MageMerit::all().into_iter().map(Into::into).collect(),
-			Self::Changeling(..) => ChangelingMerit::all().into_iter().map(Into::into).collect(),
+			Self::Vampire(..) => VampireMerit::all().map(Into::into).to_vec(),
+			Self::Werewolf(..) => WerewolfMerit::all().map(Into::into).to_vec(),
+			Self::Mage(..) => MageMerit::all().map(Into::into).to_vec(),
+			Self::Changeling(..) => ChangelingMerit::all().map(Into::into).to_vec(),
 		}
 	}
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
 pub enum XSplat {
+	#[expand]
 	Vampire(Clan),
+	#[expand]
 	Werewolf(Auspice),
+	#[expand]
 	Mage(Path),
+	#[expand]
 	Changeling(Seeming),
 }
 
 impl XSplat {
-	pub fn name(&self) -> &str {
-		match self {
-			XSplat::Vampire(clan) => clan.name(),
-			XSplat::Werewolf(auspice) => auspice.name(),
-			XSplat::Mage(path) => path.name(),
-			XSplat::Changeling(seeming) => seeming.name(),
-		}
-	}
-
 	pub fn name_mut(&mut self) -> Option<&mut String> {
 		match self {
 			Self::Vampire(Clan::_Custom(name, ..))
@@ -440,24 +435,19 @@ impl NameKey for XSplat {
 	}
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
 pub enum YSplat {
+	#[expand]
 	Vampire(Covenant),
+	#[expand]
 	Werewolf(Tribe),
+	#[expand]
 	Mage(Order),
+	#[expand]
 	Changeling(Court),
 }
 
 impl YSplat {
-	pub fn name(&self) -> &str {
-		match self {
-			YSplat::Vampire(covenant) => covenant.name(),
-			YSplat::Werewolf(tribe) => tribe.name(),
-			YSplat::Mage(order) => order.name(),
-			YSplat::Changeling(court) => court.name(),
-		}
-	}
-
 	pub fn name_mut(&mut self) -> Option<&mut String> {
 		match self {
 			Self::Vampire(Covenant::_Custom(name))
@@ -473,8 +463,8 @@ impl YSplat {
 	pub fn all(_type: SplatType) -> Vec<YSplat> {
 		match _type {
 			SplatType::Vampire => Covenant::all().map(Into::into).to_vec(),
-			SplatType::Werewolf => Tribe::all().map(Into::into).to_vec(),
-			SplatType::Mage => Order::all().map(Into::into).to_vec(),
+			SplatType::Werewolf => Tribe::all().into_iter().map(Into::into).collect(),
+			SplatType::Mage => Order::all().into_iter().map(Into::into).collect(),
 			SplatType::Changeling => Court::all().map(Into::into).to_vec(),
 			_ => vec![],
 		}
@@ -503,24 +493,19 @@ impl NameKey for YSplat {
 	}
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
 pub enum ZSplat {
+	#[expand]
 	Vampire(Bloodline),
+	#[expand]
 	Werewolf(Lodge),
+	#[expand]
 	Mage(Legacy),
+	#[expand]
 	Changeling(Kith),
 }
 
 impl ZSplat {
-	pub fn name(&self) -> &str {
-		match self {
-			Self::Vampire(bloodline) => bloodline.name(),
-			Self::Werewolf(lodge) => lodge.name(),
-			Self::Mage(legacy) => legacy.name(),
-			Self::Changeling(kith) => kith.name(),
-		}
-	}
-
 	pub fn name_mut(&mut self) -> Option<&mut String> {
 		match self {
 			ZSplat::Vampire(Bloodline::_Custom(name, _))
@@ -560,7 +545,7 @@ impl NameKey for ZSplat {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash, AllVariants, VariantName)]
 pub enum Merit {
 	// Mental Merits
 	AreaOfExpertise(String),
@@ -703,86 +688,19 @@ pub enum Merit {
 	// TwoWeaponFighting,
 	// UnarmedDefense,
 	// WeaponAndShield
+	#[expand]
 	Mage(MageMerit),
+	#[expand]
 	Vampire(VampireMerit),
+	#[expand]
 	Werewolf(WerewolfMerit),
+	#[expand]
 	Changeling(ChangelingMerit),
 
 	_Custom(String),
 }
 
 impl Merit {
-	pub fn all() -> Vec<Merit> {
-		let v = vec![
-			// Mental Merits
-
-			// Physical Merits
-
-			// Social Merits
-
-			// Style Merits
-			// Mental Styles
-			Self::ProfessionalTraining(String::new(), None, None),
-			// Physical Styles
-			Self::AggresiveDriving,
-			Self::DroneControl,
-			Self::Falconry,
-			Self::K9,
-			Self::Parkour,
-			Self::StuntDriver,
-			// Social Styles
-			Self::Etiquette,
-			Self::FastTalking,
-			// MysteryCultInitation(String, _, Merit, _, Merit, _)
-			// ScorpionCultInitation, // MTC
-
-			// Fighting Merits
-			Self::DefensiveCombat(false, None),
-			// Fighting Styles
-			// ArmedDefense,
-			// Avoidance,
-			// Berserker,
-			// Bowmanship,
-			// Boxing,
-			// BruteForce,
-			// ChainWeapons,
-			// CloseQuartersCombat,
-			// CombatArchery,
-			// DisablingTactics,
-			// Firefight,
-			// Grappling,
-			// HeavyWeapons,
-			// ImprovisedWeapons,
-			// KinoMutai,
-			// LightWeapons
-			// Marksmanship
-			// MaritalArts
-			// MountedCombat
-			// PoliceTactics
-			// PoweredProjectile
-			Self::RelentlessAssault,
-			// SpearAndBayonet
-			// StaffFighting,
-			// StreetFighting,
-			// StrengthPerformance,
-			// Systema,
-			// ThrownWepons,
-			// TwoWeaponFighting,
-			// UnarmedDefense,
-			// WeaponAndShield
-		];
-
-		let mut vec = Vec::new();
-
-		vec.extend(Merit::mental());
-		vec.extend(Merit::physical());
-		vec.extend(Merit::social());
-
-		vec.extend(v);
-
-		vec
-	}
-
 	pub fn mental() -> Vec<Merit> {
 		vec![
 			Self::AreaOfExpertise(String::new()),
@@ -880,16 +798,6 @@ impl Merit {
 			Self::TrueFriend(String::new()),
 			Self::Untouchable,
 		]
-	}
-
-	pub fn name(&self) -> String {
-		match self {
-			Merit::Mage(merit) => String::from(merit.name()),
-			Merit::Vampire(merit) => String::from(merit.name()),
-			Merit::Werewolf(merit) => String::from(merit.name()),
-			Merit::_Custom(name) => name.clone(),
-			_ => to_variant_name(self).unwrap().to_case(Case::Snake),
-		}
 	}
 
 	pub fn get_modifiers(&self, value: u16) -> Vec<Modifier> {
@@ -1019,11 +927,10 @@ impl Merit {
 				character.attributes().manipulation > 2 && character.skills().subterfuge > 1
 			}
 
-			Self::Mage(merit) => merit.is_available(character),
-			Self::Vampire(merit) => merit.is_available(character),
-			Self::Werewolf(merit) => merit.is_available(character),
-			Self::Changeling(merit) => merit.is_available(character),
-
+			// Self::Mage(merit) => merit.is_available(character),
+			// Self::Vampire(merit) => merit.is_available(character),
+			// Self::Werewolf(merit) => merit.is_available(character),
+			// Self::Changeling(merit) => merit.is_available(character),
 			_ => true,
 		}
 	}

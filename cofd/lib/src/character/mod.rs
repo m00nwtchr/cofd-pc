@@ -793,7 +793,7 @@ pub struct CharacterInfo {
 	pub other: String,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, VariantName)]
 pub enum InfoTrait {
 	Name,
 	Age,
@@ -814,30 +814,6 @@ pub enum InfoTrait {
 	Height,
 	Weight,
 	Sex,
-}
-
-impl InfoTrait {
-	pub fn name(&self) -> &str {
-		match self {
-			InfoTrait::Name => "name",
-			InfoTrait::Age => "age",
-			InfoTrait::Player => "player",
-			InfoTrait::Concept => "concept",
-			InfoTrait::Chronicle => "chronicle",
-			InfoTrait::DateOfBirth => "dob",
-			InfoTrait::Hair => "hair",
-			InfoTrait::Eyes => "eyes",
-			InfoTrait::Race => "race",
-			InfoTrait::Nationality => "nationality",
-			InfoTrait::Height => "height",
-			InfoTrait::Weight => "weight",
-			InfoTrait::Sex => "sex",
-			InfoTrait::VirtueAnchor => "virtue",
-			InfoTrait::ViceAnchor => "vice",
-			InfoTrait::Faction => "faction",
-			InfoTrait::GroupName => "group_name",
-		}
-	}
 }
 
 impl CharacterInfo {
@@ -1173,7 +1149,7 @@ pub enum ModifierValue {
 	Skill(Skill),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, VariantName)]
 pub enum ModifierOp {
 	Add,
 	Set,
@@ -1186,14 +1162,6 @@ pub enum TraitCategory {
 }
 
 impl TraitCategory {
-	pub fn name(&self) -> &str {
-		match self {
-			TraitCategory::Mental => "mental",
-			TraitCategory::Physical => "physical",
-			TraitCategory::Social => "social",
-		}
-	}
-
 	pub fn unskilled(&self) -> u16 {
 		match self {
 			TraitCategory::Mental => 3,
@@ -1215,7 +1183,7 @@ pub enum AttributeCategory {
 	Trait(TraitCategory),
 }
 
-#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize, AllVariants)]
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize, AllVariants, VariantName)]
 pub enum Attribute {
 	Intelligence,
 	Wits,
@@ -1290,22 +1258,6 @@ impl Attribute {
 		}
 	}
 
-	pub fn name(&self) -> &str {
-		match self {
-			Attribute::Intelligence => "intelligence",
-			Attribute::Wits => "wits",
-			Attribute::Resolve => "resolve",
-			//
-			Attribute::Strength => "strength",
-			Attribute::Dexterity => "dexterity",
-			Attribute::Stamina => "stamina",
-			//
-			Attribute::Presence => "presence",
-			Attribute::Manipulation => "manipulation",
-			Attribute::Composure => "composure",
-		}
-	}
-
 	#[allow(clippy::trivially_copy_pass_by_ref)]
 	pub fn get_type(&self) -> AttributeType {
 		match self {
@@ -1323,7 +1275,7 @@ impl Attribute {
 }
 
 #[derive(
-	Clone, Copy, Debug, Hash, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, AllVariants,
+	Clone, Copy, Debug, Hash, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, AllVariants, VariantName
 )]
 pub enum Skill {
 	Academics,
@@ -1399,37 +1351,6 @@ impl Skill {
 			TraitCategory::Mental => Self::mental(),
 			TraitCategory::Physical => Self::physical(),
 			TraitCategory::Social => Self::social(),
-		}
-	}
-
-	pub fn name(&self) -> &str {
-		match self {
-			Skill::Academics => "academics",
-			Skill::Computer => "computer",
-			Skill::Crafts => "crafts",
-			Skill::Investigation => "investigation",
-			Skill::Medicine => "medicine",
-			Skill::Occult => "occult",
-			Skill::Politics => "politics",
-			Skill::Science => "science",
-			//
-			Skill::Athletics => "athletics",
-			Skill::Brawl => "brawl",
-			Skill::Drive => "drive",
-			Skill::Firearms => "firearms",
-			Skill::Larceny => "larceny",
-			Skill::Stealth => "stealth",
-			Skill::Survival => "survival",
-			Skill::Weaponry => "weaponry",
-			//
-			Skill::AnimalKen => "animal_ken",
-			Skill::Empathy => "empathy",
-			Skill::Expression => "expression",
-			Skill::Intimidation => "intimidation",
-			Skill::Persuasion => "persuasion",
-			Skill::Socialize => "socialize",
-			Skill::Streetwise => "streetwise",
-			Skill::Subterfuge => "subterfuge",
 		}
 	}
 }

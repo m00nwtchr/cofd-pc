@@ -277,13 +277,20 @@ impl PureTribe {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+impl From<PureTribe> for Tribe {
+	fn from(pure: PureTribe) -> Self {
+		Tribe::Pure(pure)
+	}
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, AllVariants, VariantName)]
 pub enum Tribe {
 	BloodTalons,
 	BoneShadows,
 	HuntersInDarkness,
 	IronMasters,
 	StormLords,
+	#[expand]
 	Pure(PureTribe),
 	_Custom(String, Renown, [ShadowGift; 3]),
 }
@@ -356,31 +363,6 @@ impl Tribe {
 			// Tribe::GhostWolves => &None,
 			Tribe::_Custom(.., gifts) => gifts.to_vec(),
 		}
-	}
-
-	pub fn name(&self) -> &str {
-		match self {
-			Tribe::BloodTalons => "blood_talons",
-			Tribe::BoneShadows => "bone_shadows",
-			Tribe::HuntersInDarkness => "hunters_in_darkness",
-			Tribe::IronMasters => "iron_masters",
-			Tribe::StormLords => "storm_lords",
-			Tribe::Pure(tribe) => tribe.name(),
-			Tribe::_Custom(name, _, _) => name,
-		}
-	}
-
-	pub fn all() -> [Tribe; 8] {
-		[
-			Tribe::BloodTalons,
-			Tribe::BoneShadows,
-			Tribe::HuntersInDarkness,
-			Tribe::IronMasters,
-			Tribe::StormLords,
-			Tribe::Pure(PureTribe::FireTouched),
-			Tribe::Pure(PureTribe::IvoryClaws),
-			Tribe::Pure(PureTribe::PredatorKings),
-		]
 	}
 }
 

@@ -1,8 +1,12 @@
+#![feature(let_chains)]
 use std::collections::HashMap;
 
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, quote_spanned};
-use syn::{parse_macro_input, spanned::Spanned, Data, DeriveInput, Error, Fields, Variant};
+use syn::{
+	parse_macro_input, spanned::Spanned, AngleBracketedGenericArguments, Data, DeriveInput, Error,
+	Fields, GenericArgument, PathArguments, PathSegment, Type, Variant,
+};
 
 use convert_case::Casing;
 
@@ -216,7 +220,7 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 	proc_macro::TokenStream::from(expanded)
 }
 
-#[proc_macro_derive(VariantName)]
+#[proc_macro_derive(VariantName, attributes(expand))]
 pub fn derive_variant_name(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 
@@ -229,20 +233,56 @@ pub fn derive_variant_name(input: proc_macro::TokenStream) -> proc_macro::TokenS
 		for variant in &data.variants {
 			let variant_name = &variant.ident;
 
+			let mut flag = false;
+
+			for attr in &variant.attrs {
+				if attr.path.is_ident("expand") {
+					flag = true;
+					break;
+				}
+			}
+
 			if variant_name.eq("_Custom") {
 				if let Fields::Unnamed(fields) = &variant.fields {
-					if let Some(_field) = fields.unnamed.first() {
-						name_fun_variants.extend(quote_spanned! {variant.span()=>
+					if let Some(field) = fields.unnamed.first() {
+						name_fun_variants.extend(quote_spanned! {field.span()=>
 							#name::#variant_name (name, ..) => name,
 						});
 					}
 				}
 			} else {
-				let fields_in_variant = variant_fields(variant);
+				let mut match_arm = TokenStream::new();
+
+				let fields_in_variant = if flag && variant.fields.len() == 1 {
+					quote_spanned! {variant.span()=> (val) }
+				} else {
+					variant_fields(variant)
+				};
+
 				let variant_name_lower =
 					variant_name.to_string().to_case(convert_case::Case::Snake);
+
+				if flag {
+					if let Fields::Unnamed(fields) = &variant.fields && let Some(field) = fields.unnamed.first() && let Type::Path(ty) = &field.ty {
+						if ty.path.segments.first().unwrap().ident.eq("Option") {
+							match_arm.extend(quote_spanned! {ty.span()=>
+								match val {
+									Some(val) => VariantName::name(val),
+									None => #variant_name_lower
+								}
+							});
+						} else {
+							match_arm.extend(quote_spanned! {ty.span()=>
+								VariantName::name(val)
+							});
+						}
+					}
+				} else {
+					match_arm.extend(quote_spanned! {variant.span()=> #variant_name_lower });
+				}
+
 				name_fun_variants.extend(quote_spanned! {variant.span()=>
-					#name::#variant_name #fields_in_variant => #variant_name_lower,
+					#name::#variant_name #fields_in_variant => #match_arm,
 				});
 			}
 		}
@@ -265,7 +305,7 @@ pub fn derive_variant_name(input: proc_macro::TokenStream) -> proc_macro::TokenS
 	proc_macro::TokenStream::from(expanded)
 }
 
-#[proc_macro_derive(AllVariants)]
+#[proc_macro_derive(AllVariants, attributes(expand))]
 pub fn derive_all_variants(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 
@@ -273,16 +313,66 @@ pub fn derive_all_variants(input: proc_macro::TokenStream) -> proc_macro::TokenS
 	let data = &input.data;
 
 	let mut all_variants = TokenStream::new();
+	let mut sub_enums = TokenStream::new();
+
 	let mut num: usize = 0;
+
+	let mut flag = false;
 
 	if let Data::Enum(data) = data {
 		for variant in &data.variants {
 			let variant_name = &variant.ident;
 
+			if variant_name.eq("_Custom") {
+				continue;
+			}
+
+			let mut flag1 = false;
+
+			for attr in &variant.attrs {
+				if attr.path.is_ident("expand") {
+					flag1 = true;
+					flag = true;
+					break;
+				}
+			}
+
 			let fields = match &variant.fields {
-				// Fields::Unnamed(_) => quote_spanned! {variant.span()=> (..) },
+				Fields::Unnamed(fields) => {
+					let mut field_tokens = TokenStream::new();
+
+					if !flag1 {
+						for field in &fields.unnamed {
+							field_tokens
+								.extend(quote_spanned! { field.span()=> Default::default(), });
+						}
+					} else if let Some(field) = fields.unnamed.first() {
+						if let syn::Type::Path(ty) = &field.ty {
+							if let Some(segment) = ty.path.segments.first() {
+								if let PathArguments::AngleBracketed(arguments) = &segment.arguments
+								{
+									field_tokens.extend(
+										quote_spanned! { field.span()=> Default::default(), },
+									);
+									if let Some(GenericArgument::Type(ty2)) = arguments.args.first()
+									{
+										sub_enums.extend(
+											quote_spanned! { field.span()=> vec.extend(<#ty2 as AllVariants>::all().map(Into::into)); },
+										);
+									}
+								} else {
+									sub_enums.extend(
+										quote_spanned! { field.span()=> vec.extend(<#ty as AllVariants>::all().map(Into::into)); },
+									);
+
+									continue;
+								}
+							}
+						}
+					}
+					quote_spanned! {variant.span()=> (#field_tokens) }
+				}
 				Fields::Unit => quote_spanned! { variant.span()=> },
-				// Fields::Named(_) => quote_spanned! {variant.span()=> {..} },
 				_ => continue,
 			};
 
@@ -297,6 +387,20 @@ pub fn derive_all_variants(input: proc_macro::TokenStream) -> proc_macro::TokenS
 
 	let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
+	let mut all_vec = TokenStream::new();
+
+	if flag {
+		all_vec.extend(quote! {
+			impl #impl_generics #name #ty_generics #where_clause {
+				pub fn all() -> Vec<#name> {
+					let mut vec = std::vec::Vec::from(<#name as cofd_traits::AllVariants>::all());
+					#sub_enums
+					vec
+				}
+			}
+		});
+	}
+
 	let expanded = quote! {
 		impl #impl_generics cofd_traits::AllVariants for #name #ty_generics #where_clause {
 			type T = #name;
@@ -307,6 +411,7 @@ pub fn derive_all_variants(input: proc_macro::TokenStream) -> proc_macro::TokenS
 				]
 			}
 		}
+		#all_vec
 	};
 
 	proc_macro::TokenStream::from(expanded)

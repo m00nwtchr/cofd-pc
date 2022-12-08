@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use cofd_traits::VariantName;
+use cofd_traits::{AllVariants, VariantName};
 
 use crate::{
 	character::Skill,
@@ -56,13 +56,14 @@ impl From<Path> for XSplat {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, AllVariants, VariantName)]
 pub enum Order {
 	AdamantineArrow,
 	GuardiansOfTheVeil,
 	Mysterium,
 	SilverLadder,
 	FreeCouncil,
+	#[expand]
 	SeersOfTheThrone(Option<Ministry>),
 	_Custom(String, [Skill; 3]),
 }
@@ -101,35 +102,11 @@ impl Order {
 			Order::_Custom(_, skills) => skills,
 		}
 	}
+}
 
-	pub fn name(&self) -> &str {
-		match self {
-			Order::AdamantineArrow => "adamantine_arrow",
-			Order::GuardiansOfTheVeil => "guardians_of_the_veil",
-			Order::Mysterium => "mysterium",
-			Order::SilverLadder => "silver_ladder",
-			Order::FreeCouncil => "free_council",
-			Order::SeersOfTheThrone(ministry) => match ministry {
-				Some(ministry) => ministry.name(),
-				None => "seers_of_the_throne",
-			},
-			Order::_Custom(name, _) => name,
-		}
-	}
-
-	pub fn all() -> [Order; 10] {
-		[
-			Order::AdamantineArrow,
-			Order::GuardiansOfTheVeil,
-			Order::Mysterium,
-			Order::SilverLadder,
-			Order::FreeCouncil,
-			Order::SeersOfTheThrone(None),
-			Order::SeersOfTheThrone(Some(Ministry::Hegemony)),
-			Order::SeersOfTheThrone(Some(Ministry::Panopticon)),
-			Order::SeersOfTheThrone(Some(Ministry::Paternoster)),
-			Order::SeersOfTheThrone(Some(Ministry::Praetorian)),
-		]
+impl From<Ministry> for Order {
+	fn from(ministry: Ministry) -> Self {
+		Order::SeersOfTheThrone(Some(ministry))
 	}
 }
 
@@ -176,16 +153,12 @@ impl From<Arcanum> for Ability {
 	}
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Hash, AllVariants, VariantName)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Hash, AllVariants, VariantName)]
 pub enum MageMerit {
 	HighSpeech,
 }
 
 impl MageMerit {
-	pub fn all() -> Vec<MageMerit> {
-		vec![Self::HighSpeech]
-	}
-
 	pub fn is_available(&self, character: &Character) -> bool {
 		matches!(character.splat, Splat::Mage(..))
 	}
