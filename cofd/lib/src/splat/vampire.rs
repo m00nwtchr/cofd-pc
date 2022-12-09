@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 
+use cofd_traits::VariantName;
+
+use super::{ability::Ability, Merit, Splat};
 use crate::{
 	character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Trait},
 	dice_pool::DicePool,
 };
-use cofd_traits::VariantName;
-
-use super::{ability::Ability, Merit, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(default)]

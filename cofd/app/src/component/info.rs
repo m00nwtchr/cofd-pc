@@ -58,7 +58,11 @@ impl<Message> InfoBar<Message> {
 			let (msg, attribute) = match _trait {
 				InfoTrait::VirtueAnchor | InfoTrait::ViceAnchor => {
 					if character.splat.virtue_anchor() == "virtue" {
-						(_trait.name(), None)
+						match _trait {
+							InfoTrait::VirtueAnchor => ("virtue", None),
+							InfoTrait::ViceAnchor => ("vice", None),
+							_ => unreachable!(),
+						}
 					} else {
 						match _trait {
 							InfoTrait::VirtueAnchor => (

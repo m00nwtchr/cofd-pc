@@ -1,11 +1,10 @@
 use serde::{Deserialize, Serialize};
 
+use super::{Merit, NameKey, Splat};
 use crate::{
 	character::{AttributeCategory, AttributeType, Character, Damage},
 	prelude::*,
 };
-
-use super::{Merit, NameKey, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(default)]

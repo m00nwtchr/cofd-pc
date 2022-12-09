@@ -2,12 +2,11 @@ use serde::{Deserialize, Serialize};
 
 use cofd_traits::{AllVariants, VariantName};
 
+use super::{ability::Ability, Merit, NameKey, Splat};
 use crate::{
 	character::Skill,
 	prelude::{Attribute, Character},
 };
-
-use super::{ability::Ability, Merit, NameKey, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(default)]

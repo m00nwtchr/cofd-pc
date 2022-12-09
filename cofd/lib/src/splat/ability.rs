@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use cofd_traits::VariantName;
+
 use super::{
 	mage::Arcanum,
 	vampire::Discipline,
@@ -7,7 +9,6 @@ use super::{
 	Merit, NameKey,
 };
 use crate::character::Modifier;
-use cofd_traits::VariantName;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash, VariantName)]
 pub enum Ability {

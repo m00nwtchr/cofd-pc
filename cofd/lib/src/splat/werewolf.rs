@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use cofd_traits::VariantName;
-
 use serde::{Deserialize, Serialize};
+
+use cofd_traits::VariantName;
 
 use super::{ability::Ability, Merit, NameKey, Splat};
 use crate::{
