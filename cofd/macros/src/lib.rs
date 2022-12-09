@@ -72,7 +72,6 @@ fn parse_variant_field(
 						#[expand]
 						#variant_name(#ty),
 					});
-
 					args.insert(
 						key,
 						ty.path
@@ -133,7 +132,6 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 	let mut xsplats = TokenStream::new();
 	let mut ysplats = TokenStream::new();
 	let mut zsplats = TokenStream::new();
-
 	let mut impls = TokenStream::new();
 
 	let mut variants_map = HashMap::new();
@@ -224,7 +222,7 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
 	let mut gen_func = |key: &str, name: &str, b: bool, default: Option<&str>| {
 		if let Some(val) = variants_map.get(key) {
-			let ident: syn::Ident = syn::Ident::new(name, Span::call_site());
+			let ident = syn::Ident::new(name, Span::call_site());
 			let o = if b {
 				quote! { Option<&str> }
 			} else {
@@ -289,8 +287,6 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 		}
 		#impls
 	};
-
-	println!("{expanded}");
 
 	proc_macro::TokenStream::from(expanded)
 }

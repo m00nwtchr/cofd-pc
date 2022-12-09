@@ -1155,6 +1155,7 @@ pub enum ModifierOp {
 	Set,
 }
 
+#[derive(VariantName)]
 pub enum TraitCategory {
 	Mental,
 	Physical,

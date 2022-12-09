@@ -4,12 +4,11 @@ use cofd_traits::VariantName;
 
 use serde::{Deserialize, Serialize};
 
+use super::{ability::Ability, Merit, NameKey, Splat};
 use crate::{
 	character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait},
 	prelude::*,
 };
-
-use super::{ability::Ability, Merit, NameKey, Splat, XSplat, YSplat, ZSplat};
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct KuruthTriggerSet {
