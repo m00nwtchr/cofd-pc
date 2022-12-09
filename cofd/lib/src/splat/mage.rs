@@ -50,12 +50,6 @@ impl Path {
 	}
 }
 
-impl From<Path> for XSplat {
-	fn from(val: Path) -> Self {
-		XSplat::Mage(val)
-	}
-}
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, AllVariants, VariantName)]
 pub enum Order {
 	AdamantineArrow,
@@ -110,21 +104,9 @@ impl From<Ministry> for Order {
 	}
 }
 
-impl From<Order> for YSplat {
-	fn from(order: Order) -> Self {
-		YSplat::Mage(order)
-	}
-}
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName)]
 pub enum Legacy {
 	_Custom(String, Option<Arcanum>),
-}
-
-impl From<Legacy> for ZSplat {
-	fn from(legacy: Legacy) -> Self {
-		ZSplat::Mage(legacy)
-	}
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, VariantName, AllVariants)]

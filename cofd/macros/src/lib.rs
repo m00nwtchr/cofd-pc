@@ -49,21 +49,75 @@ fn variant_fields(variant: &Variant) -> TokenStream {
 fn parse_variant_field(
 	variant: &Variant,
 	iter: &mut syn::punctuated::Iter<syn::Field>,
-	stream: &mut TokenStream,
+	stream: &mut XYZ,
+	impls: &mut TokenStream,
+	args: &mut HashMap<String, String>,
 ) {
 	let variant_name = &variant.ident;
 	if let Some(field) = iter.next() {
 		if let Type::Path(ty) = &field.ty {
 			if let Some(segment) = ty.path.segments.first() {
-				let ty: TokenStream = if let PathArguments::AngleBracketed(arguments) = &segment.arguments && !arguments.args.is_empty() &&
-								let Some(GenericArgument::Type(ty)) = arguments.args.first()
-							{ quote!{ #ty } } else { quote! { #ty } };
+				let mut type_ = None;
 
-				stream.extend(quote_spanned! { ty.span()=>
-					#[expand]
-					#variant_name(#ty),
-				});
+				if let PathArguments::AngleBracketed(arguments) = &segment.arguments &&
+					!arguments.args.is_empty() &&
+					let Some(GenericArgument::Type(ty)) = arguments.args.first()
+						{ if let Type::Path(ty) = ty { type_ = Some(ty);  } } else { type_ = Some(ty); }
+
+				if let Some(ty) = type_ {
+					let key = String::from(stream.key());
+					let name = stream.name();
+
+					stream.unwrap().extend(quote_spanned! { ty.span()=>
+						#[expand]
+						#variant_name(#ty),
+					});
+
+					args.insert(
+						key,
+						ty.path
+							.get_ident()
+							.unwrap()
+							.to_string()
+							.to_case(convert_case::Case::Snake),
+					);
+					impls.extend(quote_spanned! { ty.span()=>
+						impl From<#ty> for #name {
+							fn from(val: #ty) -> Self {
+								#name::#variant_name(val)
+							}
+						}
+					});
+				}
 			}
+		}
+	}
+}
+
+enum XYZ<'a> {
+	X(&'a mut TokenStream),
+	Y(&'a mut TokenStream),
+	Z(&'a mut TokenStream),
+}
+
+impl<'a> XYZ<'a> {
+	pub fn key(&self) -> &str {
+		match self {
+			XYZ::X(_) => "xsplat",
+			XYZ::Y(_) => "ysplat",
+			XYZ::Z(_) => "zsplat",
+		}
+	}
+	pub fn name(&self) -> TokenStream {
+		match self {
+			XYZ::X(_) => quote! { XSplat },
+			XYZ::Y(_) => quote! { YSplat },
+			XYZ::Z(_) => quote! { ZSplat },
+		}
+	}
+	pub fn unwrap(&mut self) -> &mut TokenStream {
+		match self {
+			XYZ::X(s) | XYZ::Y(s) | XYZ::Z(s) => s,
 		}
 	}
 }
@@ -79,6 +133,8 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 	let mut xsplats = TokenStream::new();
 	let mut ysplats = TokenStream::new();
 	let mut zsplats = TokenStream::new();
+
+	let mut impls = TokenStream::new();
 
 	let mut variants_map = HashMap::new();
 
@@ -100,9 +156,27 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 			if let Fields::Unnamed(fields) = &variant.fields {
 				let mut iter = fields.unnamed.iter();
 
-				parse_variant_field(variant, &mut iter, &mut xsplats);
-				parse_variant_field(variant, &mut iter, &mut ysplats);
-				parse_variant_field(variant, &mut iter, &mut zsplats);
+				parse_variant_field(
+					variant,
+					&mut iter,
+					&mut XYZ::X(&mut xsplats),
+					&mut impls,
+					&mut args,
+				);
+				parse_variant_field(
+					variant,
+					&mut iter,
+					&mut XYZ::Y(&mut ysplats),
+					&mut impls,
+					&mut args,
+				);
+				parse_variant_field(
+					variant,
+					&mut iter,
+					&mut XYZ::Z(&mut zsplats),
+					&mut impls,
+					&mut args,
+				);
 			}
 
 			let mut gen_match_arm = |key: &str, b: bool| {
@@ -213,6 +287,7 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 		pub enum ZSplat {
 			#zsplats
 		}
+		#impls
 	};
 
 	println!("{expanded}");

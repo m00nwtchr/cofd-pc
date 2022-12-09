@@ -145,8 +145,6 @@ pub enum HuntersAspect {
 	_Custom(String),
 }
 
-impl HuntersAspect {}
-
 impl NameKey for HuntersAspect {
 	fn name_key(&self) -> String {
 		format!("werewolf.{}", self.name())
@@ -224,12 +222,6 @@ impl Auspice {
 			Auspice::Rahu => &HuntersAspect::Dominant,
 			Auspice::_Custom(.., aspect) => aspect,
 		}
-	}
-}
-
-impl From<Auspice> for XSplat {
-	fn from(val: Auspice) -> Self {
-		XSplat::Werewolf(val)
 	}
 }
 
@@ -366,21 +358,9 @@ impl Tribe {
 	}
 }
 
-impl From<Tribe> for YSplat {
-	fn from(tribe: Tribe) -> Self {
-		YSplat::Werewolf(tribe)
-	}
-}
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName)]
 pub enum Lodge {
 	_Custom(String),
-}
-
-impl From<Lodge> for ZSplat {
-	fn from(lodge: Lodge) -> Self {
-		ZSplat::Werewolf(lodge)
-	}
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash, VariantName, AllVariants)]

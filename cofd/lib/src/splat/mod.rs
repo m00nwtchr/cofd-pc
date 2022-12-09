@@ -39,9 +39,6 @@ pub enum Splat {
 	#[default]
 	Mortal,
 	#[splat(
-		xsplat = "clan",
-		ysplat = "covenant",
-		zsplat = "bloodline",
 		virtue_anchor = "mask",
 		vice_anchor = "dirge",
 		ability = "disciplines",
@@ -52,9 +49,6 @@ pub enum Splat {
 	)]
 	Vampire(Clan, Option<Covenant>, Option<Bloodline>, Box<VampireData>),
 	#[splat(
-		xsplat = "auspice",
-		ysplat = "tribe",
-		zsplat = "lodge",
 		virtue_anchor = "blood",
 		vice_anchor = "bone",
 		ability = "renown",
@@ -69,9 +63,6 @@ pub enum Splat {
 		Box<WerewolfData>,
 	),
 	#[splat(
-		xsplat = "path",
-		ysplat = "order",
-		zsplat = "legacy",
 		ability = "arcana",
 		st = "gnosis",
 		alt_beats = "arcane",
@@ -81,9 +72,6 @@ pub enum Splat {
 	Mage(Path, Option<Order>, Option<Legacy>, Box<MageData>), // TODO: Order = free order status, high speech merit
 	// Promethean,
 	#[splat(
-		xsplat = "seeming",
-		ysplat = "court",
-		zsplat = "kith",
 		virtue_anchor = "thread",
 		vice_anchor = "needle",
 		ability = "disciplines",

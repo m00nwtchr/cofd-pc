@@ -62,12 +62,6 @@ impl Seeming {
 	}
 }
 
-impl From<Seeming> for XSplat {
-	fn from(val: Seeming) -> Self {
-		XSplat::Changeling(val)
-	}
-}
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]
 pub enum Court {
 	Spring,
@@ -75,12 +69,6 @@ pub enum Court {
 	Autumn,
 	Winter,
 	_Custom(String),
-}
-
-impl From<Court> for YSplat {
-	fn from(court: Court) -> Self {
-		YSplat::Changeling(court)
-	}
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]
@@ -98,12 +86,6 @@ pub enum Kith {
 	Playmate,
 	Snowskin,
 	_Custom(String),
-}
-
-impl From<Kith> for ZSplat {
-	fn from(kith: Kith) -> Self {
-		ZSplat::Changeling(kith)
-	}
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]

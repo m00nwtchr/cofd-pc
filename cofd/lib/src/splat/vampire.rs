@@ -64,12 +64,6 @@ impl Clan {
 	}
 }
 
-impl From<Clan> for XSplat {
-	fn from(val: Clan) -> Self {
-		XSplat::Vampire(val)
-	}
-}
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]
 pub enum Covenant {
 	CarthianMovement,
@@ -80,21 +74,9 @@ pub enum Covenant {
 	_Custom(String),
 }
 
-impl From<Covenant> for YSplat {
-	fn from(covenant: Covenant) -> Self {
-		YSplat::Vampire(covenant)
-	}
-}
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName)]
 pub enum Bloodline {
 	_Custom(String, Option<[Discipline; 4]>),
-}
-
-impl From<Bloodline> for ZSplat {
-	fn from(bloodline: Bloodline) -> Self {
-		ZSplat::Vampire(bloodline)
-	}
 }
 
 #[derive(
