@@ -103,7 +103,7 @@ impl From<Ministry> for Order {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, AllVariants, VariantName)]
 pub enum Legacy {
 	_Custom(String, Option<Arcanum>),
 }

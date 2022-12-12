@@ -358,16 +358,6 @@ impl XSplat {
 		}
 	}
 
-	pub fn all(_type: SplatType) -> Vec<XSplat> {
-		match _type {
-			SplatType::Vampire => Clan::all().map(Into::into).to_vec(),
-			SplatType::Werewolf => Auspice::all().map(Into::into).to_vec(),
-			SplatType::Mage => Path::all().map(Into::into).to_vec(),
-			SplatType::Changeling => Seeming::all().map(Into::into).to_vec(),
-			_ => vec![],
-		}
-	}
-
 	pub fn is_custom(&self) -> bool {
 		matches!(
 			self,
@@ -376,17 +366,6 @@ impl XSplat {
 				| Self::Mage(Path::_Custom(..))
 				| Self::Changeling(Seeming::_Custom(..))
 		)
-	}
-}
-
-impl NameKey for XSplat {
-	fn name_key(&self) -> String {
-		match self {
-			XSplat::Vampire(clan) => format!("vampire.{}", clan.name()),
-			XSplat::Werewolf(auspice) => format!("werewolf.{}", auspice.name()),
-			XSplat::Mage(path) => format!("mage.{}", path.name()),
-			XSplat::Changeling(seeming) => format!("changeling.{}", seeming.name()),
-		}
 	}
 }
 
@@ -403,16 +382,6 @@ impl YSplat {
 		}
 	}
 
-	pub fn all(_type: SplatType) -> Vec<YSplat> {
-		match _type {
-			SplatType::Vampire => Covenant::all().map(Into::into).to_vec(),
-			SplatType::Werewolf => Tribe::all().into_iter().map(Into::into).collect(),
-			SplatType::Mage => Order::all().into_iter().map(Into::into).collect(),
-			SplatType::Changeling => Court::all().map(Into::into).to_vec(),
-			_ => vec![],
-		}
-	}
-
 	pub fn is_custom(&self) -> bool {
 		matches!(
 			self,
@@ -422,17 +391,6 @@ impl YSplat {
 					Order::_Custom(_, _) | Order::SeersOfTheThrone(Some(Ministry::_Custom(_, _))),
 				) | YSplat::Changeling(Court::_Custom(_))
 		)
-	}
-}
-
-impl NameKey for YSplat {
-	fn name_key(&self) -> String {
-		match self {
-			YSplat::Vampire(covenant) => format!("vampire.{}", covenant.name()),
-			YSplat::Werewolf(tribe) => format!("werewolf.{}", tribe.name()),
-			YSplat::Mage(order) => format!("mage.{}", order.name()),
-			YSplat::Changeling(court) => format!("changeling.{}", court.name()),
-		}
 	}
 }
 
@@ -447,13 +405,6 @@ impl ZSplat {
 		}
 	}
 
-	pub fn all(_type: SplatType) -> Vec<ZSplat> {
-		match _type {
-			SplatType::Changeling => Kith::all().map(Into::into).to_vec(),
-			_ => vec![],
-		}
-	}
-
 	pub fn is_custom(&self) -> bool {
 		matches!(
 			self,
@@ -462,17 +413,6 @@ impl ZSplat {
 				| ZSplat::Mage(Legacy::_Custom(_, _))
 				| ZSplat::Changeling(Kith::_Custom(_))
 		)
-	}
-}
-
-impl NameKey for ZSplat {
-	fn name_key(&self) -> String {
-		match self {
-			Self::Vampire(bloodline) => format!("vampire.{}", bloodline.name()),
-			Self::Werewolf(lodge) => format!("werewolf.{}", lodge.name()),
-			Self::Mage(legacy) => format!("mage.{}", legacy.name()),
-			Self::Changeling(kith) => format!("changeling.{}", kith.name()),
-		}
 	}
 }
 

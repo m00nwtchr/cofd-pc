@@ -74,7 +74,7 @@ pub enum Covenant {
 	_Custom(String),
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, AllVariants, VariantName)]
 pub enum Bloodline {
 	_Custom(String, Option<[Discipline; 4]>),
 }

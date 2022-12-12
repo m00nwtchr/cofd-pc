@@ -357,7 +357,7 @@ impl Tribe {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, AllVariants, VariantName)]
 pub enum Lodge {
 	_Custom(String),
 }

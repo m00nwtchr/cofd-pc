@@ -68,9 +68,12 @@ fn parse_variant_field(
 					let key = String::from(stream.key());
 					let name = stream.name();
 
-					stream.unwrap().extend(quote_spanned! { ty.span()=>
+					stream.unwrap_0().extend(quote_spanned! { ty.span()=>
 						#[expand]
 						#variant_name(#ty),
+					});
+					stream.unwrap_1().extend(quote_spanned! { ty.span()=>
+						SplatType::#variant_name => #ty::all().into_iter().map(Into::into).collect(),
 					});
 					args.insert(
 						key,
@@ -94,29 +97,34 @@ fn parse_variant_field(
 }
 
 enum XYZ<'a> {
-	X(&'a mut TokenStream),
-	Y(&'a mut TokenStream),
-	Z(&'a mut TokenStream),
+	X(&'a mut TokenStream, &'a mut TokenStream),
+	Y(&'a mut TokenStream, &'a mut TokenStream),
+	Z(&'a mut TokenStream, &'a mut TokenStream),
 }
 
 impl<'a> XYZ<'a> {
 	pub fn key(&self) -> &str {
 		match self {
-			XYZ::X(_) => "xsplat",
-			XYZ::Y(_) => "ysplat",
-			XYZ::Z(_) => "zsplat",
+			XYZ::X(..) => "xsplat",
+			XYZ::Y(..) => "ysplat",
+			XYZ::Z(..) => "zsplat",
 		}
 	}
 	pub fn name(&self) -> TokenStream {
 		match self {
-			XYZ::X(_) => quote! { XSplat },
-			XYZ::Y(_) => quote! { YSplat },
-			XYZ::Z(_) => quote! { ZSplat },
+			XYZ::X(..) => quote! { XSplat },
+			XYZ::Y(..) => quote! { YSplat },
+			XYZ::Z(..) => quote! { ZSplat },
 		}
 	}
-	pub fn unwrap(&mut self) -> &mut TokenStream {
+	pub fn unwrap_0(&mut self) -> &mut TokenStream {
 		match self {
-			XYZ::X(s) | XYZ::Y(s) | XYZ::Z(s) => s,
+			XYZ::X(s, _) | XYZ::Y(s, _) | XYZ::Z(s, _) => s,
+		}
+	}
+	pub fn unwrap_1(&mut self) -> &mut TokenStream {
+		match self {
+			XYZ::X(_, s) | XYZ::Y(_, s) | XYZ::Z(_, s) => s,
 		}
 	}
 }
@@ -132,7 +140,14 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 	let mut xsplats = TokenStream::new();
 	let mut ysplats = TokenStream::new();
 	let mut zsplats = TokenStream::new();
+
+	let mut xsplats_all = TokenStream::new();
+	let mut ysplats_all = TokenStream::new();
+	let mut zsplats_all = TokenStream::new();
+
 	let mut impls = TokenStream::new();
+
+	let mut name_keys = TokenStream::new();
 
 	let mut variants_map = HashMap::new();
 
@@ -141,6 +156,7 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
 		for variant in &data_enum.variants {
 			let variant_name = &variant.ident;
+			let variant_name_lower = variant_name.to_string().to_case(convert_case::Case::Snake);
 
 			args.clear();
 			parse_args(variant, &mut args);
@@ -157,21 +173,21 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 				parse_variant_field(
 					variant,
 					&mut iter,
-					&mut XYZ::X(&mut xsplats),
+					&mut XYZ::X(&mut xsplats, &mut xsplats_all),
 					&mut impls,
 					&mut args,
 				);
 				parse_variant_field(
 					variant,
 					&mut iter,
-					&mut XYZ::Y(&mut ysplats),
+					&mut XYZ::Y(&mut ysplats, &mut ysplats_all),
 					&mut impls,
 					&mut args,
 				);
 				parse_variant_field(
 					variant,
 					&mut iter,
-					&mut XYZ::Z(&mut zsplats),
+					&mut XYZ::Z(&mut zsplats, &mut zsplats_all),
 					&mut impls,
 					&mut args,
 				);
@@ -211,6 +227,12 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
 			gen_match_arm("fuel", true);
 			gen_match_arm("integrity", false);
+
+			if let Fields::Unnamed(_) = &variant.fields {
+				name_keys.extend(quote! {
+					Self::#variant_name(val) => format!("{}.{}", val.name(), #variant_name_lower),
+				});
+			}
 		}
 	} else {
 		return derive_error!("SplatEnum is only implemented for enums");
@@ -285,7 +307,53 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 		pub enum ZSplat {
 			#zsplats
 		}
+		impl XSplat {
+			pub fn all(st: SplatType) -> Vec<Self> {
+				match st {
+					#xsplats_all
+					_ => Vec::new(),
+				}
+			}
+		}
+		impl YSplat {
+			pub fn all(st: SplatType) -> Vec<Self> {
+				match st {
+					#ysplats_all
+					_ => Vec::new(),
+				}
+			}
+		}
+		impl ZSplat {
+			pub fn all(st: SplatType) -> Vec<Self> {
+				match st {
+					#zsplats_all
+					_ => Vec::new(),
+				}
+			}
+		}
 		#impls
+
+		impl NameKey for XSplat {
+			fn name_key(&self) -> String {
+				match self {
+					#name_keys
+				}
+			}
+		}
+		impl NameKey for YSplat {
+			fn name_key(&self) -> String {
+				match self {
+					#name_keys
+				}
+			}
+		}
+		impl NameKey for ZSplat {
+			fn name_key(&self) -> String {
+				match self {
+					#name_keys
+				}
+			}
+		}
 	};
 
 	proc_macro::TokenStream::from(expanded)
