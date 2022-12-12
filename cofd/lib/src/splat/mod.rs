@@ -89,16 +89,6 @@ pub enum Splat {
 }
 
 impl Splat {
-	pub fn xsplat(&self) -> Option<XSplat> {
-		match self {
-			Splat::Mortal => None,
-			Splat::Vampire(clan, ..) => Some(clan.clone().into()),
-			Splat::Werewolf(auspice, ..) => auspice.clone().map(Into::into),
-			Splat::Mage(path, ..) => Some(path.clone().into()),
-			Splat::Changeling(seeming, ..) => Some(seeming.clone().into()),
-		}
-	}
-
 	pub fn set_xsplat(&mut self, xsplat: Option<XSplat>) {
 		match xsplat {
 			Some(xsplat) => match xsplat {
@@ -166,16 +156,6 @@ impl Splat {
 		}
 	}
 
-	pub fn ysplat(&self) -> Option<YSplat> {
-		match self {
-			Splat::Mortal => None,
-			Splat::Vampire(_, covenant, _, _) => covenant.clone().map(Into::into),
-			Splat::Werewolf(_, tribe, _, _) => tribe.clone().map(Into::into),
-			Splat::Mage(_, order, _, _) => order.clone().map(Into::into),
-			Splat::Changeling(_, court, _, _) => court.clone().map(Into::into),
-		}
-	}
-
 	pub fn set_ysplat(&mut self, xsplat: Option<YSplat>) {
 		match xsplat {
 			Some(xsplat) => match xsplat {
@@ -230,16 +210,6 @@ impl Splat {
 				Order::_Custom(name, [Skill::Academics, Skill::AnimalKen, Skill::Athletics]).into(),
 			),
 			Self::Changeling(..) => Some(Court::_Custom(name).into()),
-		}
-	}
-
-	pub fn zsplat(&self) -> Option<ZSplat> {
-		match self {
-			Splat::Mortal => None,
-			Splat::Vampire(_, _, bloodline, _) => bloodline.clone().map(Into::into),
-			Splat::Werewolf(_, _, lodge, _) => lodge.clone().map(Into::into),
-			Splat::Mage(_, _, legacy, _) => legacy.clone().map(Into::into),
-			Splat::Changeling(_, _, kith, _) => kith.clone().map(Into::into),
 		}
 	}
 

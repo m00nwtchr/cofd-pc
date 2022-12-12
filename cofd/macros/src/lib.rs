@@ -59,6 +59,9 @@ fn parse_variant_field(
 			if let Some(segment) = ty.path.segments.first() {
 				let mut type_ = None;
 
+				let is_option = segment.ident.eq("Option");
+				let is_vec = segment.ident.eq("Vec");
+
 				if let PathArguments::AngleBracketed(arguments) = &segment.arguments &&
 					!arguments.args.is_empty() &&
 					let Some(GenericArgument::Type(ty)) = arguments.args.first()
@@ -75,6 +78,25 @@ fn parse_variant_field(
 					stream.unwrap_1().extend(quote_spanned! { ty.span()=>
 						Self::#variant_name(..) => #ty::all().into_iter().map(Into::into).collect(),
 					});
+
+					let s = if is_option {
+						quote! { val.clone().map(Into::into) }
+					} else if is_vec {
+						quote! { val.first().clone().map(Into::into) }
+					} else {
+						quote! { Some(val.clone().into()) }
+					};
+
+					let fields = match stream {
+						XYZ::X(..) => quote! {(val, ..)},
+						XYZ::Y(..) => quote! {(_, val, ..)},
+						XYZ::Z(..) => quote! {(_, _, val, ..)},
+					};
+
+					stream.unwrap_2().extend(quote_spanned! { ty.span()=>
+						Self::#variant_name #fields => #s,
+					});
+
 					args.insert(
 						key,
 						ty.path
@@ -97,9 +119,21 @@ fn parse_variant_field(
 }
 
 enum XYZ<'a> {
-	X(&'a mut TokenStream, &'a mut TokenStream),
-	Y(&'a mut TokenStream, &'a mut TokenStream),
-	Z(&'a mut TokenStream, &'a mut TokenStream),
+	X(
+		&'a mut TokenStream,
+		&'a mut TokenStream,
+		&'a mut TokenStream,
+	),
+	Y(
+		&'a mut TokenStream,
+		&'a mut TokenStream,
+		&'a mut TokenStream,
+	),
+	Z(
+		&'a mut TokenStream,
+		&'a mut TokenStream,
+		&'a mut TokenStream,
+	),
 }
 
 impl<'a> XYZ<'a> {
@@ -119,12 +153,17 @@ impl<'a> XYZ<'a> {
 	}
 	pub fn unwrap_0(&mut self) -> &mut TokenStream {
 		match self {
-			XYZ::X(s, _) | XYZ::Y(s, _) | XYZ::Z(s, _) => s,
+			XYZ::X(s, ..) | XYZ::Y(s, ..) | XYZ::Z(s, ..) => s,
 		}
 	}
 	pub fn unwrap_1(&mut self) -> &mut TokenStream {
 		match self {
-			XYZ::X(_, s) | XYZ::Y(_, s) | XYZ::Z(_, s) => s,
+			XYZ::X(_, s, _) | XYZ::Y(_, s, _) | XYZ::Z(_, s, _) => s,
+		}
+	}
+	pub fn unwrap_2(&mut self) -> &mut TokenStream {
+		match self {
+			XYZ::X(_, _, s) | XYZ::Y(_, _, s) | XYZ::Z(_, _, s) => s,
 		}
 	}
 }
@@ -143,6 +182,10 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 	let mut xsplats_all = TokenStream::new();
 	let mut ysplats_all = TokenStream::new();
 	let mut zsplats_all = TokenStream::new();
+
+	let mut xsplat = TokenStream::new();
+	let mut ysplat = TokenStream::new();
+	let mut zsplat = TokenStream::new();
 
 	let mut impls = TokenStream::new();
 
@@ -168,21 +211,21 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 				parse_variant_field(
 					variant,
 					&mut iter,
-					&mut XYZ::X(&mut xsplats, &mut xsplats_all),
+					&mut XYZ::X(&mut xsplats, &mut xsplats_all, &mut xsplat),
 					&mut impls,
 					&mut args,
 				);
 				parse_variant_field(
 					variant,
 					&mut iter,
-					&mut XYZ::Y(&mut ysplats, &mut ysplats_all),
+					&mut XYZ::Y(&mut ysplats, &mut ysplats_all, &mut ysplat),
 					&mut impls,
 					&mut args,
 				);
 				parse_variant_field(
 					variant,
 					&mut iter,
-					&mut XYZ::Z(&mut zsplats, &mut zsplats_all),
+					&mut XYZ::Z(&mut zsplats, &mut zsplats_all, &mut zsplat),
 					&mut impls,
 					&mut args,
 				);
@@ -225,7 +268,7 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
 			if let Fields::Unnamed(_) = &variant.fields {
 				name_keys.extend(quote! {
-					Self::#variant_name(val) => format!("{}.{}", val.name(), #variant_name_lower),
+					Self::#variant_name(val) => format!("{}.{}", #variant_name_lower, val.name()),
 				});
 			}
 		}
@@ -288,6 +331,25 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 	let expanded = quote! {
 		impl #impl_generics #name #ty_generics #where_clause {
 			#funcs
+
+			pub fn xsplat(&self) -> Option<XSplat> {
+				match self {
+					#xsplat
+					_ => None,
+				}
+			}
+			pub fn ysplat(&self) -> Option<YSplat> {
+				match self {
+					#ysplat
+					_ => None,
+				}
+			}
+			pub fn zsplat(&self) -> Option<ZSplat> {
+				match self {
+					#zsplat
+					_ => None,
+				}
+			}
 
 			pub fn xsplats(&self) -> Vec<XSplat> {
 				match self {
