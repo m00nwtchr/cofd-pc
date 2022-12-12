@@ -174,7 +174,8 @@ impl Application for PlayerCompanionApp {
 	}
 
 	fn title(&self) -> String {
-		fl!("app-name")
+		// fl!("app-name")
+		String::from("App")
 	}
 
 	fn update(&mut self, message: Self::Message) -> Command<Self::Message> {

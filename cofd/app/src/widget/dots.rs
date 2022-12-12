@@ -279,8 +279,8 @@ where
 				renderer::Quad {
 					bounds,
 					border_radius: match self.shape {
-						Shape::Dots => size / 2.0,
-						Shape::Boxes => 0.0,
+						Shape::Dots => (size / 2.0).into(),
+						Shape::Boxes => (0.0).into(),
 					},
 					border_width: custom_style.border_width,
 					border_color: custom_style.border_color,
@@ -293,8 +293,8 @@ where
 					renderer::Quad {
 						bounds,
 						border_radius: match self.shape {
-							Shape::Dots => dot_size,
-							Shape::Boxes => 0.0,
+							Shape::Dots => dot_size.into(),
+							Shape::Boxes => (0.0).into(),
 						},
 						border_width: 0.0,
 						border_color: Color::TRANSPARENT,

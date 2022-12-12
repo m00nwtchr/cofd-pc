@@ -10,9 +10,9 @@ license = "MIT"
 
 [dependencies]
 log = "0.4"
-iced = "0.5"
-iced_lazy = "0.2"
-iced_native = "0.6"
+iced = "0.6"
+iced_lazy = "0.3"
+iced_native = "0.7"
 # iced_style = "0.5"
 # iced = { git = "https://github.com/iced-rs/iced" }
 # iced_lazy = { git = "https://github.com/iced-rs/iced" }
@@ -48,6 +48,7 @@ env_logger = "0.9"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 i18n-embed = { version = "0.13", features = ["web-sys-requester"] }
+rust-embed = { version = "6", features = [ "debug-embed" ] }
 console_log = "0.2"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]

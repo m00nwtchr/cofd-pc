@@ -70,7 +70,7 @@ pub enum Splat {
 		integrity = "wisdom"
 	)]
 	Mage(Path, Option<Order>, Option<Legacy>, Box<MageData>), // TODO: Order = free order status, high speech merit
-	// Promethean,
+	// Promethean(Lineage),
 	#[splat(
 		virtue_anchor = "thread",
 		vice_anchor = "needle",
@@ -80,12 +80,12 @@ pub enum Splat {
 		integrity = "clarity"
 	)]
 	Changeling(Seeming, Option<Court>, Option<Kith>, Box<ChangelingData>),
-	// Hunter,
-	// Geist,
-	// Mummy,
-	// Demon,
-	// Beast,
-	// Deviant,
+	// Hunter(Tier),
+	// Bound(Burden, Archetype),
+	// Mummy(Decree, Guild),
+	// Demon(Incarnation, Vec<Agenda>),
+	// Beast(Hunger),
+	// Deviant(Origin, Clade, Vec<Form>),
 }
 
 impl Splat {

@@ -142,9 +142,10 @@ where
 			renderer.fill_quad(
 				renderer::Quad {
 					bounds,
-					border_radius: 0.0,
+					border_radius: (0.0).into(),
 					border_width: custom_style.border_width,
 					border_color: custom_style.border_color,
+					// ..Default::default()
 				},
 				// custom_style.background,
 				match wound {
