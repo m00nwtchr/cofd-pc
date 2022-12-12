@@ -141,9 +141,9 @@ impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
 				&character,
 			),
 			_ => {
-				let mut xsplats = XSplat::all(character.splat._type());
-				let mut ysplats = YSplat::all(character.splat._type());
-				let mut zsplats = ZSplat::all(character.splat._type());
+				let mut xsplats = character.splat.xsplats();
+				let mut ysplats = character.splat.ysplats();
+				let mut zsplats = character.splat.zsplats();
 
 				if let Some(xsplat) = character.splat.custom_xsplat(fll!("custom")) {
 					xsplats.push(xsplat);

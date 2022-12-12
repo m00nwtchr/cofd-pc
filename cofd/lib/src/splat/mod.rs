@@ -89,16 +89,6 @@ pub enum Splat {
 }
 
 impl Splat {
-	pub fn _type(&self) -> SplatType {
-		match self {
-			Splat::Mortal => SplatType::Mortal,
-			Splat::Vampire(..) => SplatType::Vampire,
-			Splat::Werewolf(..) => SplatType::Werewolf,
-			Splat::Mage(..) => SplatType::Mage,
-			Splat::Changeling(..) => SplatType::Changeling,
-		}
-	}
-
 	pub fn xsplat(&self) -> Option<XSplat> {
 		match self {
 			Splat::Mortal => None,

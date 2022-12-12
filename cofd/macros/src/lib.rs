@@ -73,7 +73,7 @@ fn parse_variant_field(
 						#variant_name(#ty),
 					});
 					stream.unwrap_1().extend(quote_spanned! { ty.span()=>
-						SplatType::#variant_name => #ty::all().into_iter().map(Into::into).collect(),
+						Self::#variant_name(..) => #ty::all().into_iter().map(Into::into).collect(),
 					});
 					args.insert(
 						key,
@@ -136,7 +136,6 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 	let name = &input.ident;
 	let data = &input.data;
 
-	let mut splat_idents = TokenStream::new();
 	let mut xsplats = TokenStream::new();
 	let mut ysplats = TokenStream::new();
 	let mut zsplats = TokenStream::new();
@@ -162,10 +161,6 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 			parse_args(variant, &mut args);
 
 			let fields_in_variant = variant_fields(variant);
-
-			splat_idents.extend(quote_spanned! {variant.span()=>
-				#variant_name,
-			});
 
 			if let Fields::Unnamed(fields) = &variant.fields {
 				let mut iter = fields.unnamed.iter();
@@ -285,14 +280,33 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 	gen_func("fuel", "fuel", true, None);
 	gen_func("integrity", "integrity", false, Some("integrity"));
 
-	let expanded = quote! {
-		#[derive(Debug, Clone, Copy, VariantName, AllVariants)]
-		pub enum SplatType {
-			#splat_idents
-		}
+	// #[derive(Debug, Clone, Copy, VariantName, AllVariants)]
+	// 	pub enum SplatType {
+	// 		#splat_idents
+	// 	}
 
+	let expanded = quote! {
 		impl #impl_generics #name #ty_generics #where_clause {
 			#funcs
+
+			pub fn xsplats(&self) -> Vec<XSplat> {
+				match self {
+					#xsplats_all
+					_ => Vec::new(),
+				}
+			}
+			pub fn ysplats(&self) -> Vec<YSplat> {
+				match self {
+					#ysplats_all
+					_ => Vec::new(),
+				}
+			}
+			pub fn zsplats(&self) -> Vec<ZSplat> {
+				match self {
+					#zsplats_all
+					_ => Vec::new(),
+				}
+			}
 		}
 
 		#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
@@ -306,30 +320,6 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 		#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
 		pub enum ZSplat {
 			#zsplats
-		}
-		impl XSplat {
-			pub fn all(st: SplatType) -> Vec<Self> {
-				match st {
-					#xsplats_all
-					_ => Vec::new(),
-				}
-			}
-		}
-		impl YSplat {
-			pub fn all(st: SplatType) -> Vec<Self> {
-				match st {
-					#ysplats_all
-					_ => Vec::new(),
-				}
-			}
-		}
-		impl ZSplat {
-			pub fn all(st: SplatType) -> Vec<Self> {
-				match st {
-					#zsplats_all
-					_ => Vec::new(),
-				}
-			}
 		}
 		#impls
 
