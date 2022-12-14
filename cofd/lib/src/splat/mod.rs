@@ -45,7 +45,8 @@ pub enum Splat {
 		st = "blood_potency",
 		alt_beats = "blood",
 		fuel = "vitae",
-		integrity = "humanity"
+		integrity = "humanity",
+		abilities_finite = false
 	)]
 	Vampire(Clan, Option<Covenant>, Option<Bloodline>, Box<VampireData>),
 	#[splat(
@@ -77,7 +78,8 @@ pub enum Splat {
 		ability = "disciplines",
 		st = "wyrd",
 		fuel = "glamour",
-		integrity = "clarity"
+		integrity = "clarity",
+		abilities_finite = false
 	)]
 	Changeling(Seeming, Option<Court>, Option<Kith>, Box<ChangelingData>),
 	// Hunter(Tier),
@@ -89,38 +91,6 @@ pub enum Splat {
 }
 
 impl Splat {
-	pub fn set_xsplat(&mut self, xsplat: Option<XSplat>) {
-		match xsplat {
-			Some(xsplat) => match xsplat {
-				XSplat::Vampire(clan) => {
-					if let Splat::Vampire(_clan, ..) = self {
-						*_clan = clan;
-					}
-				}
-				XSplat::Werewolf(ausipce) => {
-					if let Splat::Werewolf(_auspice, ..) = self {
-						*_auspice = Some(ausipce);
-					}
-				}
-				XSplat::Mage(path) => {
-					if let Splat::Mage(_path, ..) = self {
-						*_path = path;
-					}
-				}
-				XSplat::Changeling(seeming) => {
-					if let Splat::Changeling(_seeming, ..) = self {
-						*_seeming = seeming;
-					}
-				}
-			},
-			None => {
-				if let Splat::Werewolf(auspice, ..) = self {
-					*auspice = None;
-				}
-			}
-		}
-	}
-
 	pub fn custom_xsplat(&self, name: String) -> Option<XSplat> {
 		match self {
 			Self::Mortal => None,
@@ -156,40 +126,6 @@ impl Splat {
 		}
 	}
 
-	pub fn set_ysplat(&mut self, xsplat: Option<YSplat>) {
-		match xsplat {
-			Some(xsplat) => match xsplat {
-				YSplat::Vampire(covenant) => {
-					if let Splat::Vampire(_, _covenant, _, _) = self {
-						*_covenant = Some(covenant);
-					}
-				}
-				YSplat::Werewolf(tribe) => {
-					if let Splat::Werewolf(_, _tribe, _, _) = self {
-						*_tribe = Some(tribe);
-					}
-				}
-				YSplat::Mage(order) => {
-					if let Splat::Mage(_, _order, _, _) = self {
-						*_order = Some(order);
-					}
-				}
-				YSplat::Changeling(court) => {
-					if let Splat::Changeling(_, _court, _, _) = self {
-						*_court = Some(court);
-					}
-				}
-			},
-			None => match self {
-				Splat::Mortal => {}
-				Splat::Vampire(_, covenant, _, _) => *covenant = None,
-				Splat::Werewolf(_, tribe, _, _) => *tribe = None,
-				Splat::Mage(_, order, _, _) => *order = None,
-				Splat::Changeling(_, court, _, _) => *court = None,
-			},
-		}
-	}
-
 	pub fn custom_ysplat(&self, name: String) -> Option<YSplat> {
 		match self {
 			Self::Mortal => None,
@@ -213,40 +149,6 @@ impl Splat {
 		}
 	}
 
-	pub fn set_zsplat(&mut self, zsplat: Option<ZSplat>) {
-		match zsplat {
-			Some(zsplat) => match zsplat {
-				ZSplat::Vampire(bloodline) => {
-					if let Splat::Vampire(_, _, _bloodline, _) = self {
-						*_bloodline = Some(bloodline);
-					}
-				}
-				ZSplat::Werewolf(lodge) => {
-					if let Splat::Werewolf(_, _, _lodge, _) = self {
-						*_lodge = Some(lodge);
-					}
-				}
-				ZSplat::Mage(legacy) => {
-					if let Splat::Mage(_, _, _legacy, _) = self {
-						*_legacy = Some(legacy);
-					}
-				}
-				ZSplat::Changeling(kith) => {
-					if let Splat::Changeling(_, _, _kith, _) = self {
-						*_kith = Some(kith);
-					}
-				}
-			},
-			None => match self {
-				Splat::Mortal => {}
-				Splat::Vampire(_, _, bloodline, _) => *bloodline = None,
-				Splat::Werewolf(_, _, lodge, _) => *lodge = None,
-				Splat::Mage(_, _, legacy, _) => *legacy = None,
-				Splat::Changeling(_, _, kith, _) => *kith = None,
-			},
-		}
-	}
-
 	pub fn custom_zsplat(&self, name: String) -> Option<ZSplat> {
 		match self {
 			Splat::Mortal => None,
@@ -257,22 +159,12 @@ impl Splat {
 		}
 	}
 
-	pub fn are_abilities_finite(&self) -> bool {
-		match self {
-			Splat::Mortal => true,
-			Splat::Vampire(..) => false,
-			Splat::Werewolf(..) => true,
-			Splat::Mage(..) => true,
-			Splat::Changeling(..) => false,
-		}
-	}
-
 	pub fn all_abilities(&self) -> Option<Vec<Ability>> {
 		match self {
 			Splat::Mortal => None,
-			Splat::Vampire(..) => Some(Vec::from(Discipline::all().map(Into::into))),
-			Splat::Werewolf(..) => Some(Vec::from(Renown::all().map(Into::into))),
-			Splat::Mage(..) => Some(Vec::from(Arcanum::all().map(Into::into))),
+			Splat::Vampire(..) => Some(Discipline::all().into_iter().map(Into::into).collect()),
+			Splat::Werewolf(..) => Some(Renown::all().into_iter().map(Into::into).collect()),
+			Splat::Mage(..) => Some(Arcanum::all().into_iter().map(Into::into).collect()),
 			Splat::Changeling(..) => None,
 		}
 	}
