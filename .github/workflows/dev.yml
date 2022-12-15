@@ -83,7 +83,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: install
-          args: audit
+          args: cargo-audit
       
       - uses: actions-rs/clippy-check@v1
         with:
