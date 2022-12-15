@@ -55,3 +55,14 @@ impl From<Haunt> for Ability {
 		Ability::Haunt(val)
 	}
 }
+
+pub enum Key {
+	Beasts,
+	Blood,
+	Chance,
+	ColdWind,
+	Disease,
+	GraveDirt,
+	PyreFlame,
+	Stillness
+}

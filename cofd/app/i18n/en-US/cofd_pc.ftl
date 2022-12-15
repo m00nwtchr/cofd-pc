@@ -321,6 +321,51 @@ changeling = Changeling
 
 favored-regalia = Favored Regalia
 
+bound = Bound
+    .root = Root
+    .bloom = Bloom
+
+    .burden = Burden
+    .archetype = Krewe Archetype
+
+    .haunts = Haunts
+    .keys = Keys
+
+    .synergy = Synergy
+    .plasm = Plasm
+
+    .boneyard = Boneyard
+    .caul = Caul
+    .curse = Curse
+    .dirge = Dirge
+    .marinoette = Marionette
+    .memoria = Memoria
+    .oracle = Oracle
+    .rage = Rage
+    .shroud = Shroud
+    .tomb = Tomb
+
+    .beasts = Beasts
+    .blood = Blood
+    .chance = Chance
+    .cold_wind = Cold Wind
+    .disease = Disease
+    .grave_dirt = Grave-Dirt
+    .pyre_flame = Pyre-Flame
+    .stillness = Stillness
+
+    .abiding = Abiding
+    .bereaved = Bereaved
+    .hungry = Hungry
+    .kindly = Kindly
+    .vengeful = Vengeful
+
+    .furies = Furies
+    .mourners = Mourners
+    .necropolitans = Necropolitans
+    .pilgrims = Pilgrims
+    .undertakers = Undertakers
+
 age = Age
 dob = Date of Birth
 hair = Hair
