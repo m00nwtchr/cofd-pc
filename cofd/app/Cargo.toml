@@ -1,12 +1,12 @@
 [package]
 name = "cofd-pc"
-version = "0.1.0"
-edition = "2021"
+# version.workspace = true
+version = "1.0.0"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
 
 publish = false
-license = "MIT"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 log = "0.4"
@@ -40,7 +40,7 @@ once_cell = "1.4"
 
 anyhow = "1"
 
-cofd = { path = "../lib" }
+cofd.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 i18n-embed = { version = "0.13", features = ["desktop-requester"] }

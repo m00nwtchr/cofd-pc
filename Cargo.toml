@@ -2,6 +2,17 @@
 members = [ "cofd/*" ]
 resolver = "2"
 
+[workspace.package]
+version = "1.0.0"
+authors = ["m00n"]
+edition = "2021"
+license = "MPL"
+
+[workspace.dependencies]
+cofd = { path = "cofd/lib" }
+cofd-macros = { path = "cofd/macros" }
+cofd-traits = { path = "cofd/traits" }
+
 [profile.dev]
 incremental = false
 
