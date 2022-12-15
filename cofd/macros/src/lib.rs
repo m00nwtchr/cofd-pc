@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, quote_spanned};
 use syn::{
-	parse_macro_input, spanned::Spanned, AngleBracketedGenericArguments, Data, DeriveInput, Error,
-	Fields, GenericArgument, PathArguments, PathSegment, Type, Variant,
+	parse_macro_input, spanned::Spanned, Data, DeriveInput, Error,
+	Fields, GenericArgument, PathArguments, Type, Variant,
 };
 
 use convert_case::Casing;
@@ -206,7 +206,7 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
 		for variant in &data_enum.variants {
 			let variant_name = &variant.ident;
-			let variant_name_lower = variant_name.to_string().to_case(convert_case::Case::Snake);
+			let _variant_name_lower = variant_name.to_string().to_case(convert_case::Case::Snake);
 
 			args.clear();
 			parse_args(variant, &mut args);

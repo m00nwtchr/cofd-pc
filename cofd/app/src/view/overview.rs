@@ -15,7 +15,7 @@ use cofd::{
 		changeling::Regalia,
 		mage::{Ministry, Order},
 		werewolf::{
-			HuntersAspect, KuruthTrigger, KuruthTriggerSet, KuruthTriggers, Tribe, WerewolfData,
+			HuntersAspect, KuruthTrigger, KuruthTriggerSet, KuruthTriggers, Tribe,
 		},
 		Merit, Splat,
 	},

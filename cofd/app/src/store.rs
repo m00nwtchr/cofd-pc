@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use anyhow::anyhow;
+
 use cfg_if::cfg_if;
 
 pub struct Store {
@@ -47,7 +47,7 @@ impl Store {
 		store
 	}
 
-	pub fn get<T: for<'a> Deserialize<'a>>(&self, name: &str) -> anyhow::Result<Option<T>> {
+	pub fn get<T: for<'a> Deserialize<'a>>(&self, _name: &str) -> anyhow::Result<Option<T>> {
 		let val;
 
 		cfg_if! {
@@ -65,7 +65,7 @@ impl Store {
 		}
 	}
 
-	pub fn set<T: Serialize>(&self, name: &str, value: &T) -> anyhow::Result<()> {
+	pub fn set<T: Serialize>(&self, _name: &str, value: &T) -> anyhow::Result<()> {
 		let val = ron::ser::to_string(value)?;
 
 		cfg_if! {
