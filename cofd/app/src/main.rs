@@ -117,7 +117,7 @@ impl PlayerCompanionApp {
 		let characters: Vec<Character> = self
 			.store
 			.get("characters")?
-			.unwrap_or_else(|| demo::characters().to_vec());
+			.unwrap_or_else(|| demo::characters());
 
 		self.characters = characters
 			.into_iter()
@@ -150,7 +150,7 @@ impl Application for PlayerCompanionApp {
 		let mut self_ = Self {
 			state: State::CharacterList,
 			prev_state: Default::default(),
-			characters: demo::characters().map(|f| Rc::new(RefCell::new(f))).into(),
+			characters: Vec::new(),
 			store,
 			// custom_xsplats: vec![
 			// 	// My OC (Original Clan) (Do Not Steal)
@@ -273,11 +273,15 @@ fn main() -> iced::Result {
 // TODO: Add demo mortal.
 mod demo {
 
+	use std::{fs::File, io::Write};
+
 	use cofd::{
 		character::CharacterInfo,
 		prelude::*,
-		splat::{changeling::*, mage::*, vampire::*, werewolf::*, Merit, Splat},
+		splat::{changeling::*, geist::*, mage::*, vampire::*, werewolf::*, Merit, Splat},
 	};
+	use directories::ProjectDirs;
+	use ron::ser::PrettyConfig;
 
 	#[test]
 	pub fn save() -> anyhow::Result<()> {
@@ -297,7 +301,7 @@ mod demo {
 	}
 
 	#[allow(clippy::too_many_lines)]
-	pub fn characters() -> [Character; 5] {
+	pub fn characters() -> Vec<Character> {
 		let character = Character::builder().build();
 
 		let vampire_character = Character::builder()
@@ -578,12 +582,64 @@ mod demo {
 			.with_merits([])
 			.build();
 
-		[
+		let bound_character = Character::builder()
+			.with_splat(Splat::Bound(
+				Burden::Bereaved,
+				Archetype::Mourners,
+				// ,
+				// Box::new(ChangelingData {
+				// 	attr_bonus: Some(Attribute::Dexterity),
+				// 	regalia: Some(Regalia::Crown),
+				// 	contracts: vec![Default::default()],
+				// 	..Default::default()
+				// }),
+			))
+			.with_info(CharacterInfo {
+				// name: String::from("Darren Webb"),
+				player: String::from("m00n"),
+				// chronicle: String::from("Night Trains"),
+				// virtue_anchor: String::from("Scholar"),
+				// vice_anchor: String::from("Authoritarian"),
+				concept: String::from("Dancing with your Ghost // Lost and Found"),
+				..Default::default()
+			})
+			.with_attributes(Attributes {
+				intelligence: 3,
+				wits: 3,
+				resolve: 2,
+				strength: 2,
+				dexterity: 2,
+				stamina: 2,
+				presence: 2,
+				manipulation: 3,
+				composure: 2,
+				..Default::default()
+			})
+			.with_skills(Skills {
+				academics: 1,
+				computer: 1,
+				investigation: 3,
+				medicine: 2,
+				occult: 2,
+				politics: 1,
+				larceny: 1,
+				weaponry: 1,
+				empathy: 1,
+				persuasion: 1,
+				streetwise: 2,
+				subterfuge: 3,
+				..Default::default()
+			})
+			.with_merits([])
+			.build();
+
+		vec![
 			character,
 			vampire_character,
 			mage_character,
 			werewolf_character,
 			changeling_character,
+			bound_character,
 		]
 	}
 }
