@@ -283,7 +283,7 @@ mod demo {
 	use directories::ProjectDirs;
 	use ron::ser::PrettyConfig;
 
-	#[test]
+	// #[test]
 	pub fn save() -> anyhow::Result<()> {
 		let vec = characters();
 

@@ -1,4 +1,4 @@
-name: Deploy cofd-pc app
+name: Release
 
 on:
   push:
@@ -83,3 +83,34 @@ jobs:
           prerelease: false
           files: |
             target/release/cofd-pc
+            
+  # release-windows:
+  #   runs-on: windows-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - uses: actions-rs/toolchain@v1
+  #       with:
+  #         profile: minimal
+  #         toolchain: nightly
+  #         override: true
+
+  #     - name: Release build
+  #       uses: actions-rs/cargo@v1
+  #       with:
+  #         command: build
+  #         args: --release --all-features
+          
+  #     - name: Test
+  #       uses: actions-rs/cargo@v1
+  #       with:
+  #         command: test
+  #         args: --release --all-features
+          
+  #     - uses: "marvinpinto/action-automatic-releases@latest"
+  #       with:
+  #         repo_token: "${{ secrets.GITHUB_TOKEN }}"
+  #         prerelease: false
+  #         files: |
+  #           target/release/cofd-pc            
