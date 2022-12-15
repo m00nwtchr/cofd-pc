@@ -426,6 +426,12 @@ impl NameKey for MoonGift {
 	}
 }
 
+impl From<MoonGift> for Ability {
+	fn from(gift: MoonGift) -> Self {
+		Ability::MoonGift(gift)
+	}
+}
+
 #[derive(
 	Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, VariantName, AllVariants,
 )]

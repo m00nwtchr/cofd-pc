@@ -45,15 +45,18 @@ fn variant_fields(variant: &Variant) -> TokenStream {
 	}
 }
 
+type TokenStreams = (TokenStream, TokenStream, TokenStream, TokenStream);
+
 fn parse_variant_field(
 	variant: &Variant,
 	iter: &mut syn::punctuated::Iter<syn::Field>,
-	stream: &mut (TokenStream, TokenStream, TokenStream, TokenStream),
+	stream: &mut TokenStreams,
 	xyz: XYZ,
 	impls: &mut TokenStream,
 	args: &mut HashMap<String, TokenStream>,
 ) {
 	let variant_name = &variant.ident;
+	let variant_name_lower = variant_name.to_string().to_case(convert_case::Case::Snake);
 	if let Some(field) = iter.next() {
 		if let Type::Path(ty) = &field.ty {
 			if let Some(segment) = ty.path.segments.first() {
@@ -133,6 +136,11 @@ fn parse_variant_field(
 								#name::#variant_name(val)
 							}
 						}
+						impl NameKey for #ty {
+							fn name_key(&self) -> String {
+								format!("{}.{}", #variant_name_lower, self.name())
+							}
+						}
 					});
 				}
 			}
@@ -190,8 +198,6 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 	);
 
 	let mut impls = TokenStream::new();
-
-	let mut name_keys = TokenStream::new();
 
 	let mut variants_map = HashMap::new();
 
@@ -271,12 +277,6 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
 			gen_match_arm("fuel", true);
 			gen_match_arm("integrity", false);
-
-			if let Fields::Unnamed(_) = &variant.fields {
-				name_keys.extend(quote! {
-					Self::#variant_name(val) => format!("{}.{}", #variant_name_lower, val.name()),
-				});
-			}
 		}
 	} else {
 		return derive_error!("SplatEnum is only implemented for enums");
@@ -409,41 +409,20 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 			}
 		}
 
-		#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
+		#[derive(Debug, Clone, PartialEq, Eq, VariantName, NameKey)]
 		pub enum XSplat {
 			#xsplats
 		}
-		#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
+		#[derive(Debug, Clone, PartialEq, Eq, VariantName, NameKey)]
 		pub enum YSplat {
 			#ysplats
 		}
-		#[derive(Debug, Clone, PartialEq, Eq, VariantName)]
+		#[derive(Debug, Clone, PartialEq, Eq, VariantName, NameKey)]
 		pub enum ZSplat {
 			#zsplats
 		}
-		#impls
 
-		impl NameKey for XSplat {
-			fn name_key(&self) -> String {
-				match self {
-					#name_keys
-				}
-			}
-		}
-		impl NameKey for YSplat {
-			fn name_key(&self) -> String {
-				match self {
-					#name_keys
-				}
-			}
-		}
-		impl NameKey for ZSplat {
-			fn name_key(&self) -> String {
-				match self {
-					#name_keys
-				}
-			}
-		}
+		#impls
 	};
 
 	proc_macro::TokenStream::from(expanded)
@@ -641,6 +620,40 @@ pub fn derive_all_variants(input: proc_macro::TokenStream) -> proc_macro::TokenS
 			}
 		}
 		#all_vec
+	};
+
+	proc_macro::TokenStream::from(expanded)
+}
+
+#[proc_macro_derive(NameKey, attributes(expand))]
+pub fn derive_name_key(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let input = parse_macro_input!(input as DeriveInput);
+
+	let name = &input.ident;
+	let data = &input.data;
+
+	let mut match_cases = TokenStream::new();
+
+	if let Data::Enum(data) = data {
+		for variant in &data.variants {
+			let variant_name = &variant.ident;
+
+			match_cases.extend(quote_spanned! {variant.span()=>
+				#name::#variant_name(val) => val.name_key(),
+			});
+		}
+	}
+
+	let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+
+	let expanded = quote! {
+		impl #impl_generics NameKey for #name #ty_generics #where_clause {
+			fn name_key(&self) -> String {
+				match self {
+					#match_cases
+				}
+			}
+		}
 	};
 
 	proc_macro::TokenStream::from(expanded)

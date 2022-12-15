@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use cofd_traits::VariantName;
 
 use super::{
+	geist::Haunt,
 	mage::Arcanum,
 	vampire::Discipline,
 	werewolf::{MoonGift, Renown},
@@ -22,6 +23,8 @@ pub enum Ability {
 	MoonGift(MoonGift),
 	#[expand]
 	Arcanum(Arcanum),
+	#[expand]
+	Haunt(Haunt),
 }
 
 impl Ability {
@@ -38,9 +41,8 @@ impl Ability {
 		match self {
 			Ability::Merit(merit) => merit.get_modifiers(value),
 			Ability::Discipline(discipline) => discipline.get_modifiers(value),
-			Ability::Renown(_renown) => vec![],
 			Ability::MoonGift(moon_gift) => moon_gift.get_modifiers(value),
-			Ability::Arcanum(_arcanum) => vec![],
+			_ => vec![],
 		}
 	}
 
@@ -60,8 +62,9 @@ impl NameKey for Ability {
 			Ability::Merit(merit) => format!("merit.{}", merit.name()),
 			Ability::Discipline(discipline) => format!("vampire.{}", discipline.name()),
 			Ability::Renown(renown) => format!("werewolf.{}", renown.name()),
-			Ability::MoonGift(moon_gift) => format!("werewolf.{}", moon_gift.name()),
+			Ability::MoonGift(moon_gift) => moon_gift.name_key(),
 			Ability::Arcanum(arcanum) => arcanum.name_key(),
+			Ability::Haunt(haunt) => format!("geist.{}", haunt.name()),
 		}
 	}
 }

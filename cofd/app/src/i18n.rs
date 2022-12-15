@@ -57,7 +57,6 @@ pub fn fl(message_id: &str, attribute: Option<&str>) -> Option<String> {
 			}
 		}
 	});
-	// println!("{}.{:?}", message_id, attribute);
 	message.take()
 }
 

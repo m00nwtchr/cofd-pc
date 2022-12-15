@@ -6,7 +6,7 @@ use crate::{
 	prelude::{Attribute, Character},
 };
 
-use cofd_traits::{AllVariants, SplatEnum, VariantName};
+use cofd_traits::{AllVariants, NameKey, SplatEnum, VariantName};
 
 pub mod ability;
 
@@ -16,7 +16,7 @@ pub mod werewolf;
 // pub mod promethean;
 pub mod changeling;
 // pub mod hunter;
-// pub mod geist;
+pub mod geist;
 // pub mod mummy;
 // pub mod demon;
 // pub mod beast;
@@ -28,7 +28,7 @@ use werewolf::*;
 // use promethean::*;
 use changeling::*;
 // use hunter::*;
-// use geist::*;
+use geist::*;
 // use mummy::*;
 // use demon::*;
 // use beast::*;
@@ -83,7 +83,16 @@ pub enum Splat {
 	)]
 	Changeling(Seeming, Option<Court>, Option<Kith>, Box<ChangelingData>),
 	// Hunter(Tier),
-	// Bound(Burden, Archetype),
+	#[splat(
+		virtue_anchor = "root",
+		vice_anchor = "bloom",
+		ability = "haunts",
+		st = "synergy",
+		fuel = "plasm",
+		integrity = "synergy",
+		abilities_finite = false
+	)]
+	Bound(Burden, Archetype),
 	// Mummy(Decree, Guild),
 	// Demon(Incarnation, Vec<Agenda>),
 	// Beast(Hunger),
@@ -123,6 +132,9 @@ impl Splat {
 			Self::Changeling(..) => {
 				Some(Seeming::_Custom(name, Regalia::Crown, AttributeType::Power).into())
 			}
+			Self::Bound(..) => {
+				Some(Burden::_Custom(name, [Haunt::Boneyard, Haunt::Caul, Haunt::Curse]).into())
+			}
 		}
 	}
 
@@ -146,36 +158,36 @@ impl Splat {
 				Order::_Custom(name, [Skill::Academics, Skill::AnimalKen, Skill::Athletics]).into(),
 			),
 			Self::Changeling(..) => Some(Court::_Custom(name).into()),
+			Self::Bound(..) => Some(Archetype::_Custom(name).into()),
 		}
 	}
 
 	pub fn custom_zsplat(&self, name: String) -> Option<ZSplat> {
 		match self {
-			Splat::Mortal => None,
 			Splat::Vampire(..) => Some(Bloodline::_Custom(name, None).into()),
 			Splat::Werewolf(..) => Some(Lodge::_Custom(name).into()),
 			Splat::Mage(..) => Some(Legacy::_Custom(name, None).into()),
 			Splat::Changeling(..) => Some(Kith::_Custom(name).into()),
+			_ => None,
 		}
 	}
 
 	pub fn all_abilities(&self) -> Option<Vec<Ability>> {
 		match self {
-			Splat::Mortal => None,
 			Splat::Vampire(..) => Some(Discipline::all().into_iter().map(Into::into).collect()),
 			Splat::Werewolf(..) => Some(Renown::all().into_iter().map(Into::into).collect()),
 			Splat::Mage(..) => Some(Arcanum::all().into_iter().map(Into::into).collect()),
-			Splat::Changeling(..) => None,
+			Splat::Bound(..) => Some(Haunt::all().into_iter().map(Into::into).collect()),
+			_ => None,
 		}
 	}
 
 	pub fn custom_ability(&self, name: String) -> Option<Ability> {
 		match self {
-			Splat::Mortal => None,
-			Splat::Vampire(..) => Some(Ability::Discipline(Discipline::_Custom(name))),
-			Splat::Werewolf(..) => Some(Ability::MoonGift(MoonGift::_Custom(name))),
-			Splat::Mage(..) => None,
-			Splat::Changeling(..) => None,
+			Splat::Vampire(..) => Some(Discipline::_Custom(name).into()),
+			Splat::Werewolf(..) => Some(MoonGift::_Custom(name).into()),
+			Splat::Bound(..) => Some(Haunt::_Custom(name).into()),
+			_ => None,
 		}
 	}
 
@@ -195,6 +207,7 @@ impl Splat {
 			Self::Werewolf(..) => WerewolfMerit::all().map(Into::into).to_vec(),
 			Self::Mage(..) => MageMerit::all().map(Into::into).to_vec(),
 			Self::Changeling(..) => ChangelingMerit::all().map(Into::into).to_vec(),
+			Self::Bound(..) => vec![],
 		}
 	}
 }
@@ -205,7 +218,8 @@ impl XSplat {
 			Self::Vampire(Clan::_Custom(name, ..))
 			| Self::Werewolf(Auspice::_Custom(name, ..))
 			| Self::Mage(Path::_Custom(name, ..))
-			| Self::Changeling(Seeming::_Custom(name, ..)) => Some(name),
+			| Self::Changeling(Seeming::_Custom(name, ..))
+			| Self::Bound(Burden::_Custom(name, ..)) => Some(name),
 			_ => None,
 		}
 	}
@@ -217,6 +231,7 @@ impl XSplat {
 				| Self::Werewolf(Auspice::_Custom(..))
 				| Self::Mage(Path::_Custom(..))
 				| Self::Changeling(Seeming::_Custom(..))
+				| Self::Bound(Burden::_Custom(..))
 		)
 	}
 }
@@ -225,11 +240,13 @@ impl YSplat {
 	pub fn name_mut(&mut self) -> Option<&mut String> {
 		match self {
 			Self::Vampire(Covenant::_Custom(name))
-			| Self::Werewolf(Tribe::_Custom(name, _, _))
+			| Self::Werewolf(Tribe::_Custom(name, ..))
 			| Self::Mage(
-				Order::_Custom(name, _) | Order::SeersOfTheThrone(Some(Ministry::_Custom(name, _))),
+				Order::_Custom(name, ..)
+				| Order::SeersOfTheThrone(Some(Ministry::_Custom(name, ..))),
 			)
-			| Self::Changeling(Court::_Custom(name)) => Some(name),
+			| Self::Changeling(Court::_Custom(name))
+			| Self::Bound(Archetype::_Custom(name, ..)) => Some(name),
 			_ => None,
 		}
 	}
@@ -237,11 +254,12 @@ impl YSplat {
 	pub fn is_custom(&self) -> bool {
 		matches!(
 			self,
-			YSplat::Vampire(Covenant::_Custom(_))
-				| YSplat::Werewolf(Tribe::_Custom(_, _, _))
+			YSplat::Vampire(Covenant::_Custom(..))
+				| YSplat::Werewolf(Tribe::_Custom(..))
 				| YSplat::Mage(
-					Order::_Custom(_, _) | Order::SeersOfTheThrone(Some(Ministry::_Custom(_, _))),
-				) | YSplat::Changeling(Court::_Custom(_))
+					Order::_Custom(..) | Order::SeersOfTheThrone(Some(Ministry::_Custom(..))),
+				) | YSplat::Changeling(Court::_Custom(..))
+				| Self::Bound(Archetype::_Custom(..))
 		)
 	}
 }
@@ -249,9 +267,9 @@ impl YSplat {
 impl ZSplat {
 	pub fn name_mut(&mut self) -> Option<&mut String> {
 		match self {
-			ZSplat::Vampire(Bloodline::_Custom(name, _))
+			ZSplat::Vampire(Bloodline::_Custom(name, ..))
 			| ZSplat::Werewolf(Lodge::_Custom(name))
-			| ZSplat::Mage(Legacy::_Custom(name, _))
+			| ZSplat::Mage(Legacy::_Custom(name, ..))
 			| ZSplat::Changeling(Kith::_Custom(name)) => Some(name),
 			_ => None,
 		}
@@ -260,10 +278,10 @@ impl ZSplat {
 	pub fn is_custom(&self) -> bool {
 		matches!(
 			self,
-			ZSplat::Vampire(Bloodline::_Custom(_, _))
-				| ZSplat::Werewolf(Lodge::_Custom(_))
-				| ZSplat::Mage(Legacy::_Custom(_, _))
-				| ZSplat::Changeling(Kith::_Custom(_))
+			ZSplat::Vampire(Bloodline::_Custom(..))
+				| ZSplat::Werewolf(Lodge::_Custom(..))
+				| ZSplat::Mage(Legacy::_Custom(..))
+				| ZSplat::Changeling(Kith::_Custom(..))
 		)
 	}
 }
