@@ -39,16 +39,16 @@ jobs:
     - uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --verbose
+        args: --verbose --all-features --profile=coverage -Zunstable-options
       env:
         CARGO_INCREMENTAL: '0'
-        RUSTFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=unwind -Zpanic_abort_tests'
+        RUSTFLAGS: '-Zprofile'
         RUSTDOCFLAGS: '-Cpanic=abort'
 
     - uses: actions-rs/cargo@v1
       with:
         command: test
-        args: --verbose  
+        args: --verbose --no-fail-fast --all-features --profile=coverage -Zunstable-options
     
     - id: coverage  
       uses: actions-rs/grcov@v0.1
