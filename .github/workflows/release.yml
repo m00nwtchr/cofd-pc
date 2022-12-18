@@ -23,6 +23,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -53,11 +54,20 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v1
 
-  release:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        config:
+          - os: ubuntu-latest
+            path: target/release/cofd-pc
+          - os: windows-latest
+            path: target\release\cofd-pc.exe
+    name: Build ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -65,7 +75,7 @@ jobs:
           toolchain: nightly
           override: true
 
-      - name: Release build
+      - name: Build
         uses: actions-rs/cargo@v1
         with:
           command: build
@@ -77,40 +87,21 @@ jobs:
           command: test
           args: --release --all-features
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: actions/upload-artifact@master
+        with:
+          name: ${{ matrix.config.os }}-bin
+          path: ${{ matrix.config.path }}
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          files: |
-            target/release/cofd-pc
-
-  # release-windows:
-  #   runs-on: windows-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-
-  #     - uses: actions-rs/toolchain@v1
-  #       with:
-  #         profile: minimal
-  #         toolchain: nightly
-  #         override: true
-
-  #     - name: Release build
-  #       uses: actions-rs/cargo@v1
-  #       with:
-  #         command: build
-  #         args: --release --all-features
-          
-  #     - name: Test
-  #       uses: actions-rs/cargo@v1
-  #       with:
-  #         command: test
-  #         args: --release --all-features
-          
-  #     - uses: "marvinpinto/action-automatic-releases@latest"
-  #       with:
-  #         repo_token: "${{ secrets.GITHUB_TOKEN }}"
-  #         prerelease: false
-  #         files: |
-  #           target/release/cofd-pc            
+          files: artifacts/*-bin/*

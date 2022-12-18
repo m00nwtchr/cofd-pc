@@ -14,9 +14,7 @@ use cofd::{
 		ability::Ability,
 		changeling::Regalia,
 		mage::{Ministry, Order},
-		werewolf::{
-			HuntersAspect, KuruthTrigger, KuruthTriggerSet, KuruthTriggers, Tribe,
-		},
+		werewolf::{HuntersAspect, KuruthTrigger, KuruthTriggerSet, KuruthTriggers, Tribe},
 		Merit, Splat,
 	},
 };
@@ -662,6 +660,9 @@ where
 
 		match &character.splat {
 			Splat::Mortal => {}
+			Splat::Bound(..) => {
+				col2 = col2.push(fuel);
+			}
 			_ => {
 				col2 = col2.push(st).push(fuel);
 			}
@@ -700,6 +701,12 @@ where
 					.push(aspirations)
 					.push(conditions);
 				col2 = col2.push(traits);
+			}
+			Splat::Bound(..) => {
+				col1 = col1.push(merits)
+				// Keys
+				.push(abilities);
+				col2 = col2.push(aspirations);
 			}
 			_ => {
 				col1 = col1.push(merits).push(traits);

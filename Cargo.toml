@@ -30,8 +30,6 @@ opt-level = 'z'
 # optimization for size
 # opt-level = 's'
 
-cargo-features = ["named-profiles"]
-
 [profile.coverage]
 panic = "abort"
 opt-level = 0
