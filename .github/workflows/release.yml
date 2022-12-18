@@ -6,7 +6,7 @@ on:
       - "v*"
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -70,20 +70,20 @@ jobs:
         with:
           command: build
           args: --release --all-features
-          
+
       - name: Test
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: --release --all-features
-          
+
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
             target/release/cofd-pc
-            
+
   # release-windows:
   #   runs-on: windows-latest
   #   steps:
