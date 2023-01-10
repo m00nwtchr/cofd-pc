@@ -15,7 +15,7 @@ use crate::{
 		dots::{Shape, SheetDots},
 		track::HealthTrack,
 	},
-	Element, COMPONENT_SPACING, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
+	Element, COMPONENT_SPACING, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING, i18n::flt,
 };
 
 use super::list;
@@ -140,13 +140,13 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 			.into()
 		};
 
-		let label = text(fl(character.splat.name(), Some(character.splat.integrity())).unwrap())
+		let label = text(flt(character.splat.name(), Some(character.splat.integrity())).unwrap())
 			.size(H3_SIZE);
 
 		if let Splat::Werewolf(..) = character.splat {
 			col = col.push(
 				column![
-					text(fl(character.splat.name(), Some("flesh-touchstone")).unwrap())
+					text(fl!("werewolf", "flesh-touchstone"))
 						.size(H3_SIZE),
 					column![text_input(
 						"",
@@ -171,7 +171,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 			Splat::Werewolf(..) => {
 				col = col.push(
 					column![
-						text(fl(character.splat.name(), Some("spirit-touchstone")).unwrap())
+						text(fl!("werewolf", "spirit-touchstone"))
 							.size(H3_SIZE),
 						column![text_input(
 							"",

@@ -12,8 +12,8 @@ use cofd::{
 };
 
 use crate::{
-	fl as flt,
-	i18n::fl,
+	fl,
+	i18n::flt,
 	widget::dots::{Shape, SheetDots},
 	Element, H2_SIZE, TITLE_SPACING,
 };
@@ -60,7 +60,7 @@ impl<Message> AttributeBar<Message> {
 			let val = character._modified(ModifierTarget::BaseAttribute(attr));
 			let mod_ = val - v;
 
-			col1 = col1.push(text(fl("attribute", Some(attr.name())).unwrap()));
+			col1 = col1.push(text(flt("attribute", Some(attr.name())).unwrap()));
 			col2 = col2.push(SheetDots::new(
 				val,
 				1 + mod_,
@@ -90,12 +90,12 @@ impl<Message> Component<Message, iced::Renderer> for AttributeBar<Message> {
 		let character = self.character.borrow();
 
 		column![
-			text(flt!("attributes")).size(H2_SIZE),
+			text(fl!("attributes")).size(H2_SIZE),
 			row![
 				column![
-					text(fl("attribute", Some("power")).unwrap()),
-					text(fl("attribute", Some("finesse")).unwrap()),
-					text(fl("attribute", Some("resistance")).unwrap())
+					text(fl!("attribute", "power")),
+					text(fl!("attribute", "finesse")),
+					text(fl!("attribute", "resistance"))
 				]
 				.spacing(3)
 				.width(Length::Fill)

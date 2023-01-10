@@ -36,7 +36,7 @@ macro_rules! fl {
     }};
 }
 
-pub fn fl(message_id: &str, attribute: Option<&str>) -> Option<String> {
+pub fn flt(message_id: &str, attribute: Option<&str>) -> Option<String> {
 	let mut message = OnceCell::new();
 	LANGUAGE_LOADER.with_bundles_mut(|bundle| {
 		if message.get().is_none() {
@@ -66,7 +66,7 @@ pub fn fll(key: &str) -> Option<String> {
 	let message_id = iter.next().unwrap();
 	let attribute = iter.next();
 
-	fl(message_id, attribute)
+	flt(message_id, attribute)
 }
 
 // #[derive(Debug, Clone, PartialEq, Eq)]
@@ -131,7 +131,7 @@ impl<T: NameKey> fmt::Display for Translated<T> {
 		write!(
 			f,
 			"{}",
-			fl(msg_id, attr).unwrap_or_else(|| if let Some(name) = attr {
+			flt(msg_id, attr).unwrap_or_else(|| if let Some(name) = attr {
 				name.to_string()
 			} else {
 				name_key.to_string()

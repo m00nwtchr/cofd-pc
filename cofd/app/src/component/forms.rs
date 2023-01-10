@@ -7,7 +7,7 @@ use iced::{
 };
 use iced_lazy::Component;
 
-use crate::{fl, Element, INPUT_PADDING};
+use crate::{fl, i18n::flt, Element, INPUT_PADDING};
 use cofd::{
 	character::{ModifierTarget, Trait},
 	prelude::*,
@@ -86,11 +86,11 @@ impl<Message> FormsComponent<Message> {
 				| ModifierTarget::Skill(_) => unreachable!(),
 				ModifierTarget::Attribute(attr) => (
 					*attrs.get(attr) as i16,
-					fl("attribute", Some(attr.name())).unwrap(),
+					flt("attribute", Some(attr.name())).unwrap(),
 				),
 				ModifierTarget::Trait(trait_) => (
 					character.get_trait(trait_) as i16,
-					fl(trait_.name().unwrap(), None).unwrap(),
+					flt(trait_.name().unwrap(), None).unwrap(),
 				),
 			};
 
@@ -120,7 +120,7 @@ impl<Message> FormsComponent<Message> {
 
 		column![
 			button(
-				text(fl("werewolf", Some(form.name())).unwrap())
+				text(flt("werewolf", Some(form.name())).unwrap())
 					.width(Length::Fill)
 					.horizontal_alignment(alignment::Horizontal::Center)
 			)

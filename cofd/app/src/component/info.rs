@@ -13,8 +13,8 @@ use cofd::{
 };
 
 use crate::{
-	fl as fll,
-	i18n::{fl, Translated},
+	fl,
+	i18n::{flt, Translated},
 	Element, INPUT_PADDING,
 };
 
@@ -79,7 +79,7 @@ impl<Message> InfoBar<Message> {
 				_ => (_trait.name(), None),
 			};
 
-			col1 = col1.push(text(format!("{}:", fl(msg, attribute).unwrap())));
+			col1 = col1.push(text(format!("{}:", flt(msg, attribute).unwrap())));
 			col2 = col2.push(
 				text_input("", character.info.get(_trait), move |val| {
 					Event::InfoTraitChanged(val, _trait)
@@ -145,13 +145,13 @@ impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
 				let mut ysplats = character.splat.ysplats();
 				let mut zsplats = character.splat.zsplats();
 
-				if let Some(xsplat) = character.splat.custom_xsplat(fll!("custom")) {
+				if let Some(xsplat) = character.splat.custom_xsplat(fl!("custom")) {
 					xsplats.push(xsplat);
 				}
-				if let Some(ysplat) = character.splat.custom_ysplat(fll!("custom")) {
+				if let Some(ysplat) = character.splat.custom_ysplat(fl!("custom")) {
 					ysplats.push(ysplat);
 				}
-				if let Some(zsplat) = character.splat.custom_zsplat(fll!("custom")) {
+				if let Some(zsplat) = character.splat.custom_zsplat(fl!("custom")) {
 					zsplats.push(zsplat);
 				}
 
@@ -219,15 +219,15 @@ impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
 					column![
 						text(format!(
 							"{}:",
-							fl(character.splat.name(), character.splat.xsplat_name()).unwrap()
+							flt(character.splat.name(), character.splat.xsplat_name()).unwrap()
 						)),
 						text(format!(
 							"{}:",
-							fl(character.splat.name(), character.splat.ysplat_name()).unwrap()
+							flt(character.splat.name(), character.splat.ysplat_name()).unwrap()
 						)),
 						text(format!(
 							"{}:",
-							fl(character.splat.name(), character.splat.zsplat_name()).unwrap()
+							flt(character.splat.name(), character.splat.zsplat_name()).unwrap()
 						))
 					]
 					.spacing(3),

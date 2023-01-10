@@ -15,8 +15,8 @@ use cofd::{
 };
 
 use crate::{
-	fl as flt,
-	i18n::fl,
+	fl,
+	i18n::flt,
 	widget::dots::{Shape, SheetDots},
 	Element, H2_SIZE, H3_SIZE, TITLE_SPACING,
 };
@@ -100,7 +100,7 @@ impl<Message> SkillsComponent<Message> {
 			}
 
 			col1 = col1.push(
-				button(text(fl("skill", Some(skill.name())).unwrap()))
+				button(text(flt("skill", Some(skill.name())).unwrap()))
 					.padding(0)
 					.style(theme::Button::Text)
 					.on_press(Event::SpecialtySkillChanged(skill)),
@@ -141,8 +141,8 @@ impl<Message> SkillsComponent<Message> {
 		col = col.push(row![col0, col1, col2].spacing(5));
 
 		column![
-			text(fl(cat.name(), None).unwrap()).size(H3_SIZE),
-			text(flt!("unskilled", num = cat.unskilled())).size(17),
+			text(flt(cat.name(), None).unwrap()).size(H3_SIZE),
+			text(fl!("unskilled", num = cat.unskilled())).size(17),
 			col
 		]
 		.spacing(TITLE_SPACING)
@@ -174,7 +174,7 @@ impl<Message> Component<Message, iced::Renderer> for SkillsComponent<Message> {
 		let character = self.character.borrow();
 
 		column![
-			text(flt!("skills").to_uppercase()).size(H2_SIZE),
+			text(fl!("skills").to_uppercase()).size(H2_SIZE),
 			self.mk_skill_col(state, &character, &TraitCategory::Mental),
 			self.mk_skill_col(state, &character, &TraitCategory::Physical),
 			self.mk_skill_col(state, &character, &TraitCategory::Social),

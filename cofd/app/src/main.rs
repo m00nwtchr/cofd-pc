@@ -31,7 +31,7 @@ mod store;
 mod view;
 mod widget;
 
-use i18n::fl;
+use i18n::flt;
 use store::Store;
 
 #[derive(Debug, Clone)]

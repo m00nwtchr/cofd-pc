@@ -18,8 +18,8 @@ use cofd::{
 
 use crate::{
 	component::{self, list},
-	fl as fll,
-	i18n::{fl, Translated},
+	fl,
+	i18n::{flt, Translated},
 	widget::dots::{Shape, SheetDots},
 	Element, H2_SIZE, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
 };
@@ -230,7 +230,7 @@ where
 				.collect();
 
 			let shadow_gifts = list(
-				fll!("shadow-gifts"),
+				fl!("shadow-gifts"),
 				data.shadow_gifts.len() + 1,
 				data.shadow_gifts.clone(),
 				{
@@ -246,7 +246,7 @@ where
 			);
 
 			let wolf_gifts = list(
-				fll!("wolf-gifts"),
+				fl!("wolf-gifts"),
 				data.wolf_gifts.len() + 1,
 				data.wolf_gifts.clone(),
 				{
@@ -272,9 +272,9 @@ where
 					.unwrap();
 
 				column![
-					text(fll!("moon-gifts")).size(H3_SIZE),
+					text(fl!("moon-gifts")).size(H3_SIZE),
 					row![
-						text(fl("moon-gifts", Some(gift.name())).unwrap()),
+						text(flt("moon-gifts", Some(gift.name())).unwrap()),
 						SheetDots::new(val, 0, 5, Shape::Dots, None, |_| Event::Msg)
 							.width(Length::Shrink)
 					]
@@ -292,7 +292,7 @@ where
 		};
 
 		let rites = if let Splat::Werewolf(.., data) = &character.splat {
-			let list = list(fll!("rites"), data.rites.len() + 1, data.rites.clone(), {
+			let list = list(fl!("rites"), data.rites.len() + 1, data.rites.clone(), {
 				move |i, rite| {
 					if let Some(Rite::_Custom(name)) = rite {
 						text_input("", &name, move |val| {
@@ -301,7 +301,7 @@ where
 						.into()
 					} else {
 						pick_list(
-							vec![Rite::_Custom(fll!("custom")).into()],
+							vec![Rite::_Custom(fl!("custom")).into()],
 							rite.map(Into::into),
 							move |val: Translated<Rite>| Event::RiteChanged(i, val.unwrap()),
 						)

@@ -9,7 +9,7 @@ use cofd::{
 	prelude::*,
 };
 
-use crate::{fl, Element, INPUT_PADDING};
+use crate::{fl, Element, INPUT_PADDING, i18n::flt};
 
 struct Traits {
 	size: u16,
@@ -94,7 +94,7 @@ impl<Message> Component<Message, iced::Renderer> for TraitsComponent<Message> {
 			row![
 				text(format!(
 					"{}:",
-					fl(&self.traits.splat, Some("beats")).unwrap()
+					flt(&self.traits.splat, Some("beats")).unwrap()
 				)),
 				text_input("", &format!("{}", self.traits.alternate_beats), |val| {
 					Event(val, Trait::AlternateBeats)
@@ -108,7 +108,7 @@ impl<Message> Component<Message, iced::Renderer> for TraitsComponent<Message> {
 		let alternate_xp = if !self.traits.alt_opt {
 			row![text(format!(
 				"{}: {}",
-				fl(&self.traits.splat, Some("experience")).unwrap(),
+				flt(&self.traits.splat, Some("experience")).unwrap(),
 				self.traits.alternate_experience
 			)),]
 		} else {

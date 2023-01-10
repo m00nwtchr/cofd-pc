@@ -25,16 +25,9 @@ use crate::{
 		traits_component,
 	},
 	fl,
-	i18n::Translated,
-	// i18n::fl,
+	i18n::{flt, Translated},
 	widget::{dots::Shape, dots::SheetDots, track::HealthTrack},
-	Element,
-	COMPONENT_SPACING,
-	H2_SIZE,
-	H3_SIZE,
-	INPUT_PADDING,
-	MAX_INPUT_WIDTH,
-	TITLE_SPACING,
+	Element, COMPONENT_SPACING, H2_SIZE, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
 };
 
 pub struct OverviewTab<Message> {
@@ -114,7 +107,7 @@ impl<Message> OverviewTab<Message> {
 				for ability in abilities {
 					let val = character.get_ability_value(&ability).unwrap_or(&0);
 
-					col1 = col1.push(text(fl(splat_name, Some(&ability.name())).unwrap()));
+					col1 = col1.push(text(flt(splat_name, Some(&ability.name())).unwrap()));
 					col2 = col2.push(SheetDots::new(*val, 0, 5, Shape::Dots, None, move |val| {
 						Event::AbilityValChanged(ability.clone(), val)
 					}));
@@ -182,7 +175,7 @@ impl<Message> OverviewTab<Message> {
 
 			if let Some(name) = character.splat.ability_name() {
 				col = col
-					.push(text(fl(splat_name, Some(name)).unwrap()).size(H3_SIZE))
+					.push(text(flt(splat_name, Some(name)).unwrap()).size(H3_SIZE))
 					.push(column![row![col1, col2], new]);
 			}
 		}
@@ -373,7 +366,7 @@ where
 			});
 
 			column![
-				text(fl(character.splat.name(), Some(st)).unwrap()).size(H3_SIZE),
+				text(flt(character.splat.name(), Some(st)).unwrap()).size(H3_SIZE),
 				dots
 			]
 			.spacing(TITLE_SPACING)
@@ -393,7 +386,7 @@ where
 			);
 
 			column![
-				text(fl(character.splat.name(), Some(fuel)).unwrap()).size(H3_SIZE),
+				text(flt(character.splat.name(), Some(fuel)).unwrap()).size(H3_SIZE),
 				boxes
 			]
 			.spacing(TITLE_SPACING)
@@ -434,7 +427,7 @@ where
 
 		let obsessions = if let Splat::Mage(.., data) = &character.splat {
 			column![list(
-				fl("mage", Some("obsessions")).unwrap(),
+				flt("mage", Some("obsessions")).unwrap(),
 				5,
 				// match character.power {
 				// 	1..=2 => 1,
@@ -484,10 +477,10 @@ where
 					let name = data.triggers.name().unwrap();
 
 					let passive =
-						fl("kuruth-triggers", Some(&format!("{}-passive", name))).unwrap();
-					let common = fl("kuruth-triggers", Some(&format!("{}-common", name))).unwrap();
+						flt("kuruth-triggers", Some(&format!("{}-passive", name))).unwrap();
+					let common = flt("kuruth-triggers", Some(&format!("{}-common", name))).unwrap();
 					let specific =
-						fl("kuruth-triggers", Some(&format!("{}-specific", name))).unwrap();
+						flt("kuruth-triggers", Some(&format!("{}-specific", name))).unwrap();
 
 					(
 						text(passive).into(),
@@ -507,11 +500,11 @@ where
 					})
 					.width(Length::Fill)
 					.padding(INPUT_PADDING),
-					text(fl("werewolf", Some("passive")).unwrap()),
+					text(fl!("werewolf", "passive")),
 					passive,
-					text(fl("werewolf", Some("common")).unwrap()),
+					text(fl!("werewolf", "common")),
 					common,
-					text(fl("werewolf", Some("specific")).unwrap()),
+					text(fl!("werewolf", "specific")),
 					specific
 				]
 				.align_items(Alignment::Center)
@@ -531,7 +524,7 @@ where
 			let sg = seeming.get_favored_regalia();
 			let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
 
-			let seeming_regalia = text(fl(character.splat.name(), Some(sg.name())).unwrap());
+			let seeming_regalia = text(flt(character.splat.name(), Some(sg.name())).unwrap());
 
 			let regalia: Element<Event> = if let Some(Regalia::_Custom(name)) = &data.regalia {
 				text_input("", name, |val| Event::RegaliaChanged(Regalia::_Custom(val)))
@@ -566,7 +559,7 @@ where
 		let frailties: Element<Self::Event> = if let Splat::Changeling(.., data) = &character.splat
 		{
 			list(
-				fl("changeling", Some("frailties")).unwrap(),
+				fl!("changeling", "frailties"),
 				3,
 				data.frailties.clone(),
 				|i, val| {
@@ -583,18 +576,13 @@ where
 		};
 
 		let banes: Element<Self::Event> = if let Splat::Vampire(.., data) = &character.splat {
-			list(
-				fl("vampire", Some("banes")).unwrap(),
-				3,
-				data.banes.clone(),
-				|i, val| {
-					text_input("", &val.unwrap_or_default(), move |val| {
-						Event::SplatThingChanged(i, val)
-					})
-					.padding(INPUT_PADDING)
-					.into()
-				},
-			)
+			list(fl!("vampire", "banes"), 3, data.banes.clone(), |i, val| {
+				text_input("", &val.unwrap_or_default(), move |val| {
+					Event::SplatThingChanged(i, val)
+				})
+				.padding(INPUT_PADDING)
+				.into()
+			})
 			.into()
 		} else {
 			column![].into()
@@ -617,7 +605,7 @@ where
 
 				vec.push(HuntersAspect::_Custom(fl!("custom")).into());
 
-				let mut col = column![text(fl("werewolf", Some("hunters_aspect")).unwrap()),]
+				let mut col = column![text(fl!("werewolf", "hunters_aspect")),]
 					.align_items(Alignment::Center)
 					.spacing(TITLE_SPACING);
 
@@ -703,9 +691,10 @@ where
 				col2 = col2.push(traits);
 			}
 			Splat::Bound(..) => {
-				col1 = col1.push(merits)
-				// Keys
-				.push(abilities);
+				col1 = col1
+					.push(merits)
+					// Keys
+					.push(abilities);
 				col2 = col2.push(aspirations);
 			}
 			_ => {

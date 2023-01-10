@@ -8,7 +8,7 @@ use iced_lazy::Component;
 
 use cofd::prelude::*;
 
-use crate::{fl, Element};
+use crate::{fl, Element, i18n::flt};
 
 pub struct CharacterList<Message> {
 	characters: Vec<Rc<RefCell<Character>>>,
@@ -42,17 +42,17 @@ impl<Message> CharacterList<Message> {
 	}
 
 	fn mk_char(&self, i: usize, character: &Character) -> Element<Event> {
-		let mut subtitle = fl(character.splat.name(), None).unwrap();
+		let mut subtitle = flt(character.splat.name(), None).unwrap();
 
 		if let Some(ysplat) = character.splat.ysplat() {
 			subtitle = subtitle
-				+ " " + &fl(character.splat.name(), Some(ysplat.name()))
+				+ " " + &flt(character.splat.name(), Some(ysplat.name()))
 				.unwrap_or_else(|| ysplat.name().to_owned());
 		}
 
 		if let Some(xsplat) = character.splat.xsplat() {
 			subtitle = subtitle
-				+ " " + &fl(character.splat.name(), Some(xsplat.name()))
+				+ " " + &flt(character.splat.name(), Some(xsplat.name()))
 				.unwrap_or_else(|| xsplat.name().to_owned());
 		}
 
