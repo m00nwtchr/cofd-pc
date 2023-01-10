@@ -44,7 +44,7 @@ pub enum KuruthTriggers {
 impl NameKey for KuruthTriggers {
 	fn name_key(&self) -> String {
 		if let Some(name) = self.name() {
-			format!("kuruth-triggers.{}", name)
+			format!("kuruth-triggers.{name}")
 		} else {
 			"custom".to_string()
 		}
@@ -430,6 +430,15 @@ impl From<MoonGift> for Ability {
 	fn from(gift: MoonGift) -> Self {
 		Ability::MoonGift(gift)
 	}
+}
+
+pub enum Facet {
+	// Death
+	// ColdEmbrace,
+	// Barghest,
+	// MementoMori
+	// BoneGnaw
+	// EyesOfTheDead
 }
 
 #[derive(

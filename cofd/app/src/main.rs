@@ -379,7 +379,7 @@ mod demo {
 					),
 					2,
 				),
-				// AbilityVal(Ability::Merit(Merit::Contacts(String::new())), 2),
+				// (Merit::Contacts(String::new()), 2),
 				(Merit::SafePlace(String::new()), 3),
 				(Merit::Resources, 3),
 				(VampireMerit::NestGuardian.into(), 1),
