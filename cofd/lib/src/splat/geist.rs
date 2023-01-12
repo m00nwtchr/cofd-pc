@@ -1,6 +1,7 @@
+use cofd_traits::VariantName;
 use serde::{Deserialize, Serialize};
 
-use super::ability::Ability;
+use super::{ability::Ability, NameKey};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, AllVariants, VariantName)]
 pub enum Burden {
@@ -56,6 +57,7 @@ impl From<Haunt> for Ability {
 	}
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, AllVariants, VariantName)]
 pub enum Key {
 	Beasts,
 	Blood,
@@ -64,5 +66,16 @@ pub enum Key {
 	Disease,
 	GraveDirt,
 	PyreFlame,
-	Stillness
+	Stillness,
+}
+
+impl NameKey for Key {
+	fn name_key(&self) -> String {
+		format!("geist.{}", self.name())
+	}
+}
+
+#[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct BoundData {
+	pub keys: Vec<Key>,
 }
