@@ -15,11 +15,11 @@ pub mod dice_pool;
 pub mod splat;
 
 #[macro_use]
-extern crate cofd_traits;
+extern crate cofd_util;
 
 pub mod prelude {
 	pub use crate::character::{Attribute, Attributes, Character, Skill, Skills};
-	pub use cofd_traits::{AllVariants, VariantName};
+	pub use cofd_util::{AllVariants, VariantName};
 }
 
 #[cfg(test)]

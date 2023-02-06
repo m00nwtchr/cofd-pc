@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use cofd_traits::VariantName;
+use cofd_util::VariantName;
 
 use super::{
 	geist::Haunt,

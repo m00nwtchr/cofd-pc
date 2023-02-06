@@ -1,4 +1,4 @@
-use cofd_traits::VariantName;
+use cofd_util::VariantName;
 use serde::{Deserialize, Serialize};
 
 use super::{ability::Ability, NameKey};

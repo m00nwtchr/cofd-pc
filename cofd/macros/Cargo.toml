@@ -11,11 +11,10 @@ license.workspace = true
 proc-macro = true
 
 [dependencies]
+cofd-util.workspace = true
+
 proc-macro2 = "1"
 quote = "1"
 syn = "1"
 
-convert_case = "0.6"
-
 ron.workspace = true
-cofd-xtask.workspace = true

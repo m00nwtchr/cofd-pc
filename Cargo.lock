@@ -336,7 +336,8 @@ dependencies = [
 name = "cofd"
 version = "1.0.0"
 dependencies = [
- "cofd-traits",
+ "cofd-macros",
+ "cofd-util",
  "convert_case 0.6.0",
  "erased-serde",
  "ron",
@@ -344,11 +345,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "cofd-derive"
+version = "1.0.0"
+dependencies = [
+ "convert_case 0.6.0",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "cofd-macros"
 version = "1.0.0"
 dependencies = [
- "cofd-xtask",
- "convert_case 0.6.0",
+ "cofd-util",
  "proc-macro2",
  "quote",
  "ron",
@@ -382,21 +392,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "cofd-traits"
+name = "cofd-util"
 version = "1.0.0"
 dependencies = [
- "cofd-macros",
+ "cofd-derive",
+ "serde",
 ]
 
 [[package]]
 name = "cofd-xtask"
 version = "1.0.0"
 dependencies = [
+ "cofd-util",
  "convert_case 0.6.0",
  "reqwest",
  "ron",
  "scraper",
- "serde",
  "tokio",
 ]
 

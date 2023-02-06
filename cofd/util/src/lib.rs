@@ -1,10 +1,10 @@
 #![feature(generic_const_exprs)]
 
-extern crate cofd_macros;
+pub mod scraper;
 
-pub use cofd_macros::*;
+extern crate cofd_derive;
 
-// mod traits {
+pub use cofd_derive::*;
 
 pub trait VariantName {
 	fn name(&self) -> &str;
@@ -15,5 +15,3 @@ pub trait AllVariants {
 	const N: usize;
 	fn all() -> [Self::T; Self::N];
 }
-
-// pub use traits::*;

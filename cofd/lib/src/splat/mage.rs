@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use cofd_traits::{AllVariants, VariantName};
+use cofd_util::{AllVariants, VariantName};
 
 use super::{ability::Ability, Merit, NameKey, Splat};
 use crate::{

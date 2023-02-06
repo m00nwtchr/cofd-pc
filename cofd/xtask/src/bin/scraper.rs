@@ -1,5 +1,5 @@
 #![feature(iter_array_chunks)]
-use std::fs::{self, File};
+use std::fs;
 use std::path::Path;
 
 use convert_case::Casing;
@@ -7,7 +7,7 @@ use reqwest::Url;
 use ron::ser::PrettyConfig;
 use scraper::{ElementRef, Html, Selector};
 
-use cofd_xtask::scraper::*;
+use cofd_util::scraper::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -106,7 +106,11 @@ async fn download(url: &str) -> Result<(), Box<dyn std::error::Error>> {
 					}
 				} else if let Some(gift) = &mut gift {
 					let id = facet_name_to_id(&vec[0]);
-					gift.facets.push(Facet::new(id, vec[1].clone()));
+					
+					let str = vec[1].clone();
+					let try_parse = str.clone().parse::<u16>();
+					
+					gift.facets.push(Facet::new(id, try_parse.clone().ok(), try_parse.err().map(|_| str)));
 				}
 			}
 			if let Some(g) = gift {

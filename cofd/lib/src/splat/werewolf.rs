@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use cofd_traits::VariantName;
+use cofd_util::VariantName;
 
 use super::{ability::Ability, Merit, NameKey, Splat};
 use crate::{
@@ -377,7 +377,7 @@ impl From<Renown> for Ability {
 	}
 }
 
-cofd_traits::gifts!();
+cofd_macros::gifts!();
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Gift {

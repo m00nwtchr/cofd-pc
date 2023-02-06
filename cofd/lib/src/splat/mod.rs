@@ -6,7 +6,7 @@ use crate::{
 	prelude::{Attribute, Character},
 };
 
-use cofd_traits::{AllVariants, NameKey, SplatEnum, VariantName};
+use cofd_util::{AllVariants, NameKey, SplatEnum, VariantName};
 
 pub mod ability;
 
