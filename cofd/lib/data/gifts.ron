@@ -1,0 +1,730 @@
+[
+    (
+        name: "Crescent",
+        typek: "Moon",
+        facets: [
+            (
+                name: "ShadowGaze",
+                f: "•",
+            ),
+            (
+                name: "SpiritWhispers",
+                f: "••",
+            ),
+            (
+                name: "ShadowHunter",
+                f: "•••",
+            ),
+            (
+                name: "ShadowMasquerade",
+                f: "••••",
+            ),
+            (
+                name: "Panopticon",
+                f: "•••••",
+            ),
+        ],
+    ),
+    (
+        name: "Full",
+        typek: "Moon",
+        facets: [
+            (
+                name: "KillerInstinct",
+                f: "•",
+            ),
+            (
+                name: "WarriorsHide",
+                f: "••",
+            ),
+            (
+                name: "BloodyHandedHunter",
+                f: "•••",
+            ),
+            (
+                name: "Butchery",
+                f: "••••",
+            ),
+            (
+                name: "CrimsonSpasm",
+                f: "•••••",
+            ),
+        ],
+    ),
+    (
+        name: "Gibbous",
+        typek: "Moon",
+        facets: [
+            (
+                name: "WarHowl",
+                f: "•",
+            ),
+            (
+                name: "VoiceOfGlory",
+                f: "••",
+            ),
+            (
+                name: "DreamHunter",
+                f: "•••",
+            ),
+            (
+                name: "ThousandThroatHowl",
+                f: "••••",
+            ),
+            (
+                name: "EndOfStory",
+                f: "•••••",
+            ),
+        ],
+    ),
+    (
+        name: "Half",
+        typek: "Moon",
+        facets: [
+            (
+                name: "ScentBeneathTheSurface",
+                f: "•",
+            ),
+            (
+                name: "BindingOath",
+                f: "••",
+            ),
+            (
+                name: "SlyHunter",
+                f: "•••",
+            ),
+            (
+                name: "TiesOfWordAndPromise",
+                f: "••••",
+            ),
+            (
+                name: "TiesOfBloodAndBone",
+                f: "•••••",
+            ),
+        ],
+    ),
+    (
+        name: "New",
+        typek: "Moon",
+        facets: [
+            (
+                name: "Eviscerate",
+                f: "•",
+            ),
+            (
+                name: "SlipAway",
+                f: "••",
+            ),
+            (
+                name: "RelentlessHunter",
+                f: "•••",
+            ),
+            (
+                name: "DivideAndConquer",
+                f: "••••",
+            ),
+            (
+                name: "Breach",
+                f: "•••••",
+            ),
+        ],
+    ),
+    (
+        name: "Agony",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "Wrack",
+                f: "Cunning",
+            ),
+            (
+                name: "Stocicism",
+                f: "Glory",
+            ),
+            (
+                name: "PainMirror",
+                f: "Honor",
+            ),
+            (
+                name: "Catharsis",
+                f: "Purity",
+            ),
+            (
+                name: "Scourge",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Blood",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "Seep",
+                f: "Cunning",
+            ),
+            (
+                name: "Purge",
+                f: "Glory",
+            ),
+            (
+                name: "Bind",
+                f: "Honor",
+            ),
+            (
+                name: "Bleed",
+                f: "Purity",
+            ),
+            (
+                name: "Clot",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Death",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "ColdEmbrace",
+                f: "Cunning",
+            ),
+            (
+                name: "Barghest",
+                f: "Glory",
+            ),
+            (
+                name: "MementoMori",
+                f: "Honor",
+            ),
+            (
+                name: "BoneGnaw",
+                f: "Purity",
+            ),
+            (
+                name: "EyesOfTheDead",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Disease",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "FesteringBite",
+                f: "Cunning",
+            ),
+            (
+                name: "RancidMaw",
+                f: "Glory",
+            ),
+            (
+                name: "LepersBell",
+                f: "Honor",
+            ),
+            (
+                name: "RabidFever",
+                f: "Purity",
+            ),
+            (
+                name: "PoxCauldron",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Dominance",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "PrimalAllure",
+                f: "Cunning",
+            ),
+            (
+                name: "GloriousLunacy",
+                f: "Glory",
+            ),
+            (
+                name: "LayLowTheChallenger",
+                f: "Honor",
+            ),
+            (
+                name: "SnarlOfThePredator",
+                f: "Purity",
+            ),
+            (
+                name: "LeadTheLesserPack",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Elementals",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "BreathOfAir",
+                f: "Cunning",
+            ),
+            (
+                name: "Catastrophe",
+                f: "Glory",
+            ),
+            (
+                name: "FleshOfEarth",
+                f: "Honor",
+            ),
+            (
+                name: "TongueOfFlame",
+                f: "Purity",
+            ),
+            (
+                name: "HeartOfWater",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Evasion",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "FeetOfMist",
+                f: "Cunning",
+            ),
+            (
+                name: "FogOfWar",
+                f: "Glory",
+            ),
+            (
+                name: "DenyEverything",
+                f: "Honor",
+            ),
+            (
+                name: "HitAndRun",
+                f: "Purity",
+            ),
+            (
+                name: "ExitStrategy",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Fervor",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "CrisisOfFaith",
+                f: "Cunning",
+            ),
+            (
+                name: "Fanaticism",
+                f: "Glory",
+            ),
+            (
+                name: "Affirmation",
+                f: "Honor",
+            ),
+            (
+                name: "Zeal",
+                f: "Purity",
+            ),
+            (
+                name: "FervidMission",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Hunger",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "EaterOfNames",
+                f: "Cunning",
+            ),
+            (
+                name: "FamineHowl",
+                f: "Glory",
+            ),
+            (
+                name: "Gluttony",
+                f: "Honor",
+            ),
+            (
+                name: "WolfHunger",
+                f: "Purity",
+            ),
+            (
+                name: "RavenousMaw",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Insight",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "PreyOnWeakness",
+                f: "Cunning",
+            ),
+            (
+                name: "ReadTheWorldsLoom",
+                f: "Glory",
+            ),
+            (
+                name: "EchoDream",
+                f: "Honor",
+            ),
+            (
+                name: "ScentTheUnnatural",
+                f: "Purity",
+            ),
+            (
+                name: "OneStepAhead",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Inspiration",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "LunaticInspiration",
+                f: "Cunning",
+            ),
+            (
+                name: "FearlessHunter",
+                f: "Glory",
+            ),
+            (
+                name: "PackTriumphsTogether",
+                f: "Honor",
+            ),
+            (
+                name: "Unity",
+                f: "Purity",
+            ),
+            (
+                name: "StillSmallVoice",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Knowledge",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "Needle",
+                f: "Cunning",
+            ),
+            (
+                name: "ThisStoryIsTrue",
+                f: "Glory",
+            ),
+            (
+                name: "KnowThyPrey",
+                f: "Honor",
+            ),
+            (
+                name: "LoreOfTheLand",
+                f: "Purity",
+            ),
+            (
+                name: "SiftTheSands",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Nature",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "NaturesLure",
+                f: "Cunning",
+            ),
+            (
+                name: "BlackEarthRedHunger",
+                f: "Glory",
+            ),
+            (
+                name: "KnottedPaths",
+                f: "Honor",
+            ),
+            (
+                name: "PackKin",
+                f: "Purity",
+            ),
+            (
+                name: "BeastRide",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Rage",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "InciteFury",
+                f: "Cunning",
+            ),
+            (
+                name: "BerserkersMight",
+                f: "Glory",
+            ),
+            (
+                name: "PerfectedRage",
+                f: "Honor",
+            ),
+            (
+                name: "Slaughterer",
+                f: "Purity",
+            ),
+            (
+                name: "RagingLunacy",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Shaping",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "Moldywarp",
+                f: "Cunning",
+            ),
+            (
+                name: "ShieldBreaker",
+                f: "Glory",
+            ),
+            (
+                name: "EntropysToll",
+                f: "Honor",
+            ),
+            (
+                name: "PerfectionOfForm",
+                f: "Purity",
+            ),
+            (
+                name: "Sculpt",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Stealth",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "ShadowPelt",
+                f: "Cunning",
+            ),
+            (
+                name: "PredatorsShadow",
+                f: "Glory",
+            ),
+            (
+                name: "PackStalksThePrey",
+                f: "Honor",
+            ),
+            (
+                name: "TheHunterWaits",
+                f: "Purity",
+            ),
+            (
+                name: "RunningSilent",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Strength",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "Unchained",
+                f: "Cunning",
+            ),
+            (
+                name: "PredatorsUnmatchedPursuit",
+                f: "Glory",
+            ),
+            (
+                name: "CrushingBlow",
+                f: "Honor",
+            ),
+            (
+                name: "PrimalStrength",
+                f: "Purity",
+            ),
+            (
+                name: "RendingClaws",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Technology",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "Garble",
+                f: "Cunning",
+            ),
+            (
+                name: "Unmake",
+                f: "Glory",
+            ),
+            (
+                name: "CommandArtifice",
+                f: "Honor",
+            ),
+            (
+                name: "Shutdown",
+                f: "Purity",
+            ),
+            (
+                name: "IronSlave",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Warding",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "MazeWard",
+                f: "Cunning",
+            ),
+            (
+                name: "WardTheWolfsDen",
+                f: "Glory",
+            ),
+            (
+                name: "AllDoorsLocked",
+                f: "Honor",
+            ),
+            (
+                name: "PredatorsClaim",
+                f: "Purity",
+            ),
+            (
+                name: "BoundaryWard",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Weather",
+        typek: "Shadow",
+        facets: [
+            (
+                name: "CloakOfMistAndHaze",
+                f: "Cunning",
+            ),
+            (
+                name: "HeavensUnleashed",
+                f: "Glory",
+            ),
+            (
+                name: "HuntUnderIronSkies",
+                f: "Honor",
+            ),
+            (
+                name: "GraspOfHowlingWinds",
+                f: "Purity",
+            ),
+            (
+                name: "HuntOfFireAndIce",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Change",
+        typek: "Wolf",
+        facets: [
+            (
+                name: "SkinThief",
+                f: "Cunning",
+            ),
+            (
+                name: "GazeOfTheMoon",
+                f: "Glory",
+            ),
+            (
+                name: "LunasEmbrace",
+                f: "Honor",
+            ),
+            (
+                name: "TheFathersForm",
+                f: "Purity",
+            ),
+            (
+                name: "QuicksilverFlesh",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Hunting",
+        typek: "Wolf",
+        facets: [
+            (
+                name: "HonedSenses",
+                f: "Cunning",
+            ),
+            (
+                name: "CowThePrey",
+                f: "Glory",
+            ),
+            (
+                name: "BeastTalker",
+                f: "Honor",
+            ),
+            (
+                name: "TirelessHunter",
+                f: "Purity",
+            ),
+            (
+                name: "ImpossibleSpoor",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+    (
+        name: "Pack",
+        typek: "Wolf",
+        facets: [
+            (
+                name: "ReflectedFacets",
+                f: "Cunning",
+            ),
+            (
+                name: "DownThePrey",
+                f: "Glory",
+            ),
+            (
+                name: "TotemsWrath",
+                f: "Honor",
+            ),
+            (
+                name: "MawOfMadness",
+                f: "Purity",
+            ),
+            (
+                name: "PackAwareness",
+                f: "Wisdom",
+            ),
+        ],
+    ),
+]

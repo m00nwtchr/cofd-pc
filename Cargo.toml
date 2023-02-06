@@ -1,5 +1,6 @@
 [workspace]
 members = [ "cofd/*" ]
+default-members = [ "cofd/app" ]
 resolver = "2"
 
 [workspace.package]
@@ -12,6 +13,9 @@ license = "MPL"
 cofd = { path = "cofd/lib" }
 cofd-macros = { path = "cofd/macros" }
 cofd-traits = { path = "cofd/traits" }
+cofd-xtask  = { path = "cofd/xtask" }
+
+ron = "0.8"
 
 [profile.dev]
 incremental = false

@@ -149,7 +149,7 @@ impl Splat {
 					[
 						ShadowGift::Death,
 						ShadowGift::Dominance,
-						ShadowGift::Elemental,
+						ShadowGift::Elementals,
 					],
 				)
 				.into(),

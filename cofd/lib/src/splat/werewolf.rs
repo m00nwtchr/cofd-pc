@@ -195,7 +195,7 @@ impl Auspice {
 			Auspice::Cahalith => &[ShadowGift::Inspiration, ShadowGift::Knowledge],
 			Auspice::Elodoth => &[ShadowGift::Insight, ShadowGift::Warding],
 			Auspice::Irraka => &[ShadowGift::Evasion, ShadowGift::Stealth],
-			Auspice::Ithaeur => &[ShadowGift::Elemental, ShadowGift::Shaping],
+			Auspice::Ithaeur => &[ShadowGift::Elementals, ShadowGift::Shaping],
 			Auspice::Rahu => &[ShadowGift::Dominance, ShadowGift::Strength],
 			Auspice::_Custom(.., gifts, _) => gifts,
 		}
@@ -314,7 +314,7 @@ impl Tribe {
 			],
 			Tribe::BoneShadows => vec![
 				ShadowGift::Death,
-				ShadowGift::Elemental,
+				ShadowGift::Elementals,
 				ShadowGift::Insight,
 			],
 			Tribe::HuntersInDarkness => {
@@ -377,23 +377,13 @@ impl From<Renown> for Ability {
 	}
 }
 
+cofd_traits::gifts!();
+
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Gift {
 	Moon(MoonGift),
 	Shadow(ShadowGift),
 	Wolf(WolfGift),
-}
-
-#[derive(
-	Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, Hash, VariantName,
-)]
-pub enum MoonGift {
-	Crescent,
-	Full,
-	Gibbous,
-	Half,
-	New,
-	_Custom(String),
 }
 
 impl MoonGift {
@@ -432,58 +422,10 @@ impl From<MoonGift> for Ability {
 	}
 }
 
-pub enum Facet {
-	// Death
-	// ColdEmbrace,
-	// Barghest,
-	// MementoMori
-	// BoneGnaw
-	// EyesOfTheDead
-}
-
-#[derive(
-	Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, VariantName, AllVariants,
-)]
-pub enum ShadowGift {
-	Death,
-	Dominance,
-	Elemental,
-	Evasion,
-	Insight,
-	Inspiration,
-	Knowledge,
-	Nature,
-	Rage,
-	Shaping,
-	Stealth,
-	Strength,
-	Technology,
-	Warding,
-	Weather,
-
-	Agony,
-	Blood,
-	Disease,
-	Fervor,
-	Hunger,
-
-	_Custom(String),
-}
-
 impl NameKey for ShadowGift {
 	fn name_key(&self) -> String {
 		format!("shadow-gifts.{}", self.name())
 	}
-}
-
-#[derive(
-	Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, VariantName, AllVariants,
-)]
-pub enum WolfGift {
-	Change,
-	Hunting,
-	Pack,
-	_Custom(String),
 }
 
 impl NameKey for WolfGift {

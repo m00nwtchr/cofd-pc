@@ -9,7 +9,7 @@ use cofd::{
 	prelude::*,
 };
 
-use crate::{fl, Element, INPUT_PADDING, i18n::flt};
+use crate::{fl, i18n::flt, Element, INPUT_PADDING};
 
 struct Traits {
 	size: u16,

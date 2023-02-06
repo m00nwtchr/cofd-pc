@@ -10,12 +10,13 @@ use cofd::{character::Wound, prelude::*, splat::Splat};
 
 use crate::{
 	fl,
+	i18n::flt,
 	widget::{
 		self,
 		dots::{Shape, SheetDots},
 		track::HealthTrack,
 	},
-	Element, COMPONENT_SPACING, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING, i18n::flt,
+	Element, COMPONENT_SPACING, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
 };
 
 use super::list;
@@ -146,8 +147,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 		if let Splat::Werewolf(..) = character.splat {
 			col = col.push(
 				column![
-					text(fl!("werewolf", "flesh-touchstone"))
-						.size(H3_SIZE),
+					text(fl!("werewolf", "flesh-touchstone")).size(H3_SIZE),
 					column![text_input(
 						"",
 						character.touchstones.get(0).unwrap_or(&String::new()),
@@ -171,8 +171,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 			Splat::Werewolf(..) => {
 				col = col.push(
 					column![
-						text(fl!("werewolf", "spirit-touchstone"))
-							.size(H3_SIZE),
+						text(fl!("werewolf", "spirit-touchstone")).size(H3_SIZE),
 						column![text_input(
 							"",
 							character.touchstones.get(1).unwrap_or(&String::new()),
