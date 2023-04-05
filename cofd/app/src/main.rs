@@ -212,6 +212,20 @@ impl Application for PlayerCompanionApp {
 			},
 		}
 
+		#[cfg(target_arch = "wasm32")]
+		{
+			use iced_native::{command, window};
+			let window = web_sys::window().unwrap();
+			let (width, height) = (
+				(window.inner_width().unwrap().as_f64().unwrap()) as u32,
+				(window.inner_height().unwrap().as_f64().unwrap()) as u32,
+			);
+			Command::single(command::Action::Window(window::Action::Resize {
+				width,
+				height,
+			}))
+		}
+		#[cfg(not(target_arch = "wasm32"))]
 		Command::none()
 	}
 
