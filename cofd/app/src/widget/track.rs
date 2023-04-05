@@ -62,7 +62,7 @@ where
 	}
 
 	fn height(&self) -> iced::Length {
-		iced::Length::Units(15)
+		iced::Length::Fixed(15.0)
 	}
 
 	fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
@@ -72,11 +72,7 @@ where
 			.align_items(Alignment::Center);
 
 		for _ in 0..self.max {
-			row = row.push(
-				Row::new()
-					.width(Length::Units(self.size))
-					.height(Length::Units(self.size)),
-			);
+			row = row.push(Row::new().width(self.size).height(self.size));
 		}
 		row.layout(renderer, limits)
 	}

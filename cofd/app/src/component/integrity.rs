@@ -105,8 +105,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 						)
 						.padding(INPUT_PADDING)]
 						.max_width(
-							MAX_INPUT_WIDTH
-								- u32::from(SheetDots::<Event, iced::Renderer>::DEFAULT_SIZE), // - SheetDots::<Event, Renderer>::DEFAULT_SPACING as u32,
+							MAX_INPUT_WIDTH - SheetDots::<Event, iced::Renderer>::DEFAULT_SIZE, // - SheetDots::<Event, Renderer>::DEFAULT_SPACING,
 						),
 					);
 				}

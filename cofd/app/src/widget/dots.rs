@@ -171,11 +171,7 @@ where
 		let mut col_or_row: ColOrRow<(), Renderer> = new_row();
 
 		for i in 0..self.max {
-			col_or_row = col_or_row.push(
-				Row::new()
-					.width(Length::Units(self.size))
-					.height(Length::Units(self.size)),
-			);
+			col_or_row = col_or_row.push(Row::new().width(self.size).height(self.size));
 
 			if (i + 1) % per_row_count == 0 {
 				col = col.push(col_or_row);

@@ -68,7 +68,7 @@ struct PlayerCompanionApp {
 const H2_SIZE: u16 = 25;
 const H3_SIZE: u16 = 20;
 
-const MAX_INPUT_WIDTH: u32 = 200;
+const MAX_INPUT_WIDTH: u16 = 200;
 pub const INPUT_PADDING: u16 = 1;
 
 const TITLE_SPACING: u16 = 2;

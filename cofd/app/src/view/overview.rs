@@ -476,8 +476,7 @@ where
 				} else {
 					let name = data.triggers.name().unwrap();
 
-					let passive =
-						flt("kuruth-triggers", Some(&format!("{name}-passive"))).unwrap();
+					let passive = flt("kuruth-triggers", Some(&format!("{name}-passive"))).unwrap();
 					let common = flt("kuruth-triggers", Some(&format!("{name}-common"))).unwrap();
 					let specific =
 						flt("kuruth-triggers", Some(&format!("{name}-specific"))).unwrap();

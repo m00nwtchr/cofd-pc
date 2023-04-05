@@ -3,6 +3,7 @@ use iced::{
 	Alignment,
 };
 use iced_lazy::Component;
+use iced_native::Pixels;
 
 use crate::{Element, H3_SIZE, TITLE_SPACING};
 
@@ -11,7 +12,7 @@ pub struct List<'a, T, Message> {
 	min: usize,
 	vec: Vec<T>,
 	f: Box<dyn Fn(usize, Option<T>) -> Element<'a, Message>>,
-	max_width: Option<u32>, // on_change: Box<dyn Fn(usize, T) -> Message>,
+	max_width: f32, // on_change: Box<dyn Fn(usize, T) -> Message>,
 }
 
 pub fn list<'a, T, Message>(
@@ -40,13 +41,13 @@ impl<'a, T, Message> List<'a, T, Message> {
 			min,
 			vec,
 			f: Box::new(f),
-			max_width: None,
+			max_width: f32::INFINITY,
 			// on_change: Box::new(on_change),
 		}
 	}
 
-	pub fn max_width(mut self, width: u32) -> Self {
-		self.max_width = Some(width);
+	pub fn max_width(mut self, width: impl Into<Pixels>) -> Self {
+		self.max_width = width.into().0;
 		self
 	}
 }
@@ -71,17 +72,13 @@ where
 			col = col.push((self.f)(i, val));
 		}
 
-		let mut col = Column::new()
+		Column::new()
 			.push(text(self.str.clone()).size(H3_SIZE))
 			.push(col)
 			.spacing(TITLE_SPACING)
-			.align_items(Alignment::Center);
-
-		if let Some(max_width) = self.max_width {
-			col = col.max_width(max_width);
-		}
-
-		col.into()
+			.align_items(Alignment::Center)
+			.max_width(self.max_width)
+			.into()
 	}
 }
 

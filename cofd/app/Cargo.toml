@@ -9,10 +9,9 @@ license.workspace = true
 publish = false
 
 [dependencies]
-log = "0.4"
-iced = "0.6"
-iced_lazy = "0.3"
-iced_native = "0.7"
+iced = "0.8"
+iced_lazy = "0.5"
+iced_native = "0.9"
 # iced_style = "0.5"
 # iced = { git = "https://github.com/iced-rs/iced" }
 # iced_lazy = { git = "https://github.com/iced-rs/iced" }
@@ -20,10 +19,10 @@ iced_native = "0.7"
 # iced_aw = {version = "0.2", default-features = false, features = ["pure", "tabs"]}
 # iced_aw = {git = "https://github.com/iced-rs/iced_aw", features = ["pure", "tabs"]}
 # iced_aw = { git = "https://github.com/genusistimelord/iced_aw", features = ["tabs"] }
+log = "0.4"
 
 closure = "0.3"
 
-directories = "4"
 ron = "0.8"
 serde = "1"
 
@@ -44,12 +43,13 @@ cofd.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 i18n-embed = { version = "0.13", features = ["desktop-requester"] }
-env_logger = "0.9"
+env_logger = "0.10"
+directories = "5"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 i18n-embed = { version = "0.13", features = ["web-sys-requester"] }
 rust-embed = { version = "6", features = [ "debug-embed" ] }
-console_log = "0.2"
+console_log = "1"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
 version = "0.3.60"
