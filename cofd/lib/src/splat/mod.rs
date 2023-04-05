@@ -92,7 +92,7 @@ pub enum Splat {
 		integrity = "synergy",
 		abilities_finite = false
 	)]
-	Bound(Burden, Archetype),
+	Bound(Burden, Archetype, #[skip] BoundData),
 	// Mummy(Decree, Guild),
 	// Demon(Incarnation, Vec<Agenda>),
 	// Beast(Hunger),

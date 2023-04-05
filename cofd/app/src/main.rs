@@ -129,10 +129,6 @@ impl PlayerCompanionApp {
 			.map(|val| Rc::new(RefCell::new(val)))
 			.collect();
 
-		if (self.characters.len() > 0) {
-			self.state = State::CharacterList;
-		}
-
 		Ok(())
 	}
 }
@@ -153,8 +149,8 @@ impl Application for PlayerCompanionApp {
 		let store = Store::new().expect("Data store not available");
 
 		let mut self_ = Self {
-			// state: State::CharacterList,
-			state: State::CharacterCreator,
+			state: State::CharacterList,
+			// state: State::CharacterCreator,
 			prev_state: Default::default(),
 			characters: Vec::new(),
 			store,
@@ -277,7 +273,6 @@ fn main() -> iced::Result {
 	})
 }
 
-// TODO: Add demo mortal.
 mod demo {
 
 	use std::{fs::File, io::Write};
@@ -290,20 +285,14 @@ mod demo {
 	use directories::ProjectDirs;
 	use ron::ser::PrettyConfig;
 
-	// #[test]
+	use crate::store::Store;
+
+	#[test]
 	pub fn save() -> anyhow::Result<()> {
 		let vec = characters();
+		let store = Store::new().unwrap();
 
-		let val = ron::ser::to_string_pretty(&vec, PrettyConfig::default())?;
-		let mut file = File::create(
-			ProjectDirs::from("", "", "cofd-pc")
-				.unwrap()
-				.data_dir()
-				.join("characters.ron"),
-		)?;
-
-		file.write_all(val.as_bytes())?;
-
+		store.set("characters", &vec)?;
 		Ok(())
 	}
 
@@ -593,13 +582,9 @@ mod demo {
 			.with_splat(Splat::Bound(
 				Burden::Bereaved,
 				Archetype::Mourners,
-				// ,
-				// Box::new(ChangelingData {
-				// 	attr_bonus: Some(Attribute::Dexterity),
-				// 	regalia: Some(Regalia::Crown),
-				// 	contracts: vec![Default::default()],
-				// 	..Default::default()
-				// }),
+				BoundData {
+					keys: vec![Key::Stillness],
+				},
 			))
 			.with_info(CharacterInfo {
 				// name: String::from("Darren Webb"),

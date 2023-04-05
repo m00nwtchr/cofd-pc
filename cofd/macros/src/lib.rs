@@ -58,6 +58,10 @@ fn parse_variant_field(
 	let variant_name = &variant.ident;
 	let variant_name_lower = variant_name.to_string().to_case(convert_case::Case::Snake);
 	if let Some(field) = iter.next() {
+		if field.attrs.iter().any(|attr| attr.path.is_ident("skip")) {
+			return;
+		}
+
 		if let Type::Path(ty) = &field.ty {
 			if let Some(segment) = ty.path.segments.first() {
 				let mut type_ = None;
@@ -171,7 +175,7 @@ impl XYZ {
 	}
 }
 
-#[proc_macro_derive(SplatEnum, attributes(splat))]
+#[proc_macro_derive(SplatEnum, attributes(splat, skip))]
 pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 

@@ -91,7 +91,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 
 			let mut flag = false;
 
-			if let Splat::Vampire(..) = &character.splat {
+			if let Splat::Vampire(..) | Splat::Bound(..) = &character.splat {
 				flag = true;
 
 				coll = coll.width(Length::FillPortion(4)).spacing(1);
