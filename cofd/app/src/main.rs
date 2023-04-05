@@ -17,7 +17,7 @@ use std::{cell::RefCell, mem, rc::Rc};
 use iced::{
 	executor,
 	widget::{button, column, row, Column},
-	Application, Command, Theme,
+	Alignment, Application, Command, Theme,
 };
 
 #[cfg(target_arch = "wasm32")]
@@ -228,11 +228,13 @@ impl Application for PlayerCompanionApp {
 
 	fn view(&self) -> Element<Self::Message> {
 		// view::overview_tab(character.clone(), Message::Previous)
+		// Column::new().align_items(align)
 		match &self.state {
 			State::CharacterList => column![
 				view::character_list(self.characters.clone(), Message::PickCharacter),
 				button("New Character").on_press(Message::NewCharacter)
 			]
+			.align_items(Alignment::Center)
 			.into(),
 			State::CharacterCreator => view::creator_view(Message::AddCharacter).into(),
 			State::Sheet {
