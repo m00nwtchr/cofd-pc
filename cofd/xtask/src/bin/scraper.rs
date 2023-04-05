@@ -106,11 +106,20 @@ async fn download(url: &str) -> Result<(), Box<dyn std::error::Error>> {
 					}
 				} else if let Some(gift) = &mut gift {
 					let id = facet_name_to_id(&vec[0]);
-					
+
 					let str = vec[1].clone();
-					let try_parse = str.clone().parse::<u16>();
-					
-					gift.facets.push(Facet::new(id, try_parse.clone().ok(), try_parse.err().map(|_| str)));
+
+					if str.contains('•') {
+						gift.facets.push(Facet::Moon {
+							name: id,
+							level: str.chars().count() as u16,
+						});
+					} else {
+						gift.facets.push(Facet::Other {
+							name: id,
+							renown: str,
+						});
+					}
 				}
 			}
 			if let Some(g) = gift {

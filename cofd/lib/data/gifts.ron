@@ -1,869 +1,729 @@
 [
     (
         name: "Crescent",
-        typek: "Moon",
+        type: "Moon",
         facets: [
-            (
+            Moon(
                 name: "ShadowGaze",
-                level: None,
-                renown: Some("•"),
+                level: 1,
             ),
-            (
+            Moon(
                 name: "SpiritWhispers",
-                level: None,
-                renown: Some("••"),
+                level: 2,
             ),
-            (
+            Moon(
                 name: "ShadowHunter",
-                level: None,
-                renown: Some("•••"),
+                level: 3,
             ),
-            (
+            Moon(
                 name: "ShadowMasquerade",
-                level: None,
-                renown: Some("••••"),
+                level: 4,
             ),
-            (
+            Moon(
                 name: "Panopticon",
-                level: None,
-                renown: Some("•••••"),
+                level: 5,
             ),
         ],
     ),
     (
         name: "Full",
-        typek: "Moon",
+        type: "Moon",
         facets: [
-            (
+            Moon(
                 name: "KillerInstinct",
-                level: None,
-                renown: Some("•"),
+                level: 1,
             ),
-            (
+            Moon(
                 name: "WarriorsHide",
-                level: None,
-                renown: Some("••"),
+                level: 2,
             ),
-            (
+            Moon(
                 name: "BloodyHandedHunter",
-                level: None,
-                renown: Some("•••"),
+                level: 3,
             ),
-            (
+            Moon(
                 name: "Butchery",
-                level: None,
-                renown: Some("••••"),
+                level: 4,
             ),
-            (
+            Moon(
                 name: "CrimsonSpasm",
-                level: None,
-                renown: Some("•••••"),
+                level: 5,
             ),
         ],
     ),
     (
         name: "Gibbous",
-        typek: "Moon",
+        type: "Moon",
         facets: [
-            (
+            Moon(
                 name: "WarHowl",
-                level: None,
-                renown: Some("•"),
+                level: 1,
             ),
-            (
+            Moon(
                 name: "VoiceOfGlory",
-                level: None,
-                renown: Some("••"),
+                level: 2,
             ),
-            (
+            Moon(
                 name: "DreamHunter",
-                level: None,
-                renown: Some("•••"),
+                level: 3,
             ),
-            (
+            Moon(
                 name: "ThousandThroatHowl",
-                level: None,
-                renown: Some("••••"),
+                level: 4,
             ),
-            (
+            Moon(
                 name: "EndOfStory",
-                level: None,
-                renown: Some("•••••"),
+                level: 5,
             ),
         ],
     ),
     (
         name: "Half",
-        typek: "Moon",
+        type: "Moon",
         facets: [
-            (
+            Moon(
                 name: "ScentBeneathTheSurface",
-                level: None,
-                renown: Some("•"),
+                level: 1,
             ),
-            (
+            Moon(
                 name: "BindingOath",
-                level: None,
-                renown: Some("••"),
+                level: 2,
             ),
-            (
+            Moon(
                 name: "SlyHunter",
-                level: None,
-                renown: Some("•••"),
+                level: 3,
             ),
-            (
+            Moon(
                 name: "TiesOfWordAndPromise",
-                level: None,
-                renown: Some("••••"),
+                level: 4,
             ),
-            (
+            Moon(
                 name: "TiesOfBloodAndBone",
-                level: None,
-                renown: Some("•••••"),
+                level: 5,
             ),
         ],
     ),
     (
         name: "New",
-        typek: "Moon",
+        type: "Moon",
         facets: [
-            (
+            Moon(
                 name: "Eviscerate",
-                level: None,
-                renown: Some("•"),
+                level: 1,
             ),
-            (
+            Moon(
                 name: "SlipAway",
-                level: None,
-                renown: Some("••"),
+                level: 2,
             ),
-            (
+            Moon(
                 name: "RelentlessHunter",
-                level: None,
-                renown: Some("•••"),
+                level: 3,
             ),
-            (
+            Moon(
                 name: "DivideAndConquer",
-                level: None,
-                renown: Some("••••"),
+                level: 4,
             ),
-            (
+            Moon(
                 name: "Breach",
-                level: None,
-                renown: Some("•••••"),
+                level: 5,
             ),
         ],
     ),
     (
         name: "Agony",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "Wrack",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "Stocicism",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "PainMirror",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "Catharsis",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "Scourge",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Blood",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "Seep",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "Purge",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "Bind",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "Bleed",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "Clot",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Death",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "ColdEmbrace",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "Barghest",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "MementoMori",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "BoneGnaw",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "EyesOfTheDead",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Disease",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "FesteringBite",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "RancidMaw",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "LepersBell",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "RabidFever",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "PoxCauldron",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Dominance",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "PrimalAllure",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "GloriousLunacy",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "LayLowTheChallenger",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "SnarlOfThePredator",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "LeadTheLesserPack",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Elementals",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "BreathOfAir",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "Catastrophe",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "FleshOfEarth",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "TongueOfFlame",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "HeartOfWater",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Evasion",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "FeetOfMist",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "FogOfWar",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "DenyEverything",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "HitAndRun",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "ExitStrategy",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Fervor",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "CrisisOfFaith",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "Fanaticism",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "Affirmation",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "Zeal",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "FervidMission",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Hunger",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "EaterOfNames",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "FamineHowl",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "Gluttony",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "WolfHunger",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "RavenousMaw",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Insight",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "PreyOnWeakness",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "ReadTheWorldsLoom",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "EchoDream",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "ScentTheUnnatural",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "OneStepAhead",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Inspiration",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "LunaticInspiration",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "FearlessHunter",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "PackTriumphsTogether",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "Unity",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "StillSmallVoice",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Knowledge",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "Needle",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "ThisStoryIsTrue",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "KnowThyPrey",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "LoreOfTheLand",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "SiftTheSands",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Nature",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "NaturesLure",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "BlackEarthRedHunger",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "KnottedPaths",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "PackKin",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "BeastRide",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Rage",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "InciteFury",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "BerserkersMight",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "PerfectedRage",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "Slaughterer",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "RagingLunacy",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Shaping",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "Moldywarp",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "ShieldBreaker",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "EntropysToll",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "PerfectionOfForm",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "Sculpt",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Stealth",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "ShadowPelt",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "PredatorsShadow",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "PackStalksThePrey",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "TheHunterWaits",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "RunningSilent",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Strength",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "Unchained",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "PredatorsUnmatchedPursuit",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "CrushingBlow",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "PrimalStrength",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "RendingClaws",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Technology",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "Garble",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "Unmake",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "CommandArtifice",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "Shutdown",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "IronSlave",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Warding",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "MazeWard",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "WardTheWolfsDen",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "AllDoorsLocked",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "PredatorsClaim",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "BoundaryWard",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Weather",
-        typek: "Shadow",
+        type: "Shadow",
         facets: [
-            (
+            Other(
                 name: "CloakOfMistAndHaze",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "HeavensUnleashed",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "HuntUnderIronSkies",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "GraspOfHowlingWinds",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "HuntOfFireAndIce",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Change",
-        typek: "Wolf",
+        type: "Wolf",
         facets: [
-            (
+            Other(
                 name: "SkinThief",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "GazeOfTheMoon",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "LunasEmbrace",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "TheFathersForm",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "QuicksilverFlesh",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Hunting",
-        typek: "Wolf",
+        type: "Wolf",
         facets: [
-            (
+            Other(
                 name: "HonedSenses",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "CowThePrey",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "BeastTalker",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "TirelessHunter",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "ImpossibleSpoor",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),
     (
         name: "Pack",
-        typek: "Wolf",
+        type: "Wolf",
         facets: [
-            (
+            Other(
                 name: "ReflectedFacets",
-                level: None,
-                renown: Some("Cunning"),
+                renown: "Cunning",
             ),
-            (
+            Other(
                 name: "DownThePrey",
-                level: None,
-                renown: Some("Glory"),
+                renown: "Glory",
             ),
-            (
+            Other(
                 name: "TotemsWrath",
-                level: None,
-                renown: Some("Honor"),
+                renown: "Honor",
             ),
-            (
+            Other(
                 name: "MawOfMadness",
-                level: None,
-                renown: Some("Purity"),
+                renown: "Purity",
             ),
-            (
+            Other(
                 name: "PackAwareness",
-                level: None,
-                renown: Some("Wisdom"),
+                renown: "Wisdom",
             ),
         ],
     ),

@@ -37,7 +37,7 @@ pub fn gifts(_input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 	for gift in vec {
 		if let Ok(name) = gift.name.parse::<TokenStream>() {
-			let (ts, ts2) = match gift.typek.as_str() {
+			let (ts, ts2) = match gift.type_.as_str() {
 				"Moon" => (&mut moon_gift_variants, None),
 				"Shadow" => (
 					&mut shadow_gift_variants,
@@ -56,7 +56,7 @@ pub fn gifts(_input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 			let mut facets_arr = TokenStream::new();
 			for facet in gift.facets {
-				if let Ok(facet_name) = facet.name.parse::<TokenStream>() {
+				if let Ok(facet_name) = facet.name().parse::<TokenStream>() {
 					facet_variants.extend(quote! {
 						#facet_name,
 					});
@@ -127,6 +127,5 @@ pub fn gifts(_input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		}
 	};
 
-	println!("{expanded}");
 	proc_macro::TokenStream::from(expanded)
 }

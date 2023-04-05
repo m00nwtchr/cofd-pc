@@ -8,45 +8,40 @@ pub enum Data {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Gift {
 	pub name: String,
-	pub typek: String,
+	#[serde(rename = "type")]
+	pub type_: String,
 	pub facets: Vec<Facet>,
 }
 
 impl Gift {
-	pub fn new(name: String, typek: String) -> Self {
+	pub fn new(name: String, type_: String) -> Self {
 		Self {
 			name,
-			typek,
+			type_,
 			facets: vec![],
 		}
 	}
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Facet {
-	pub name: String,
-	pub level: Option<u16>, // Moon Gift
-	pub renown: Option<String>, // Wolf/Shadow Gift
-	                       // pub cost: String,
-	                       // pub pool: String,
-	                       // pub action: String,
-	                       // pub duration: String,
-	                       // pub description: String,
-	                       // pub reference: String,
+pub enum Facet {
+	// Moon Gift
+	Moon { name: String, level: u16 },
+	// Wolf/Shadow Gift
+	Other { name: String, renown: String },
+	//                        // pub cost: String,
+	//                        // pub pool: String,
+	//                        // pub action: String,
+	//                        // pub duration: String,
+	//                       // pub description: String,
+	//                        // pub reference: String,
 }
 
 impl Facet {
-	pub fn new(name: String, level: Option<u16>, renown: Option<String>) -> Self {
-		Self {
-			name,
-			level,
-			renown,
-			// cost: arr[2].clone(),
-			// pool: arr[3].clone(),
-			// action: arr[4].clone(),
-			// duration: arr[5].clone(),
-			// description: arr[6].clone(),
-			// reference: arr[7].clone(),
+	pub fn name(&self) -> &String {
+		match self {
+			Self::Moon { name, .. } => name,
+			Self::Other { name, .. } => name,
 		}
 	}
 }
