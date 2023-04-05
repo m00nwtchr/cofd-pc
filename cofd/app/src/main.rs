@@ -31,7 +31,6 @@ mod store;
 mod view;
 mod widget;
 
-
 use store::Store;
 
 #[derive(Debug, Clone)]
@@ -224,9 +223,7 @@ impl Application for PlayerCompanionApp {
 				button("New Character").on_press(Message::NewCharacter)
 			]
 			.into(),
-			State::CharacterCreator => {
-				view::creator_view(Message::AddCharacter).into()
-			}
+			State::CharacterCreator => view::creator_view(Message::AddCharacter).into(),
 			State::Sheet {
 				active_tab,
 				character,
@@ -275,28 +272,23 @@ impl Application for PlayerCompanionApp {
 	}
 }
 
-fn main() -> iced::Result {
+fn main() -> anyhow::Result<()> {
 	#[cfg(not(target_arch = "wasm32"))]
 	env_logger::init();
 	#[cfg(target_arch = "wasm32")]
-	console_log::init_with_level(Level::Warn);
+	console_log::init_with_level(Level::Warn).map_err(|err| anyhow::anyhow!(err))?;
 
-	PlayerCompanionApp::run(Default::default())
+	PlayerCompanionApp::run(Default::default())?;
+	Ok(())
 }
 
 mod demo {
-
-	
 
 	use cofd::{
 		character::CharacterInfo,
 		prelude::*,
 		splat::{changeling::*, geist::*, mage::*, vampire::*, werewolf::*, Merit, Splat},
 	};
-	
-	
-
-	
 
 	#[test]
 	pub fn save() -> anyhow::Result<()> {

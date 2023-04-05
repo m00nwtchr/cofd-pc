@@ -1,12 +1,9 @@
-#[cfg(not(target_arch = "wasm32"))]
-use directories::ProjectDirs;
-
-#[cfg(not(target_arch = "wasm32"))]
-use std::path::PathBuf;
-
 use serde::{Deserialize, Serialize};
 
 use cfg_if::cfg_if;
+
+#[cfg(not(target_arch = "wasm32"))]
+use directories::ProjectDirs;
 
 #[cfg(target_arch = "wasm32")]
 use anyhow::anyhow;
@@ -20,18 +17,16 @@ pub struct Store {
 
 impl Store {
 	pub fn new() -> Option<Store> {
-		let store;
-
 		cfg_if! {
 			if #[cfg(target_arch = "wasm32")] {
 				let window = web_sys::window()?;
-				if let Ok(Some(local_storage)) = window.local_storage() {
-					store = Some(Self {
+				let store = if let Ok(Some(local_storage)) = window.local_storage() {
+					Some(Self {
 						local_storage,
-					});
+					})
 				} else {
-					store = None;
-				}
+					None
+				};
 			} else {
 				let dirs = ProjectDirs::from("", "", "cofd-pc").unwrap();
 
@@ -40,7 +35,7 @@ impl Store {
 					std::fs::create_dir_all(dir.unwrap()).ok()?;
 				}
 
-				store = Some(Self {
+				let store = Some(Self {
 					dirs
 				});
 			}
@@ -50,17 +45,16 @@ impl Store {
 	}
 
 	pub fn get<T: for<'a> Deserialize<'a>>(&self, name: &str) -> anyhow::Result<Option<T>> {
-		let val;
+		#[cfg(target_arch = "wasm32")]
+		let val = self
+			.local_storage
+			.get_item(name)
+			.map_err(|err| anyhow!("{:?}", err))?;
 
-		cfg_if! {
-			if #[cfg(target_arch = "wasm32")] {
-				val = self.local_storage.get_item(name).map_err(|err| anyhow!("{:?}", err))?;
-			} else {
-				val = Some(std::fs::read_to_string(
-					self.dirs.data_dir().join(format!("{name}.ron")),
-				)?);
-			}
-		}
+		#[cfg(not(target_arch = "wasm32"))]
+		let val = Some(std::fs::read_to_string(
+			self.dirs.data_dir().join(format!("{name}.ron")),
+		)?);
 
 		if let Some(val) = val {
 			Ok(Some(ron::de::from_str(&val)?))

@@ -1,13 +1,20 @@
 #![feature(iter_array_chunks)]
-use std::fs;
 use std::path::Path;
+use std::{fs, path::PathBuf};
 
-use convert_case::Casing;
+use lazy_static::lazy_static;
 use reqwest::Url;
-use ron::ser::PrettyConfig;
 use scraper::{ElementRef, Html, Selector};
 
-use cofd_util::scraper::*;
+mod gifts;
+
+lazy_static! {
+	static ref PATH: PathBuf =
+		Path::new(&std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR env var"))
+			.join("..")
+			.join("lib")
+			.join("data");
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -20,26 +27,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	Ok(())
 }
 
-async fn download(url: &str) -> Result<(), Box<dyn std::error::Error>> {
+async fn download(url: &str) -> anyhow::Result<()> {
 	let url = Url::parse(url).expect("Invalid url");
 
-	let last = url
+	let page_name = url
 		.path_segments()
 		.expect("Path segments")
 		.last()
 		.expect("Last path segment")
 		.to_string();
-	let path = Path::new(&std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR env var"))
-		.join("..")
-		.join("lib")
-		.join("data")
-		.join("cache");
+
+	let path = PATH.join("cache");
 
 	if !path.exists() {
 		std::fs::create_dir_all(&path)?;
 	}
 
-	let html_path = path.join(format!("{last}.html"));
+	let html_path = path.join(format!("{page_name}.html"));
 
 	let text;
 	if !html_path.exists() {
@@ -53,7 +57,13 @@ async fn download(url: &str) -> Result<(), Box<dyn std::error::Error>> {
 		text = fs::read_to_string(html_path)?;
 	}
 
-	let document = Html::parse_document(&text);
+	parse(&page_name, &text)?;
+
+	Ok(())
+}
+
+fn parse(page_name: &str, text: &str) -> anyhow::Result<()> {
+	let document = Html::parse_document(text);
 
 	let selector = Selector::parse(".mw-parser-output > section, h2").unwrap();
 	let table_sel = Selector::parse("table").unwrap();
@@ -83,77 +93,12 @@ async fn download(url: &str) -> Result<(), Box<dyn std::error::Error>> {
 		}
 	}
 
-	let mut txt = String::new();
-	#[allow(clippy::single_match)]
-	match last.as_str() {
-		"Gifts" => {
-			let mut gift = None;
-			let mut gifts = Vec::new();
-			for vec in vec {
-				if vec.len() == 2 {
-					if let Some(g) = gift {
-						gifts.push(g);
-						gift = None;
-					}
+	let txt = match page_name {
+		"Gifts" => ron::ser::to_string(&gifts::parse_gifts(vec))?,
+		_ => String::new(),
+	};
 
-					if let Some(name) = vec.first() {
-						if !name.contains('(') {
-							gift = Some(Gift::new(
-								gift_name_to_id(name).to_string(),
-								vec.last().unwrap().split(' ').next().unwrap().to_string(),
-							));
-						}
-					}
-				} else if let Some(gift) = &mut gift {
-					let id = facet_name_to_id(&vec[0]);
-
-					let str = vec[1].clone();
-
-					if str.contains('•') {
-						gift.facets.push(Facet::Moon {
-							name: id,
-							level: str.chars().count() as u16,
-						});
-					} else {
-						gift.facets.push(Facet::Other {
-							name: id,
-							renown: str,
-						});
-					}
-				}
-			}
-			if let Some(g) = gift {
-				gifts.push(g);
-			}
-
-			txt = ron::ser::to_string_pretty(&gifts, PrettyConfig::default())?;
-		}
-		_ => {}
-	}
-
-	fs::write(
-		path.join("..").join(format!("{}.ron", last.to_lowercase())),
-		txt,
-	)?;
+	fs::write(PATH.join(format!("{}.ron", page_name.to_lowercase())), txt)?;
 
 	Ok(())
-}
-
-fn gift_name_to_id(name: &str) -> &str {
-	if name.contains("of") {
-		name.split(' ').last().unwrap()
-	} else {
-		let next = name.split(' ').next().unwrap();
-		if next.contains('\'') {
-			next.strip_suffix("\'s").unwrap()
-		} else {
-			next
-		}
-	}
-}
-
-fn facet_name_to_id(name: &str) -> String {
-	name.replace('\'', "")
-		.replace(',', "")
-		.to_case(convert_case::Case::Pascal)
 }
