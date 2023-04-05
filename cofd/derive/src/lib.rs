@@ -18,23 +18,20 @@ macro_rules! derive_error {
 	};
 }
 
-fn parse_args(variant: &Variant, map: &mut HashMap<String, TokenStream>) {
+fn parse_args(variant: &Variant, map: &mut HashMap<String, TokenStream>) -> syn::Result<()> {
 	for attr in &variant.attrs {
-		if attr.path.is_ident("splat") {
-			let meta: syn::Meta = attr.parse_meta().unwrap();
+		if attr.path().is_ident("splat") {
+			attr.parse_nested_meta(|meta| {
+				let val: syn::Expr = meta.value()?.parse()?;
 
-			if let syn::Meta::List(list) = meta {
-				list.nested.into_pairs().for_each(|pair| {
-					if let syn::NestedMeta::Meta(syn::Meta::NameValue(nv)) = pair.value() {
-						let lit = &nv.lit;
-						map.insert(nv.path.get_ident().unwrap().to_string(), quote! { #lit });
-					}
-				});
-			}
-
+				map.insert(meta.path.get_ident().unwrap().to_string(), quote! { #val });
+				Ok(())
+			})?;
 			break;
 		}
 	}
+
+	Ok(())
 }
 
 fn variant_fields(variant: &Variant) -> TokenStream {
@@ -58,7 +55,7 @@ fn parse_variant_field(
 	let variant_name = &variant.ident;
 	let variant_name_lower = variant_name.to_string().to_case(convert_case::Case::Snake);
 	if let Some(field) = iter.next() {
-		if field.attrs.iter().any(|attr| attr.path.is_ident("skip")) {
+		if field.attrs.iter().any(|attr| attr.path().is_ident("skip")) {
 			return;
 		}
 
@@ -214,7 +211,7 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 			let variant_name_lower = variant_name.to_string().to_case(convert_case::Case::Snake);
 
 			args.clear();
-			parse_args(variant, &mut args);
+			parse_args(variant, &mut args).unwrap();
 
 			let fields_in_variant = variant_fields(variant);
 
@@ -461,7 +458,7 @@ pub fn derive_variant_name(input: proc_macro::TokenStream) -> proc_macro::TokenS
 			let mut flag = false;
 
 			for attr in &variant.attrs {
-				if attr.path.is_ident("expand") {
+				if attr.path().is_ident("expand") {
 					flag = true;
 					break;
 				}
@@ -555,7 +552,7 @@ pub fn derive_all_variants(input: proc_macro::TokenStream) -> proc_macro::TokenS
 			let mut flag1 = false;
 
 			for attr in &variant.attrs {
-				if attr.path.is_ident("expand") {
+				if attr.path().is_ident("expand") {
 					flag1 = true;
 					flag = true;
 					break;
