@@ -64,5 +64,5 @@ pub enum Key {
 	Disease,
 	GraveDirt,
 	PyreFlame,
-	Stillness
+	Stillness,
 }
