@@ -68,8 +68,6 @@ pub enum Key {
 	PyreFlame,
 	Stillness,
 }
-// <<<<<<< HEAD
-// =======
 
 impl NameKey for Key {
 	fn name_key(&self) -> String {
@@ -81,4 +79,3 @@ impl NameKey for Key {
 pub struct BoundData {
 	pub keys: Vec<Key>,
 }
-// >>>>>>> 4381447562f12cea62a64e5baba486ff5ee4df89
