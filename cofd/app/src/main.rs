@@ -41,7 +41,6 @@ pub enum Tab {
 	SplatExtras,
 }
 
-// #[derive(Clone)]
 pub enum State {
 	CharacterList,
 	CharacterCreator,
@@ -59,8 +58,6 @@ struct PlayerCompanionApp {
 	characters: Vec<Rc<RefCell<Character>>>,
 
 	store: Store,
-	// character: Rc<RefCell<Character>>,
-	// custom_xsplats: Vec<XSplat>,
 	// locale: Locale,
 	// language_requester: Box<dyn LanguageRequester<'static>>,
 }
