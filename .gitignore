@@ -1,5 +1,3 @@
 /target
 cofd/app/dist
-characters
-
-cofd/lib/data/cache
+macros

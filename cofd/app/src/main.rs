@@ -45,6 +45,7 @@ pub enum Tab {
 // #[derive(Clone)]
 pub enum State {
 	CharacterList,
+	CharacterCreator,
 	Sheet {
 		active_tab: Tab,
 		character: Rc<RefCell<Character>>,
@@ -149,6 +150,7 @@ impl Application for PlayerCompanionApp {
 
 		let mut self_ = Self {
 			state: State::CharacterList,
+			// state: State::CharacterCreator,
 			prev_state: Default::default(),
 			characters: Vec::new(),
 			store,
@@ -211,6 +213,7 @@ impl Application for PlayerCompanionApp {
 			State::CharacterList => {
 				view::character_list(self.characters.clone(), Message::PickCharacter).into()
 			}
+			State::CharacterCreator => view::creator_view().into(),
 			State::Sheet {
 				active_tab,
 				character,
