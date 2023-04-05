@@ -17,7 +17,7 @@ use std::{cell::RefCell, mem, rc::Rc};
 use iced::{
 	executor,
 	widget::{button, column, row, Column},
-	Application, Command, Settings, Theme,
+	Application, Command, Theme,
 };
 
 #[cfg(target_arch = "wasm32")]
@@ -31,7 +31,7 @@ mod store;
 mod view;
 mod widget;
 
-use i18n::flt;
+
 use store::Store;
 
 #[derive(Debug, Clone)]
@@ -120,7 +120,7 @@ impl PlayerCompanionApp {
 		let characters: Vec<Character> = self
 			.store
 			.get("characters")?
-			.unwrap_or_else(|| demo::characters());
+			.unwrap_or_else(demo::characters);
 
 		self.characters = characters
 			.into_iter()
@@ -145,7 +145,7 @@ impl Application for PlayerCompanionApp {
 		let _language_requester = i18n::setup();
 
 		if let Err(err) = _language_requester {
-			println!("{:?}", err);
+			println!("{err:?}");
 		}
 
 		let store = Store::new().expect("Data store not available");
@@ -225,7 +225,7 @@ impl Application for PlayerCompanionApp {
 			]
 			.into(),
 			State::CharacterCreator => {
-				view::creator_view(|character| Message::AddCharacter(character)).into()
+				view::creator_view(Message::AddCharacter).into()
 			}
 			State::Sheet {
 				active_tab,
@@ -281,24 +281,22 @@ fn main() -> iced::Result {
 	#[cfg(target_arch = "wasm32")]
 	console_log::init_with_level(Level::Warn);
 
-	PlayerCompanionApp::run(Settings {
-		..Default::default()
-	})
+	PlayerCompanionApp::run(Default::default())
 }
 
 mod demo {
 
-	use std::{fs::File, io::Write};
+	
 
 	use cofd::{
 		character::CharacterInfo,
 		prelude::*,
 		splat::{changeling::*, geist::*, mage::*, vampire::*, werewolf::*, Merit, Splat},
 	};
-	use directories::ProjectDirs;
-	use ron::ser::PrettyConfig;
+	
+	
 
-	use crate::store::Store;
+	
 
 	#[test]
 	pub fn save() -> anyhow::Result<()> {
@@ -579,12 +577,8 @@ mod demo {
 				concept: String::from("Fae Magic Enthusiast"),
 				..Default::default()
 			})
-			.with_attributes(Attributes {
-				..Default::default()
-			})
-			.with_skills(Skills {
-				..Default::default()
-			})
+			.with_attributes(Default::default())
+			.with_skills(Default::default())
 			// .with_specialties(Skill::Larceny, vec![String::from("Sleight of Hand")])
 			// .with_specialties(Skill::Streetwise, vec![String::from("Rumours")])
 			// .with_specialties(Skill::Subterfuge, vec![String::from("Detecting Lies")])

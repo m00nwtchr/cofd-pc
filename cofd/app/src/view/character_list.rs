@@ -8,7 +8,7 @@ use iced_lazy::Component;
 
 use cofd::prelude::*;
 
-use crate::{fl, i18n::flt, Element};
+use crate::{i18n::flt, Element};
 
 pub struct CharacterList<Message> {
 	characters: Vec<Rc<RefCell<Character>>>,

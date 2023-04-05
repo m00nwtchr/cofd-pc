@@ -115,7 +115,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 			row![
 				column![
 					SheetDots::new(character.integrity, 1, 10, Shape::Dots, None, |val| {
-						Event::IntegrityChanged(val as u16)
+						Event::IntegrityChanged(val)
 					})
 					.axis(if flag {
 						widget::dots::Axis::Vertical

@@ -107,7 +107,7 @@ impl<Message> OverviewTab<Message> {
 				for ability in abilities {
 					let val = character.get_ability_value(&ability).unwrap_or(&0);
 
-					col1 = col1.push(text(flt(splat_name, Some(&ability.name())).unwrap()));
+					col1 = col1.push(text(flt(splat_name, Some(ability.name())).unwrap()));
 					col2 = col2.push(SheetDots::new(*val, 0, 5, Shape::Dots, None, move |val| {
 						Event::AbilityValChanged(ability.clone(), val)
 					}));
@@ -131,7 +131,7 @@ impl<Message> OverviewTab<Message> {
 						col1 = col1.push(
 							text_input(
 								"",
-								&ability.name(),
+								ability.name(),
 								closure!(clone ability, |val| {
 									let mut new = ability.clone();
 									*new.name_mut().unwrap() = val;
@@ -249,10 +249,10 @@ where
 					character.base_size =
 						(val as i16 - character._mod(ModifierTarget::Trait(Trait::Size))) as u16;
 				}
-				Trait::Willpower => character.willpower = val as u16,
-				Trait::Power => character.power = val as u16,
-				Trait::Fuel => character.fuel = val as u16,
-				Trait::Integrity => character.integrity = val as u16,
+				Trait::Willpower => character.willpower = val,
+				Trait::Power => character.power = val,
+				Trait::Fuel => character.fuel = val,
+				Trait::Integrity => character.integrity = val,
 				Trait::Beats => character.beats = val,
 				Trait::AlternateBeats => character.alternate_beats = val,
 				_ => {}
@@ -349,10 +349,10 @@ where
 			let dots = SheetDots::new(
 				character.willpower,
 				0,
-				character.max_willpower() as u16,
+				character.max_willpower(),
 				Shape::Dots,
 				None,
-				|val| Event::TraitChanged(val as u16, Trait::Willpower),
+				|val| Event::TraitChanged(val, Trait::Willpower),
 			);
 
 			column![text(fl!("willpower")).size(H3_SIZE), dots]
@@ -362,7 +362,7 @@ where
 
 		let st = if let Some(st) = character.splat.supernatural_tolerance() {
 			let dots = SheetDots::new(character.power, 1, 10, Shape::Dots, None, |val| {
-				Event::TraitChanged(val as u16, Trait::Power)
+				Event::TraitChanged(val, Trait::Power)
 			});
 
 			column![
@@ -382,7 +382,7 @@ where
 				character.max_fuel(),
 				Shape::Boxes,
 				Some(10),
-				|val| Event::TraitChanged(val as u16, Trait::Fuel),
+				|val| Event::TraitChanged(val, Trait::Fuel),
 			);
 
 			column![
@@ -477,10 +477,10 @@ where
 					let name = data.triggers.name().unwrap();
 
 					let passive =
-						flt("kuruth-triggers", Some(&format!("{}-passive", name))).unwrap();
-					let common = flt("kuruth-triggers", Some(&format!("{}-common", name))).unwrap();
+						flt("kuruth-triggers", Some(&format!("{name}-passive"))).unwrap();
+					let common = flt("kuruth-triggers", Some(&format!("{name}-common"))).unwrap();
 					let specific =
-						flt("kuruth-triggers", Some(&format!("{}-specific", name))).unwrap();
+						flt("kuruth-triggers", Some(&format!("{name}-specific"))).unwrap();
 
 					(
 						text(passive).into(),

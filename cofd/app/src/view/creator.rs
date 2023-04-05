@@ -1,17 +1,15 @@
-use std::marker::PhantomData;
+
 
 use iced::{
-	widget::{button, column, pick_list, row, text, Column},
-	Alignment, Length,
+	widget::{button, column, pick_list, row, text}, Length,
 };
 use iced_lazy::Component;
 
-use cofd::{character::CharacterBuilder, prelude::*, splat::Splat};
+use cofd::{prelude::*, splat::Splat};
 
 use crate::{
-	fl,
-	i18n::{flt, Translated},
-	Element, H2_SIZE, INPUT_PADDING,
+	i18n::{Translated},
+	Element, INPUT_PADDING,
 };
 
 pub struct CreatorView<Message> {

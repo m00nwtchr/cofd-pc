@@ -7,7 +7,7 @@ use iced::{
 };
 use iced_lazy::Component;
 
-use crate::{fl, i18n::flt, Element, INPUT_PADDING};
+use crate::{i18n::flt, Element, INPUT_PADDING};
 use cofd::{
 	character::{ModifierTarget, Trait},
 	prelude::*,
@@ -113,7 +113,7 @@ impl<Message> FormsComponent<Message> {
 			};
 
 			col = col.push(row![
-				text(format!("{}: ", name)),
+				text(format!("{name}: ")),
 				text_input("", &val.to_string(), |_val| Event::Msg).padding(INPUT_PADDING)
 			]);
 		}
