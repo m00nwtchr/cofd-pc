@@ -204,13 +204,14 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 	let mut impls = TokenStream::new();
 
 	let mut variants_map = HashMap::new();
+	let mut name_key_match_cases = TokenStream::new();
 
 	if let Data::Enum(data_enum) = data {
 		let mut args = HashMap::new();
 
 		for variant in &data_enum.variants {
 			let variant_name = &variant.ident;
-			let _variant_name_lower = variant_name.to_string().to_case(convert_case::Case::Snake);
+			let variant_name_lower = variant_name.to_string().to_case(convert_case::Case::Snake);
 
 			args.clear();
 			parse_args(variant, &mut args);
@@ -281,6 +282,10 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 
 			gen_match_arm("fuel", true);
 			gen_match_arm("integrity", false);
+
+			name_key_match_cases.extend(quote_spanned! {variant.span()=>
+				#name::#variant_name #fields_in_variant => String::from(#variant_name_lower),
+			});
 		}
 	} else {
 		return derive_error!("SplatEnum is only implemented for enums");
@@ -409,6 +414,14 @@ pub fn derive_splat_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 				match self {
 					#zsplats_all
 					_ => Vec::new(),
+				}
+			}
+		}
+
+		impl #impl_generics NameKey for #name #ty_generics #where_clause {
+			fn name_key(&self) -> String {
+				match self {
+					#name_key_match_cases
 				}
 			}
 		}

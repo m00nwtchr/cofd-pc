@@ -16,7 +16,7 @@ use std::{cell::RefCell, mem, rc::Rc};
 
 use iced::{
 	executor,
-	widget::{button, row, Column},
+	widget::{button, column, row, Column},
 	Application, Command, Settings, Theme,
 };
 
@@ -86,6 +86,8 @@ const COMPONENT_SPACING: u16 = 8;
 enum Message {
 	TabSelected(Tab),
 	PickCharacter(usize),
+	AddCharacter(Character),
+	NewCharacter,
 	Previous,
 	Msg,
 
@@ -193,6 +195,13 @@ impl Application for PlayerCompanionApp {
 					character: self.characters.get(i).unwrap().clone(),
 				});
 			}
+			Message::AddCharacter(character) => {
+				self.characters.push(Rc::new(RefCell::new(character)));
+				self.next(State::CharacterList);
+			}
+			Message::NewCharacter => {
+				self.next(State::CharacterCreator);
+			}
 			Message::Previous => self.prev(),
 			Message::Msg => {}
 
@@ -210,10 +219,14 @@ impl Application for PlayerCompanionApp {
 	fn view(&self) -> Element<Self::Message> {
 		// view::overview_tab(character.clone(), Message::Previous)
 		match &self.state {
-			State::CharacterList => {
-				view::character_list(self.characters.clone(), Message::PickCharacter).into()
+			State::CharacterList => column![
+				view::character_list(self.characters.clone(), Message::PickCharacter),
+				button("New Character").on_press(Message::NewCharacter)
+			]
+			.into(),
+			State::CharacterCreator => {
+				view::creator_view(|character| Message::AddCharacter(character)).into()
 			}
-			State::CharacterCreator => view::creator_view().into(),
 			State::Sheet {
 				active_tab,
 				character,

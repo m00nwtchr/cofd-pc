@@ -16,8 +16,11 @@ pub struct MageData {
 	pub rotes: Vec<Rote>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]
+#[derive(
+	Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants, Default,
+)]
 pub enum Path {
+	#[default]
 	Acanthus,
 	Mastigos,
 	Moros,

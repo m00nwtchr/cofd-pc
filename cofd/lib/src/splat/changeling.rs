@@ -23,8 +23,11 @@ impl ChangelingData {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]
+#[derive(
+	Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants, Default,
+)]
 pub enum Seeming {
+	#[default]
 	Beast,
 	Darkling,
 	Elemental,

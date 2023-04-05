@@ -34,7 +34,18 @@ use geist::*;
 // use beast::*;
 // use deviant:*;
 
-#[derive(Clone, Default, Serialize, Deserialize, Debug, VariantName, SplatEnum)]
+#[derive(
+	Clone,
+	Default,
+	Serialize,
+	Deserialize,
+	Debug,
+	VariantName,
+	SplatEnum,
+	AllVariants,
+	PartialEq,
+	Eq,
+)]
 pub enum Splat {
 	#[default]
 	Mortal,

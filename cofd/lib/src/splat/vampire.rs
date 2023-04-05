@@ -15,8 +15,11 @@ pub struct VampireData {
 	pub banes: Vec<String>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants)]
+#[derive(
+	Clone, Serialize, Deserialize, Debug, PartialEq, Eq, VariantName, AllVariants, Default,
+)]
 pub enum Clan {
+	#[default]
 	Daeva,
 	Gangrel,
 	Mekhet,

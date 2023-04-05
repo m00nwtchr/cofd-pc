@@ -3,8 +3,11 @@ use serde::{Deserialize, Serialize};
 
 use super::{ability::Ability, NameKey};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, AllVariants, VariantName)]
+#[derive(
+	Debug, Clone, PartialEq, Eq, Serialize, Deserialize, AllVariants, VariantName, Default,
+)]
 pub enum Burden {
+	#[default]
 	Abiding,
 	Bereaved,
 	Hungry,
@@ -26,8 +29,11 @@ impl Burden {
 	}
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, AllVariants, VariantName)]
+#[derive(
+	Debug, Clone, PartialEq, Eq, Serialize, Deserialize, AllVariants, VariantName, Default,
+)]
 pub enum Archetype {
+	#[default]
 	Furies,
 	Mourners,
 	Necropolitans,
