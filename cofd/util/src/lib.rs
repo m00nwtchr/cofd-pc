@@ -10,6 +10,15 @@ pub trait VariantName {
 	fn name(&self) -> &str;
 }
 
+impl<T> VariantName for Box<T>
+where
+	T: VariantName,
+{
+	fn name(&self) -> &str {
+		self.as_ref().name()
+	}
+}
+
 pub trait AllVariants {
 	type T;
 	const N: usize;

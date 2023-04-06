@@ -25,7 +25,7 @@ pub enum Clan {
 	Mekhet,
 	Nosferatu,
 	Ventrue,
-	_Custom(String, [Discipline; 3], [Attribute; 2]),
+	_Custom(String, Box<[Discipline; 3]>, [Attribute; 2]),
 }
 
 impl Clan {

@@ -162,7 +162,7 @@ pub enum Auspice {
 		[Skill; 3],
 		Renown,
 		MoonGift,
-		[ShadowGift; 2],
+		Box<[ShadowGift; 2]>,
 		HuntersAspect,
 	),
 }
@@ -235,7 +235,7 @@ pub enum PureTribe {
 		[Renown; 2],
 		[Skill; 3],
 		[HuntersAspect; 2],
-		[ShadowGift; 4],
+		Box<[ShadowGift; 4]>,
 	),
 }
 
@@ -283,7 +283,7 @@ pub enum Tribe {
 	StormLords,
 	#[expand]
 	Pure(PureTribe),
-	_Custom(String, Renown, [ShadowGift; 3]),
+	_Custom(String, Renown, Box<[ShadowGift; 3]>),
 }
 
 impl Tribe {

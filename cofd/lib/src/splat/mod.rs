@@ -117,11 +117,11 @@ impl Splat {
 			Self::Vampire(..) => Some(
 				Clan::_Custom(
 					name,
-					[
+					Box::new([
 						Discipline::Animalism,
 						Discipline::Auspex,
 						Discipline::Celerity,
-					],
+					]),
 					[Attribute::Composure, Attribute::Dexterity],
 				)
 				.into(),
@@ -132,7 +132,7 @@ impl Splat {
 					[Skill::Academics, Skill::AnimalKen, Skill::Athletics],
 					Renown::Cunning,
 					MoonGift::_Custom(String::from("Custom")),
-					[ShadowGift::Death, ShadowGift::Dominance],
+					Box::new([ShadowGift::Death, ShadowGift::Dominance]),
 					HuntersAspect::Monstrous,
 				)
 				.into(),
@@ -157,11 +157,11 @@ impl Splat {
 				Tribe::_Custom(
 					name,
 					Renown::Cunning,
-					[
+					Box::new([
 						ShadowGift::Death,
 						ShadowGift::Dominance,
 						ShadowGift::Elementals,
-					],
+					]),
 				)
 				.into(),
 			),

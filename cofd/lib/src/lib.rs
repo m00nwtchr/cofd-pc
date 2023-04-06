@@ -38,6 +38,11 @@ mod tests {
 	};
 
 	#[test]
+	fn size() {
+		println!("{}", std::mem::size_of::<Splat>());
+	}
+
+	#[test]
 	#[allow(clippy::too_many_lines)]
 	fn it_works() {
 		let vampire_character = Character::builder()

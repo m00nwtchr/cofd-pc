@@ -455,11 +455,11 @@ pub fn derive_variant_name(input: proc_macro::TokenStream) -> proc_macro::TokenS
 		for variant in &data.variants {
 			let variant_name = &variant.ident;
 
-			let mut flag = false;
+			let mut expand = false;
 
 			for attr in &variant.attrs {
 				if attr.path().is_ident("expand") {
-					flag = true;
+					expand = true;
 					break;
 				}
 			}
@@ -475,7 +475,7 @@ pub fn derive_variant_name(input: proc_macro::TokenStream) -> proc_macro::TokenS
 			} else {
 				let mut match_arm = TokenStream::new();
 
-				let fields_in_variant = if flag && variant.fields.len() == 1 {
+				let fields_in_variant = if expand && variant.fields.len() == 1 {
 					quote_spanned! {variant.span()=> (val) }
 				} else {
 					variant_fields(variant)
@@ -484,7 +484,7 @@ pub fn derive_variant_name(input: proc_macro::TokenStream) -> proc_macro::TokenS
 				let variant_name_lower =
 					variant_name.to_string().to_case(convert_case::Case::Snake);
 
-				if flag {
+				if expand {
 					if let Fields::Unnamed(fields) = &variant.fields && let Some(field) = fields.unnamed.first() && let Type::Path(ty) = &field.ty {
 						if ty.path.segments.first().unwrap().ident.eq("Option") {
 							match_arm.extend(quote_spanned! {ty.span()=>
@@ -573,13 +573,18 @@ pub fn derive_all_variants(input: proc_macro::TokenStream) -> proc_macro::TokenS
 							if let Some(segment) = ty.path.segments.first() {
 								if let PathArguments::AngleBracketed(arguments) = &segment.arguments
 								{
-									field_tokens.extend(
-										quote_spanned! { field.span()=> Default::default(), },
-									);
 									if let Some(GenericArgument::Type(ty2)) = arguments.args.first()
 									{
 										sub_enums.extend(
 											quote_spanned! { field.span()=> vec.extend(<#ty2 as AllVariants>::all().map(Into::into)); },
+										);
+									}
+
+									if segment.ident.to_string().eq("Box") {
+										continue;
+									} else {
+										field_tokens.extend(
+											quote_spanned! { field.span()=> Default::default(), },
 										);
 									}
 								} else {
