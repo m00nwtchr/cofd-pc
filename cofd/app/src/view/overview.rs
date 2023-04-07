@@ -240,7 +240,9 @@ where
 						flag = true;
 					}
 
-					character.merits.insert(i, (ability, val));
+					if !ability.name().is_empty() {
+						character.merits.insert(i, (ability, val));
+					}
 				}
 
 				if flag {

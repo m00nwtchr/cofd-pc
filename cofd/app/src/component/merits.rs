@@ -9,7 +9,7 @@ use cofd::{prelude::*, splat::Merit};
 
 use crate::{
 	fl,
-	i18n::Translated,
+	i18n::{flt, Translated},
 	widget::dots::{Shape, SheetDots},
 	Element, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
 };
@@ -77,7 +77,7 @@ impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
 
 		vec.push(Merit::_Custom(format!(
 			"--- {} Merits ---",
-			character.splat.name()
+			flt(character.splat.name(), None).unwrap()
 		)));
 		vec.extend(character.splat.merits());
 

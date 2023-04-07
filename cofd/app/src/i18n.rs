@@ -60,15 +60,6 @@ pub fn flt(message_id: &str, attribute: Option<&str>) -> Option<String> {
 	message.take()
 }
 
-pub fn fll(key: &str) -> Option<String> {
-	let mut iter = key.split('.');
-
-	let message_id = iter.next().unwrap();
-	let attribute = iter.next();
-
-	flt(message_id, attribute)
-}
-
 // #[derive(Debug, Clone, PartialEq, Eq)]
 // pub enum Locale {
 // 	System,
