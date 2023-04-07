@@ -1006,7 +1006,7 @@ pub enum Armor {
 	Ballistic,
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Weapon {
 	pub name: String,
 	pub dice_pool: String,

@@ -9,7 +9,8 @@ use crate::{Element, H3_SIZE, TITLE_SPACING};
 
 pub struct List<'a, T, Message> {
 	str: String,
-	min: usize,
+	min: Option<usize>,
+	max: Option<usize>,
 	vec: Vec<T>,
 	f: Box<dyn Fn(usize, Option<T>) -> Element<'a, Message>>,
 	max_width: f32, // on_change: Box<dyn Fn(usize, T) -> Message>,
@@ -17,12 +18,13 @@ pub struct List<'a, T, Message> {
 
 pub fn list<'a, T, Message>(
 	str: String,
-	min: usize,
+	min: Option<usize>,
+	max: Option<usize>,
 	vec: Vec<T>,
 	f: impl Fn(usize, Option<T>) -> Element<'a, Message> + 'static,
 	// on_change: impl Fn(usize, T) -> Message + 'static,
 ) -> List<'a, T, Message> {
-	List::new(str, min, vec, f)
+	List::new(str, min, max, vec, f)
 }
 
 // #[derive(Clone)]
@@ -31,7 +33,8 @@ pub fn list<'a, T, Message>(
 impl<'a, T, Message> List<'a, T, Message> {
 	fn new(
 		str: String,
-		min: usize,
+		min: Option<usize>,
+		max: Option<usize>,
 		vec: Vec<T>,
 		f: impl Fn(usize, Option<T>) -> Element<'a, Message> + 'static,
 		// on_change: impl Fn(usize, T) -> Message + 'static,
@@ -39,6 +42,7 @@ impl<'a, T, Message> List<'a, T, Message> {
 		Self {
 			str,
 			min,
+			max,
 			vec,
 			f: Box::new(f),
 			max_width: f32::INFINITY,
@@ -66,7 +70,10 @@ where
 	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let mut col = Column::new();
 
-		for i in 0..self.min {
+		for i in 0..std::cmp::min(
+			self.max.unwrap_or(usize::MAX),
+			std::cmp::max(self.min.unwrap_or(0), self.vec.len()),
+		) {
 			let val = self.vec.get(i).cloned();
 
 			col = col.push((self.f)(i, val));

@@ -230,7 +230,8 @@ where
 
 			let shadow_gifts = list(
 				fl!("shadow-gifts"),
-				data.shadow_gifts.len() + 1,
+				Some(data.shadow_gifts.len() + 1),
+				None,
 				data.shadow_gifts.clone(),
 				{
 					let shadow_gifts = shadow_gifts;
@@ -246,7 +247,8 @@ where
 
 			let wolf_gifts = list(
 				fl!("wolf-gifts"),
-				data.wolf_gifts.len() + 1,
+				Some(data.wolf_gifts.len() + 1),
+				None,
 				data.wolf_gifts.clone(),
 				{
 					let wolf_gifts = wolf_gifts;
@@ -291,24 +293,30 @@ where
 		};
 
 		let rites = if let Splat::Werewolf(.., data) = &character.splat {
-			let list = list(fl!("rites"), data.rites.len() + 1, data.rites.clone(), {
-				move |i, rite| {
-					if let Some(Rite::_Custom(name)) = rite {
-						text_input("", &name, move |val| {
-							Event::RiteChanged(i, Rite::_Custom(val))
-						})
-						.into()
-					} else {
-						pick_list(
-							vec![Rite::_Custom(fl!("custom")).into()],
-							rite.map(Into::into),
-							move |val: Translated<Rite>| Event::RiteChanged(i, val.unwrap()),
-						)
-						.padding(INPUT_PADDING)
-						.into()
+			let list = list(
+				fl!("rites"),
+				Some(data.rites.len() + 1),
+				None,
+				data.rites.clone(),
+				{
+					move |i, rite| {
+						if let Some(Rite::_Custom(name)) = rite {
+							text_input("", &name, move |val| {
+								Event::RiteChanged(i, Rite::_Custom(val))
+							})
+							.into()
+						} else {
+							pick_list(
+								vec![Rite::_Custom(fl!("custom")).into()],
+								rite.map(Into::into),
+								move |val: Translated<Rite>| Event::RiteChanged(i, val.unwrap()),
+							)
+							.padding(INPUT_PADDING)
+							.into()
+						}
 					}
-				}
-			});
+				},
+			);
 
 			row![list].align_items(Alignment::Center)
 		} else {

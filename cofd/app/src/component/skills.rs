@@ -137,7 +137,8 @@ impl<Message> SkillsComponent<Message> {
 				if skill.eq(&specialty_skill) {
 					col = col.push(row![col0, col1, col2].spacing(5)).push(list(
 						String::new(),
-						specialties.len() + 1,
+						Some(specialties.len() + 1),
+						None,
 						specialties.clone(),
 						closure!(clone skill,
 								 |i, val| text_input("", &val.unwrap_or_default(),

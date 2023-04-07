@@ -51,7 +51,11 @@ where
 
 		match event {
 			Event::WeaponChanged(i, weapon) => {
-				vec_changed(i, weapon, &mut character.weapons);
+				if weapon == Default::default() {
+					character.weapons.remove(i);
+				} else {
+					vec_changed(i, weapon, &mut character.weapons);
+				}
 
 				None
 			}

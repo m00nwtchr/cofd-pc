@@ -202,7 +202,11 @@ where
 			Event::SkillChanged(val, skill) => *character.base_skills_mut().get_mut(&skill) = val,
 			Event::SpecialtyChanged(skill, i, val) => {
 				if let Some(vec) = character.specialties.get_mut(&skill) {
-					vec_changed(i, val, vec);
+					if val.is_empty() {
+						vec.remove(i);
+					} else {
+						vec_changed(i, val, vec);
+					}
 				} else {
 					character.specialties.insert(skill, vec![val]);
 				}
@@ -256,12 +260,42 @@ where
 				_ => {}
 			},
 			Event::HealthChanged(wound) => character.health_mut().poke(&wound),
-			Event::ConditionChanged(i, val) => vec_changed(i, val, &mut character.conditions),
-			Event::AspirationChanged(i, val) => vec_changed(i, val, &mut character.aspirations),
+			Event::ConditionChanged(i, val) => {
+				if val.is_empty() {
+					character.conditions.remove(i);
+				} else {
+					vec_changed(i, val, &mut character.conditions)
+				}
+			}
+			Event::AspirationChanged(i, val) => {
+				if val.is_empty() {
+					character.aspirations.remove(i);
+				} else {
+					vec_changed(i, val, &mut character.aspirations)
+				}
+			}
 			Event::SplatThingChanged(i, val) => match &mut character.splat {
-				Splat::Changeling(.., data) => vec_changed(i, val, &mut data.frailties),
-				Splat::Vampire(.., data) => vec_changed(i, val, &mut data.banes),
-				Splat::Mage(.., data) => vec_changed(i, val, &mut data.obsessions),
+				Splat::Changeling(.., data) => {
+					if val.is_empty() {
+						data.frailties.remove(i);
+					} else {
+						vec_changed(i, val, &mut data.frailties)
+					}
+				}
+				Splat::Vampire(.., data) => {
+					if val.is_empty() {
+						data.banes.remove(i);
+					} else {
+						vec_changed(i, val, &mut data.banes)
+					}
+				}
+				Splat::Mage(.., data) => {
+					if val.is_empty() {
+						data.obsessions.remove(i);
+					} else {
+						vec_changed(i, val, &mut data.obsessions)
+					}
+				}
 				_ => (),
 			},
 			Event::RoteSkillChanged(skill) => {
@@ -394,7 +428,8 @@ where
 
 		let conditions = list(
 			fl!("conditions"),
-			character.conditions.len() + 1,
+			Some(character.conditions.len() + 1),
+			None,
 			character.conditions.clone(),
 			|i, val| {
 				text_input("", &val.unwrap_or_default(), move |val| {
@@ -408,7 +443,8 @@ where
 
 		let aspirations = list(
 			fl!("aspirations"),
-			character.aspirations.len() + 1,
+			Some(character.aspirations.len() + 1),
+			Some(3),
 			character.aspirations.clone(),
 			|i, val| {
 				text_input("", &val.unwrap_or_default(), move |val| {
@@ -423,14 +459,14 @@ where
 		let obsessions = if let Splat::Mage(.., data) = &character.splat {
 			column![list(
 				flt("mage", Some("obsessions")).unwrap(),
-				5,
-				// match character.power {
-				// 	1..=2 => 1,
-				// 	3..=5 => 2,
-				// 	6..=8 => 3,
-				// 	9..=10 => 4,
-				// 	_ => 1,
-				// },
+				Some(1),
+				Some(match character.power {
+					1..=2 => 1,
+					3..=5 => 2,
+					6..=8 => 3,
+					9..=10 => 4,
+					_ => 1,
+				}),
 				data.obsessions.clone(),
 				|i, val| text_input("", &val.unwrap_or_default(), move |val| {
 					Event::SplatThingChanged(i, val)
@@ -554,7 +590,8 @@ where
 		{
 			list(
 				fl!("changeling", "frailties"),
-				3,
+				Some(3),
+				Some(3),
 				data.frailties.clone(),
 				|i, val| {
 					text_input("", &val.unwrap_or_default(), move |val| {
@@ -570,13 +607,19 @@ where
 		};
 
 		let banes: Element<Self::Event> = if let Splat::Vampire(.., data) = &character.splat {
-			list(fl!("vampire", "banes"), 3, data.banes.clone(), |i, val| {
-				text_input("", &val.unwrap_or_default(), move |val| {
-					Event::SplatThingChanged(i, val)
-				})
-				.padding(INPUT_PADDING)
-				.into()
-			})
+			list(
+				fl!("vampire", "banes"),
+				Some(3),
+				Some(3),
+				data.banes.clone(),
+				|i, val| {
+					text_input("", &val.unwrap_or_default(), move |val| {
+						Event::SplatThingChanged(i, val)
+					})
+					.padding(INPUT_PADDING)
+					.into()
+				},
+			)
 			.into()
 		} else {
 			column![].into()

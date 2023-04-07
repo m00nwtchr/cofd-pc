@@ -186,7 +186,8 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 				col = col.push(
 					list(
 						fl!("touchstones"),
-						10,
+						Some(10),
+						Some(10),
 						character.touchstones.clone() as Vec<String>,
 						|i, val| {
 							text_input("", &val.unwrap_or_default(), move |val| {
