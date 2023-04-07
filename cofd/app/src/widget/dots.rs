@@ -233,7 +233,11 @@ where
 		_viewport: &Rectangle,
 		_renderer: &Renderer,
 	) -> mouse::Interaction {
-		if layout.bounds().contains(cursor_position) {
+		if layout
+			.children()
+			.flat_map(Layout::children)
+			.any(|layout| layout.bounds().contains(cursor_position))
+		{
 			mouse::Interaction::Pointer
 		} else {
 			mouse::Interaction::default()

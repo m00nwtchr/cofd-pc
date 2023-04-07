@@ -335,12 +335,9 @@ where
 			if wp > 0 {
 				label += &format!(" (-{wp})");
 			}
-			column![
-				text(label).size(H3_SIZE),
-				track // text(format!("{:?}", character.health_track))
-			]
-			.spacing(TITLE_SPACING)
-			.align_items(Alignment::Center)
+			column![text(label).size(H3_SIZE), track]
+				.spacing(TITLE_SPACING)
+				.align_items(Alignment::Center)
 		};
 
 		let willpower = {

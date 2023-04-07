@@ -1,9 +1,7 @@
-// TODO: Implement wrapping (boxes-style)
-
 use iced::{event, mouse, Alignment, Background, Color, Element, Event, Point, Rectangle, Theme};
 use iced_native::{
 	layout, renderer, text, touch,
-	widget::{self, Row, Tree},
+	widget::{self, Column, Row, Tree},
 	Clipboard, Layout, Shell, Widget,
 };
 
@@ -16,6 +14,7 @@ where
 {
 	damage: Damage,
 	max: usize,
+	per_row_count: Option<usize>,
 	on_click: Box<dyn Fn(Wound) -> Message + 'a>,
 	size: u16,
 	spacing: u16,
@@ -41,6 +40,7 @@ where
 		Self {
 			damage,
 			max,
+			per_row_count: Some(13),
 			on_click: Box::new(f),
 			size: Self::DEFAULT_SIZE,
 			spacing: Self::DEFAULT_SPACING, //15
@@ -56,23 +56,40 @@ where
 	Renderer::Theme: StyleSheet + widget::text::StyleSheet,
 {
 	fn width(&self) -> iced::Length {
-		iced::Length::Fill
+		iced::Length::Shrink
 	}
 
 	fn height(&self) -> iced::Length {
-		iced::Length::Fixed(15.0)
+		iced::Length::Shrink
 	}
 
 	fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
-		let mut row = Row::<(), Renderer>::new()
-			// .width(Length::Shrink)
+		let mut col = Column::<(), Renderer>::new()
+			.spacing(self.spacing)
+			.width(self.width());
+
+		let per_row_count = self.per_row_count.unwrap_or(self.max);
+
+		let mut row = Row::new()
 			.spacing(self.spacing)
 			.align_items(Alignment::Center);
 
-		for _ in 0..self.max {
+		for i in 0..self.max {
 			row = row.push(Row::new().width(self.size).height(self.size));
+
+			if (i + 1) % per_row_count == 0 {
+				col = col.push(row);
+				row = Row::new()
+					.spacing(self.spacing)
+					.align_items(Alignment::Center);
+			}
 		}
-		row.layout(renderer, limits)
+
+		if row.children().len() > 0 {
+			col = col.push(row);
+		}
+
+		col.layout(renderer, limits)
 	}
 
 	fn on_event(
@@ -88,7 +105,7 @@ where
 		match event {
 			Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
 			| Event::Touch(touch::Event::FingerPressed { .. }) => {
-				for (i, layout) in layout.children().enumerate() {
+				for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
 					if layout.bounds().contains(cursor_position) {
 						let wound = self.damage.get_i(i);
 						shell.publish((self.on_click)(wound));
@@ -111,7 +128,11 @@ where
 		_viewport: &Rectangle,
 		_renderer: &Renderer,
 	) -> mouse::Interaction {
-		if layout.bounds().contains(cursor_position) {
+		if layout
+			.children()
+			.flat_map(Layout::children)
+			.any(|layout| layout.bounds().contains(cursor_position))
+		{
 			mouse::Interaction::Pointer
 		} else {
 			mouse::Interaction::default()
@@ -128,7 +149,7 @@ where
 		_cursor_position: Point,
 		_viewport: &Rectangle,
 	) {
-		for (i, layout) in layout.children().enumerate() {
+		for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
 			let bounds = layout.bounds();
 			let custom_style = theme.active(self.style);
 
@@ -152,48 +173,6 @@ where
 		}
 	}
 }
-
-// fn vert_line<Renderer: text::Renderer>(
-// 	renderer: &mut Renderer,
-// 	bounds: Rectangle,
-// 	style: Appearance,
-// ) {
-// 	renderer.fill_quad(
-// 		renderer::Quad {
-// 			bounds: Rectangle {
-// 				x: bounds.x + (bounds.width / 2.0) - 1.0,
-// 				y: bounds.y,
-// 				width: 2.0,
-// 				height: bounds.height,
-// 			},
-// 			border_radius: 0.0,
-// 			border_width: 0.0,
-// 			border_color: Color::TRANSPARENT,
-// 		},
-// 		style.dot_color,
-// 	);
-// }
-
-// fn horiz_line<Renderer: text::Renderer>(
-// 	renderer: &mut Renderer,
-// 	bounds: Rectangle,
-// 	style: Appearance,
-// ) {
-// 	renderer.fill_quad(
-// 		renderer::Quad {
-// 			bounds: Rectangle {
-// 				x: bounds.x,
-// 				y: bounds.y + (bounds.height / 2.0) - 1.0,
-// 				width: bounds.width,
-// 				height: 2.0,
-// 			},
-// 			border_radius: 0.0,
-// 			border_width: 0.0,
-// 			border_color: Color::TRANSPARENT,
-// 		},
-// 		style.dot_color,
-// 	);
-// }
 
 impl<'a, Message, Renderer> From<HealthTrack<'a, Message, Renderer>>
 	for Element<'a, Message, Renderer>
