@@ -1,13 +1,11 @@
 use std::{
-	cell::RefCell,
 	collections::HashMap,
-	rc::Rc,
 	sync::{Arc, RwLock},
 };
 
 use serde::{Deserialize, Serialize};
 
-use super::{add, traits::*, Character};
+use super::{traits::*, Character};
 use crate::{
 	dice_pool::DicePool,
 	splat::{ability::Ability, werewolf::Form, Splat},
@@ -407,7 +405,6 @@ impl Modifiers {
 
 	pub fn get_conditional_pool(
 		&self,
-		character: &Character,
 		target: impl Into<ModifierTarget>,
 		condition: impl Into<Condition>,
 	) -> Option<DicePool> {

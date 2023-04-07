@@ -118,7 +118,7 @@ impl PlayerCompanionApp {
 
 		self.characters = characters
 			.into_iter()
-			.map(|mut val| {
+			.map(|val| {
 				val.calc_mod_map();
 				val
 			})

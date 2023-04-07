@@ -8,10 +8,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::{i18n::flt, Element, INPUT_PADDING};
 use cofd::{
-	character::{
-		modifier::{Modifier, ModifierTarget},
-		traits::Trait,
-	},
+	character::{modifier::ModifierTarget, traits::Trait},
 	prelude::*,
 	splat::{
 		werewolf::{get_form_trait, Form},
@@ -48,13 +45,8 @@ impl<Message> FormsComponent<Message> {
 		}
 	}
 
-	fn mk_col(&self, form: Form, character: &Character, active_form: &Form) -> Element<Event> {
-		let attrs = character.attributes();
-
+	fn mk_col(&self, form: Form, character: &Character) -> Element<Event> {
 		let mut col = Column::new();
-
-		let cur_mods = active_form.get_modifiers();
-		let mods = form.get_modifiers();
 
 		let mut vec: Vec<ModifierTarget> = vec![
 			Attribute::Strength.into(),
@@ -131,9 +123,9 @@ impl<Message: Clone> Component<Message, iced::Renderer> for FormsComponent<Messa
 
 		let mut row = Row::new();
 
-		if let Splat::Werewolf(.., data) = &character.splat {
+		if let Splat::Werewolf(..) = &character.splat {
 			for form in Form::all() {
-				row = row.push(self.mk_col(form, &character, &data.form));
+				row = row.push(self.mk_col(form, &character));
 			}
 		}
 

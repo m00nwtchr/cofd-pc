@@ -5,7 +5,7 @@ use std::{
 	ops::{Add, Sub},
 };
 
-use crate::splat::{ability::Ability, werewolf::Form, Merit, Splat};
+use crate::splat::{ability::Ability, Merit, Splat};
 use crate::{dice_pool::DicePool, prelude::VariantName};
 
 pub mod modifier;
@@ -418,7 +418,7 @@ impl Character {
 		target: impl Into<ModifierTarget>,
 		condition: impl Into<Condition>,
 	) -> Option<DicePool> {
-		self.modifiers.get_conditional_pool(self, target, condition)
+		self.modifiers.get_conditional_pool(target, condition)
 	}
 
 	pub fn attributes(&self) -> Attributes {

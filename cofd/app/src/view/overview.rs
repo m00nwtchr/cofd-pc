@@ -202,7 +202,7 @@ where
 			Event::SkillChanged(val, skill) => *character.base_skills_mut().get_mut(&skill) = val,
 			Event::SpecialtyChanged(skill, i, val) => {
 				if let Some(vec) = character.specialties.get_mut(&skill) {
-					vec_changed(i, val, vec)
+					vec_changed(i, val, vec);
 				} else {
 					character.specialties.insert(skill, vec![val]);
 				}
