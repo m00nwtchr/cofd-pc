@@ -12,16 +12,14 @@
 	clippy::default_trait_access
 )]
 
-use std::{cell::RefCell, mem, rc::Rc};
-
 use iced::{
 	executor,
 	widget::{button, column, row, Column},
 	Alignment, Application, Command, Theme,
 };
-
 #[cfg(target_arch = "wasm32")]
 use log::Level;
+use std::{cell::RefCell, mem, rc::Rc};
 
 use cofd::prelude::*;
 
@@ -302,6 +300,9 @@ mod demo {
 		prelude::*,
 		splat::{changeling::*, geist::*, mage::*, vampire::*, werewolf::*, Merit, Splat},
 	};
+
+	#[allow(unused_imports)]
+	use crate::store::Store;
 
 	#[test]
 	pub fn save() -> anyhow::Result<()> {

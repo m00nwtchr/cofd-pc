@@ -4,8 +4,9 @@ use cofd_util::VariantName;
 
 use super::{ability::Ability, Merit, Splat};
 use crate::{
-	character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Trait},
+	character::modifier::{Modifier, ModifierOp},
 	dice_pool::DicePool,
+	prelude::{Attribute, Trait},
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
@@ -111,25 +112,15 @@ pub enum Discipline {
 
 impl Discipline {
 	#[warn(clippy::cast_possible_wrap)]
-	pub fn get_modifiers(&self, value: u16) -> Vec<crate::character::Modifier> {
+	pub fn get_modifiers(&self, value: u16) -> Vec<crate::character::modifier::Modifier> {
 		match self {
 			Discipline::Celerity => {
-				vec![Modifier::new(
-					ModifierTarget::Trait(Trait::Defense),
-					ModifierValue::Num(value as i16),
-					ModifierOp::Add,
-				)]
+				vec![Modifier::new(Trait::Defense, value, ModifierOp::Add)]
 			}
-			Discipline::Resilience => vec![Modifier::new(
-				ModifierTarget::Attribute(Attribute::Stamina),
-				ModifierValue::Num(value as i16),
-				ModifierOp::Add,
-			)],
-			Discipline::Vigor => vec![Modifier::new(
-				ModifierTarget::Attribute(Attribute::Strength),
-				ModifierValue::Num(value as i16),
-				ModifierOp::Add,
-			)],
+			Discipline::Resilience => {
+				vec![Modifier::new(Attribute::Stamina, value, ModifierOp::Add)]
+			}
+			Discipline::Vigor => vec![Modifier::new(Attribute::Strength, value, ModifierOp::Add)],
 			_ => vec![],
 		}
 	}

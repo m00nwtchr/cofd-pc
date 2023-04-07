@@ -2,7 +2,10 @@ use serde::{Deserialize, Serialize};
 
 use super::{Merit, NameKey, Splat};
 use crate::{
-	character::{AttributeCategory, AttributeType, Character, Damage},
+	character::{
+		traits::{AttributeCategory, AttributeType},
+		Character, Damage,
+	},
 	prelude::*,
 };
 

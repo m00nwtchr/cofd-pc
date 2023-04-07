@@ -1,16 +1,12 @@
-
-
 use iced::{
-	widget::{button, column, pick_list, row, text}, Length,
+	widget::{button, column, pick_list, row, text},
+	Length,
 };
 use iced_lazy::Component;
 
 use cofd::{prelude::*, splat::Splat};
 
-use crate::{
-	i18n::{Translated},
-	Element, INPUT_PADDING,
-};
+use crate::{i18n::Translated, Element, INPUT_PADDING};
 
 pub struct CreatorView<Message> {
 	on_done: Box<dyn Fn(Character) -> Message>,

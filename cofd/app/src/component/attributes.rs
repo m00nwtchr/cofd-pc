@@ -1,13 +1,15 @@
-use std::{cell::RefCell, rc::Rc};
-
 use iced::{
 	widget::{column, row, text, Column},
 	Alignment, Length,
 };
 use iced_lazy::Component;
+use std::{cell::RefCell, rc::Rc};
 
 use cofd::{
-	character::{AttributeCategory, ModifierTarget, TraitCategory},
+	character::{
+		modifier::ModifierTarget,
+		traits::{AttributeCategory, TraitCategory},
+	},
 	prelude::*,
 };
 
@@ -56,7 +58,7 @@ impl<Message> AttributeBar<Message> {
 			.align_items(Alignment::End);
 
 		for attr in Attribute::get(AttributeCategory::Trait(cat)) {
-			let v = character.base_attributes().get(attr);
+			let v = character.base_attributes().get(&attr);
 			let val = character._modified(ModifierTarget::BaseAttribute(attr));
 			let mod_ = val - v;
 

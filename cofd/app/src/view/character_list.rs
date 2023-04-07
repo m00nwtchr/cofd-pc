@@ -1,10 +1,9 @@
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
-
 use iced::{
 	widget::{button, column, row, text, Column},
 	Alignment, Length,
 };
 use iced_lazy::Component;
+use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use cofd::prelude::*;
 
@@ -58,7 +57,13 @@ impl<Message> CharacterList<Message> {
 
 		// button(text(fl!("select"))).on_press(Event::PickCharacter(i))
 
-		button(column![text(&character.info.name), text(subtitle)])
+		let name = if character.info.name.is_empty() {
+			"Unnamed"
+		} else {
+			&character.info.name
+		};
+
+		button(column![text(name), text(subtitle)])
 			.width(Length::Fill)
 			.on_press(Event::PickCharacter(i))
 			.into()

@@ -1,12 +1,10 @@
-use std::{
-	fmt::{self},
-	sync::Arc,
-};
-
-use cofd::splat::NameKey;
 use i18n_embed::{
 	fluent::{fluent_language_loader, FluentLanguageLoader},
 	DefaultLocalizer, LanguageRequester, Localizer,
+};
+use std::{
+	fmt::{self},
+	sync::Arc,
 };
 cfg_if! {
 	if #[cfg(target_arch = "wasm32")] {
@@ -18,6 +16,8 @@ cfg_if! {
 use cfg_if::cfg_if;
 use once_cell::sync::{Lazy, OnceCell};
 use rust_embed::RustEmbed;
+
+use cofd::splat::NameKey;
 
 #[derive(RustEmbed)]
 #[folder = "i18n"] // path to the compiled localization resources

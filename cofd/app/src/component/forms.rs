@@ -1,17 +1,22 @@
-use std::{cell::RefCell, rc::Rc};
-
 use iced::{
 	alignment,
 	widget::{button, column, row, text, text_input, Column, Row},
 	Length,
 };
 use iced_lazy::Component;
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{i18n::flt, Element, INPUT_PADDING};
 use cofd::{
-	character::{ModifierTarget, Trait},
+	character::{
+		modifier::{Modifier, ModifierTarget},
+		traits::Trait,
+	},
 	prelude::*,
-	splat::{werewolf::Form, Splat},
+	splat::{
+		werewolf::{get_form_trait, Form},
+		Splat,
+	},
 };
 
 pub struct FormsComponent<Message> {
@@ -43,12 +48,12 @@ impl<Message> FormsComponent<Message> {
 		}
 	}
 
-	fn mk_col(&self, form: Form, character: &Character, current_form: &Form) -> Element<Event> {
+	fn mk_col(&self, form: Form, character: &Character, active_form: &Form) -> Element<Event> {
 		let attrs = character.attributes();
 
 		let mut col = Column::new();
 
-		let cur_mods = current_form.get_modifiers();
+		let cur_mods = active_form.get_modifiers();
 		let mods = form.get_modifiers();
 
 		let mut vec: Vec<ModifierTarget> = vec![
@@ -58,18 +63,6 @@ impl<Message> FormsComponent<Message> {
 			Attribute::Manipulation.into(),
 		];
 
-		let iter: Vec<_> = mods
-			.iter()
-			.filter_map(|mod_| {
-				if let ModifierTarget::Attribute(_) = mod_.target && !vec.contains(&mod_.target) {
-				Some(mod_.target)
-			} else {
-				None
-			}
-			})
-			.collect();
-
-		vec.extend(iter);
 		vec.extend(vec![
 			ModifierTarget::Trait(Trait::Size),
 			ModifierTarget::Trait(Trait::Defense),
@@ -80,37 +73,16 @@ impl<Message> FormsComponent<Message> {
 		]);
 
 		for target in vec {
-			let (base, name) = match target {
+			let name = match target {
 				ModifierTarget::BaseAttribute(_)
 				| ModifierTarget::BaseSkill(_)
-				| ModifierTarget::Skill(_) => unreachable!(),
-				ModifierTarget::Attribute(attr) => (
-					*attrs.get(attr) as i16,
-					flt("attribute", Some(attr.name())).unwrap(),
-				),
-				ModifierTarget::Trait(trait_) => (
-					character.get_trait(trait_) as i16,
-					flt(trait_.name().unwrap(), None).unwrap(),
-				),
+				| ModifierTarget::Skill(_)
+				| ModifierTarget::WerewolfForm(..) => unreachable!(),
+				ModifierTarget::Attribute(attr) => flt("attribute", Some(attr.name())).unwrap(),
+				ModifierTarget::Trait(trait_) => flt(trait_.name().unwrap(), None).unwrap(),
 			};
 
-			let val: i16 = if !form.eq(current_form) {
-				let cur_mod_ = cur_mods
-					.iter()
-					.filter(|el| el.target.eq(&target))
-					.find_map(cofd::character::Modifier::val)
-					.unwrap_or(0);
-
-				let mod_ = mods
-					.iter()
-					.filter(|el| el.target.eq(&target))
-					.find_map(cofd::character::Modifier::val)
-					.unwrap_or(0);
-
-				base - cur_mod_ + mod_
-			} else {
-				base
-			};
+			let val = get_form_trait(character, &form, &target);
 
 			col = col.push(row![
 				text(format!("{name}: ")),

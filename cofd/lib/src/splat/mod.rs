@@ -1,12 +1,15 @@
 use serde::{Deserialize, Serialize};
 
+use cofd_util::{AllVariants, NameKey, SplatEnum, VariantName};
+
 use self::ability::Ability;
 use crate::{
-	character::{AttributeType, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait},
-	prelude::{Attribute, Character},
+	character::{
+		modifier::{Modifier, ModifierOp, ModifierTarget, ModifierValue},
+		traits::AttributeType,
+	},
+	prelude::{Attribute, Character, Skill, Trait},
 };
-
-use cofd_util::{AllVariants, NameKey, SplatEnum, VariantName};
 
 pub mod ability;
 
@@ -572,6 +575,7 @@ impl Merit {
 					vec![]
 				}
 			}
+			Merit::Werewolf(merit) => merit.get_modifiers(value),
 			_ => vec![],
 		}
 	}
@@ -593,8 +597,8 @@ impl Merit {
 				skills.academics > 1 || skills.science > 1
 			}
 			Self::Indomitable => character.attributes().resolve > 2,
-			Self::InterdisciplinarySpecialty(_, Some(skill)) => *character.skills().get(*skill) > 2,
-			Self::InvestigativeAide(Some(skill)) => *character.skills().get(*skill) > 2,
+			Self::InterdisciplinarySpecialty(_, Some(skill)) => *character.skills().get(skill) > 2,
+			Self::InvestigativeAide(Some(skill)) => *character.skills().get(skill) > 2,
 			Self::InvestigativeProdigy => {
 				character.attributes().wits > 2 && character.skills().investigation > 2
 			}
@@ -660,7 +664,7 @@ impl Merit {
 			Self::Empath => character.skills().empathy > 1,
 			// Self::Fame // No Anonimity Merit
 			// Self::Fixer => character.attributes().wits > 2 // Contacts 2
-			Self::HobbyistClique(_, Some(skill)) => *character.skills().get(*skill) > 1,
+			Self::HobbyistClique(_, Some(skill)) => *character.skills().get(skill) > 1,
 			Self::Inspiring => character.attributes().presence > 2,
 			Self::IronWill => character.attributes().resolve > 3,
 			Self::Peacemaker => character.attributes().wits > 2 && character.skills().empathy > 2,
@@ -679,10 +683,10 @@ impl Merit {
 				character.attributes().manipulation > 2 && character.skills().subterfuge > 1
 			}
 
-			// Self::Mage(merit) => merit.is_available(character),
-			// Self::Vampire(merit) => merit.is_available(character),
-			// Self::Werewolf(merit) => merit.is_available(character),
-			// Self::Changeling(merit) => merit.is_available(character),
+			Self::Mage(merit) => merit.is_available(character),
+			Self::Vampire(merit) => merit.is_available(character),
+			Self::Werewolf(merit) => merit.is_available(character),
+			Self::Changeling(merit) => merit.is_available(character),
 			_ => true,
 		}
 	}

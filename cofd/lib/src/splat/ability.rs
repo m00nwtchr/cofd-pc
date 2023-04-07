@@ -9,7 +9,7 @@ use super::{
 	werewolf::{MoonGift, Renown},
 	Merit, NameKey,
 };
-use crate::character::Modifier;
+use crate::character::modifier::Modifier;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash, VariantName)]
 pub enum Ability {

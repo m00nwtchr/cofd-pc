@@ -1,14 +1,13 @@
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
-
 use closure::closure;
 use iced::{
 	widget::{column, pick_list, row, text, text_input, Column},
 	Alignment, Length,
 };
 use iced_lazy::Component;
+use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use cofd::{
-	character::{ModifierTarget, Trait, Wound},
+	character::Wound,
 	prelude::*,
 	splat::{
 		ability::Ability,
@@ -199,8 +198,8 @@ where
 		let res = None;
 
 		match event {
-			Event::AttrChanged(val, attr) => *character.base_attributes_mut().get_mut(attr) = val,
-			Event::SkillChanged(val, skill) => *character.base_skills_mut().get_mut(skill) = val,
+			Event::AttrChanged(val, attr) => *character.base_attributes_mut().get_mut(&attr) = val,
+			Event::SkillChanged(val, skill) => *character.base_skills_mut().get_mut(&skill) = val,
 			Event::SpecialtyChanged(skill, i, val) => {
 				if let Some(vec) = character.specialties.get_mut(&skill) {
 					vec_changed(i, val, vec)
@@ -246,8 +245,7 @@ where
 			}
 			Event::TraitChanged(val, _trait) => match _trait {
 				Trait::Size => {
-					character.base_size =
-						(val as i16 - character._mod(ModifierTarget::Trait(Trait::Size))) as u16;
+					character.base_size = (val as i16 - character._mod(&Trait::Size.into())) as u16;
 				}
 				Trait::Willpower => character.willpower = val,
 				Trait::Power => character.power = val,
@@ -673,7 +671,8 @@ where
 					.push(abilities)
 					.push(aspirations)
 					.push(hunters_aspect)
-					.push(conditions);
+					.push(conditions)
+					.push(traits);
 				col2 = col2.push(kuruth_triggers);
 			}
 			Splat::Mage(..) => {

@@ -1,10 +1,9 @@
-use std::{cell::RefCell, rc::Rc};
-
 use iced::{
 	widget::{checkbox, column, pick_list, row, text, text_input, Column},
 	Alignment, Length,
 };
 use iced_lazy::Component;
+use std::{cell::RefCell, rc::Rc};
 
 use cofd::{
 	prelude::*,

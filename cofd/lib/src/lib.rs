@@ -1,3 +1,4 @@
+#![feature(let_chains)]
 #![deny(clippy::pedantic)]
 #![allow(
 	clippy::must_use_candidate,
@@ -18,7 +19,10 @@ pub mod splat;
 extern crate cofd_util;
 
 pub mod prelude {
-	pub use crate::character::{Attribute, Attributes, Character, Skill, Skills};
+	pub use crate::character::{
+		traits::{Attribute, Skill, Trait},
+		Attributes, Character, Skills,
+	};
 	pub use cofd_util::{AllVariants, VariantName};
 }
 
@@ -27,8 +31,8 @@ mod tests {
 	use ron::ser::PrettyConfig;
 
 	use crate::{
-		character::{Attributes, Character, CharacterInfo, Skill, Skills},
-		prelude::Attribute,
+		character::CharacterInfo,
+		prelude::*,
 		splat::{
 			mage::{Arcanum, MageData, MageMerit, Order, Path},
 			vampire::{Bloodline, Clan, Covenant, Discipline, VampireMerit},

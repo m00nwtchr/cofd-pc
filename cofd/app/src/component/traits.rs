@@ -4,10 +4,7 @@ use iced::{
 };
 use iced_lazy::Component;
 
-use cofd::{
-	character::{ArmorStruct, Trait},
-	prelude::*,
-};
+use cofd::{character::ArmorStruct, prelude::*};
 
 use crate::{fl, i18n::flt, Element, INPUT_PADDING};
 

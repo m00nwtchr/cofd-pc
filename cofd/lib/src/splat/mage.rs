@@ -3,10 +3,7 @@ use serde::{Deserialize, Serialize};
 use cofd_util::{AllVariants, VariantName};
 
 use super::{ability::Ability, Merit, NameKey, Splat};
-use crate::{
-	character::Skill,
-	prelude::{Attribute, Character},
-};
+use crate::prelude::{Attribute, Character, Skill};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(default)]

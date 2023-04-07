@@ -1,12 +1,9 @@
-use serde::{Deserialize, Serialize};
-
-use cfg_if::cfg_if;
-
-#[cfg(not(target_arch = "wasm32"))]
-use directories::ProjectDirs;
-
 #[cfg(target_arch = "wasm32")]
 use anyhow::anyhow;
+use cfg_if::cfg_if;
+#[cfg(not(target_arch = "wasm32"))]
+use directories::ProjectDirs;
+use serde::{Deserialize, Serialize};
 
 pub struct Store {
 	#[cfg(target_arch = "wasm32")]

@@ -1,17 +1,15 @@
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
-
 use closure::closure;
 use iced::{
 	widget::{column, row, text, text_input},
 	Alignment, Length,
 };
 use iced_lazy::Component;
+use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use cofd::{character::Weapon, prelude::*};
 
-use crate::{Element, H2_SIZE, TITLE_SPACING};
-
 use super::overview::vec_changed;
+use crate::{Element, H2_SIZE, TITLE_SPACING};
 
 pub struct EquipmentTab<Message> {
 	character: Rc<RefCell<Character>>,
@@ -66,7 +64,7 @@ where
 
 		let weapons = {
 			let mut name = column![text("Weapon/Attack")]
-				.width(Length::Fill)
+				.width(Length::FillPortion(3))
 				.align_items(Alignment::Center)
 				.spacing(3);
 			let mut pool = column![text("Dice Pool")]
@@ -86,7 +84,7 @@ where
 				.align_items(Alignment::Center)
 				.spacing(3);
 			let mut size = column![text("Size")]
-				.width(Length::FillPortion(4))
+				.width(Length::Fill)
 				.align_items(Alignment::Center)
 				.spacing(3);
 
