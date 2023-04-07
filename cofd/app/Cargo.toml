@@ -22,13 +22,14 @@ iced_native = "0.9"
 log = "0.4"
 
 closure = "0.3"
+lazy_static = "1"
+cfg-if = "1"
 
 ron = "0.8"
 serde = "1"
 
 itertools = "0.10"
 
-cfg-if = "1"
 
 i18n-embed = { version = "0.13", features = ["fluent-system"] }
 i18n-embed-fl = "0.6"

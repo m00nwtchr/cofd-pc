@@ -2,7 +2,7 @@ use closure::closure;
 use iced::{
 	theme::{self},
 	widget::{button, checkbox, column, row, text, text_input, Column},
-	Alignment, Length,
+	Alignment, Color, Length,
 };
 use iced_lazy::Component;
 use std::{cell::RefCell, rc::Rc};
@@ -98,11 +98,26 @@ impl<Message> SkillsComponent<Message> {
 				);
 			}
 
+			let specialties = if let Some(specialties) = character.specialties.get(&skill) {
+				specialties
+			} else {
+				lazy_static::lazy_static! {
+					static ref DEFAULT: Vec<String> = vec![];
+				}
+				&DEFAULT
+			};
+
 			col1 = col1.push(
-				button(text(flt("skill", Some(skill.name())).unwrap()))
-					.padding(0)
-					.style(theme::Button::Text)
-					.on_press(Event::SpecialtySkillChanged(skill)),
+				button(text(flt("skill", Some(skill.name())).unwrap()).style(
+					if specialties.len() > 0 {
+						theme::Text::Color(Color::from_rgb(0.0, 0.7, 0.0))
+					} else {
+						theme::Text::Default
+					},
+				))
+				.padding(0)
+				.style(theme::Button::Text)
+				.on_press(Event::SpecialtySkillChanged(skill)),
 			);
 
 			let v = character.base_skills().get(&skill);
@@ -118,22 +133,25 @@ impl<Message> SkillsComponent<Message> {
 				move |val| Event::SkillChanged(val - mod_, skill),
 			));
 
-			if let Some(specialty_skill) = state.specialty_skill && skill.eq(&specialty_skill) {
-				let specialties = character.specialties.get(&skill).cloned().unwrap_or_default();
+			if let Some(specialty_skill) = state.specialty_skill {
+				if skill.eq(&specialty_skill) {
+					col = col.push(row![col0, col1, col2].spacing(5)).push(list(
+						String::new(),
+						specialties.len() + 1,
+						specialties.clone(),
+						closure!(clone skill,
+								 |i, val| text_input("", &val.unwrap_or_default(),
+									 move |val| Event::SpecialtyChanged(skill, i, val)).padding(0).into()
+						),
+					));
 
-				col = col.push(row![col0, col1, col2].spacing(5))
-				.push(list(String::new(), specialties.len()+1, specialties,
-					closure!(clone skill,
-					 	|i, val| text_input("", &val.unwrap_or_default(),
-					 		move |val| Event::SpecialtyChanged(skill, i, val)).padding(0).into()
-				)));
-
-				col0 = Column::new().spacing(3);
-				col1 = Column::new().width(Length::Fill).spacing(3);
-				col2 = Column::new()
-					.spacing(4)
-					.width(Length::Fill)
-					.align_items(Alignment::End);
+					col0 = Column::new().spacing(3);
+					col1 = Column::new().width(Length::Fill).spacing(3);
+					col2 = Column::new()
+						.spacing(4)
+						.width(Length::Fill)
+						.align_items(Alignment::End);
+				}
 			}
 		}
 

@@ -395,6 +395,7 @@ dependencies = [
  "iced_lazy",
  "iced_native",
  "itertools",
+ "lazy_static",
  "log",
  "once_cell",
  "ron",
