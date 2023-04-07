@@ -559,7 +559,7 @@ impl Merit {
 		match &self {
 			Merit::DefensiveCombat(true, Some(skill)) => {
 				vec![Modifier::new(
-					ModifierTarget::Trait(Trait::DefenseSkill),
+					ModifierTarget::Trait(Trait::Defense),
 					ModifierValue::Skill(*skill),
 					ModifierOp::Set,
 				)]

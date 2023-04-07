@@ -1,5 +1,3 @@
-use std::{cell::RefCell, rc::Rc};
-
 use closure::closure;
 use iced::{
 	theme::{self},
@@ -7,6 +5,7 @@ use iced::{
 	Alignment, Length,
 };
 use iced_lazy::Component;
+use std::{cell::RefCell, rc::Rc};
 
 use cofd::{
 	character::{modifier::ModifierTarget, traits::TraitCategory},

@@ -1,12 +1,12 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use cofd_util::VariantName;
 
 use super::{ability::Ability, Merit, NameKey, Splat};
 use crate::{
-	character::{Attribute, Modifier, ModifierOp, ModifierTarget, ModifierValue, Skill, Trait},
+	character::modifier::{Modifier, ModifierOp, ModifierTarget},
+	dice_pool::DicePool,
 	prelude::*,
 };
 
@@ -387,14 +387,14 @@ pub enum Gift {
 }
 
 impl MoonGift {
-	pub fn get_modifiers(&self, value: u16) -> Vec<crate::character::Modifier> {
+	pub fn get_modifiers(&self, value: u16) -> Vec<crate::character::modifier::Modifier> {
 		match self {
 			// MoonGift::Crescent => vec![],
 			MoonGift::Full => {
 				if value > 2 {
 					vec![Modifier::new(
-						ModifierTarget::Trait(Trait::Health),
-						ModifierValue::Ability(Ability::Renown(Renown::Purity)),
+						Trait::Health,
+						Ability::Renown(Renown::Purity),
 						ModifierOp::Add,
 					)]
 				} else {
@@ -461,135 +461,74 @@ impl Form {
 	#[allow(clippy::too_many_lines)]
 	pub fn get_modifiers(&self) -> Vec<Modifier> {
 		match self {
-			Form::Hishu => vec![Modifier::new(
-				ModifierTarget::Trait(Trait::Perception),
-				ModifierValue::Num(1),
-				ModifierOp::Add,
-			)],
+			Form::Hishu => vec![Modifier::new(Trait::Perception, 1, ModifierOp::Add)],
 			Form::Dalu => vec![
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Strength),
-					ModifierValue::Num(1),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Stamina),
-					ModifierValue::Num(1),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Manipulation),
-					ModifierValue::Num(-1),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Trait(Trait::Size),
-					ModifierValue::Num(1),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Trait(Trait::Perception),
-					ModifierValue::Num(2),
-					ModifierOp::Add,
-				),
+				Modifier::new(Attribute::Strength, 1, ModifierOp::Add),
+				Modifier::new(Attribute::Stamina, 1, ModifierOp::Add),
+				Modifier::new(Attribute::Manipulation, -1, ModifierOp::Add),
+				Modifier::new(Trait::Size, 1, ModifierOp::Add),
+				Modifier::new(Trait::Perception, 2, ModifierOp::Add),
 			],
 			Form::Gauru => vec![
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Strength),
-					ModifierValue::Num(3),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Dexterity),
-					ModifierValue::Num(1),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Stamina),
-					ModifierValue::Num(2),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Trait(Trait::Size),
-					ModifierValue::Num(2),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Trait(Trait::Perception),
-					ModifierValue::Num(3),
-					ModifierOp::Add,
-				),
+				Modifier::new(Attribute::Strength, 3, ModifierOp::Add),
+				Modifier::new(Attribute::Dexterity, 1, ModifierOp::Add),
+				Modifier::new(Attribute::Stamina, 2, ModifierOp::Add),
+				Modifier::new(Trait::Size, 2, ModifierOp::Add),
+				Modifier::new(Trait::Perception, 3, ModifierOp::Add),
 			],
 			Form::Urshul => vec![
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Strength),
-					ModifierValue::Num(2),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Dexterity),
-					ModifierValue::Num(2),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Stamina),
-					ModifierValue::Num(2),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Manipulation),
-					ModifierValue::Num(-1),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Trait(Trait::Size),
-					ModifierValue::Num(1),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Trait(Trait::Speed),
-					ModifierValue::Num(3),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Trait(Trait::Perception),
-					ModifierValue::Num(3),
-					ModifierOp::Add,
-				),
+				Modifier::new(Attribute::Strength, 2, ModifierOp::Add),
+				Modifier::new(Attribute::Dexterity, 2, ModifierOp::Add),
+				Modifier::new(Attribute::Stamina, 2, ModifierOp::Add),
+				Modifier::new(Attribute::Manipulation, -1, ModifierOp::Add),
+				Modifier::new(Trait::Size, 1, ModifierOp::Add),
+				Modifier::new(Trait::Speed, 3, ModifierOp::Add),
+				Modifier::new(Trait::Perception, 3, ModifierOp::Add),
 			],
 			Form::Urhan => vec![
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Dexterity),
-					ModifierValue::Num(2),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Stamina),
-					ModifierValue::Num(1),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Attribute(Attribute::Manipulation),
-					ModifierValue::Num(-1),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Trait(Trait::Size),
-					ModifierValue::Num(-1),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Trait(Trait::Speed),
-					ModifierValue::Num(3),
-					ModifierOp::Add,
-				),
-				Modifier::new(
-					ModifierTarget::Trait(Trait::Perception),
-					ModifierValue::Num(4),
-					ModifierOp::Add,
-				),
+				Modifier::new(Attribute::Dexterity, 2, ModifierOp::Add),
+				Modifier::new(Attribute::Stamina, 1, ModifierOp::Add),
+				Modifier::new(Attribute::Manipulation, -1, ModifierOp::Add),
+				Modifier::new(Trait::Size, -1, ModifierOp::Add),
+				Modifier::new(Trait::Speed, 3, ModifierOp::Add),
+				Modifier::new(Trait::Perception, 4, ModifierOp::Add),
 			],
 		}
+	}
+
+	pub fn modifiers() -> Vec<Modifier> {
+		// match self {
+		vec![
+			//
+			Modifier::conditional(Trait::Perception, 1, ModifierOp::Add, Form::Hishu),
+			//
+			Modifier::conditional(Attribute::Strength, 1, ModifierOp::Add, Form::Dalu),
+			Modifier::conditional(Attribute::Stamina, 1, ModifierOp::Add, Form::Dalu),
+			Modifier::conditional(Attribute::Manipulation, -1, ModifierOp::Add, Form::Dalu),
+			Modifier::conditional(Trait::Size, 1, ModifierOp::Add, Form::Dalu),
+			Modifier::conditional(Trait::Perception, 2, ModifierOp::Add, Form::Dalu),
+			//
+			Modifier::conditional(Attribute::Strength, 3, ModifierOp::Add, Form::Gauru),
+			Modifier::conditional(Attribute::Dexterity, 1, ModifierOp::Add, Form::Gauru),
+			Modifier::conditional(Attribute::Stamina, 2, ModifierOp::Add, Form::Gauru),
+			Modifier::conditional(Trait::Size, 2, ModifierOp::Add, Form::Gauru),
+			Modifier::conditional(Trait::Perception, 3, ModifierOp::Add, Form::Gauru),
+			//
+			Modifier::conditional(Attribute::Strength, 2, ModifierOp::Add, Form::Urshul),
+			Modifier::conditional(Attribute::Dexterity, 2, ModifierOp::Add, Form::Urshul),
+			Modifier::conditional(Attribute::Stamina, 2, ModifierOp::Add, Form::Urshul),
+			Modifier::conditional(Attribute::Manipulation, -1, ModifierOp::Add, Form::Urshul),
+			Modifier::conditional(Trait::Size, 1, ModifierOp::Add, Form::Urshul),
+			Modifier::conditional(Trait::Speed, 3, ModifierOp::Add, Form::Urshul),
+			Modifier::conditional(Trait::Perception, 3, ModifierOp::Add, Form::Urshul),
+			//
+			Modifier::conditional(Attribute::Dexterity, 2, ModifierOp::Add, Form::Urhan),
+			Modifier::conditional(Attribute::Stamina, 1, ModifierOp::Add, Form::Urhan),
+			Modifier::conditional(Attribute::Manipulation, -1, ModifierOp::Add, Form::Urhan),
+			Modifier::conditional(Trait::Size, -1, ModifierOp::Add, Form::Urhan),
+			Modifier::conditional(Trait::Speed, 3, ModifierOp::Add, Form::Urhan),
+			Modifier::conditional(Trait::Perception, 4, ModifierOp::Add, Form::Urhan),
+		]
 	}
 }
 
@@ -610,11 +549,48 @@ pub enum WerewolfMerit {
 	FavoredForm(Option<Form>),
 	EfficientKiller,
 	Totem,
+
+	InstinctiveDefense,
 }
 
 impl WerewolfMerit {
 	pub fn is_available(&self, character: &crate::prelude::Character) -> bool {
-		matches!(character.splat, Splat::Werewolf(..))
+		if matches!(character.splat, Splat::Werewolf(..)) {
+			match self {
+				Self::InstinctiveDefense => {
+					character.power >= 2 && character.skills().athletics >= 2
+				}
+				_ => true,
+			}
+		} else {
+			false
+		}
+	}
+
+	pub fn get_modifiers(&self, value: u16) -> Vec<Modifier> {
+		match self {
+			Self::InstinctiveDefense => {
+				if value == 2 {
+					vec![
+						Modifier::conditional(
+							Trait::Defense,
+							DicePool::max(Attribute::Wits, Attribute::Dexterity),
+							ModifierOp::Set,
+							Form::Urhan,
+						),
+						Modifier::conditional(
+							Trait::Defense,
+							DicePool::max(Attribute::Wits, Attribute::Dexterity),
+							ModifierOp::Set,
+							Form::Urshul,
+						),
+					]
+				} else {
+					vec![]
+				}
+			}
+			_ => vec![],
+		}
 	}
 }
 
@@ -622,4 +598,86 @@ impl From<WerewolfMerit> for Merit {
 	fn from(merit: WerewolfMerit) -> Self {
 		Merit::Werewolf(merit)
 	}
+}
+
+pub fn get_form_trait(character: &Character, form: &Form, target: &ModifierTarget) -> i16 {
+	let Splat::Werewolf(.., data) = &character.splat else {
+		unreachable!()
+	};
+	let active_form = &data.form;
+
+	let value = match target {
+		ModifierTarget::BaseAttribute(_)
+		| ModifierTarget::BaseSkill(_)
+		| ModifierTarget::Skill(_) => unreachable!(),
+		ModifierTarget::Attribute(attr) => *character.attributes().get(&attr) as i16,
+		ModifierTarget::Trait(trait_) => character.get_trait(trait_) as i16,
+	};
+
+	if form.eq(active_form) {
+		value
+	} else {
+		let modifiers = match target {
+			ModifierTarget::Trait(trait_) => match trait_ {
+				Trait::Speed => {
+					form_modifier(character, form, &Attribute::Dexterity)
+						+ form_modifier(character, form, &Attribute::Strength)
+						- form_modifier(character, active_form, &Attribute::Dexterity)
+						- form_modifier(character, active_form, &Attribute::Strength)
+				}
+				Trait::Initative => {
+					form_modifier(character, form, &Attribute::Dexterity)
+						+ form_modifier(character, form, &Attribute::Composure)
+						- form_modifier(character, active_form, &Attribute::Dexterity)
+						- form_modifier(character, active_form, &Attribute::Composure)
+				}
+				Trait::Defense => {
+					// let active_form_pool = form_pool(character, active_form, target);
+					// let form_pool = form_pool(character, form, target);
+
+					// let attributes = character.attributes();
+					// println!("{active_form_pool} - {form_pool}");
+
+					// let attributes = character.attributes();
+					// let dex = attributes.dexterity as i16
+					// 	+ form_modifier(character, form, &Attribute::Dexterity)
+					// 	- form_modifier(character, active_form, &Attribute::Dexterity);
+					// let wits = attributes.wits as i16
+					// 	+ form_modifier(character, form, &Attribute::Wits)
+					// 	- form_modifier(character, active_form, &Attribute::Wits);
+
+					// TODO: uhh make defense display in forms work.
+					return value; // Active Form Defense
+				}
+				_ => 0,
+			},
+			_ => 0,
+		};
+
+		let active_form_modifier = form_modifier(character, active_form, target);
+		let form_mod = form_modifier(character, form, target);
+
+		// println!("{form:?} {target:?} = {value} - {active_form_modifier} + {form_mod}");
+		value - active_form_modifier + form_mod + modifiers
+	}
+}
+
+fn form_modifier(
+	character: &Character,
+	form: &Form,
+	target: &(impl Into<ModifierTarget> + Clone),
+) -> i16 {
+	character
+		.get_conditional_modifier((*target).clone(), form.clone())
+		.unwrap_or(0)
+}
+
+fn form_pool(
+	character: &Character,
+	form: &Form,
+	target: &(impl Into<ModifierTarget> + Clone),
+) -> DicePool {
+	character
+		.get_conditional_pool((*target).clone(), form.clone())
+		.unwrap_or(DicePool::Mod(0))
 }

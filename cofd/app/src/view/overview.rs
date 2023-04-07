@@ -245,7 +245,7 @@ where
 			}
 			Event::TraitChanged(val, _trait) => match _trait {
 				Trait::Size => {
-					character.base_size = (val as i16 - character._mod(&Trait::Size.into())) as u16;
+					character.base_size = (val as i16 - character.get_modifier(Trait::Size)) as u16;
 				}
 				Trait::Willpower => character.willpower = val,
 				Trait::Power => character.power = val,

@@ -1,12 +1,18 @@
 use serde::{Deserialize, Serialize};
 use std::{
-	cmp::min,
+	cmp::{max, min},
 	collections::HashMap,
 	ops::{Add, Sub},
 };
 
-use crate::prelude::VariantName;
-use crate::splat::{ability::Ability, Merit, NameKey, Splat};
+use crate::splat::{ability::Ability, werewolf::Form, Merit, Splat};
+use crate::{dice_pool::DicePool, prelude::VariantName};
+
+pub mod modifier;
+pub mod traits;
+
+use modifier::*;
+use traits::*;
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn add(a: u16, b: i16) -> u16 {
@@ -32,10 +38,9 @@ pub struct CharacterBuilder {
 
 	abilities: HashMap<Ability, u16>,
 	power: u16,
-	fuel: u16,
+	fuel: Option<u16>,
 
 	flag: bool,
-	flag2: bool,
 }
 
 impl CharacterBuilder {
@@ -92,8 +97,7 @@ impl CharacterBuilder {
 
 	#[must_use]
 	pub fn with_fuel(mut self, fuel: u16) -> Self {
-		self.fuel = fuel;
-		self.flag2 = true;
+		self.fuel = Some(fuel);
 		self
 	}
 
@@ -123,12 +127,7 @@ impl CharacterBuilder {
 			character.calc_mod_map();
 		}
 
-		if self.flag2 {
-			character.fuel = self.fuel;
-		} else {
-			character.fuel = character.max_fuel();
-		}
-
+		character.fuel = self.fuel.unwrap_or_else(|| character.max_fuel());
 		character.willpower = character.max_willpower();
 
 		if let Splat::Werewolf(Some(auspice), .., data) = &mut character.splat {
@@ -275,8 +274,8 @@ impl Damage {
 	}
 }
 
-pub fn athletics() -> Skill {
-	Skill::Athletics
+pub fn defense_pool() -> DicePool {
+	DicePool::min(Attribute::Wits, Attribute::Dexterity) + Skill::Athletics
 }
 
 pub fn is_empty_vec(vec: &Vec<String>) -> bool {
@@ -327,9 +326,7 @@ pub struct Character {
 	pub aspirations: Vec<String>,
 
 	#[serde(skip)]
-	_mod_map: HashMap<ModifierTarget, Vec<ModifierValue>>,
-	#[serde(skip_serializing, default = "athletics")]
-	_defense_skill: Skill,
+	modifiers: Modifiers,
 }
 
 impl Character {
@@ -373,11 +370,10 @@ impl Character {
 		self.merits.get_mut(i)
 	}
 
-	pub fn get_trait(&self, trait_: Trait) -> u16 {
+	pub fn get_trait(&self, trait_: &Trait) -> u16 {
 		match trait_ {
 			Trait::Speed => self.speed(),
 			Trait::Defense => self.defense(),
-			Trait::DefenseSkill => 0,
 			Trait::Initative => self.initative(),
 			Trait::Perception => self.perception(),
 			Trait::Health => self.max_health(),
@@ -395,124 +391,47 @@ impl Character {
 		}
 	}
 
-	pub fn calc_mod_map(&mut self) {
-		self._mod_map.clear();
+	#[allow(clippy::too_many_lines)]
+	pub fn calc_mod_map(&self) {
+		self.modifiers.update(self);
+	}
 
-		let mut modifiers: Vec<Modifier> = Vec::new();
+	pub fn get_modifier(&self, target: impl Into<ModifierTarget>) -> i16 {
+		self.modifiers.get_modifier(self, target)
+	}
 
-		modifiers.extend(
-			self.abilities
-				.iter()
-				.flat_map(|(ability, val)| ability.get_modifiers(*val)),
-		);
-		modifiers.extend(
-			self.merits
-				.iter()
-				.flat_map(|(merit, val)| merit.get_modifiers(*val)),
-		);
+	pub fn get_conditional_modifier(
+		&self,
+		target: impl Into<ModifierTarget>,
+		condition: impl Into<Condition>,
+	) -> Option<i16> {
+		self.modifiers
+			.get_conditional_modifier(self, target, condition)
+	}
 
-		match &self.splat {
-			Splat::Werewolf(auspice, .., data) => {
-				modifiers.extend(data.form.get_modifiers());
-				if let Some(auspice) = auspice {
-					modifiers.extend(
-						auspice.get_moon_gift().get_modifiers(
-							*self
-								.get_ability_value(&auspice.get_renown().clone().into())
-								.unwrap_or(&0),
-						),
-					);
+	pub fn get_pool(&self, target: impl Into<ModifierTarget>) -> Option<DicePool> {
+		self.modifiers.get_pool(self, target)
+	}
 
-					if let Some(skill_bonus) = data.skill_bonus {
-						if auspice.get_skills().contains(&skill_bonus) {
-							modifiers.push(Modifier::new(
-								ModifierTarget::BaseSkill(skill_bonus),
-								ModifierValue::Num(1),
-								ModifierOp::Add,
-							));
-						}
-					}
-				}
-			}
-			Splat::Mage(_, order, _, data) => {
-				// TODO: High Speech merit, Order Status merit
-				if order.is_some() {
-					modifiers.push(Modifier::new(
-						ModifierTarget::BaseSkill(Skill::Occult),
-						ModifierValue::Num(1),
-						ModifierOp::Add,
-					));
-				}
-
-				if let Some(attr_bonus) = data.attr_bonus {
-					if attr_bonus.get_type() == AttributeType::Resistance {
-						modifiers.push(Modifier::new(
-							ModifierTarget::BaseAttribute(attr_bonus),
-							ModifierValue::Num(1),
-							ModifierOp::Add,
-						));
-					}
-				}
-			}
-			Splat::Vampire(clan, .., data) => {
-				if let Some(attr_bonus) = data.attr_bonus {
-					if clan.get_favored_attributes().contains(&attr_bonus) {
-						modifiers.push(Modifier::new(
-							ModifierTarget::BaseAttribute(attr_bonus),
-							ModifierValue::Num(1),
-							ModifierOp::Add,
-						));
-					}
-				}
-			}
-			Splat::Changeling(seeming, .., data) => {
-				if let Some(attr_bonus) = data.attr_bonus {
-					if seeming.get_favored_attributes().contains(&attr_bonus) {
-						modifiers.push(Modifier::new(
-							ModifierTarget::BaseAttribute(attr_bonus),
-							ModifierValue::Num(1),
-							ModifierOp::Add,
-						));
-					}
-				}
-			}
-
-			_ => {}
-		}
-
-		self._defense_skill = Skill::Athletics;
-
-		// for ability in vec {
-		for modifier in modifiers {
-			match modifier.op {
-				ModifierOp::Add => {
-					let mut vecc = self._mod_map.remove(&modifier.target).unwrap_or_default();
-					vecc.push(modifier.value);
-					self._mod_map.insert(modifier.target, vecc);
-				}
-				ModifierOp::Set => {
-					if let ModifierTarget::Trait(Trait::DefenseSkill) = modifier.target {
-						if let ModifierValue::Skill(skill) = modifier.value {
-							self._defense_skill = skill;
-						}
-					}
-				}
-			}
-		}
-		// }
+	pub fn get_conditional_pool(
+		&self,
+		target: impl Into<ModifierTarget>,
+		condition: impl Into<Condition>,
+	) -> Option<DicePool> {
+		self.modifiers.get_conditional_pool(self, target, condition)
 	}
 
 	pub fn attributes(&self) -> Attributes {
 		Attributes {
-			intelligence: self._modified_attr(Attribute::Intelligence),
-			wits: self._modified_attr(Attribute::Wits),
-			resolve: self._modified_attr(Attribute::Resolve),
-			strength: self._modified_attr(Attribute::Strength),
-			dexterity: self._modified_attr(Attribute::Dexterity),
-			stamina: self._modified_attr(Attribute::Stamina),
-			presence: self._modified_attr(Attribute::Presence),
-			manipulation: self._modified_attr(Attribute::Manipulation),
-			composure: self._modified_attr(Attribute::Composure),
+			intelligence: self._modified(Attribute::Intelligence),
+			wits: self._modified(Attribute::Wits),
+			resolve: self._modified(Attribute::Resolve),
+			strength: self._modified(Attribute::Strength),
+			dexterity: self._modified(Attribute::Dexterity),
+			stamina: self._modified(Attribute::Stamina),
+			presence: self._modified(Attribute::Presence),
+			manipulation: self._modified(Attribute::Manipulation),
+			composure: self._modified(Attribute::Composure),
 		}
 	}
 	pub fn base_attributes_mut(&mut self) -> &mut Attributes {
@@ -522,34 +441,67 @@ impl Character {
 		&self._attributes
 	}
 
+	pub fn _modified(&self, target: impl Into<ModifierTarget>) -> u16 {
+		let target = &target.into();
+		let base = match &target {
+			ModifierTarget::BaseAttribute(attr) | ModifierTarget::Attribute(attr) => {
+				*self._attributes.get(attr)
+			}
+			ModifierTarget::BaseSkill(skill) | ModifierTarget::Skill(skill) => {
+				*self.skills.get(skill)
+			}
+			_ => 0,
+		};
+
+		let modifier = match &target {
+			ModifierTarget::BaseAttribute(_) => 0,
+			ModifierTarget::BaseSkill(_) => 0,
+			_ => self.modifiers.get_modifier(self, target.clone()),
+		};
+		let base_modifier = self.modifiers.get_modifier(
+			self,
+			match *target {
+				ModifierTarget::Attribute(attr) => ModifierTarget::BaseAttribute(attr),
+				ModifierTarget::Skill(skill) => ModifierTarget::BaseSkill(skill),
+				_ => target.clone(),
+			},
+		);
+
+		if add(base, base_modifier) > 5 {
+			add(base, modifier)
+		} else {
+			add(base, base_modifier + modifier)
+		}
+	}
+
 	pub fn skills(&self) -> Skills {
 		Skills {
-			academics: self._modified_skll(Skill::Academics),
-			computer: self._modified_skll(Skill::Computer),
-			crafts: self._modified_skll(Skill::Crafts),
-			investigation: self._modified_skll(Skill::Investigation),
-			medicine: self._modified_skll(Skill::Medicine),
-			occult: self._modified_skll(Skill::Occult),
-			politics: self._modified_skll(Skill::Politics),
-			science: self._modified_skll(Skill::Science),
+			academics: self._modified(Skill::Academics),
+			computer: self._modified(Skill::Computer),
+			crafts: self._modified(Skill::Crafts),
+			investigation: self._modified(Skill::Investigation),
+			medicine: self._modified(Skill::Medicine),
+			occult: self._modified(Skill::Occult),
+			politics: self._modified(Skill::Politics),
+			science: self._modified(Skill::Science),
 
-			athletics: self._modified_skll(Skill::Athletics),
-			brawl: self._modified_skll(Skill::Brawl),
-			drive: self._modified_skll(Skill::Drive),
-			firearms: self._modified_skll(Skill::Firearms),
-			larceny: self._modified_skll(Skill::Larceny),
-			stealth: self._modified_skll(Skill::Stealth),
-			survival: self._modified_skll(Skill::Survival),
-			weaponry: self._modified_skll(Skill::Weaponry),
+			athletics: self._modified(Skill::Athletics),
+			brawl: self._modified(Skill::Brawl),
+			drive: self._modified(Skill::Drive),
+			firearms: self._modified(Skill::Firearms),
+			larceny: self._modified(Skill::Larceny),
+			stealth: self._modified(Skill::Stealth),
+			survival: self._modified(Skill::Survival),
+			weaponry: self._modified(Skill::Weaponry),
 
-			animal_ken: self._modified_skll(Skill::AnimalKen),
-			empathy: self._modified_skll(Skill::Empathy),
-			expression: self._modified_skll(Skill::Expression),
-			intimidation: self._modified_skll(Skill::Intimidation),
-			persuasion: self._modified_skll(Skill::Persuasion),
-			socialize: self._modified_skll(Skill::Socialize),
-			streetwise: self._modified_skll(Skill::Streetwise),
-			subterfuge: self._modified_skll(Skill::Subterfuge),
+			animal_ken: self._modified(Skill::AnimalKen),
+			empathy: self._modified(Skill::Empathy),
+			expression: self._modified(Skill::Expression),
+			intimidation: self._modified(Skill::Intimidation),
+			persuasion: self._modified(Skill::Persuasion),
+			socialize: self._modified(Skill::Socialize),
+			streetwise: self._modified(Skill::Streetwise),
+			subterfuge: self._modified(Skill::Subterfuge),
 		}
 	}
 	pub fn base_skills(&self) -> &Skills {
@@ -564,7 +516,7 @@ impl Character {
 
 		add(
 			self.size() + attributes.stamina,
-			self._mod(ModifierTarget::Trait(Trait::Health)),
+			self.modifiers.get_modifier(self, Trait::Health),
 		)
 	}
 
@@ -595,7 +547,7 @@ impl Character {
 	pub fn size(&self) -> u16 {
 		add(
 			self.base_size,
-			self._mod(ModifierTarget::Trait(Trait::Size)),
+			self.modifiers.get_modifier(self, Trait::Size),
 		)
 	}
 	pub fn speed(&self) -> u16 {
@@ -603,16 +555,11 @@ impl Character {
 
 		add(
 			5 + attributes.dexterity + attributes.strength,
-			self._mod(ModifierTarget::Trait(Trait::Speed)),
+			self.modifiers.get_modifier(self, Trait::Speed),
 		)
 	}
 	pub fn defense(&self) -> u16 {
-		let attributes = self.attributes();
-
-		add(
-			min(attributes.wits, attributes.dexterity) + *self.skills.get(self._defense_skill),
-			self._mod(ModifierTarget::Trait(Trait::Defense)),
-		)
+		max::<i16>(0, self.get_pool(Trait::Defense).unwrap().value(self)) as u16
 	}
 	pub fn armor(&self) -> ArmorStruct {
 		ArmorStruct {
@@ -628,7 +575,7 @@ impl Character {
 
 		add(
 			attributes.dexterity + attributes.composure,
-			self._mod(ModifierTarget::Trait(Trait::Initative)),
+			self.modifiers.get_modifier(self, Trait::Initative),
 		)
 	}
 	pub fn perception(&self) -> u16 {
@@ -636,7 +583,7 @@ impl Character {
 
 		add(
 			attributes.wits + attributes.composure,
-			self._mod(ModifierTarget::Trait(Trait::Perception)),
+			self.modifiers.get_modifier(self, Trait::Perception),
 		)
 	}
 	pub fn experience(&self) -> u16 {
@@ -656,62 +603,6 @@ impl Character {
 			_ => 0,
 		}
 	}
-
-	#[warn(clippy::cast_possible_wrap)]
-	pub fn _mod(&self, attr: ModifierTarget) -> i16 {
-		let mut count = 0;
-		if let Some(vec) = self._mod_map.get(&attr) {
-			for value in vec {
-				count += match value {
-					ModifierValue::Num(value) => *value,
-					ModifierValue::Ability(ability) => {
-						*self.get_ability_value(ability).unwrap_or(&0) as i16
-					}
-					ModifierValue::Skill(skill) => *self.skills.get(*skill) as i16,
-				}
-			}
-		}
-
-		count
-	}
-
-	fn _modified_attr(&self, attr: Attribute) -> u16 {
-		self._modified(ModifierTarget::Attribute(attr))
-	}
-
-	fn _modified_skll(&self, skill: Skill) -> u16 {
-		self._modified(ModifierTarget::Skill(skill))
-	}
-
-	pub fn _modified(&self, target: ModifierTarget) -> u16 {
-		// let base = base as i16;
-		let base = *match target {
-			ModifierTarget::BaseAttribute(attr) | ModifierTarget::Attribute(attr) => {
-				self._attributes.get(attr)
-			}
-			ModifierTarget::BaseSkill(skill) | ModifierTarget::Skill(skill) => {
-				self.skills.get(skill)
-			}
-			_ => &0,
-		};
-
-		let base_mod = self._mod(match target {
-			ModifierTarget::Attribute(attr) => ModifierTarget::BaseAttribute(attr),
-			ModifierTarget::Skill(skill) => ModifierTarget::BaseSkill(skill),
-			_ => target,
-		});
-		let _mod = match target {
-			ModifierTarget::BaseAttribute(_) => 0,
-			ModifierTarget::BaseSkill(_) => 0,
-			_ => self._mod(target),
-		};
-
-		if add(base, base_mod) > 5 {
-			add(base, _mod)
-		} else {
-			add(base, base_mod + _mod)
-		}
-	}
 }
 
 impl Default for Character {
@@ -725,11 +616,12 @@ impl Default for Character {
 			abilities: Default::default(),
 			merits: Default::default(),
 			health: Default::default(),
-			_mod_map: Default::default(),
+
+			modifiers: Default::default(),
+
 			power: Default::default(),
 			integrity: 7,
 			fuel: Default::default(),
-			_defense_skill: Skill::Athletics,
 			willpower: Default::default(),
 			beats: Default::default(),
 			alternate_beats: Default::default(),
@@ -893,7 +785,7 @@ pub struct Attributes {
 }
 
 impl Attributes {
-	pub fn get(&self, attr: Attribute) -> &u16 {
+	pub fn get(&self, attr: &Attribute) -> &u16 {
 		match attr {
 			Attribute::Intelligence => &self.intelligence,
 			Attribute::Wits => &self.wits,
@@ -909,7 +801,7 @@ impl Attributes {
 		}
 	}
 
-	pub fn get_mut(&mut self, attr: Attribute) -> &mut u16 {
+	pub fn get_mut(&mut self, attr: &Attribute) -> &mut u16 {
 		match attr {
 			Attribute::Intelligence => &mut self.intelligence,
 			Attribute::Wits => &mut self.wits,
@@ -983,11 +875,6 @@ fn is_zero(n: &u16) -> bool {
 	*n == 0
 }
 
-// #[allow(clippy::trivially_copy_pass_by_ref)]
-// fn is_empty(n: &String) -> bool {
-// 	*n == 0
-// }
-
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(default)]
 pub struct Skills {
@@ -1044,7 +931,7 @@ pub struct Skills {
 }
 
 impl Skills {
-	pub fn get(&self, skill: Skill) -> &u16 {
+	pub fn get(&self, skill: &Skill) -> &u16 {
 		match skill {
 			Skill::Academics => &self.academics,
 			Skill::Computer => &self.computer,
@@ -1075,7 +962,7 @@ impl Skills {
 		}
 	}
 
-	pub fn get_mut(&mut self, skill: Skill) -> &mut u16 {
+	pub fn get_mut(&mut self, skill: &Skill) -> &mut u16 {
 		match skill {
 			Skill::Academics => &mut self.academics,
 			Skill::Computer => &mut self.computer,
@@ -1106,328 +993,6 @@ impl Skills {
 		}
 	}
 }
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct Modifier {
-	pub target: ModifierTarget,
-	value: ModifierValue,
-	op: ModifierOp,
-}
-
-impl Modifier {
-	pub fn new(target: ModifierTarget, value: ModifierValue, op: ModifierOp) -> Self {
-		Self { target, value, op }
-	}
-
-	pub fn val(&self) -> Option<i16> {
-		match self.value {
-			ModifierValue::Num(val) => Some(val),
-			ModifierValue::Skill(_) | ModifierValue::Ability(_) => None,
-		}
-	}
-}
-
-#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize)]
-pub enum ModifierTarget {
-	BaseAttribute(Attribute),
-	BaseSkill(Skill),
-	Attribute(Attribute),
-	Skill(Skill),
-	Trait(Trait),
-}
-
-impl From<Attribute> for ModifierTarget {
-	fn from(attr: Attribute) -> Self {
-		ModifierTarget::Attribute(attr)
-	}
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum ModifierValue {
-	Num(i16),
-	Ability(Ability),
-	Skill(Skill),
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, VariantName)]
-pub enum ModifierOp {
-	Add,
-	Set,
-}
-
-#[derive(VariantName)]
-pub enum TraitCategory {
-	Mental,
-	Physical,
-	Social,
-}
-
-impl TraitCategory {
-	pub fn unskilled(&self) -> u16 {
-		match self {
-			TraitCategory::Mental => 3,
-			TraitCategory::Physical => 1,
-			TraitCategory::Social => 1,
-		}
-	}
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
-pub enum AttributeType {
-	Power,
-	Finesse,
-	Resistance,
-}
-
-pub enum AttributeCategory {
-	Type(AttributeType),
-	Trait(TraitCategory),
-}
-
-#[derive(
-	PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize, AllVariants, VariantName,
-)]
-pub enum Attribute {
-	Intelligence,
-	Wits,
-	Resolve,
-
-	Strength,
-	Dexterity,
-	Stamina,
-
-	Presence,
-	Manipulation,
-	Composure,
-}
-
-impl Attribute {
-	pub fn mental() -> [Attribute; 3] {
-		[Self::Intelligence, Self::Wits, Self::Resolve]
-	}
-
-	pub fn physical() -> [Attribute; 3] {
-		[Self::Strength, Self::Dexterity, Self::Stamina]
-	}
-
-	pub fn social() -> [Attribute; 3] {
-		[Self::Presence, Self::Manipulation, Self::Composure]
-	}
-
-	pub fn power() -> [Attribute; 3] {
-		[Self::Intelligence, Self::Strength, Self::Presence]
-	}
-
-	pub fn finesse() -> [Attribute; 3] {
-		[Self::Wits, Self::Dexterity, Self::Manipulation]
-	}
-
-	pub fn resistance() -> [Attribute; 3] {
-		[Self::Resolve, Self::Stamina, Self::Composure]
-	}
-
-	pub fn get(cat: AttributeCategory) -> [Attribute; 3] {
-		match cat {
-			AttributeCategory::Type(_type) => match _type {
-				AttributeType::Power => Self::power(),
-				AttributeType::Finesse => Self::finesse(),
-				AttributeType::Resistance => Self::resistance(),
-			},
-			AttributeCategory::Trait(_trait) => match _trait {
-				TraitCategory::Mental => Self::mental(),
-				TraitCategory::Physical => Self::physical(),
-				TraitCategory::Social => Self::social(),
-			},
-		}
-	}
-
-	pub fn get_attr(_trait: &TraitCategory, _type: &AttributeType) -> Attribute {
-		match _trait {
-			TraitCategory::Mental => match _type {
-				AttributeType::Power => Self::Intelligence,
-				AttributeType::Finesse => Self::Wits,
-				AttributeType::Resistance => Self::Resolve,
-			},
-			TraitCategory::Physical => match _type {
-				AttributeType::Power => Self::Strength,
-				AttributeType::Finesse => Self::Dexterity,
-				AttributeType::Resistance => Self::Stamina,
-			},
-			TraitCategory::Social => match _type {
-				AttributeType::Power => Self::Presence,
-				AttributeType::Finesse => Self::Manipulation,
-				AttributeType::Resistance => Self::Composure,
-			},
-		}
-	}
-
-	#[allow(clippy::trivially_copy_pass_by_ref)]
-	pub fn get_type(&self) -> AttributeType {
-		match self {
-			Attribute::Intelligence => AttributeType::Power,
-			Attribute::Wits => AttributeType::Finesse,
-			Attribute::Resolve => AttributeType::Resistance,
-			Attribute::Strength => AttributeType::Power,
-			Attribute::Dexterity => AttributeType::Finesse,
-			Attribute::Stamina => AttributeType::Resistance,
-			Attribute::Presence => AttributeType::Power,
-			Attribute::Manipulation => AttributeType::Finesse,
-			Attribute::Composure => AttributeType::Resistance,
-		}
-	}
-}
-
-#[derive(
-	Clone,
-	Copy,
-	Debug,
-	Hash,
-	PartialEq,
-	PartialOrd,
-	Eq,
-	Ord,
-	Serialize,
-	Deserialize,
-	AllVariants,
-	VariantName,
-)]
-pub enum Skill {
-	Academics,
-	Computer,
-	Crafts,
-	Investigation,
-	Medicine,
-	Occult,
-	Politics,
-	Science,
-
-	Athletics,
-	Brawl,
-	Drive,
-	Firearms,
-	Larceny,
-	Stealth,
-	Survival,
-	Weaponry,
-
-	AnimalKen,
-	Empathy,
-	Expression,
-	Intimidation,
-	Persuasion,
-	Socialize,
-	Streetwise,
-	Subterfuge,
-}
-
-impl Skill {
-	fn mental() -> [Skill; 8] {
-		[
-			Self::Academics,
-			Self::Computer,
-			Self::Crafts,
-			Self::Investigation,
-			Self::Medicine,
-			Self::Occult,
-			Self::Politics,
-			Self::Science,
-		]
-	}
-
-	fn physical() -> [Skill; 8] {
-		[
-			Self::Athletics,
-			Self::Brawl,
-			Self::Drive,
-			Self::Firearms,
-			Self::Larceny,
-			Self::Stealth,
-			Self::Survival,
-			Self::Weaponry,
-		]
-	}
-
-	fn social() -> [Skill; 8] {
-		[
-			Self::AnimalKen,
-			Self::Empathy,
-			Self::Expression,
-			Self::Intimidation,
-			Self::Persuasion,
-			Self::Socialize,
-			Self::Streetwise,
-			Self::Subterfuge,
-		]
-	}
-
-	pub fn get(cat: &TraitCategory) -> [Skill; 8] {
-		match cat {
-			TraitCategory::Mental => Self::mental(),
-			TraitCategory::Physical => Self::physical(),
-			TraitCategory::Social => Self::social(),
-		}
-	}
-}
-
-impl NameKey for Skill {
-	fn name_key(&self) -> String {
-		format!("skill.{}", self.name())
-	}
-}
-
-#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, Serialize, Deserialize)]
-pub enum Trait {
-	Speed,
-	Defense,
-	DefenseSkill,
-	Initative,
-	Perception,
-	Health,
-	Size,
-
-	Beats,
-	AlternateBeats,
-
-	Armor(Option<Armor>),
-
-	Willpower,
-	Power,
-	Fuel,
-	Integrity,
-}
-
-impl Trait {
-	pub fn name(&self) -> Option<&str> {
-		match self {
-			Trait::Speed => Some("speed"),
-			Trait::Defense => Some("defense"),
-			Trait::DefenseSkill => None,
-			Trait::Initative => Some("initative"),
-			Trait::Perception => Some("perception"),
-			Trait::Health => Some("health"),
-			Trait::Size => Some("size"),
-			Trait::Beats => Some("beats"),
-			Trait::Armor(_) => Some("armor"),
-			Trait::Willpower => Some("willpower"),
-			Trait::Power => None,
-			Trait::Fuel => None,
-			Trait::Integrity => None,
-			Trait::AlternateBeats => None,
-		}
-	}
-}
-
-// enum VirtueAnchor {
-// 	// Virtue(Virtue),
-// 	Mask(MaskDirge),
-// 	_Custom(String),
-// }
-
-// enum ViceAnchor {
-// 	// Vice(Vice),
-// 	Dirge(MaskDirge),
-// 	_Custom(String),
-// }
 
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct ArmorStruct {

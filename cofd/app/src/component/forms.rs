@@ -76,8 +76,7 @@ impl<Message> FormsComponent<Message> {
 			let name = match target {
 				ModifierTarget::BaseAttribute(_)
 				| ModifierTarget::BaseSkill(_)
-				| ModifierTarget::Skill(_)
-				| ModifierTarget::WerewolfForm(..) => unreachable!(),
+				| ModifierTarget::Skill(_) => unreachable!(),
 				ModifierTarget::Attribute(attr) => flt("attribute", Some(attr.name())).unwrap(),
 				ModifierTarget::Trait(trait_) => flt(trait_.name().unwrap(), None).unwrap(),
 			};

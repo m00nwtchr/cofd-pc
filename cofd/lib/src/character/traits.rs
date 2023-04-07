@@ -229,8 +229,6 @@ impl NameKey for Skill {
 pub enum Trait {
 	Speed,
 	Defense,
-	DefenseSkill,
-	DefenseAttr,
 	Initative,
 	Perception,
 	Health,
@@ -252,8 +250,6 @@ impl Trait {
 		match self {
 			Trait::Speed => Some("speed"),
 			Trait::Defense => Some("defense"),
-			Trait::DefenseSkill => None,
-			Trait::DefenseAttr => None,
 			Trait::Initative => Some("initative"),
 			Trait::Perception => Some("perception"),
 			Trait::Health => Some("health"),
