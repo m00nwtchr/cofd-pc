@@ -83,6 +83,9 @@ impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
 
 		vec.push(Merit::_Custom(fl!("custom")));
 
+		let attributes = &character.attributes();
+		let skills = &character.skills();
+
 		let vec: Vec<Translated<Merit>> = vec
 			.iter()
 			.cloned()
@@ -91,7 +94,7 @@ impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
 					.merits
 					.iter()
 					.filter(|(merit, _)| *merit == *e)
-					.count() == 0 && e.is_available(&character)
+					.count() == 0 && e.is_available(&character, attributes, skills)
 			})
 			.map(Into::into)
 			.collect();
