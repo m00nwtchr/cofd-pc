@@ -49,6 +49,7 @@ pub enum Event {
 	// YSplatChanged(YSplat),
 	AbilityValChanged(Ability, u16),
 	AbilityChanged(Ability, Ability),
+	NewAbility(Ability),
 	MeritChanged(usize, Merit, u16),
 	// CustomAbilityChanged(Ability, String),
 	HealthChanged(Wound),
@@ -165,7 +166,7 @@ impl<Message> OverviewTab<Message> {
 				}
 
 				new = new.push(
-					pick_list(vec, None, |key| Event::AbilityValChanged(key.unwrap(), 0))
+					pick_list(vec, None, |key| Event::NewAbility(key.unwrap()))
 						.width(Length::Fill)
 						.padding(INPUT_PADDING)
 						.text_size(20),
@@ -199,7 +200,7 @@ where
 
 		match event {
 			Event::AttrChanged(val, attr) => *character.base_attributes_mut().get_mut(&attr) = val,
-			Event::SkillChanged(val, skill) => *character.base_skills_mut().get_mut(&skill) = val,
+			Event::SkillChanged(val, skill) => *character.base_skills_mut().get_mut(skill) = val,
 			Event::SpecialtyChanged(skill, i, val) => {
 				if let Some(vec) = character.specialties.get_mut(&skill) {
 					if val.is_empty() {
@@ -222,7 +223,10 @@ where
 				if character.has_ability(&ability) {
 					let val = character.remove_ability(&ability).unwrap_or_default();
 					character.add_ability(new, val);
-				} else {
+				}
+			}
+			Event::NewAbility(ability) => {
+				if !character.has_ability(&ability) {
 					character.add_ability(ability, 0);
 				}
 			}

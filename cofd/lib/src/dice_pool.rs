@@ -31,7 +31,7 @@ impl DicePool {
 		match self {
 			Self::Mod(val) => *val,
 			Self::Attribute(attr) => *character.attributes().get(attr) as i16,
-			Self::Skill(skill) => *character.skills().get(skill) as i16,
+			Self::Skill(skill) => character.skills().get(*skill) as i16,
 			Self::Trait(trait_) => character.get_trait(trait_) as i16,
 			Self::Add(p1, p2) => p1.value(character) + p2.value(character),
 			Self::Sub(p1, p2) => p1.value(character) - p2.value(character),

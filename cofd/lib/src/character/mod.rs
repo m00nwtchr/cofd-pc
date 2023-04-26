@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::{
 	cmp::{max, min},
 	collections::HashMap,
-	ops::{Add, Sub},
+	ops::{Add, Index, Sub},
 };
 
 use crate::splat::{ability::Ability, Merit, Splat};
@@ -320,6 +320,7 @@ pub struct Character {
 	pub base_size: u16,
 	base_armor: ArmorStruct,
 	pub beats: u16,
+	#[serde(skip_serializing_if = "is_zero")]
 	pub alternate_beats: u16,
 
 	pub conditions: Vec<String>,
@@ -448,7 +449,7 @@ impl Character {
 				*self._attributes.get(attr)
 			}
 			ModifierTarget::BaseSkill(skill) | ModifierTarget::Skill(skill) => {
-				*self.skills.get(skill)
+				self.skills.get(*skill)
 			}
 			_ => 0,
 		};
@@ -931,38 +932,38 @@ pub struct Skills {
 }
 
 impl Skills {
-	pub fn get(&self, skill: &Skill) -> &u16 {
+	pub fn get(&self, skill: Skill) -> u16 {
 		match skill {
-			Skill::Academics => &self.academics,
-			Skill::Computer => &self.computer,
-			Skill::Crafts => &self.crafts,
-			Skill::Investigation => &self.investigation,
-			Skill::Medicine => &self.medicine,
-			Skill::Occult => &self.occult,
-			Skill::Politics => &self.politics,
-			Skill::Science => &self.science,
+			Skill::Academics => self.academics,
+			Skill::Computer => self.computer,
+			Skill::Crafts => self.crafts,
+			Skill::Investigation => self.investigation,
+			Skill::Medicine => self.medicine,
+			Skill::Occult => self.occult,
+			Skill::Politics => self.politics,
+			Skill::Science => self.science,
 			//
-			Skill::Athletics => &self.athletics,
-			Skill::Brawl => &self.brawl,
-			Skill::Drive => &self.drive,
-			Skill::Firearms => &self.firearms,
-			Skill::Larceny => &self.larceny,
-			Skill::Stealth => &self.stealth,
-			Skill::Survival => &self.survival,
-			Skill::Weaponry => &self.weaponry,
+			Skill::Athletics => self.athletics,
+			Skill::Brawl => self.brawl,
+			Skill::Drive => self.drive,
+			Skill::Firearms => self.firearms,
+			Skill::Larceny => self.larceny,
+			Skill::Stealth => self.stealth,
+			Skill::Survival => self.survival,
+			Skill::Weaponry => self.weaponry,
 			//
-			Skill::AnimalKen => &self.animal_ken,
-			Skill::Empathy => &self.empathy,
-			Skill::Expression => &self.expression,
-			Skill::Intimidation => &self.intimidation,
-			Skill::Persuasion => &self.persuasion,
-			Skill::Socialize => &self.socialize,
-			Skill::Streetwise => &self.streetwise,
-			Skill::Subterfuge => &self.subterfuge,
+			Skill::AnimalKen => self.animal_ken,
+			Skill::Empathy => self.empathy,
+			Skill::Expression => self.expression,
+			Skill::Intimidation => self.intimidation,
+			Skill::Persuasion => self.persuasion,
+			Skill::Socialize => self.socialize,
+			Skill::Streetwise => self.streetwise,
+			Skill::Subterfuge => self.subterfuge,
 		}
 	}
 
-	pub fn get_mut(&mut self, skill: &Skill) -> &mut u16 {
+	pub fn get_mut(&mut self, skill: Skill) -> &mut u16 {
 		match skill {
 			Skill::Academics => &mut self.academics,
 			Skill::Computer => &mut self.computer,

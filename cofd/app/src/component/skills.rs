@@ -120,7 +120,7 @@ impl<Message> SkillsComponent<Message> {
 				.on_press(Event::SpecialtySkillChanged(skill)),
 			);
 
-			let v = character.base_skills().get(&skill);
+			let v = character.base_skills().get(skill);
 			let val = character._modified(ModifierTarget::BaseSkill(skill));
 			let mod_ = val - v;
 
