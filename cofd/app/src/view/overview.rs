@@ -112,7 +112,7 @@ impl<Message> OverviewTab<Message> {
 					}));
 				}
 			} else {
-				let mut vec = character.splat.all_abilities().unwrap();
+				let mut vec = abilities.clone();
 
 				if let Some(ability) = character.splat.custom_ability(fl!("custom")) {
 					vec.push(ability);
@@ -214,6 +214,8 @@ where
 			Event::AbilityValChanged(ability, val) => {
 				if let Some(val_) = character.get_ability_value_mut(&ability) {
 					*val_ = val;
+				} else {
+					character.add_ability(ability, val);
 				}
 
 				character.calc_mod_map();

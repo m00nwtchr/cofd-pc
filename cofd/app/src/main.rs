@@ -385,11 +385,11 @@ mod demo {
 				(VampireMerit::CacophonySavvy.into(), 3),
 				(Merit::FastTalking, 1),
 				(
-					Merit::ProfessionalTraining(
-						String::new(),
-						Some([Skill::Expression, Skill::Occult]),
-						None,
-					),
+					Merit::ProfessionalTraining {
+						profession: String::new(),
+						skills: [Skill::Expression, Skill::Occult],
+						skill: None,
+					},
 					2,
 				),
 				// (Merit::Contacts(String::new()), 2),
@@ -455,7 +455,7 @@ mod demo {
 				(Merit::Giant, 3),
 				(Merit::TrainedObserver, 1),
 				(Merit::DefensiveCombat(true, Some(Skill::Brawl)), 1),
-				(WerewolfMerit::FavoredForm(Some(Form::Gauru)).into(), 2),
+				(WerewolfMerit::FavoredForm { form: Form::Gauru }.into(), 2),
 				(WerewolfMerit::EfficientKiller.into(), 2),
 				(Merit::RelentlessAssault, 2),
 				(Merit::Language("First Tongue".to_owned()), 1),
@@ -547,11 +547,11 @@ mod demo {
 				(Merit::Status("Mysterium".to_string()), 1),
 				(MageMerit::HighSpeech.into(), 1),
 				(
-					Merit::ProfessionalTraining(
-						"e".to_owned(),
-						Some([Skill::Investigation, Skill::Science]),
-						None,
-					),
+					Merit::ProfessionalTraining {
+						profession: String::new(),
+						skills: [Skill::Investigation, Skill::Science],
+						skill: None,
+					},
 					3,
 				),
 				(Merit::TrainedObserver, 1),

@@ -545,8 +545,13 @@ impl NameKey for Rite {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash, AllVariants, VariantName)]
+#[cfg(feature = "type-info")]
+#[derive(type_info_derive::TypeInfo)]
 pub enum WerewolfMerit {
-	FavoredForm(Option<Form>),
+	FavoredForm {
+		form: Form,
+		//
+	},
 	EfficientKiller,
 	Totem,
 

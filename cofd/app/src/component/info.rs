@@ -106,6 +106,7 @@ impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
 				} else {
 					character.splat.set_xsplat(Some(xsplat));
 				}
+				character.calc_mod_map();
 			}
 			Event::YSplatChanged(ysplat) => {
 				if ysplat.name().eq("") {
@@ -113,6 +114,7 @@ impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
 				} else {
 					character.splat.set_ysplat(Some(ysplat));
 				}
+				//character.calc_mod_map();
 			}
 			Event::ZSplatChanged(zsplat) => {
 				if zsplat.name().eq("") {
