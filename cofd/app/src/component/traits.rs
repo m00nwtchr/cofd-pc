@@ -9,7 +9,6 @@ use cofd::{character::ArmorStruct, prelude::*};
 use crate::{
 	fl,
 	i18n::flt,
-	widget::dots::{Shape, SheetDots},
 	Element, INPUT_PADDING,
 };
 

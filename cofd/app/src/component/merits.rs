@@ -87,15 +87,13 @@ impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
 		let skills = &character.skills();
 
 		let vec: Vec<Translated<Merit>> = vec
-			.iter()
-			.cloned()
-			.filter(|e| {
+			.iter().filter(|&e| {
 				character
 					.merits
 					.iter()
 					.filter(|(merit, _)| *merit == *e)
 					.count() == 0 && e.is_available(&character, attributes, skills)
-			})
+			}).cloned()
 			.map(Into::into)
 			.collect();
 

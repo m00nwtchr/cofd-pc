@@ -148,7 +148,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 					text(fl!("werewolf", "flesh-touchstone")).size(H3_SIZE),
 					column![text_input(
 						"",
-						character.touchstones.get(0).unwrap_or(&String::new()),
+						character.touchstones.first().unwrap_or(&String::new()),
 						|str| Event::TouchstoneChanged(0, str),
 					)
 					.padding(INPUT_PADDING)]

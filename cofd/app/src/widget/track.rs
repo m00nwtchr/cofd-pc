@@ -85,7 +85,7 @@ where
 			}
 		}
 
-		if row.children().len() > 0 {
+		if !row.children().is_empty() {
 			col = col.push(row);
 		}
 

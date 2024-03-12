@@ -200,7 +200,7 @@ impl Application for PlayerCompanionApp {
 			Message::Msg => {}
 
 			Message::Save => match self.save() {
-				Ok(_) => {}
+				Ok(()) => {}
 				Err(err) => {
 					log::error!("{}", err);
 				}

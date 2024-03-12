@@ -109,7 +109,7 @@ impl<Message> SkillsComponent<Message> {
 
 			col1 = col1.push(
 				button(text(flt("skill", Some(skill.name())).unwrap()).style(
-					if specialties.len() > 0 {
+					if !specialties.is_empty() {
 						theme::Text::Color(Color::from_rgb(0.0, 0.7, 0.0))
 					} else {
 						theme::Text::Default

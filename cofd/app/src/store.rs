@@ -32,13 +32,13 @@ impl Store {
 					std::fs::create_dir_all(dir.unwrap()).ok()?;
 				}
 
-				let store = Some(Self {
-					dirs
-				});
+				
 			}
 		}
 
-		store
+		Some(Self {
+					dirs
+				})
 	}
 
 	pub fn get<T: for<'a> Deserialize<'a>>(&self, name: &str) -> anyhow::Result<Option<T>> {

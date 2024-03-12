@@ -272,14 +272,14 @@ where
 				if val.is_empty() {
 					character.conditions.remove(i);
 				} else {
-					vec_changed(i, val, &mut character.conditions)
+					vec_changed(i, val, &mut character.conditions);
 				}
 			}
 			Event::AspirationChanged(i, val) => {
 				if val.is_empty() {
 					character.aspirations.remove(i);
 				} else {
-					vec_changed(i, val, &mut character.aspirations)
+					vec_changed(i, val, &mut character.aspirations);
 				}
 			}
 			Event::SplatThingChanged(i, val) => match &mut character.splat {
@@ -287,21 +287,21 @@ where
 					if val.is_empty() {
 						data.frailties.remove(i);
 					} else {
-						vec_changed(i, val, &mut data.frailties)
+						vec_changed(i, val, &mut data.frailties);
 					}
 				}
 				Splat::Vampire(.., data) => {
 					if val.is_empty() {
 						data.banes.remove(i);
 					} else {
-						vec_changed(i, val, &mut data.banes)
+						vec_changed(i, val, &mut data.banes);
 					}
 				}
 				Splat::Mage(.., data) => {
 					if val.is_empty() {
 						data.obsessions.remove(i);
 					} else {
-						vec_changed(i, val, &mut data.obsessions)
+						vec_changed(i, val, &mut data.obsessions);
 					}
 				}
 				_ => (),
@@ -571,9 +571,7 @@ where
 					.into()
 			} else {
 				let reg: Vec<Translated<Regalia>> = all_regalia
-					.iter()
-					.cloned()
-					.filter(|reg| reg != sg)
+					.iter().filter(|&reg| reg != sg).cloned()
 					.map(Into::into)
 					.collect();
 
