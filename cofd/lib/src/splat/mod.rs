@@ -4,8 +4,9 @@ use cofd_util::{AllVariants, NameKey, SplatEnum, VariantName};
 
 use self::ability::Ability;
 use crate::{
+	character::modifier::{Modifier, ModifierOp, ModifierTarget, ModifierValue},
 	character::traits::AttributeType,
-	prelude::{Attribute, Skill},
+	prelude::{Attribute, Attributes, Character, Skill, Skills, Trait},
 };
 
 pub mod ability;

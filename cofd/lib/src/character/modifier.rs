@@ -98,7 +98,7 @@ impl ModifierValue {
 			ModifierValue::Ability(ability) => {
 				*character.get_ability_value(ability).unwrap_or(&0) as i16
 			}
-			ModifierValue::Skill(skill) => *character.skills.get(skill) as i16,
+			ModifierValue::Skill(skill) => character.skills.get(*skill) as i16,
 			ModifierValue::DicePool(pool) => pool.value(character),
 		}
 	}

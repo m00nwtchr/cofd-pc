@@ -6,7 +6,12 @@ use iced_lazy::Component;
 
 use cofd::{character::ArmorStruct, prelude::*};
 
-use crate::{fl, i18n::flt, Element, INPUT_PADDING};
+use crate::{
+	fl,
+	i18n::flt,
+	widget::dots::{Shape, SheetDots},
+	Element, INPUT_PADDING,
+};
 
 struct Traits {
 	size: u16,
@@ -37,7 +42,7 @@ pub fn traits_component<Message>(
 }
 
 #[derive(Clone)]
-pub struct Event(String, Trait);
+pub struct Event(u16, Trait);
 
 impl<Message> TraitsComponent<Message> {
 	fn new(character: &Character, on_change: impl Fn(u16, Trait) -> Message + 'static) -> Self {
@@ -67,22 +72,14 @@ impl<Message> Component<Message, iced::Renderer> for TraitsComponent<Message> {
 	type Event = Event;
 
 	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
-		if let Ok(val) = event.0.parse() {
-			Some((self.on_change)(val, event.1))
-		} else if event.0.is_empty() {
-			Some((self.on_change)(0, event.1))
-		} else {
-			None
-		}
+		Some((self.on_change)(event.0, event.1))
 	}
 
 	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
 		let beats = row![
 			text(format!("{}:", fl!("beats"))),
 			text_input("", &format!("{}", self.traits.beats), |val| {
-				// if let Some(val) = val.parse() {
-				Event(val, Trait::Beats)
-				// }
+				Event(val.parse().unwrap_or(0), Trait::Beats)
 			})
 			.padding(INPUT_PADDING)
 		];
@@ -94,7 +91,7 @@ impl<Message> Component<Message, iced::Renderer> for TraitsComponent<Message> {
 					flt(&self.traits.splat, Some("beats")).unwrap()
 				)),
 				text_input("", &format!("{}", self.traits.alternate_beats), |val| {
-					Event(val, Trait::AlternateBeats)
+					Event(val.parse().unwrap_or(0), Trait::AlternateBeats)
 				})
 				.padding(INPUT_PADDING)
 			]

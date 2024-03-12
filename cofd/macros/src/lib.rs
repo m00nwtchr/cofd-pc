@@ -5,7 +5,7 @@ use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::Error;
 
-use cofd_util::scraper::Gift;
+use cofd_util::scraper::{Gift, Merit};
 
 macro_rules! derive_error {
 	($string: tt) => {
@@ -126,6 +126,24 @@ pub fn gifts(_input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 			}
 		}
 	};
+
+	proc_macro::TokenStream::from(expanded)
+}
+
+#[proc_macro]
+pub fn merits(_input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let path = Path::new(&env::var("CARGO_MANIFEST_DIR").expect(""))
+		.join("data")
+		.join("merits_universal.ron");
+
+	let Ok(str) = fs::read_to_string(path) else {
+		return derive_error!("Error reading merits_universal.ron file");
+	};
+
+	let vec: Vec<Merit> = ron::from_str(&str).expect("Parsing error");
+	for merit in vec {}
+
+	let expanded = quote! {};
 
 	proc_macro::TokenStream::from(expanded)
 }

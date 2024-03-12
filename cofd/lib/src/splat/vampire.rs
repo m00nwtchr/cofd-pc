@@ -6,7 +6,7 @@ use super::{ability::Ability, Merit, Splat};
 use crate::{
 	character::modifier::{Modifier, ModifierOp},
 	dice_pool::DicePool,
-	prelude::{Attribute, Trait},
+	prelude::{Attribute, Attributes, Skills, Trait},
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq, Eq)]
@@ -167,9 +167,9 @@ pub enum MaskDirge {
 pub enum VampireMerit {
 	AcuteSenses,
 	Atrocious,
-	// Beloved, // TY
+	Beloved, // TY
 	Bloodhound,
-	// CallTheBeast // TY
+	CallTheBeast, // TY
 	ClawsOfTheUnholy,
 	CloseFamily,
 	Cutthroat,
@@ -177,20 +177,20 @@ pub enum VampireMerit {
 	DreamVisions, // Mekhet
 	Enticing,
 	FeedingGrounds(String),
-	// HeartOfStone, // TY
+	HeartOfStone, // TY
 	Herd,
 	HoneyTrap,
 	KindredStatus(String), // Status?
-	KissOfTheSuccubus,     // Daeva
+	KissOfTheSuccubus,
 	Lineage(String),
 	LingeringDreams, // DE2
-	// MajorDomo, // TY
-	// MarriedByBlood, // TY
-	PackAlpha, // Gangrel
-	// ReceptiveMind, // TY
-	// RevenantImpostor, // HD
-	// SaviorOfTheLost, // TY
-	// SpecialTreat, // TY
+	MajorDomo,       // TY
+	MarriedByBlood,  // TY
+	PackAlpha,
+	ReceptiveMind,    // TY
+	RevenantImpostor, // HD
+	SaviorOfTheLost,  // TY
+	SpecialTreat,     // TY
 	SwarmForm,
 	Touchstone,
 	UndeadMenses,
@@ -223,8 +223,92 @@ pub enum VampireMerit {
 }
 
 impl VampireMerit {
-	pub fn is_available(&self, character: &crate::prelude::Character) -> bool {
+	pub fn is_available(
+		&self,
+		character: &crate::prelude::Character,
+		attributes: &Attributes,
+		skills: &Skills,
+	) -> bool {
 		matches!(character.splat, Splat::Vampire(..))
+			&& match self {
+				// VampireMerit::Atrocious => todo!(), // Not Enticing or Cutthroat
+				VampireMerit::Bloodhound => attributes.wits >= 3,
+				VampireMerit::CallTheBeast => character.integrity < 5,
+				VampireMerit::ClawsOfTheUnholy => {
+					*character
+						.abilities
+						.get(&Discipline::Protean.into())
+						.unwrap_or(&0) >= 4
+				}
+				// VampireMerit::Cutthroat => todo!(), // Not Enticing or Atrocious
+				VampireMerit::DreamVisions => {
+					matches!(character.splat, Splat::Vampire(Clan::Mekhet, ..))
+				}
+				// VampireMerit::Enticing => todo!(), // Not Cutthroat or Atrocious
+				// VampireMerit::FeedingGrounds(_) => todo!(),
+				// VampireMerit::HeartOfStone => todo!(), // Feeding Grounds
+				// VampireMerit::HoneyTrap => todo!(), // Not a Revenant
+				// VampireMerit::KindredStatus(_) => todo!(),
+				VampireMerit::KissOfTheSuccubus => {
+					matches!(character.splat, Splat::Vampire(Clan::Daeva, ..))
+				}
+				// VampireMerit::Lineage(_) => todo!(), Clan Status
+				VampireMerit::LingeringDreams => {
+					matches!(character.splat, Splat::Vampire(Clan::Mekhet, ..))
+				} // Dream Visions
+				VampireMerit::PackAlpha => {
+					matches!(character.splat, Splat::Vampire(Clan::Gangrel, ..))
+				}
+				VampireMerit::ReceptiveMind => {
+					character.power >= 6
+						&& *character
+							.abilities
+							.get(&Discipline::Auspex.into())
+							.unwrap_or(&0) >= 4
+				}
+				VampireMerit::RevenantImpostor => {
+					attributes.manipulation >= 3 && skills.subterfuge >= 2
+				}
+				VampireMerit::SwarmForm => {
+					*character
+						.abilities
+						.get(&Discipline::Protean.into())
+						.unwrap_or(&0) >= 4
+				}
+				VampireMerit::UnsettlingGaze => {
+					matches!(character.splat, Splat::Vampire(Clan::Nosferatu, ..))
+				}
+
+				// VampireMerit::CacophonySavvy => todo!(), // City Status
+				VampireMerit::Courtoisie => {
+					attributes.composure >= 3 && skills.socialize >= 2 && skills.weaponry >= 2
+				} // Invictus Status
+				VampireMerit::Crusade => {
+					attributes.resolve >= 3 && skills.occult >= 2 && skills.weaponry >= 2
+				} // Theban Sorcery 2 or Sorc Eunuch
+				// VampireMerit::DynastyMembership => todo!(), // Clan Status
+				VampireMerit::KindredDueling => attributes.composure >= 3 && skills.weaponry >= 2,
+				VampireMerit::MobilizeOutrage => {
+					character.max_willpower() >= 5 && skills.brawl >= 2
+				} // Carthian Status
+				VampireMerit::RidingTheWave => attributes.composure >= 3 && attributes.resolve >= 3,
+				VampireMerit::RitesOfTheImpaled => {
+					attributes.resolve >= 3 && attributes.stamina >= 3 && skills.weaponry >= 2
+				} // Sworn
+				VampireMerit::TempleGuardian => {
+					skills.athletics >= 2 && skills.brawl >= 2 && skills.weaponry >= 2
+				} // Crone Status
+				// VampireMerit::IndependentStudy => todo!(),
+				// VampireMerit::SecretSocietyJunkie => todo!(),
+				// VampireMerit::Sworn(_) => todo!(),
+				// VampireMerit::TwilightJudge => todo!(),
+				// VampireMerit::NestGuardian => todo!(),
+				_ => true,
+			}
+	}
+
+	pub fn get_modifiers(&self, value: u16) -> Vec<Modifier> {
+		Vec::new()
 	}
 }
 

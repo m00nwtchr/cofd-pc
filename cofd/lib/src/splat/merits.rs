@@ -8,12 +8,10 @@ use super::{
 };
 use crate::{
 	character::modifier::{Modifier, ModifierOp, ModifierTarget, ModifierValue},
-	prelude::{Character, Skill, Trait},
+	prelude::{Attributes, Character, Skill, Skills, Trait},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash, AllVariants, VariantName)]
-#[cfg(feature = "type-info")]
-#[derive(type_info_derive::TypeInfo)]
 pub enum Merit {
 	// Mental Merits
 	AreaOfExpertise(String),
@@ -297,7 +295,12 @@ impl Merit {
 		}
 	}
 
-	pub fn is_available(&self, character: &Character) -> bool {
+	pub fn is_available(
+		&self,
+		character: &crate::prelude::Character,
+		attributes: &Attributes,
+		skills: &Skills,
+	) -> bool {
 		match self {
 			Merit::_Custom(_) => true,
 
@@ -314,8 +317,8 @@ impl Merit {
 				skills.academics > 1 || skills.science > 1
 			}
 			Self::Indomitable => character.attributes().resolve > 2,
-			Self::InterdisciplinarySpecialty(_, Some(skill)) => *character.skills().get(skill) > 2,
-			Self::InvestigativeAide(Some(skill)) => *character.skills().get(skill) > 2,
+			Self::InterdisciplinarySpecialty(_, Some(skill)) => character.skills().get(*skill) > 2,
+			Self::InvestigativeAide(Some(skill)) => character.skills().get(*skill) > 2,
 			Self::InvestigativeProdigy => {
 				character.attributes().wits > 2 && character.skills().investigation > 2
 			}
@@ -381,7 +384,7 @@ impl Merit {
 			Self::Empath => character.skills().empathy > 1,
 			// Self::Fame // No Anonimity Merit
 			// Self::Fixer => character.attributes().wits > 2 // Contacts 2
-			Self::HobbyistClique(_, Some(skill)) => *character.skills().get(skill) > 1,
+			Self::HobbyistClique(_, Some(skill)) => character.skills().get(*skill) > 1,
 			Self::Inspiring => character.attributes().presence > 2,
 			Self::IronWill => character.attributes().resolve > 3,
 			Self::Peacemaker => character.attributes().wits > 2 && character.skills().empathy > 2,
@@ -401,7 +404,7 @@ impl Merit {
 			}
 
 			Self::Mage(merit) => merit.is_available(character),
-			Self::Vampire(merit) => merit.is_available(character),
+			Self::Vampire(merit) => merit.is_available(character, attributes, skills),
 			Self::Werewolf(merit) => merit.is_available(character),
 			Self::Changeling(merit) => merit.is_available(character),
 			_ => true,
