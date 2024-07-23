@@ -1,42 +1,38 @@
+use iced::widget::{component, Component};
 use iced::{
 	widget::{text, Column},
-	Alignment,
+	Alignment, Element, Pixels,
 };
-use iced_lazy::Component;
-use iced_native::Pixels;
 
-use crate::{Element, H3_SIZE, TITLE_SPACING};
+use crate::{H3_SIZE, TITLE_SPACING};
 
-pub struct List<'a, T, Message> {
+pub struct List<'a, T, Message, Theme> {
 	str: String,
 	min: Option<usize>,
 	max: Option<usize>,
 	vec: Vec<T>,
-	f: Box<dyn Fn(usize, Option<T>) -> Element<'a, Message>>,
+	f: Box<dyn Fn(usize, Option<T>) -> Element<'a, Message, Theme>>,
 	max_width: f32, // on_change: Box<dyn Fn(usize, T) -> Message>,
 }
 
-pub fn list<'a, T, Message>(
+pub fn list<'a, T, Message, Theme>(
 	str: String,
 	min: Option<usize>,
 	max: Option<usize>,
 	vec: Vec<T>,
-	f: impl Fn(usize, Option<T>) -> Element<'a, Message> + 'static,
+	f: impl Fn(usize, Option<T>) -> Element<'a, Message, Theme> + 'static,
 	// on_change: impl Fn(usize, T) -> Message + 'static,
-) -> List<'a, T, Message> {
+) -> List<'a, T, Message, Theme> {
 	List::new(str, min, max, vec, f)
 }
 
-// #[derive(Clone)]
-// pub struct Event<Message>(Message);
-
-impl<'a, T, Message> List<'a, T, Message> {
+impl<'a, T, Message, Theme> List<'a, T, Message, Theme> {
 	fn new(
 		str: String,
 		min: Option<usize>,
 		max: Option<usize>,
 		vec: Vec<T>,
-		f: impl Fn(usize, Option<T>) -> Element<'a, Message> + 'static,
+		f: impl Fn(usize, Option<T>) -> Element<'a, Message, Theme> + 'static,
 		// on_change: impl Fn(usize, T) -> Message + 'static,
 	) -> Self {
 		Self {
@@ -56,9 +52,10 @@ impl<'a, T, Message> List<'a, T, Message> {
 	}
 }
 
-impl<'a, T, Message> Component<Message, iced::Renderer> for List<'a, T, Message>
+impl<'a, T, Message, Theme> Component<Message, Theme> for List<'a, T, Message, Theme>
 where
 	T: Clone,
+	Theme: text::StyleSheet,
 {
 	type State = ();
 	type Event = Message;
@@ -67,8 +64,8 @@ where
 		Some(event)
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
-		let mut col = Column::new();
+	fn view(&self, _state: &Self::State) -> Element<'_, Message, Theme> {
+		let mut col = Column::<'_, Message, Theme>::new();
 
 		for i in 0..std::cmp::min(
 			self.max.unwrap_or(usize::MAX),
@@ -89,12 +86,13 @@ where
 	}
 }
 
-impl<'a, T, Message> From<List<'a, T, Message>> for Element<'a, Message>
+impl<'a, T, Message, Theme> From<List<'a, T, Message, Theme>> for Element<'a, Message, Theme>
 where
 	T: 'a + Clone,
 	Message: 'a,
+	Theme: text::StyleSheet + 'static,
 {
-	fn from(list: List<'a, T, Message>) -> Self {
-		iced_lazy::component(list)
+	fn from(list: List<'a, T, Message, Theme>) -> Self {
+		component(list)
 	}
 }

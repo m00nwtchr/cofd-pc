@@ -1,4 +1,3 @@
-#![feature(is_some_and)]
 #![feature(let_chains)]
 #![deny(clippy::pedantic)]
 #![allow(
@@ -15,7 +14,7 @@
 use iced::{
 	executor,
 	widget::{button, column, row, Column},
-	Alignment, Application, Command, Theme,
+	Alignment, Application, Command, Element, Length, Theme,
 };
 #[cfg(target_arch = "wasm32")]
 use log::Level;
@@ -47,8 +46,6 @@ pub enum State {
 		character: Rc<RefCell<Character>>,
 	},
 }
-
-pub type Element<'a, Message> = iced::Element<'a, Message, iced::Renderer>;
 
 struct PlayerCompanionApp {
 	state: State,
@@ -131,9 +128,9 @@ impl PlayerCompanionApp {
 
 impl Application for PlayerCompanionApp {
 	type Executor = executor::Default;
-	type Flags = ();
 	type Message = Message;
 	type Theme = Theme;
+	type Flags = ();
 
 	fn new(_flags: ()) -> (Self, Command<Self::Message>) {
 		let _language_requester = i18n::setup();
@@ -224,16 +221,16 @@ impl Application for PlayerCompanionApp {
 		Command::none()
 	}
 
-	fn view(&self) -> Element<Self::Message> {
-		// view::overview_tab(character.clone(), Message::Previous)
-		// Column::new().align_items(align)
+	fn view(&self) -> Element<Self::Message, Self::Theme> {
 		match &self.state {
 			State::CharacterList => column![
 				view::character_list(self.characters.clone(), Message::PickCharacter),
 				button("New Character").on_press(Message::NewCharacter)
 			]
+			.width(Length::Fill)
 			.align_items(Alignment::Center)
 			.into(),
+
 			State::CharacterCreator => view::creator_view(Message::AddCharacter).into(),
 			State::Sheet {
 				active_tab,
@@ -241,17 +238,21 @@ impl Application for PlayerCompanionApp {
 			} => {
 				let _brw = character.borrow();
 
-				let tab: Element<Self::Message> = match active_tab {
+				let tab: Element<Self::Message, Self::Theme> = match active_tab {
 					Tab::Overview => view::overview_tab(character.clone()).into(),
-					Tab::Equipment => view::equipment_tab(character.clone()).into(),
-					// Tab::Forms => {
-					// 	if let Splat::Werewolf(_, _, _, _) = brw.splat {
-					// 		view::werewolf::form_tab(character.clone(), Message::Msg).into()
-					// 	} else {
-					// 		unreachable!()
-					// 	}
-					// }
-					Tab::SplatExtras => view::splat_extras_tab(character.clone()).into(),
+					_ => {
+						todo!()
+					} // Tab::Equipment => view::equipment_tab(character.clone()).into(),
+
+					  // Tab::Forms => {
+					  // 	if let Splat::Werewolf(_, _, _, _) = brw.splat {
+					  // 		view::werewolf::form_tab(character.clone(), Message::Msg).into()
+					  // 	} else {
+					  // 		unreachable!()
+					  // 	}
+					  // }
+
+					  // Tab::SplatExtras => view::splat_extras_tab(character.clone()).into(),
 				};
 
 				// let mut row = row![
@@ -262,7 +263,7 @@ impl Application for PlayerCompanionApp {
 				// ];
 
 				// if let Splat::Werewolf(_, _, _, data) = &brw.splat {
-				// row = row.push(button("Forms").on_press(Message::TabSelected(Tab::Forms)));
+				// 	row = row.push(button("Forms").on_press(Message::TabSelected(Tab::Forms)));
 				// }
 
 				// row = row.push(button("Equipment").on_press(Message::TabSelected(Tab::Equipment)));
@@ -275,8 +276,9 @@ impl Application for PlayerCompanionApp {
 						button("Equipment").on_press(Message::TabSelected(Tab::Equipment)),
 						button("Splat").on_press(Message::TabSelected(Tab::SplatExtras)),
 					])
-					.spacing(1)
 					.push(tab)
+					.width(Length::Fill)
+					.spacing(1)
 					.into()
 			}
 		}
@@ -294,7 +296,6 @@ fn main() -> anyhow::Result<()> {
 }
 
 mod demo {
-
 	use cofd::{
 		character::CharacterInfo,
 		prelude::*,

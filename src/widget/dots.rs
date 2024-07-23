@@ -1,56 +1,15 @@
-use iced::{
-	event, mouse, widget::Column, Alignment, Background, Color, Element, Event, Length, Point,
-	Rectangle, Theme,
-};
-use iced_native::{
-	layout, renderer, text, touch,
-	widget::{self, Column as Col, Row, Tree},
-	Clipboard, Layout, Shell, Widget,
-};
+use std::default::Default;
 
-pub enum Shape {
-	Dots,
-	Boxes,
-}
+use iced::advanced::layout::{self, Layout};
+use iced::advanced::widget::{self, Widget};
+use iced::advanced::{renderer, Clipboard, Shell};
+use iced::widget::{text, Column, Row};
+use iced::{event, touch, Background, Theme};
+use iced::{mouse, Alignment, Border, Color, Element, Length, Rectangle, Size};
 
-#[derive(Default)]
-pub enum Axis {
-	Vertical,
-	#[default]
-	Horizontal,
-}
-
-pub enum ColOrRow<'a, Message, Renderer> {
-	Col(Col<'a, Message, Renderer>),
-	Row(Row<'a, Message, Renderer>),
-}
-
-impl<'a, Message, Renderer> ColOrRow<'a, Message, Renderer> {
-	pub fn push(self, child: impl Into<Element<'a, Message, Renderer>>) -> Self {
-		match self {
-			ColOrRow::Col(col) => ColOrRow::Col(col.push(child)),
-			ColOrRow::Row(row) => ColOrRow::Row(row.push(child)),
-		}
-	}
-}
-
-impl<'a, Message, Renderer> From<ColOrRow<'a, Message, Renderer>> for Element<'a, Message, Renderer>
+pub struct SheetDots<'a, Message, Theme>
 where
-	Message: 'a,
-	Renderer: 'a + text::Renderer,
-{
-	fn from(val: ColOrRow<'a, Message, Renderer>) -> Self {
-		match val {
-			ColOrRow::Col(col) => col.into(),
-			ColOrRow::Row(row) => row.into(),
-		}
-	}
-}
-
-pub struct SheetDots<'a, Message, Renderer>
-where
-	Renderer: text::Renderer,
-	Renderer::Theme: StyleSheet,
+	Theme: StyleSheet,
 {
 	value: u16,
 	min: u16,
@@ -58,7 +17,7 @@ where
 	on_click: Box<dyn Fn(u16) -> Message + 'a>,
 	size: u16,
 	spacing: u16,
-	style: <Renderer::Theme as StyleSheet>::Style,
+	style: <Theme as StyleSheet>::Style,
 	shape: Shape,
 	row_count: Option<u16>,
 	axis: Axis,
@@ -68,23 +27,19 @@ where
 fn iter<'a>(
 	layout: Layout<'a>,
 	axis: &Axis,
-) -> itertools::Either<
-	impl Iterator<Item = iced_native::Layout<'a>>,
-	impl Iterator<Item = iced_native::Layout<'a>>,
-> {
+) -> itertools::Either<impl Iterator<Item = Layout<'a>>, impl Iterator<Item = Layout<'a>>> {
 	let iter = layout.children().flat_map(Layout::children);
 	if let Axis::Horizontal = axis {
 		itertools::Either::Left(iter)
 	} else {
-		itertools::Either::Right(iter.collect::<Vec<iced_native::Layout>>().into_iter().rev())
+		itertools::Either::Right(iter.collect::<Vec<Layout>>().into_iter().rev())
 	}
 }
 
-impl<'a, Message, Renderer> SheetDots<'a, Message, Renderer>
+impl<'a, Message, Theme> SheetDots<'a, Message, Theme>
 where
 	Message: Clone,
-	Renderer: text::Renderer,
-	Renderer::Theme: StyleSheet,
+	Theme: StyleSheet,
 {
 	/// The default size of a [`Radio`] button.
 	pub const DEFAULT_SIZE: u16 = 19;
@@ -134,41 +89,44 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> Widget<Message, Renderer> for SheetDots<'a, Message, Renderer>
+impl<'a, Message, Theme, Renderer> Widget<Message, Theme, Renderer>
+	for SheetDots<'a, Message, Theme>
 where
 	Message: Clone,
-	Renderer: text::Renderer,
-	Renderer::Theme: StyleSheet + widget::text::StyleSheet,
+	Renderer: renderer::Renderer,
+	Theme: StyleSheet + text::StyleSheet + 'static,
 {
-	fn width(&self) -> iced::Length {
-		self.width
+	fn size(&self) -> Size<Length> {
+		Size {
+			width: self.width,
+			height: Length::Shrink,
+		}
 	}
 
-	fn height(&self) -> iced::Length {
-		iced::Length::Shrink
-	}
-
-	fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
-		let mut col = Column::<(), Renderer>::new()
-			.spacing(self.spacing)
-			.width(self.width);
+	fn layout(
+		&self,
+		tree: &mut widget::Tree,
+		renderer: &Renderer,
+		limits: &layout::Limits,
+	) -> layout::Node {
+		let mut col = Column::new().spacing(self.spacing).width(self.width);
 
 		let per_row_count = self.row_count.unwrap_or(self.max);
 
 		let new_row = || match self.axis {
 			Axis::Vertical => ColOrRow::Col(
-				Col::<(), Renderer>::new()
+				Column::new()
 					.spacing(self.spacing)
 					.align_items(Alignment::Center),
 			),
 			Axis::Horizontal => ColOrRow::Row(
-				Row::<(), Renderer>::new()
+				Row::new()
 					.spacing(self.spacing)
 					.align_items(Alignment::Center),
 			),
 		};
 
-		let mut col_or_row: ColOrRow<(), Renderer> = new_row();
+		let mut col_or_row: ColOrRow<Message, Theme, Renderer> = new_row();
 
 		for i in 0..self.max {
 			col_or_row = col_or_row.push(Row::new().width(self.size).height(self.size));
@@ -187,24 +145,92 @@ where
 			col = col.push(col_or_row);
 		}
 
-		col.layout(renderer, limits)
+		col.layout(tree, renderer, limits)
+	}
+
+	fn draw(
+		&self,
+		_state: &widget::Tree,
+		renderer: &mut Renderer,
+		theme: &Theme,
+		_style: &renderer::Style,
+		layout: Layout<'_>,
+		cursor: mouse::Cursor,
+		_viewport: &Rectangle,
+	) {
+		let mut mouse_i = None;
+		for (i, layout) in iter(layout, &self.axis).enumerate() {
+			let bounds = layout.bounds();
+
+			if let Some(_) = cursor.position_over(bounds) {
+				mouse_i = Some(i);
+			}
+		}
+
+		for (i, layout) in iter(layout, &self.axis).enumerate() {
+			let bounds = layout.bounds();
+
+			let custom_style = if mouse_i.is_some_and(|mouse_i| i <= mouse_i) {
+				theme.hovered(self.style)
+			} else {
+				theme.active(self.style)
+			};
+
+			let size = bounds.width;
+			let dot_size = size / 2.0;
+
+			renderer.fill_quad(
+				renderer::Quad {
+					bounds,
+					border: Border {
+						radius: match self.shape {
+							Shape::Dots => (size / 2.0).into(),
+							Shape::Boxes => (0.0).into(),
+						},
+						width: custom_style.border_width,
+						color: custom_style.border_color,
+					},
+					..Default::default()
+				},
+				custom_style.background,
+			);
+
+			if self.value as usize > i {
+				renderer.fill_quad(
+					renderer::Quad {
+						bounds,
+						border: Border {
+							radius: match self.shape {
+								Shape::Dots => dot_size.into(),
+								Shape::Boxes => (0.0).into(),
+							},
+							width: 0.0,
+							color: Color::TRANSPARENT,
+						},
+						..Default::default()
+					},
+					custom_style.dot_color,
+				);
+			}
+		}
 	}
 
 	fn on_event(
 		&mut self,
-		_state: &mut Tree,
-		event: Event,
+		_state: &mut widget::Tree,
+		event: event::Event,
 		layout: Layout<'_>,
-		cursor_position: Point,
+		cursor: mouse::Cursor,
 		_renderer: &Renderer,
 		_clipboard: &mut dyn Clipboard,
 		shell: &mut Shell<'_, Message>,
+		_viewport: &Rectangle,
 	) -> event::Status {
 		match event {
-			Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
-			| Event::Touch(touch::Event::FingerPressed { .. }) => {
+			event::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+			| event::Event::Touch(touch::Event::FingerPressed { .. }) => {
 				for (i, layout) in iter(layout, &self.axis).enumerate() {
-					if layout.bounds().contains(cursor_position) {
+					if let Some(_) = cursor.position_over(layout.bounds()) {
 						let i = if self.value as usize == i + 1 {
 							i
 						} else {
@@ -227,93 +253,32 @@ where
 
 	fn mouse_interaction(
 		&self,
-		_state: &Tree,
+		_state: &widget::Tree,
 		layout: Layout<'_>,
-		cursor_position: Point,
+		cursor: mouse::Cursor,
 		_viewport: &Rectangle,
 		_renderer: &Renderer,
 	) -> mouse::Interaction {
 		if layout
 			.children()
 			.flat_map(Layout::children)
-			.any(|layout| layout.bounds().contains(cursor_position))
+			.any(|layout| cursor.position_over(layout.bounds()).is_some())
 		{
 			mouse::Interaction::Pointer
 		} else {
 			mouse::Interaction::default()
 		}
 	}
-
-	fn draw(
-		&self,
-		_state: &Tree,
-		renderer: &mut Renderer,
-		theme: &Renderer::Theme,
-		_style: &renderer::Style,
-		layout: Layout<'_>,
-		cursor_position: Point,
-		_viewport: &Rectangle,
-	) {
-		let mut mouse_i = None;
-		for (i, layout) in iter(layout, &self.axis).enumerate() {
-			let bounds = layout.bounds();
-
-			if bounds.contains(cursor_position) {
-				mouse_i = Some(i);
-			}
-		}
-
-		for (i, layout) in iter(layout, &self.axis).enumerate() {
-			let bounds = layout.bounds();
-
-			let custom_style = if mouse_i.is_some_and(|mouse_i| i <= mouse_i) {
-				theme.hovered(self.style)
-			} else {
-				theme.active(self.style)
-			};
-
-			let size = bounds.width;
-			let dot_size = size / 2.0;
-
-			renderer.fill_quad(
-				renderer::Quad {
-					bounds,
-					border_radius: match self.shape {
-						Shape::Dots => (size / 2.0).into(),
-						Shape::Boxes => (0.0).into(),
-					},
-					border_width: custom_style.border_width,
-					border_color: custom_style.border_color,
-				},
-				custom_style.background,
-			);
-
-			if self.value as usize > i {
-				renderer.fill_quad(
-					renderer::Quad {
-						bounds,
-						border_radius: match self.shape {
-							Shape::Dots => dot_size.into(),
-							Shape::Boxes => (0.0).into(),
-						},
-						border_width: 0.0,
-						border_color: Color::TRANSPARENT,
-					},
-					custom_style.dot_color,
-				);
-			}
-		}
-	}
 }
 
-impl<'a, Message, Renderer> From<SheetDots<'a, Message, Renderer>>
-	for Element<'a, Message, Renderer>
+impl<'a, Message, Theme, Renderer> From<SheetDots<'a, Message, Theme>>
+	for Element<'a, Message, Theme, Renderer>
 where
 	Message: 'a + Clone,
-	Renderer: 'a + text::Renderer,
-	Renderer::Theme: StyleSheet + widget::text::StyleSheet,
+	Renderer: renderer::Renderer,
+	Theme: StyleSheet + text::StyleSheet + 'static,
 {
-	fn from(radio: SheetDots<'a, Message, Renderer>) -> Self {
+	fn from(radio: SheetDots<'a, Message, Theme>) -> Self {
 		Element::new(radio)
 	}
 }
@@ -360,6 +325,50 @@ impl StyleSheet for Theme {
 			dot_color: palette.primary.strong.color,
 			background: palette.primary.weak.color.into(),
 			..active
+		}
+	}
+}
+
+pub enum Shape {
+	Dots,
+	Boxes,
+}
+
+#[derive(Default)]
+pub enum Axis {
+	Vertical,
+	#[default]
+	Horizontal,
+}
+
+pub enum ColOrRow<'a, Message, Theme, Renderer> {
+	Col(Column<'a, Message, Theme, Renderer>),
+	Row(Row<'a, Message, Theme, Renderer>),
+}
+
+impl<'a, Message, Theme, Renderer> ColOrRow<'a, Message, Theme, Renderer>
+where
+	Renderer: renderer::Renderer,
+{
+	pub fn push(self, child: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
+		match self {
+			ColOrRow::Col(col) => ColOrRow::Col(col.push(child)),
+			ColOrRow::Row(row) => ColOrRow::Row(row.push(child)),
+		}
+	}
+}
+
+impl<'a, Message, Theme, Renderer> From<ColOrRow<'a, Message, Theme, Renderer>>
+	for Element<'a, Message, Theme, Renderer>
+where
+	Message: 'a,
+	Renderer: 'a + renderer::Renderer,
+	Theme: 'static,
+{
+	fn from(val: ColOrRow<'a, Message, Theme, Renderer>) -> Self {
+		match val {
+			ColOrRow::Col(col) => col.into(),
+			ColOrRow::Row(row) => row.into(),
 		}
 	}
 }

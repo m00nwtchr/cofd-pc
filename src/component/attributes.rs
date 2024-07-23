@@ -1,10 +1,12 @@
-use iced::{
-	widget::{column, row, text, Column},
-	Alignment, Length,
-};
-use iced_lazy::Component;
 use std::{cell::RefCell, rc::Rc};
 
+use crate::widget::dots;
+use crate::{
+	fl,
+	i18n::flt,
+	widget::dots::{Shape, SheetDots},
+	Element, H2_SIZE, TITLE_SPACING,
+};
 use cofd::{
 	character::{
 		modifier::ModifierTarget,
@@ -12,12 +14,10 @@ use cofd::{
 	},
 	prelude::*,
 };
-
-use crate::{
-	fl,
-	i18n::flt,
-	widget::dots::{Shape, SheetDots},
-	Element, H2_SIZE, TITLE_SPACING,
+use iced::widget::{component, Component};
+use iced::{
+	widget::{column, row, text, Column},
+	Alignment, Length,
 };
 
 pub struct AttributeBar<Message> {
@@ -50,7 +50,10 @@ impl<Message> AttributeBar<Message> {
 		}
 	}
 
-	fn mk_attr_col(&self, character: &Character, cat: TraitCategory) -> Element<Event> {
+	fn mk_attr_col<Theme>(&self, character: &Character, cat: TraitCategory) -> Element<Event, Theme>
+	where
+		Theme: text::StyleSheet + dots::StyleSheet + 'static,
+	{
 		let mut col1 = Column::new().spacing(3);
 		let mut col2 = Column::new()
 			.spacing(5)
@@ -81,7 +84,10 @@ impl<Message> AttributeBar<Message> {
 	}
 }
 
-impl<Message> Component<Message, iced::Renderer> for AttributeBar<Message> {
+impl<Message, Theme> Component<Message, Theme> for AttributeBar<Message>
+where
+	Theme: text::StyleSheet + dots::StyleSheet + 'static,
+{
 	type State = ();
 	type Event = Event;
 
@@ -89,7 +95,7 @@ impl<Message> Component<Message, iced::Renderer> for AttributeBar<Message> {
 		Some((self.on_change)(event.0, event.1))
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
+	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
 		let character = self.character.borrow();
 
 		column![
@@ -116,11 +122,12 @@ impl<Message> Component<Message, iced::Renderer> for AttributeBar<Message> {
 	}
 }
 
-impl<'a, Message> From<AttributeBar<Message>> for Element<'a, Message>
+impl<'a, Message, Theme> From<AttributeBar<Message>> for Element<'a, Message, Theme>
 where
 	Message: 'a,
+	Theme: text::StyleSheet + dots::StyleSheet + 'static,
 {
 	fn from(info_bar: AttributeBar<Message>) -> Self {
-		iced_lazy::component(info_bar)
+		component(info_bar)
 	}
 }

@@ -1,11 +1,6 @@
-use closure::closure;
-use iced::{
-	widget::{column, pick_list, row, text, text_input, Column},
-	Alignment, Length,
-};
-use iced_lazy::Component;
 use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
+use closure::closure;
 use cofd::{
 	character::Wound,
 	prelude::*,
@@ -17,16 +12,29 @@ use cofd::{
 		Merit, Splat,
 	},
 };
+use iced::overlay::menu;
+use iced::widget::{button, container, scrollable};
+use iced::{
+	widget::{column, component, pick_list, row, text, text_input, Column, Component},
+	Alignment, Element, Length,
+};
 
+use crate::widget::{dots, track};
 use crate::{
-	component::{
-		attribute_bar, info_bar, integrity_component, list, merit_component, skills_component,
-		traits_component,
-	},
+	component::{attribute_bar, info_bar, list, skills_component},
+	// component::{
+	// 	attribute_bar, info_bar, integrity_component, list, merit_component, skills_component,
+	// 	traits_component,
+	// },
 	fl,
 	i18n::{flt, Translated},
 	widget::{dots::Shape, dots::SheetDots, track::HealthTrack},
-	Element, COMPONENT_SPACING, H2_SIZE, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
+	COMPONENT_SPACING,
+	H2_SIZE,
+	H3_SIZE,
+	INPUT_PADDING,
+	MAX_INPUT_WIDTH,
+	TITLE_SPACING,
 };
 
 pub struct OverviewTab<Message> {
@@ -87,7 +95,16 @@ impl<Message> OverviewTab<Message> {
 		}
 	}
 
-	fn abilities(&self, character: &Character) -> Element<Event> {
+	fn abilities<Theme>(&self, character: &Character) -> Element<Event, Theme>
+	where
+		Theme: 'static,
+		Theme: text::StyleSheet + text_input::StyleSheet + dots::StyleSheet,
+		Theme: pick_list::StyleSheet
+			+ scrollable::StyleSheet
+			+ menu::StyleSheet
+			+ container::StyleSheet,
+		<Theme as menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
+	{
 		let splat_name = character.splat.name();
 
 		let mut col = Column::new()
@@ -129,23 +146,20 @@ impl<Message> OverviewTab<Message> {
 				for (ability, val) in &character.abilities {
 					if ability.is_custom() {
 						col1 = col1.push(
-							text_input(
-								"",
-								ability.name(),
-								closure!(clone ability, |val| {
+							text_input("", ability.name())
+								.on_input(closure!(clone ability, |val| {
 									let mut new = ability.clone();
 									*new.name_mut().unwrap() = val;
 									Event::AbilityChanged(ability.clone(), new)
-								}),
-							)
-							.padding(INPUT_PADDING),
+								}))
+								.padding(INPUT_PADDING),
 						);
 					} else {
 						col1 = col1
 							.push(
 								pick_list(
 									vec.clone(),
-									Some(ability.clone().into()),
+									Some::<Translated<Ability>>(ability.clone().into()),
 									closure!(clone ability, |val| Event::AbilityChanged(ability.clone(), val.unwrap())),
 								)
 								.width(Length::Fill)
@@ -166,10 +180,12 @@ impl<Message> OverviewTab<Message> {
 				}
 
 				new = new.push(
-					pick_list(vec, None, |key| Event::NewAbility(key.unwrap()))
-						.width(Length::Fill)
-						.padding(INPUT_PADDING)
-						.text_size(20),
+					pick_list(vec, None::<Translated<Ability>>, |key| {
+						Event::NewAbility(key.unwrap())
+					})
+					.width(Length::Fill)
+					.padding(INPUT_PADDING)
+					.text_size(20),
 				);
 			}
 
@@ -184,9 +200,16 @@ impl<Message> OverviewTab<Message> {
 	}
 }
 
-impl<Message> Component<Message, iced::Renderer> for OverviewTab<Message>
+impl<Message, Theme> Component<Message, Theme> for OverviewTab<Message>
 where
 	Message: Clone,
+	Theme: 'static + button::StyleSheet + iced::widget::checkbox::StyleSheet,
+	Theme: text::StyleSheet + text_input::StyleSheet + dots::StyleSheet + track::StyleSheet,
+	Theme:
+		pick_list::StyleSheet + scrollable::StyleSheet + menu::StyleSheet + container::StyleSheet,
+	<Theme as menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
+	<Theme as text::StyleSheet>::Style: From<iced::theme::Text>,
+	<Theme as button::StyleSheet>::Style: From<iced::theme::Button>,
 {
 	type State = ();
 
@@ -348,7 +371,9 @@ where
 			}
 			Event::HuntersAspectChanged(val) => {
 				if let Splat::Werewolf(.., data) = &mut character.splat {
-					if let HuntersAspect::_Custom(name) = &val && name.eq("") {
+					if let HuntersAspect::_Custom(name) = &val
+						&& name.eq("")
+					{
 						data.hunters_aspect = None;
 					} else {
 						data.hunters_aspect = Some(val);
@@ -361,7 +386,7 @@ where
 	}
 
 	#[allow(clippy::too_many_lines)]
-	fn view(&self, _state: &Self::State) -> iced_native::Element<Self::Event, iced::Renderer> {
+	fn view(&self, _state: &Self::State) -> Element<'_, Event, Theme> {
 		let character = self.character.borrow();
 
 		let health = {
@@ -432,7 +457,7 @@ where
 			column![]
 		};
 
-		let integrity = integrity_component(self.character.clone());
+		// let integrity = integrity_component(self.character.clone());
 
 		let conditions = list(
 			fl!("conditions"),
@@ -440,11 +465,10 @@ where
 			None,
 			character.conditions.clone(),
 			|i, val| {
-				text_input("", &val.unwrap_or_default(), move |val| {
-					Event::ConditionChanged(i, val)
-				})
-				.padding(INPUT_PADDING)
-				.into()
+				text_input("", &val.unwrap_or_default())
+					.on_input(move |val| Event::ConditionChanged(i, val))
+					.padding(INPUT_PADDING)
+					.into()
 			},
 		);
 		// .max_width(MAX_INPUT_WIDTH);
@@ -455,11 +479,10 @@ where
 			Some(3),
 			character.aspirations.clone(),
 			|i, val| {
-				text_input("", &val.unwrap_or_default(), move |val| {
-					Event::AspirationChanged(i, val)
-				})
-				.padding(INPUT_PADDING)
-				.into()
+				text_input("", &val.unwrap_or_default())
+					.on_input(move |val| Event::AspirationChanged(i, val))
+					.padding(INPUT_PADDING)
+					.into()
 			},
 		);
 		// .max_width(MAX_INPUT_WIDTH);
@@ -476,11 +499,10 @@ where
 					_ => 1,
 				}),
 				data.obsessions.clone(),
-				|i, val| text_input("", &val.unwrap_or_default(), move |val| {
-					Event::SplatThingChanged(i, val)
-				})
-				.padding(INPUT_PADDING)
-				.into()
+				|i, val| text_input("", &val.unwrap_or_default(),)
+					.on_input(move |val| { Event::SplatThingChanged(i, val) })
+					.padding(INPUT_PADDING)
+					.into()
 			)]
 			.max_width(MAX_INPUT_WIDTH)
 		} else {
@@ -488,44 +510,49 @@ where
 		};
 
 		let kuruth_triggers = if let Splat::Werewolf(.., data) = &character.splat {
-			let (passive, common, specific): (Element<Event>, Element<Event>, Element<Event>) =
-				if let KuruthTriggers::_Custom(KuruthTriggerSet {
-					passive,
-					common,
-					specific,
-				}) = &data.triggers
-				{
-					(
-						text_input("", passive, |passive| {
+			let (passive, common, specific): (
+				Element<Self::Event, Theme>,
+				Element<Self::Event, Theme>,
+				Element<Self::Event, Theme>,
+			) = if let KuruthTriggers::_Custom(KuruthTriggerSet {
+				passive,
+				common,
+				specific,
+			}) = &data.triggers
+			{
+				(
+					text_input("", passive)
+						.on_input(|passive| {
 							Event::KuruthTriggerChanged(KuruthTrigger::Passive, passive)
 						})
 						.padding(INPUT_PADDING)
 						.into(),
-						text_input("", common, |common| {
+					text_input("", common)
+						.on_input(|common| {
 							Event::KuruthTriggerChanged(KuruthTrigger::Common, common)
 						})
 						.padding(INPUT_PADDING)
 						.into(),
-						text_input("", specific, |specific| {
+					text_input("", specific)
+						.on_input(|specific| {
 							Event::KuruthTriggerChanged(KuruthTrigger::Specific, specific)
 						})
 						.padding(INPUT_PADDING)
 						.into(),
-					)
-				} else {
-					let name = data.triggers.name().unwrap();
+				)
+			} else {
+				let name = data.triggers.name().unwrap();
 
-					let passive = flt("kuruth-triggers", Some(&format!("{name}-passive"))).unwrap();
-					let common = flt("kuruth-triggers", Some(&format!("{name}-common"))).unwrap();
-					let specific =
-						flt("kuruth-triggers", Some(&format!("{name}-specific"))).unwrap();
+				let passive = flt("kuruth-triggers", Some(&format!("{name}-passive"))).unwrap();
+				let common = flt("kuruth-triggers", Some(&format!("{name}-common"))).unwrap();
+				let specific = flt("kuruth-triggers", Some(&format!("{name}-specific"))).unwrap();
 
-					(
-						text(passive).into(),
-						text(common).into(),
-						text(specific).into(),
-					)
-				};
+				(
+					text(passive).into(),
+					text(common).into(),
+					text(specific).into(),
+				)
+			};
 
 			let vec: Vec<Translated<KuruthTriggers>> =
 				KuruthTriggers::all().into_iter().map(Into::into).collect();
@@ -533,9 +560,11 @@ where
 			column![
 				text(fl!("kuruth-triggers")),
 				column![
-					pick_list(vec, Some(data.triggers.clone().into()), |val| {
-						Event::KuruthTriggersChanged(val.unwrap())
-					})
+					pick_list(
+						vec,
+						Some::<Translated<KuruthTriggers>>(data.triggers.clone().into()),
+						|val| { Event::KuruthTriggersChanged(val.unwrap()) }
+					)
 					.width(Length::Fill)
 					.padding(INPUT_PADDING),
 					text(fl!("werewolf", "passive")),
@@ -555,8 +584,8 @@ where
 		};
 
 		let abilities = self.abilities(&character);
-		let merits = merit_component(self.character.clone(), Event::MeritChanged);
-		let traits = traits_component(&character, Event::TraitChanged);
+		// let merits = merit_component(self.character.clone(), Event::MeritChanged);
+		// let traits = traits_component(&character, Event::TraitChanged);
 
 		let regalia = if let Splat::Changeling(seeming, .., data) = &character.splat {
 			let sg = seeming.get_favored_regalia();
@@ -564,23 +593,29 @@ where
 
 			let seeming_regalia = text(flt(character.splat.name(), Some(sg.name())).unwrap());
 
-			let regalia: Element<Event> = if let Some(Regalia::_Custom(name)) = &data.regalia {
-				text_input("", name, |val| Event::RegaliaChanged(Regalia::_Custom(val)))
-					.width(Length::Fill)
-					.padding(INPUT_PADDING)
-					.into()
-			} else {
-				let reg: Vec<Translated<Regalia>> = all_regalia
-					.iter().filter(|&reg| reg != sg).cloned()
-					.map(Into::into)
-					.collect();
+			let regalia: Element<Self::Event, Theme> =
+				if let Some(Regalia::_Custom(name)) = &data.regalia {
+					text_input("", name)
+						.on_input(|val| Event::RegaliaChanged(Regalia::_Custom(val)))
+						.width(Length::Fill)
+						.padding(INPUT_PADDING)
+						.into()
+				} else {
+					let reg: Vec<Translated<Regalia>> = all_regalia
+						.iter()
+						.filter(|&reg| reg != sg)
+						.cloned()
+						.map(Into::into)
+						.collect();
 
-				pick_list(reg, data.regalia.clone().map(Into::into), |val| {
-					Event::RegaliaChanged(val.unwrap())
-				})
-				.width(Length::Fill)
-				.into()
-			};
+					pick_list(
+						reg,
+						data.regalia.clone().map(Into::<Translated<Regalia>>::into),
+						|val| Event::RegaliaChanged(val.unwrap()),
+					)
+					.width(Length::Fill)
+					.into()
+				};
 
 			column![
 				text(fl!("favored-regalia")).size(H3_SIZE),
@@ -592,38 +627,37 @@ where
 			column![]
 		};
 
-		let frailties: Element<Self::Event> = if let Splat::Changeling(.., data) = &character.splat
-		{
-			list(
-				fl!("changeling", "frailties"),
-				Some(3),
-				Some(3),
-				data.frailties.clone(),
-				|i, val| {
-					text_input("", &val.unwrap_or_default(), move |val| {
-						Event::SplatThingChanged(i, val)
-					})
-					.padding(INPUT_PADDING)
-					.into()
-				},
-			)
-			.into()
-		} else {
-			column![].into()
-		};
+		let frailties: Element<Self::Event, Theme> =
+			if let Splat::Changeling(.., data) = &character.splat {
+				list(
+					fl!("changeling", "frailties"),
+					Some(3),
+					Some(3),
+					data.frailties.clone(),
+					|i, val| {
+						text_input("", &val.unwrap_or_default())
+							.on_input(move |val| Event::SplatThingChanged(i, val))
+							.padding(INPUT_PADDING)
+							.into()
+					},
+				)
+				.into()
+			} else {
+				column![].into()
+			};
 
-		let banes: Element<Self::Event> = if let Splat::Vampire(.., data) = &character.splat {
+		let banes: Element<Self::Event, Theme> = if let Splat::Vampire(.., data) = &character.splat
+		{
 			list(
 				fl!("vampire", "banes"),
 				Some(3),
 				Some(3),
 				data.banes.clone(),
 				|i, val| {
-					text_input("", &val.unwrap_or_default(), move |val| {
-						Event::SplatThingChanged(i, val)
-					})
-					.padding(INPUT_PADDING)
-					.into()
+					text_input("", &val.unwrap_or_default())
+						.on_input(move |val| Event::SplatThingChanged(i, val))
+						.padding(INPUT_PADDING)
+						.into()
 				},
 			)
 			.into()
@@ -631,7 +665,7 @@ where
 			column![].into()
 		};
 
-		let hunters_aspect: Element<Self::Event> =
+		let hunters_aspect: Element<Self::Event, Theme> =
 			if let Splat::Werewolf(auspice, tribe, _, data) = &character.splat {
 				let mut vec: Vec<Translated<HuntersAspect>> = if let Some(auspice) = auspice {
 					vec![auspice.get_hunters_aspect().clone().into()]
@@ -654,16 +688,21 @@ where
 
 				if let Some(HuntersAspect::_Custom(name)) = &data.hunters_aspect {
 					col = col.push(
-						text_input("", name, |val| {
-							Event::HuntersAspectChanged(HuntersAspect::_Custom(val))
-						})
-						.padding(INPUT_PADDING),
+						text_input("", name)
+							.on_input(|val| {
+								Event::HuntersAspectChanged(HuntersAspect::_Custom(val))
+							})
+							.padding(INPUT_PADDING),
 					);
 				} else {
 					col = col.push(
-						pick_list(vec, data.hunters_aspect.clone().map(Into::into), |val| {
-							Event::HuntersAspectChanged(val.unwrap())
-						})
+						pick_list(
+							vec,
+							data.hunters_aspect
+								.clone()
+								.map(Into::<Translated<HuntersAspect>>::into),
+							|val| Event::HuntersAspectChanged(val.unwrap()),
+						)
 						.width(Length::Fill)
 						.padding(INPUT_PADDING),
 					);
@@ -674,7 +713,7 @@ where
 				column![].into()
 			};
 
-		let mut col1 = Column::new()
+		let mut col1: Column<Event, Theme> = Column::new()
 			.align_items(Alignment::Center)
 			.width(Length::Fill)
 			.spacing(COMPONENT_SPACING);
@@ -682,9 +721,6 @@ where
 		let mut col2 = Column::new()
 			.push(health)
 			.push(willpower)
-			// .push(st)
-			// .push(fuel)
-			// .push(integrity)
 			.spacing(COMPONENT_SPACING)
 			.align_items(Alignment::Center)
 			.width(Length::Fill);
@@ -699,50 +735,50 @@ where
 			}
 		}
 
-		col2 = col2.push(integrity);
+		// col2 = col2.push(integrity);
 
 		match &character.splat {
 			Splat::Vampire(..) => {
 				col1 = col1
 					.push(abilities)
-					.push(merits)
+					// .push(merits)
 					.push(aspirations)
 					.push(banes)
 					.push(conditions);
-				col2 = col2.push(traits);
+				// col2 = col2.push(traits);
 			}
 			Splat::Werewolf(..) => {
 				col1 = col1
-					.push(merits)
+					// .push(merits)
 					.push(abilities)
 					.push(aspirations)
 					.push(hunters_aspect)
-					.push(conditions)
-					.push(traits);
+					.push(conditions);
+				// .push(traits);
 				col2 = col2.push(kuruth_triggers);
 			}
 			Splat::Mage(..) => {
-				col1 = col1.push(abilities).push(merits).push(traits);
+				// col1 = col1.push(abilities).push(merits).push(traits);
 				col2 = col2.push(conditions).push(aspirations).push(obsessions);
 			}
 			Splat::Changeling(..) => {
 				col1 = col1
-					.push(merits)
+					// .push(merits)
 					.push(regalia)
 					.push(frailties)
 					.push(aspirations)
 					.push(conditions);
-				col2 = col2.push(traits);
+				// col2 = col2.push(traits);
 			}
 			Splat::Bound(..) => {
 				col1 = col1
-					.push(merits)
+					// .push(merits)
 					// Keys
 					.push(abilities);
 				col2 = col2.push(aspirations);
 			}
 			_ => {
-				col1 = col1.push(merits).push(traits);
+				// col1 = col1.push(merits).push(traits);
 				col2 = col2.push(conditions).push(aspirations);
 			}
 		}
@@ -784,11 +820,18 @@ where
 	}
 }
 
-impl<'a, Message> From<OverviewTab<Message>> for Element<'a, Message>
+impl<'a, Message, Theme> From<OverviewTab<Message>> for Element<'a, Message, Theme>
 where
 	Message: 'a + Clone,
+	Theme: 'static + button::StyleSheet + iced::widget::checkbox::StyleSheet,
+	Theme: text::StyleSheet + text_input::StyleSheet + dots::StyleSheet + track::StyleSheet,
+	Theme:
+		pick_list::StyleSheet + scrollable::StyleSheet + menu::StyleSheet + container::StyleSheet,
+	<Theme as menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
+	<Theme as text::StyleSheet>::Style: From<iced::theme::Text>,
+	<Theme as button::StyleSheet>::Style: From<iced::theme::Button>,
 {
 	fn from(overview_tab: OverviewTab<Message>) -> Self {
-		iced_lazy::component(overview_tab)
+		component(overview_tab)
 	}
 }

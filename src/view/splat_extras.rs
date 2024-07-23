@@ -16,7 +16,7 @@ use cofd::{
 };
 
 use crate::{
-	component::{self, list},
+	// component::{self, list},
 	fl,
 	i18n::{flt, Translated},
 	widget::dots::{Shape, SheetDots},

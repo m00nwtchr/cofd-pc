@@ -1,13 +1,11 @@
-use iced::{
-	widget::{button, column, row, text, Column},
-	Alignment, Length,
-};
-use iced_lazy::Component;
 use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
+use crate::i18n::flt;
 use cofd::prelude::*;
-
-use crate::{i18n::flt, Element};
+use iced::{
+	widget::{button, column, component, row, text, Column, Component},
+	Alignment, Element, Length,
+};
 
 pub struct CharacterList<Message> {
 	characters: Vec<Rc<RefCell<Character>>>,
@@ -40,7 +38,10 @@ impl<Message> CharacterList<Message> {
 		}
 	}
 
-	fn mk_char(&self, i: usize, character: &Character) -> Element<Event> {
+	fn mk_char<Theme>(&self, i: usize, character: &Character) -> Element<Event, Theme>
+	where
+		Theme: button::StyleSheet + text::StyleSheet + 'static,
+	{
 		let mut subtitle = flt(character.splat.name(), None).unwrap();
 
 		if let Some(ysplat) = character.splat.ysplat() {
@@ -55,8 +56,6 @@ impl<Message> CharacterList<Message> {
 				.unwrap_or_else(|| xsplat.name().to_owned());
 		}
 
-		// button(text(fl!("select"))).on_press(Event::PickCharacter(i))
-
 		let name = if character.info.name.is_empty() {
 			"Unnamed"
 		} else {
@@ -70,22 +69,23 @@ impl<Message> CharacterList<Message> {
 	}
 }
 
-impl<Message> Component<Message, iced::Renderer> for CharacterList<Message> {
+impl<Message, Theme> Component<Message, Theme> for CharacterList<Message>
+where
+	Theme: button::StyleSheet + text::StyleSheet + 'static,
+{
 	type State = ();
-
 	type Event = Event;
 
 	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
-		// let mut character = self.character.borrow_mut();
-
 		match event {
 			Event::PickCharacter(i) => Some((self.on_pick)(i)),
 		}
 	}
 
-	#[allow(clippy::too_many_lines)]
-	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
-		let mut list = Column::new().width(Length::FillPortion(4)).spacing(5);
+	fn view(&self, _state: &Self::State) -> Element<'_, Event, Theme> {
+		let mut list = Column::new()
+			.width(Length::FillPortion(4))
+			.spacing(5);
 
 		for (i, character) in self.characters.iter().enumerate() {
 			list = list.push(self.mk_char(i, &character.borrow()));
@@ -103,11 +103,12 @@ impl<Message> Component<Message, iced::Renderer> for CharacterList<Message> {
 	}
 }
 
-impl<'a, Message> From<CharacterList<Message>> for Element<'a, Message>
+impl<'a, Message, Theme> From<CharacterList<Message>> for Element<'a, Message, Theme>
 where
+	Theme: button::StyleSheet + text::StyleSheet + 'static,
 	Message: 'a,
 {
 	fn from(character_list: CharacterList<Message>) -> Self {
-		iced_lazy::component(character_list)
+		component(character_list)
 	}
 }

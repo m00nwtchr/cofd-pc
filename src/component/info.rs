@@ -1,21 +1,21 @@
+use iced::widget::{component, container, scrollable, Component};
 use iced::{
 	widget::{column, pick_list, row, text, text_input, Column},
 	Alignment, Length,
 };
-use iced_lazy::Component;
 use std::{cell::RefCell, rc::Rc};
-
-use cofd::{
-	character::InfoTrait,
-	prelude::*,
-	splat::{Splat, XSplat, YSplat, ZSplat},
-};
 
 use crate::{
 	fl,
 	i18n::{flt, Translated},
 	Element, INPUT_PADDING,
 };
+use cofd::{
+	character::InfoTrait,
+	prelude::*,
+	splat::{Splat, XSplat, YSplat, ZSplat},
+};
+use iced::overlay::menu;
 
 pub struct InfoBar<Message> {
 	character: Rc<RefCell<Character>>,
@@ -46,7 +46,14 @@ impl<Message> InfoBar<Message> {
 		}
 	}
 
-	fn mk_info_col(&self, info: Vec<InfoTrait>, character: &Character) -> Element<Event> {
+	fn mk_info_col<Theme>(
+		&self,
+		info: Vec<InfoTrait>,
+		character: &Character,
+	) -> Element<Event, Theme>
+	where
+		Theme: text_input::StyleSheet + text::StyleSheet + 'static,
+	{
 		let mut col1 = Column::new().spacing(3);
 		let mut col2 = Column::new()
 			.spacing(3)
@@ -80,10 +87,9 @@ impl<Message> InfoBar<Message> {
 
 			col1 = col1.push(text(format!("{}:", flt(msg, attribute).unwrap())));
 			col2 = col2.push(
-				text_input("", character.info.get(_trait), move |val| {
-					Event::InfoTraitChanged(val, _trait)
-				})
-				.padding(INPUT_PADDING),
+				text_input("", character.info.get(_trait))
+					.on_input(move |val| Event::InfoTraitChanged(val, _trait))
+					.padding(INPUT_PADDING),
 			);
 		}
 
@@ -91,11 +97,20 @@ impl<Message> InfoBar<Message> {
 	}
 }
 
-impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
+impl<Message, Theme> Component<Message, Theme> for InfoBar<Message>
+where
+	Theme: text_input::StyleSheet + text::StyleSheet,
+	Theme: pick_list::StyleSheet
+		+ scrollable::StyleSheet
+		+ menu::StyleSheet
+		+ container::StyleSheet
+		+ 'static,
+	<Theme as menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
+{
 	type State = ();
 	type Event = Event;
 
-	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
+	fn update(&mut self, _state: &mut Self::State, event: Event) -> Option<Message> {
 		let mut character = self.character.borrow_mut();
 
 		match event {
@@ -133,10 +148,10 @@ impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
 		clippy::single_match_else,
 		clippy::too_many_lines
 	)]
-	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
+	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
 		let character = self.character.borrow();
 
-		let col3: Element<Self::Event> = match character.splat {
+		let col3: Element<Event, Theme> = match character.splat {
 			Splat::Mortal => self.mk_info_col(
 				vec![InfoTrait::Age, InfoTrait::Faction, InfoTrait::GroupName],
 				&character,
@@ -167,53 +182,79 @@ impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
 				let ysplat = character.splat.ysplat();
 				let zsplat = character.splat.zsplat();
 
-				let xsplat: Element<Self::Event> = if let Some(xsplat) = xsplat.clone() && xsplat.is_custom() {
-					text_input("", xsplat.name(), {
-						let xsplat = xsplat.clone();
-						move |val| {
-							let mut xsplat = xsplat.clone();
-							*xsplat.name_mut().unwrap() = val;
-							Event::XSplatChanged(xsplat)
-						}
-					}).padding(INPUT_PADDING)
-					.into()
-				} else {
-					pick_list(xsplats, xsplat.map(Into::into), |val| Event::XSplatChanged(val.unwrap()))
-					.padding(INPUT_PADDING)
-					.width(Length::Fill).into()
-				};
-
-				let ysplat: Element<Self::Event> = if let Some(ysplat) = ysplat.clone() && ysplat.is_custom() {
-					text_input("", ysplat.name(), {
-						let ysplat = ysplat.clone();
-						move |val| {
-							let mut ysplat = ysplat.clone();
-							*ysplat.name_mut().unwrap() = val;
-							Event::YSplatChanged(ysplat)
-						}
-					}).padding(INPUT_PADDING)
-					.into()
-				} else {
-					pick_list(ysplats, ysplat.map(Into::into), |val| Event::YSplatChanged(val.unwrap()))
-					.padding(INPUT_PADDING)
-					.width(Length::Fill).into()
-				};
-
-				let zsplat: Element<Self::Event> = if let Some(zsplat) = zsplat.clone() && zsplat.is_custom() {
-					text_input("", zsplat.name(), {
-						let zsplat = zsplat.clone();
-						move |val| {
-							let mut zsplat = zsplat.clone();
-							*zsplat.name_mut().unwrap() = val;
-							Event::ZSplatChanged(zsplat)
-						}
-					}).padding(INPUT_PADDING)
-					.into()
-				} else {
-					pick_list(zsplats, zsplat.map(Into::into), |val| Event::ZSplatChanged(val.unwrap()))
+				let xsplat: Element<Event, Theme> = if let Some(xsplat) = xsplat.clone()
+					&& xsplat.is_custom()
+				{
+					text_input("", xsplat.name())
+						.on_input({
+							let xsplat = xsplat.clone();
+							move |val| {
+								let mut xsplat = xsplat.clone();
+								*xsplat.name_mut().unwrap() = val;
+								Event::XSplatChanged(xsplat)
+							}
+						})
 						.padding(INPUT_PADDING)
-						.width(Length::Fill)
 						.into()
+				} else {
+					pick_list(
+						xsplats,
+						xsplat.map(Into::<Translated<XSplat>>::into),
+						|val| Event::XSplatChanged(val.unwrap()),
+					)
+					.padding(INPUT_PADDING)
+					.width(Length::Fill)
+					.into()
+				};
+
+				let ysplat: Element<Event, Theme> = if let Some(ysplat) = ysplat.clone()
+					&& ysplat.is_custom()
+				{
+					text_input("", ysplat.name())
+						.on_input({
+							let ysplat = ysplat.clone();
+							move |val| {
+								let mut ysplat = ysplat.clone();
+								*ysplat.name_mut().unwrap() = val;
+								Event::YSplatChanged(ysplat)
+							}
+						})
+						.padding(INPUT_PADDING)
+						.into()
+				} else {
+					pick_list(
+						ysplats,
+						ysplat.map(Into::<Translated<YSplat>>::into),
+						|val| Event::YSplatChanged(val.unwrap()),
+					)
+					.padding(INPUT_PADDING)
+					.width(Length::Fill)
+					.into()
+				};
+
+				let zsplat: Element<Event, Theme> = if let Some(zsplat) = zsplat.clone()
+					&& zsplat.is_custom()
+				{
+					text_input("", zsplat.name())
+						.on_input({
+							let zsplat = zsplat.clone();
+							move |val| {
+								let mut zsplat = zsplat.clone();
+								*zsplat.name_mut().unwrap() = val;
+								Event::ZSplatChanged(zsplat)
+							}
+						})
+						.padding(INPUT_PADDING)
+						.into()
+				} else {
+					pick_list(
+						zsplats,
+						zsplat.map(Into::<Translated<ZSplat>>::into),
+						|val| Event::ZSplatChanged(val.unwrap()),
+					)
+					.padding(INPUT_PADDING)
+					.width(Length::Fill)
+					.into()
 				};
 
 				row![
@@ -257,16 +298,24 @@ impl<Message> Component<Message, iced::Renderer> for InfoBar<Message> {
 			),
 			col3,
 		]
+		.width(Length::Fill)
 		.spacing(10)
 		.into()
 	}
 }
 
-impl<'a, Message> From<InfoBar<Message>> for Element<'a, Message>
+impl<'a, Message, Theme> From<InfoBar<Message>> for Element<'a, Message, Theme>
 where
 	Message: 'a,
+	Theme: text_input::StyleSheet + text::StyleSheet,
+	Theme: pick_list::StyleSheet
+		+ scrollable::StyleSheet
+		+ menu::StyleSheet
+		+ container::StyleSheet
+		+ 'static,
+	<Theme as menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
 {
 	fn from(info_bar: InfoBar<Message>) -> Self {
-		iced_lazy::component(info_bar)
+		component(info_bar)
 	}
 }

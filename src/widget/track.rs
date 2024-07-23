@@ -1,16 +1,18 @@
-use iced::{event, mouse, Alignment, Background, Color, Element, Event, Point, Rectangle, Theme};
-use iced_native::{
-	layout, renderer, text, touch,
-	widget::{self, Column, Row, Tree},
-	Clipboard, Layout, Shell, Widget,
-};
+use std::default::Default;
+
+use iced::advanced::layout::{self, Layout};
+use iced::advanced::widget::{self, Widget};
+use iced::advanced::{renderer, Clipboard, Shell};
+use iced::widget::{text, Column, Row};
+use iced::{event, touch, Background, Theme};
+use iced::{mouse, Alignment, Border, Color, Element, Length, Rectangle, Size};
 
 use cofd::character::{Damage, Wound};
+use iced::border::Radius;
 
-pub struct HealthTrack<'a, Message, Renderer>
+pub struct HealthTrack<'a, Message, Theme>
 where
-	Renderer: text::Renderer,
-	Renderer::Theme: StyleSheet,
+	Theme: StyleSheet,
 {
 	damage: Damage,
 	max: usize,
@@ -18,14 +20,13 @@ where
 	on_click: Box<dyn Fn(Wound) -> Message + 'a>,
 	size: u16,
 	spacing: u16,
-	style: <Renderer::Theme as StyleSheet>::Style,
+	style: <Theme as StyleSheet>::Style,
 }
 
-impl<'a, Message, Renderer> HealthTrack<'a, Message, Renderer>
+impl<'a, Message, Theme> HealthTrack<'a, Message, Theme>
 where
 	Message: Clone,
-	Renderer: text::Renderer,
-	Renderer::Theme: StyleSheet,
+	Theme: StyleSheet,
 {
 	/// The default size of a [`Radio`] button.
 	pub const DEFAULT_SIZE: u16 = 19;
@@ -49,24 +50,28 @@ where
 	}
 }
 
-impl<'a, Message, Renderer> Widget<Message, Renderer> for HealthTrack<'a, Message, Renderer>
+impl<'a, Message, Theme, Renderer> Widget<Message, Theme, Renderer>
+	for HealthTrack<'a, Message, Theme>
 where
 	Message: Clone,
-	Renderer: text::Renderer,
-	Renderer::Theme: StyleSheet + widget::text::StyleSheet,
+	Renderer: renderer::Renderer,
+	Theme: StyleSheet + text::StyleSheet,
 {
-	fn width(&self) -> iced::Length {
-		iced::Length::Shrink
+	fn size(&self) -> Size<Length> {
+		Size {
+			width: Length::Shrink,
+			height: Length::Shrink,
+		}
 	}
 
-	fn height(&self) -> iced::Length {
-		iced::Length::Shrink
-	}
-
-	fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
-		let mut col = Column::<(), Renderer>::new()
-			.spacing(self.spacing)
-			.width(self.width());
+	fn layout(
+		&self,
+		tree: &mut widget::Tree,
+		renderer: &Renderer,
+		limits: &layout::Limits,
+	) -> layout::Node {
+		let mut col: Column<Message, Theme, Renderer> =
+			Column::new().spacing(self.spacing).width(Length::Shrink);
 
 		let per_row_count = self.per_row_count.unwrap_or(self.max);
 
@@ -89,24 +94,61 @@ where
 			col = col.push(row);
 		}
 
-		col.layout(renderer, limits)
+		col.layout(tree, renderer, limits)
+	}
+
+	fn draw(
+		&self,
+		_state: &widget::Tree,
+		renderer: &mut Renderer,
+		theme: &Theme,
+		_style: &renderer::Style,
+		layout: Layout<'_>,
+		cursor: mouse::Cursor,
+		_viewport: &Rectangle,
+	) {
+		for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
+			let bounds = layout.bounds();
+			let custom_style = theme.active(self.style);
+
+			let wound = self.damage.get_i(i);
+			renderer.fill_quad(
+				renderer::Quad {
+					bounds,
+					border: Border {
+						radius: 0.into(),
+						width: custom_style.border_width,
+						color: custom_style.border_color,
+					},
+					..Default::default()
+				},
+				// custom_style.background,
+				match wound {
+					Wound::None => Color::from_rgb(0.0, 1.0, 0.0),
+					Wound::Bashing => Color::from_rgb(1.0, 1.0, 0.0),
+					Wound::Lethal => Color::from_rgb(1.0, 0.8, 0.0),
+					Wound::Aggravated => Color::from_rgb(1.0, 0.0, 0.0),
+				},
+			);
+		}
 	}
 
 	fn on_event(
 		&mut self,
-		_state: &mut Tree,
-		event: Event,
+		_state: &mut widget::Tree,
+		event: event::Event,
 		layout: Layout<'_>,
-		cursor_position: Point,
+		cursor: mouse::Cursor,
 		_renderer: &Renderer,
 		_clipboard: &mut dyn Clipboard,
 		shell: &mut Shell<'_, Message>,
+		_viewport: &Rectangle,
 	) -> event::Status {
 		match event {
-			Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
-			| Event::Touch(touch::Event::FingerPressed { .. }) => {
+			event::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
+			| event::Event::Touch(touch::Event::FingerPressed { .. }) => {
 				for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
-					if layout.bounds().contains(cursor_position) {
+					if let Some(_) = cursor.position_over(layout.bounds()) {
 						let wound = self.damage.get_i(i);
 						shell.publish((self.on_click)(wound));
 
@@ -122,66 +164,32 @@ where
 
 	fn mouse_interaction(
 		&self,
-		_state: &Tree,
+		_state: &widget::Tree,
 		layout: Layout<'_>,
-		cursor_position: Point,
+		cursor: mouse::Cursor,
 		_viewport: &Rectangle,
 		_renderer: &Renderer,
 	) -> mouse::Interaction {
 		if layout
 			.children()
 			.flat_map(Layout::children)
-			.any(|layout| layout.bounds().contains(cursor_position))
+			.any(|layout| cursor.position_over(layout.bounds()).is_some())
 		{
 			mouse::Interaction::Pointer
 		} else {
 			mouse::Interaction::default()
 		}
 	}
-
-	fn draw(
-		&self,
-		_state: &Tree,
-		renderer: &mut Renderer,
-		theme: &Renderer::Theme,
-		_style: &renderer::Style,
-		layout: Layout<'_>,
-		_cursor_position: Point,
-		_viewport: &Rectangle,
-	) {
-		for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
-			let bounds = layout.bounds();
-			let custom_style = theme.active(self.style);
-
-			let wound = self.damage.get_i(i);
-			renderer.fill_quad(
-				renderer::Quad {
-					bounds,
-					border_radius: (0.0).into(),
-					border_width: custom_style.border_width,
-					border_color: custom_style.border_color,
-					// ..Default::default()
-				},
-				// custom_style.background,
-				match wound {
-					Wound::None => Color::from_rgb(0.0, 1.0, 0.0),
-					Wound::Bashing => Color::from_rgb(1.0, 1.0, 0.0),
-					Wound::Lethal => Color::from_rgb(1.0, 0.8, 0.0),
-					Wound::Aggravated => Color::from_rgb(1.0, 0.0, 0.0),
-				},
-			);
-		}
-	}
 }
 
-impl<'a, Message, Renderer> From<HealthTrack<'a, Message, Renderer>>
-	for Element<'a, Message, Renderer>
+impl<'a, Message, Theme, Renderer> From<HealthTrack<'a, Message, Theme>>
+	for Element<'a, Message, Theme, Renderer>
 where
 	Message: 'a + Clone,
-	Renderer: 'a + text::Renderer,
-	Renderer::Theme: StyleSheet + widget::text::StyleSheet,
+	Renderer: 'a + renderer::Renderer,
+	Theme: StyleSheet + text::StyleSheet + 'static,
 {
-	fn from(radio: HealthTrack<'a, Message, Renderer>) -> Self {
+	fn from(radio: HealthTrack<'a, Message, Theme>) -> Self {
 		Element::new(radio)
 	}
 }

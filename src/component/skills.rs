@@ -1,26 +1,25 @@
-use closure::closure;
-use iced::{
-	theme::{self},
-	widget::{button, checkbox, column, row, text, text_input, Column},
-	Alignment, Color, Length,
-};
-use iced_lazy::Component;
 use std::{cell::RefCell, rc::Rc};
 
-use cofd::{
-	character::{modifier::ModifierTarget, traits::TraitCategory},
-	prelude::*,
-	splat::Splat,
-};
-
+use super::list;
+use crate::widget::dots;
 use crate::{
 	fl,
 	i18n::flt,
 	widget::dots::{Shape, SheetDots},
 	Element, H2_SIZE, H3_SIZE, TITLE_SPACING,
 };
-
-use super::list;
+use closure::closure;
+use cofd::{
+	character::{modifier::ModifierTarget, traits::TraitCategory},
+	prelude::*,
+	splat::Splat,
+};
+use iced::widget::{component, Component};
+use iced::{
+	theme::{self},
+	widget::{button, checkbox, column, row, text, text_input, Column},
+	Alignment, Color, Length,
+};
 
 pub struct SkillsComponent<Message> {
 	character: Rc<RefCell<Character>>,
@@ -66,12 +65,22 @@ impl<Message> SkillsComponent<Message> {
 		}
 	}
 
-	fn mk_skill_col(
+	fn mk_skill_col<Theme>(
 		&self,
 		state: &State,
 		character: &Character,
 		cat: &TraitCategory,
-	) -> Element<Event> {
+	) -> Element<Event, Theme>
+	where
+		Theme: 'static
+			+ button::StyleSheet
+			+ dots::StyleSheet
+			+ text::StyleSheet
+			+ text_input::StyleSheet
+			+ checkbox::StyleSheet,
+		<Theme as text::StyleSheet>::Style: From<theme::Text>,
+		<Theme as button::StyleSheet>::Style: From<theme::Button>,
+	{
 		let mut col = Column::new();
 
 		let mut col0 = Column::new().spacing(3);
@@ -90,11 +99,12 @@ impl<Message> SkillsComponent<Message> {
 				};
 
 				col0 = col0.push(
-					checkbox("", flag, {
-						let skill = skill;
-						move |_| Event::RoteSkillChanged(skill)
-					})
-					.spacing(0),
+					checkbox("", flag)
+						.on_toggle({
+							let skill = skill;
+							move |_| Event::RoteSkillChanged(skill)
+						})
+						.spacing(0),
 				);
 			}
 
@@ -140,10 +150,12 @@ impl<Message> SkillsComponent<Message> {
 						Some(specialties.len() + 1),
 						None,
 						specialties.clone(),
-						closure!(clone skill,
-								 |i, val| text_input("", &val.unwrap_or_default(),
-									 move |val| Event::SpecialtyChanged(skill, i, val)).padding(0).into()
-						),
+						closure!(clone skill, |i, val| {
+							text_input("", &val.unwrap_or_default())
+								.on_input(move |val| Event::SpecialtyChanged(skill, i, val))
+								.padding(0)
+								.into()
+						}),
 					));
 
 					col0 = Column::new().spacing(3);
@@ -169,7 +181,17 @@ impl<Message> SkillsComponent<Message> {
 	}
 }
 
-impl<Message> Component<Message, iced::Renderer> for SkillsComponent<Message> {
+impl<Message, Theme> Component<Message, Theme> for SkillsComponent<Message>
+where
+	Theme: 'static
+		+ button::StyleSheet
+		+ dots::StyleSheet
+		+ text::StyleSheet
+		+ text_input::StyleSheet
+		+ checkbox::StyleSheet,
+	<Theme as text::StyleSheet>::Style: From<theme::Text>,
+	<Theme as button::StyleSheet>::Style: From<theme::Button>,
+{
 	type State = State;
 	type Event = Event;
 
@@ -177,18 +199,24 @@ impl<Message> Component<Message, iced::Renderer> for SkillsComponent<Message> {
 		match event {
 			Event::SkillChanged(val, skill) => Some((self.on_change)(val, skill)),
 			Event::RoteSkillChanged(skill) => Some((self.on_rote_change)(skill)),
-			Event::SpecialtyChanged(skill, i, val) =>  Some((self.on_specialty_change)(skill, i, val)),
-			Event::SpecialtySkillChanged(skill) => if let Some(cur) = state.specialty_skill && cur == skill {
-				state.specialty_skill = None;
-				None
-			} else {
-				state.specialty_skill = Some(skill);
-				None
+			Event::SpecialtyChanged(skill, i, val) => {
+				Some((self.on_specialty_change)(skill, i, val))
+			}
+			Event::SpecialtySkillChanged(skill) => {
+				if let Some(cur) = state.specialty_skill
+					&& cur == skill
+				{
+					state.specialty_skill = None;
+					None
+				} else {
+					state.specialty_skill = Some(skill);
+					None
+				}
 			}
 		}
 	}
 
-	fn view(&self, state: &Self::State) -> Element<Self::Event> {
+	fn view(&self, state: &Self::State) -> Element<Event, Theme> {
 		let character = self.character.borrow();
 
 		column![
@@ -205,11 +233,19 @@ impl<Message> Component<Message, iced::Renderer> for SkillsComponent<Message> {
 	}
 }
 
-impl<'a, Message> From<SkillsComponent<Message>> for Element<'a, Message>
+impl<'a, Message, Theme> From<SkillsComponent<Message>> for Element<'a, Message, Theme>
 where
 	Message: 'a,
+	Theme: 'static
+		+ button::StyleSheet
+		+ dots::StyleSheet
+		+ text::StyleSheet
+		+ text_input::StyleSheet
+		+ checkbox::StyleSheet,
+	<Theme as text::StyleSheet>::Style: From<theme::Text>,
+	<Theme as button::StyleSheet>::Style: From<theme::Button>,
 {
 	fn from(info_bar: SkillsComponent<Message>) -> Self {
-		iced_lazy::component(info_bar)
+		component(info_bar)
 	}
 }
