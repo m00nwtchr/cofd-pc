@@ -1,3 +1,2 @@
 /target
-cofd/app/dist
-cofd/lib/data/cache
+/dist
