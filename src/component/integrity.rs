@@ -53,15 +53,12 @@ where
 
 		match event {
 			Event::IntegrityChanged(val) => character.integrity = val,
-			Event::IntegrityDamage(wound) => match &mut character.splat {
-				Splat::Changeling(.., data) => {
-					data.clarity.poke(&wound);
-					if let Wound::Lethal = wound {
-						data.clarity.poke(&Wound::Aggravated);
-					}
-				}
-				_ => {}
-			},
+			Event::IntegrityDamage(wound) => if let Splat::Changeling(.., data) = &mut character.splat {
+   					data.clarity.poke(&wound);
+   					if let Wound::Lethal = wound {
+   						data.clarity.poke(&Wound::Aggravated);
+   					}
+   				},
 			Event::TouchstoneChanged(i, val) => {
 				if let Some(touchstone) = character.touchstones.get_mut(i) {
 					*touchstone = val;

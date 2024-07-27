@@ -1,29 +1,30 @@
-use i18n_embed::{
-	fluent::{fluent_language_loader, FluentLanguageLoader},
-	DefaultLocalizer, LanguageRequester, Localizer,
-};
 use std::{
 	fmt::{self},
 	sync::Arc,
 };
-cfg_if! {
-	if #[cfg(target_arch = "wasm32")] {
-		use i18n_embed::WebLanguageRequester;
-	} else {
-		use i18n_embed::DesktopLanguageRequester;
-	}
-}
+
 use cfg_if::cfg_if;
+use cofd::splat::NameKey;
+use i18n_embed::{
+	fluent::{fluent_language_loader, FluentLanguageLoader},
+	DefaultLocalizer, LanguageLoader, LanguageRequester, Localizer,
+};
 use once_cell::sync::{Lazy, OnceCell};
 use rust_embed::RustEmbed;
-
-use cofd::splat::NameKey;
 
 #[derive(RustEmbed)]
 #[folder = "i18n"] // path to the compiled localization resources
 struct Localizations;
 
-pub static LANGUAGE_LOADER: Lazy<FluentLanguageLoader> = Lazy::new(|| fluent_language_loader!());
+pub static LANGUAGE_LOADER: Lazy<FluentLanguageLoader> = Lazy::new(|| {
+	let loader = fluent_language_loader!();
+
+	loader
+		.load_fallback_language(&Localizations)
+		.expect("Error while loading fallback language");
+
+	loader
+});
 
 #[macro_export]
 macro_rules! fl {
@@ -82,20 +83,20 @@ pub fn flt(message_id: &str, attribute: Option<&str>) -> Option<String> {
 // }
 
 pub fn setup() -> anyhow::Result<Box<dyn LanguageRequester<'static>>> {
-	let localizer = DefaultLocalizer::new(&*LANGUAGE_LOADER, &Localizations);
-	let localizer_arc: Arc<dyn Localizer> = Arc::new(localizer);
+	let localizer: Arc<dyn Localizer> =
+		Arc::new(DefaultLocalizer::new(&*LANGUAGE_LOADER, &Localizations));
 
 	let mut language_requester = Box::new({
 		cfg_if! {
 			if #[cfg(target_arch = "wasm32")] {
-				WebLanguageRequester::new()
+				i18n_embed::WebLanguageRequester::new()
 			} else {
-				DesktopLanguageRequester::new()
+				i18n_embed::DesktopLanguageRequester::new()
 			}
 		}
 	});
 
-	language_requester.add_listener(Arc::downgrade(&localizer_arc));
+	language_requester.add_listener(Arc::downgrade(&localizer));
 	language_requester.poll()?;
 
 	LANGUAGE_LOADER.set_use_isolating(false);

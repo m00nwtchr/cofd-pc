@@ -8,7 +8,6 @@ use iced::{event, touch, Background, Theme};
 use iced::{mouse, Alignment, Border, Color, Element, Length, Rectangle, Size};
 
 use cofd::character::{Damage, Wound};
-use iced::border::Radius;
 
 pub struct HealthTrack<'a, Message, Theme>
 where
@@ -148,7 +147,7 @@ where
 			event::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
 			| event::Event::Touch(touch::Event::FingerPressed { .. }) => {
 				for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
-					if let Some(_) = cursor.position_over(layout.bounds()) {
+					if cursor.position_over(layout.bounds()).is_some() {
 						let wound = self.damage.get_i(i);
 						shell.publish((self.on_click)(wound));
 

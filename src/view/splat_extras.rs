@@ -235,17 +235,14 @@ where
 				Some(data.shadow_gifts.len() + 1),
 				None,
 				data.shadow_gifts.clone(),
-				{
-					let shadow_gifts = shadow_gifts;
-					move |i, val| {
-						pick_list(
-							shadow_gifts.clone(),
-							val.map(Into::<Translated<ShadowGift>>::into),
-							move |val| Event::ShadowGiftChanged(i, val.unwrap()),
-						)
-						.padding(INPUT_PADDING)
-						.into()
-					}
+				move |i, val| {
+					pick_list(
+						shadow_gifts.clone(),
+						val.map(Into::<Translated<ShadowGift>>::into),
+						move |val| Event::ShadowGiftChanged(i, val.unwrap()),
+					)
+					.padding(INPUT_PADDING)
+					.into()
 				},
 			);
 

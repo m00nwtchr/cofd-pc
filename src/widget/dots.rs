@@ -162,7 +162,7 @@ where
 		for (i, layout) in iter(layout, &self.axis).enumerate() {
 			let bounds = layout.bounds();
 
-			if let Some(_) = cursor.position_over(bounds) {
+			if cursor.position_over(bounds).is_some() {
 				mouse_i = Some(i);
 			}
 		}
@@ -230,7 +230,7 @@ where
 			event::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
 			| event::Event::Touch(touch::Event::FingerPressed { .. }) => {
 				for (i, layout) in iter(layout, &self.axis).enumerate() {
-					if let Some(_) = cursor.position_over(layout.bounds()) {
+					if cursor.position_over(layout.bounds()).is_some() {
 						let i = if self.value as usize == i + 1 {
 							i
 						} else {

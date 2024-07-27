@@ -115,9 +115,8 @@ impl PlayerCompanionApp {
 
 		self.characters = characters
 			.into_iter()
-			.map(|val| {
+			.inspect(|val| {
 				val.calc_mod_map();
-				val
 			})
 			.map(|val| Rc::new(RefCell::new(val)))
 			.collect();
