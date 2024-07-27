@@ -2,11 +2,10 @@ use iced::{
 	widget::{column, row, text, text_input, Column},
 	Alignment, Length,
 };
-use iced_lazy::Component;
 use std::{cell::RefCell, rc::Rc};
 
-use cofd::{character::Wound, prelude::*, splat::Splat};
-
+use super::list;
+use crate::widget::{dots, track};
 use crate::{
 	fl,
 	i18n::flt,
@@ -17,8 +16,8 @@ use crate::{
 	},
 	Element, COMPONENT_SPACING, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
 };
-
-use super::list;
+use cofd::{character::Wound, prelude::*, splat::Splat};
+use iced::widget::{component, Component};
 
 pub struct IntegrityComponent {
 	character: Rc<RefCell<Character>>,
@@ -41,11 +40,15 @@ impl IntegrityComponent {
 	}
 }
 
-impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
+impl<Message, Theme> Component<Message, Theme> for IntegrityComponent
+where
+	Theme:
+		text::StyleSheet + text_input::StyleSheet + dots::StyleSheet + track::StyleSheet + 'static,
+{
 	type State = ();
 	type Event = Event;
 
-	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
+	fn update(&mut self, _state: &mut Self::State, event: Event) -> Option<Message> {
 		let mut character = self.character.borrow_mut();
 
 		match event {
@@ -71,14 +74,15 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 		None
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
+	#[allow(clippy::too_many_lines)]
+	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
 		let character = self.character.borrow();
 
-		let mut col = Column::new()
+		let mut col = Column::<Event, Theme>::new()
 			.align_items(Alignment::Center)
 			.spacing(COMPONENT_SPACING);
 
-		let dots: Element<Event> = if let Splat::Changeling(.., data) = &character.splat {
+		let dots: Element<Event, Theme> = if let Splat::Changeling(.., data) = &character.splat {
 			HealthTrack::new(
 				data.clarity.clone(),
 				data.max_clarity(&character) as usize,
@@ -100,11 +104,11 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 						column![text_input(
 							"",
 							character.touchstones.get(i).unwrap_or(&String::new()),
-							move |val| Event::TouchstoneChanged(i, val),
 						)
+						.on_input(move |val| Event::TouchstoneChanged(i, val))
 						.padding(INPUT_PADDING)]
 						.max_width(
-							MAX_INPUT_WIDTH - SheetDots::<Event, iced::Renderer>::DEFAULT_SIZE, // - SheetDots::<Event, Renderer>::DEFAULT_SPACING,
+							MAX_INPUT_WIDTH - SheetDots::<Event, Theme>::DEFAULT_SIZE, // - SheetDots::<Event, Renderer>::DEFAULT_SPACING,
 						),
 					);
 				}
@@ -123,7 +127,7 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 					.spacing(if flag {
 						4
 					} else {
-						SheetDots::<Event, iced::Renderer>::DEFAULT_SPACING
+						SheetDots::<Event, Theme>::DEFAULT_SPACING
 					}),
 				]
 				.align_items(if flag {
@@ -149,8 +153,8 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 					column![text_input(
 						"",
 						character.touchstones.first().unwrap_or(&String::new()),
-						|str| Event::TouchstoneChanged(0, str),
 					)
+					.on_input(|str| Event::TouchstoneChanged(0, str),)
 					.padding(INPUT_PADDING)]
 					.max_width(MAX_INPUT_WIDTH),
 				]
@@ -173,8 +177,8 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 						column![text_input(
 							"",
 							character.touchstones.get(1).unwrap_or(&String::new()),
-							|str| Event::TouchstoneChanged(1, str),
 						)
+						.on_input(|str| Event::TouchstoneChanged(1, str),)
 						.padding(INPUT_PADDING)]
 						.max_width(MAX_INPUT_WIDTH),
 					]
@@ -190,11 +194,10 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 						Some(10),
 						character.touchstones.clone() as Vec<String>,
 						|i, val| {
-							text_input("", &val.unwrap_or_default(), move |val| {
-								Event::TouchstoneChanged(i, val)
-							})
-							.padding(INPUT_PADDING)
-							.into()
+							text_input("", &val.unwrap_or_default())
+								.on_input(move |val| Event::TouchstoneChanged(i, val))
+								.padding(INPUT_PADDING)
+								.into()
 						},
 					)
 					.max_width(MAX_INPUT_WIDTH),
@@ -207,11 +210,13 @@ impl<Message> Component<Message, iced::Renderer> for IntegrityComponent {
 	}
 }
 
-impl<'a, Message> From<IntegrityComponent> for Element<'a, Message>
+impl<'a, Message, Theme> From<IntegrityComponent> for Element<'a, Message, Theme>
 where
 	Message: 'a,
+	Theme:
+		text::StyleSheet + text_input::StyleSheet + dots::StyleSheet + track::StyleSheet + 'static,
 {
 	fn from(integrity: IntegrityComponent) -> Self {
-		iced_lazy::component(integrity)
+		component(integrity)
 	}
 }

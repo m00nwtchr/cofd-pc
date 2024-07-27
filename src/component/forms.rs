@@ -1,9 +1,3 @@
-use iced::{
-	alignment,
-	widget::{button, column, row, text, text_input, Column, Row},
-	Length,
-};
-use iced_lazy::Component;
 use std::{cell::RefCell, rc::Rc};
 
 use crate::{i18n::flt, Element, INPUT_PADDING};
@@ -14,6 +8,12 @@ use cofd::{
 		werewolf::{get_form_trait, Form},
 		Splat,
 	},
+};
+use iced::widget::{component, Component};
+use iced::{
+	alignment,
+	widget::{button, column, row, text, text_input, Column, Row},
+	Length,
 };
 
 pub struct FormsComponent<Message> {
@@ -45,7 +45,10 @@ impl<Message> FormsComponent<Message> {
 		}
 	}
 
-	fn mk_col(&self, form: Form, character: &Character) -> Element<Event> {
+	fn mk_col<Theme>(&self, form: Form, character: &Character) -> Element<Event, Theme>
+	where
+		Theme: 'static + text::StyleSheet + text_input::StyleSheet + button::StyleSheet,
+	{
 		let mut col = Column::new();
 
 		let mut vec: Vec<ModifierTarget> = vec![
@@ -77,7 +80,9 @@ impl<Message> FormsComponent<Message> {
 
 			col = col.push(row![
 				text(format!("{name}: ")),
-				text_input("", &val.to_string(), |_val| Event::Msg).padding(INPUT_PADDING)
+				text_input("", &val.to_string())
+					.on_input(|_val| Event::Msg)
+					.padding(INPUT_PADDING)
 			]);
 		}
 
@@ -97,7 +102,11 @@ impl<Message> FormsComponent<Message> {
 	}
 }
 
-impl<Message: Clone> Component<Message, iced::Renderer> for FormsComponent<Message> {
+impl<Message, Theme> Component<Message, Theme> for FormsComponent<Message>
+where
+	Message: Clone,
+	Theme: 'static + text::StyleSheet + text_input::StyleSheet + button::StyleSheet,
+{
 	type State = ();
 	type Event = Event;
 
@@ -118,7 +127,7 @@ impl<Message: Clone> Component<Message, iced::Renderer> for FormsComponent<Messa
 		}
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
+	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
 		let character = self.character.borrow();
 
 		let mut row = Row::new();
@@ -133,11 +142,12 @@ impl<Message: Clone> Component<Message, iced::Renderer> for FormsComponent<Messa
 	}
 }
 
-impl<'a, Message> From<FormsComponent<Message>> for Element<'a, Message>
+impl<'a, Message, Theme> From<FormsComponent<Message>> for Element<'a, Message, Theme>
 where
 	Message: 'a + Clone,
+	Theme: 'static + text::StyleSheet + text_input::StyleSheet + button::StyleSheet,
 {
 	fn from(forms_component: FormsComponent<Message>) -> Self {
-		iced_lazy::component(forms_component)
+		component(forms_component)
 	}
 }

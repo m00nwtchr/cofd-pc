@@ -1,6 +1,6 @@
 use cofd::{prelude::*, splat::Splat};
 use iced::overlay::menu;
-use iced::widget::{container, overlay, scrollable, Column, Row};
+use iced::widget::{container, scrollable};
 use iced::{
 	widget::{button, column, component, pick_list, row, text, Component},
 	Element, Length,
@@ -21,7 +21,7 @@ pub fn creator_view<Message>(
 
 #[derive(Clone)]
 pub enum Event {
-	SplatChanged(Splat),
+	SplatChanged(Splat), // TODO: Switch to using a unit-varianted "SplatKind" enum here
 	Done,
 }
 

@@ -1,4 +1,4 @@
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::i18n::flt;
 use cofd::prelude::*;
@@ -10,8 +10,6 @@ use iced::{
 pub struct CharacterList<Message> {
 	characters: Vec<Rc<RefCell<Character>>>,
 	on_pick: Box<dyn Fn(usize) -> Message + 'static>,
-
-	phantom: PhantomData<Message>,
 }
 
 pub fn character_list<Message>(
@@ -33,7 +31,6 @@ impl<Message> CharacterList<Message> {
 	) -> Self {
 		Self {
 			characters,
-			phantom: PhantomData,
 			on_pick: Box::new(on_pick),
 		}
 	}
@@ -83,9 +80,7 @@ where
 	}
 
 	fn view(&self, _state: &Self::State) -> Element<'_, Event, Theme> {
-		let mut list = Column::new()
-			.width(Length::FillPortion(4))
-			.spacing(5);
+		let mut list = Column::new().width(Length::FillPortion(4)).spacing(5);
 
 		for (i, character) in self.characters.iter().enumerate() {
 			list = list.push(self.mk_char(i, &character.borrow()));

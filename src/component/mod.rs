@@ -1,17 +1,17 @@
 mod attributes;
-// mod forms;
+mod forms;
 mod info;
-// mod integrity;
+mod integrity;
 mod list;
-// mod merits;
+mod merits;
 mod skills;
-// mod traits;
+mod traits;
 
 pub use attributes::{attribute_bar, AttributeBar};
-// pub use forms::{forms_component, FormsComponent};
+pub use forms::{forms_component, FormsComponent};
 pub use info::{info_bar, InfoBar};
-// pub use integrity::{integrity_component, IntegrityComponent};
+pub use integrity::{integrity_component, IntegrityComponent};
 pub use list::{list, List};
-// pub use merits::{merit_component, MeritComponent};
+pub use merits::{merit_component, MeritComponent};
 pub use skills::{skills_component, SkillsComponent};
-// pub use traits::{traits_component, TraitsComponent};
+pub use traits::{traits_component, TraitsComponent};

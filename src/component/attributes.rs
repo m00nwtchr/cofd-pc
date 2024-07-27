@@ -1,12 +1,5 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::widget::dots;
-use crate::{
-	fl,
-	i18n::flt,
-	widget::dots::{Shape, SheetDots},
-	Element, H2_SIZE, TITLE_SPACING,
-};
 use cofd::{
 	character::{
 		modifier::ModifierTarget,
@@ -18,6 +11,14 @@ use iced::widget::{component, Component};
 use iced::{
 	widget::{column, row, text, Column},
 	Alignment, Length,
+};
+
+use crate::widget::dots;
+use crate::{
+	fl,
+	i18n::flt,
+	widget::dots::{Shape, SheetDots},
+	Element, H2_SIZE, TITLE_SPACING,
 };
 
 pub struct AttributeBar<Message> {

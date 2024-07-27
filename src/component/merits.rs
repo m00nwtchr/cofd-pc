@@ -2,17 +2,17 @@ use iced::{
 	widget::{column, pick_list, row, text, text_input, Column},
 	Alignment, Length,
 };
-use iced_lazy::Component;
 use std::{cell::RefCell, rc::Rc};
 
-use cofd::{prelude::*, splat::Merit};
-
+use crate::widget::dots;
 use crate::{
 	fl,
 	i18n::{flt, Translated},
 	widget::dots::{Shape, SheetDots},
 	Element, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
 };
+use cofd::{prelude::*, splat::Merit};
+use iced::widget::{component, container, overlay, scrollable, Component};
 
 pub struct MeritComponent<Message> {
 	character: Rc<RefCell<Character>>,
@@ -41,11 +41,22 @@ impl<Message> MeritComponent<Message> {
 	}
 }
 
-impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
+impl<Message, Theme> Component<Message, Theme> for MeritComponent<Message>
+where
+	Theme: text::StyleSheet
+		+ dots::StyleSheet
+		+ text_input::StyleSheet
+		+ pick_list::StyleSheet
+		+ scrollable::StyleSheet
+		+ overlay::menu::StyleSheet
+		+ container::StyleSheet
+		+ 'static,
+	<Theme as overlay::menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
+{
 	type State = ();
 	type Event = Event;
 
-	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
+	fn update(&mut self, _state: &mut Self::State, event: Event) -> Option<Message> {
 		if let Merit::_Custom(str) = &event.1 {
 			if str.contains("---") {
 				return None;
@@ -55,7 +66,7 @@ impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
 		Some((self.on_change)(event.0, event.1, event.2))
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
+	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
 		let character = self.character.borrow();
 
 		let mut col1 = Column::new().spacing(3).width(Length::FillPortion(3));
@@ -87,28 +98,33 @@ impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
 		let skills = &character.skills();
 
 		let vec: Vec<Translated<Merit>> = vec
-			.iter().filter(|&e| {
+			.iter()
+			.filter(|&e| {
 				character
 					.merits
 					.iter()
 					.filter(|(merit, _)| *merit == *e)
 					.count() == 0 && e.is_available(&character, attributes, skills)
-			}).cloned()
+			})
+			.cloned()
 			.map(Into::into)
 			.collect();
 
 		for (i, (merit, val)) in character.merits.iter().cloned().enumerate() {
 			if let Merit::_Custom(str) = &merit {
 				col1 = col1.push(
-					text_input("", str, move |key| Event(i, Merit::_Custom(key), val))
+					text_input("", str)
+						.on_input(move |key| Event(i, Merit::_Custom(key), val))
 						.padding(INPUT_PADDING),
 				);
 			} else {
 				col1 = col1
 					.push(
-						pick_list(vec.clone(), Some(merit.clone().into()), move |key| {
-							Event(i, key.unwrap(), val)
-						})
+						pick_list(
+							vec.clone(),
+							Some::<Translated<Merit>>(merit.clone().into()),
+							move |key| Event(i, key.unwrap(), val),
+						)
 						.padding(INPUT_PADDING)
 						.text_size(20)
 						.width(Length::Fill),
@@ -122,7 +138,7 @@ impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
 			}));
 		}
 
-		let new = pick_list(vec, None, |key| {
+		let new = pick_list(vec, None::<Translated<Merit>>, |key| {
 			Event(self.character.borrow().merits.len(), key.unwrap(), 0)
 		})
 		.padding(INPUT_PADDING)
@@ -139,11 +155,20 @@ impl<Message> Component<Message, iced::Renderer> for MeritComponent<Message> {
 	}
 }
 
-impl<'a, Message> From<MeritComponent<Message>> for Element<'a, Message>
+impl<'a, Message, Theme> From<MeritComponent<Message>> for Element<'a, Message, Theme>
 where
 	Message: 'a,
+	Theme: text::StyleSheet
+		+ dots::StyleSheet
+		+ text_input::StyleSheet
+		+ pick_list::StyleSheet
+		+ scrollable::StyleSheet
+		+ overlay::menu::StyleSheet
+		+ container::StyleSheet
+		+ 'static,
+	<Theme as overlay::menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
 {
 	fn from(info_bar: MeritComponent<Message>) -> Self {
-		iced_lazy::component(info_bar)
+		component(info_bar)
 	}
 }

@@ -240,19 +240,16 @@ impl Application for PlayerCompanionApp {
 
 				let tab: Element<Self::Message, Self::Theme> = match active_tab {
 					Tab::Overview => view::overview_tab(character.clone()).into(),
-					_ => {
-						todo!()
-					} // Tab::Equipment => view::equipment_tab(character.clone()).into(),
+					Tab::Equipment => view::equipment_tab(character.clone()).into(),
 
-					  // Tab::Forms => {
-					  // 	if let Splat::Werewolf(_, _, _, _) = brw.splat {
-					  // 		view::werewolf::form_tab(character.clone(), Message::Msg).into()
-					  // 	} else {
-					  // 		unreachable!()
-					  // 	}
-					  // }
-
-					  // Tab::SplatExtras => view::splat_extras_tab(character.clone()).into(),
+					// Tab::Forms => {
+					// 	if let Splat::Werewolf(_, _, _, _) = brw.splat {
+					// 		view::werewolf::form_tab(character.clone(), Message::Msg).into()
+					// 	} else {
+					// 		unreachable!()
+					// 	}
+					// }
+					Tab::SplatExtras => view::splat_extras_tab(character.clone()).into(),
 				};
 
 				// let mut row = row![

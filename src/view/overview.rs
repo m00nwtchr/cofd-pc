@@ -19,22 +19,15 @@ use iced::{
 	Alignment, Element, Length,
 };
 
-use crate::widget::{dots, track};
 use crate::{
-	component::{attribute_bar, info_bar, list, skills_component},
-	// component::{
-	// 	attribute_bar, info_bar, integrity_component, list, merit_component, skills_component,
-	// 	traits_component,
-	// },
+	component::{
+		attribute_bar, info_bar, integrity_component, list, merit_component, skills_component,
+		traits_component,
+	},
 	fl,
 	i18n::{flt, Translated},
-	widget::{dots::Shape, dots::SheetDots, track::HealthTrack},
-	COMPONENT_SPACING,
-	H2_SIZE,
-	H3_SIZE,
-	INPUT_PADDING,
-	MAX_INPUT_WIDTH,
-	TITLE_SPACING,
+	widget::{dots, dots::Shape, dots::SheetDots, track, track::HealthTrack},
+	COMPONENT_SPACING, H2_SIZE, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
 };
 
 pub struct OverviewTab<Message> {
@@ -457,7 +450,7 @@ where
 			column![]
 		};
 
-		// let integrity = integrity_component(self.character.clone());
+		let integrity = integrity_component(self.character.clone());
 
 		let conditions = list(
 			fl!("conditions"),
@@ -584,8 +577,8 @@ where
 		};
 
 		let abilities = self.abilities(&character);
-		// let merits = merit_component(self.character.clone(), Event::MeritChanged);
-		// let traits = traits_component(&character, Event::TraitChanged);
+		let merits = merit_component(self.character.clone(), Event::MeritChanged);
+		let traits = traits_component(&character, Event::TraitChanged);
 
 		let regalia = if let Splat::Changeling(seeming, .., data) = &character.splat {
 			let sg = seeming.get_favored_regalia();
@@ -735,50 +728,50 @@ where
 			}
 		}
 
-		// col2 = col2.push(integrity);
+		col2 = col2.push(integrity);
 
 		match &character.splat {
 			Splat::Vampire(..) => {
 				col1 = col1
 					.push(abilities)
-					// .push(merits)
+					.push(merits)
 					.push(aspirations)
 					.push(banes)
 					.push(conditions);
-				// col2 = col2.push(traits);
+				col2 = col2.push(traits);
 			}
 			Splat::Werewolf(..) => {
 				col1 = col1
-					// .push(merits)
+					.push(merits)
 					.push(abilities)
 					.push(aspirations)
 					.push(hunters_aspect)
-					.push(conditions);
-				// .push(traits);
+					.push(conditions)
+					.push(traits);
 				col2 = col2.push(kuruth_triggers);
 			}
 			Splat::Mage(..) => {
-				// col1 = col1.push(abilities).push(merits).push(traits);
+				col1 = col1.push(abilities).push(merits).push(traits);
 				col2 = col2.push(conditions).push(aspirations).push(obsessions);
 			}
 			Splat::Changeling(..) => {
 				col1 = col1
-					// .push(merits)
+					.push(merits)
 					.push(regalia)
 					.push(frailties)
 					.push(aspirations)
 					.push(conditions);
-				// col2 = col2.push(traits);
+				col2 = col2.push(traits);
 			}
 			Splat::Bound(..) => {
 				col1 = col1
-					// .push(merits)
+					.push(merits)
 					// Keys
 					.push(abilities);
 				col2 = col2.push(aspirations);
 			}
 			_ => {
-				// col1 = col1.push(merits).push(traits);
+				col1 = col1.push(merits).push(traits);
 				col2 = col2.push(conditions).push(aspirations);
 			}
 		}

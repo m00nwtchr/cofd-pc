@@ -1,15 +1,9 @@
+use crate::{fl, i18n::flt, Element, INPUT_PADDING};
+use cofd::{character::ArmorStruct, prelude::*};
+use iced::widget::{component, Component};
 use iced::{
 	widget::{column, row, text, text_input},
 	Length,
-};
-use iced_lazy::Component;
-
-use cofd::{character::ArmorStruct, prelude::*};
-
-use crate::{
-	fl,
-	i18n::flt,
-	Element, INPUT_PADDING,
 };
 
 struct Traits {
@@ -17,7 +11,7 @@ struct Traits {
 	speed: u16,
 	defense: u16,
 	armor: ArmorStruct,
-	initative: u16,
+	initiative: u16,
 	beats: u16,
 	alternate_beats: u16,
 	alternate_experience: u16,
@@ -50,7 +44,7 @@ impl<Message> TraitsComponent<Message> {
 				size: character.size(),
 				speed: character.speed(),
 				defense: character.defense(),
-				initative: character.initative(),
+				initiative: character.initative(),
 				beats: character.beats,
 				experience: character.experience(),
 				alternate_beats: character.alternate_beats,
@@ -66,46 +60,47 @@ impl<Message> TraitsComponent<Message> {
 	}
 }
 
-impl<Message> Component<Message, iced::Renderer> for TraitsComponent<Message> {
+impl<Message, Theme> Component<Message, Theme> for TraitsComponent<Message>
+where
+	Theme: text::StyleSheet + text_input::StyleSheet + 'static,
+{
 	type State = ();
 	type Event = Event;
 
-	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
+	fn update(&mut self, _state: &mut Self::State, event: Event) -> Option<Message> {
 		Some((self.on_change)(event.0, event.1))
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
+	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
 		let beats = row![
 			text(format!("{}:", fl!("beats"))),
-			text_input("", &format!("{}", self.traits.beats), |val| {
-				Event(val.parse().unwrap_or(0), Trait::Beats)
-			})
-			.padding(INPUT_PADDING)
+			text_input("", &format!("{}", self.traits.beats))
+				.on_input(|val| { Event(val.parse().unwrap_or(0), Trait::Beats) })
+				.padding(INPUT_PADDING)
 		];
 
-		let alternate_beats = if !self.traits.alt_opt {
+		let alternate_beats = if self.traits.alt_opt {
+			row![]
+		} else {
 			row![
 				text(format!(
 					"{}:",
 					flt(&self.traits.splat, Some("beats")).unwrap()
 				)),
-				text_input("", &format!("{}", self.traits.alternate_beats), |val| {
-					Event(val.parse().unwrap_or(0), Trait::AlternateBeats)
-				})
-				.padding(INPUT_PADDING)
+				text_input("", &format!("{}", self.traits.alternate_beats))
+					.on_input(|val| { Event(val.parse().unwrap_or(0), Trait::AlternateBeats) })
+					.padding(INPUT_PADDING)
 			]
-		} else {
-			row![]
 		};
 
-		let alternate_xp = if !self.traits.alt_opt {
+		let alternate_xp = if self.traits.alt_opt {
+			row![]
+		} else {
 			row![text(format!(
 				"{}: {}",
 				flt(&self.traits.splat, Some("experience")).unwrap(),
 				self.traits.alternate_experience
 			)),]
-		} else {
-			row![]
 		};
 
 		column![
@@ -143,7 +138,7 @@ impl<Message> Component<Message, iced::Renderer> for TraitsComponent<Message> {
 				// })
 			],
 			row![
-				text(format!("{}: {}", fl!("initative"), self.traits.initative)),
+				text(format!("{}: {}", fl!("initative"), self.traits.initiative)),
 				// text(self.traits.initative)
 			],
 			beats,
@@ -160,11 +155,12 @@ impl<Message> Component<Message, iced::Renderer> for TraitsComponent<Message> {
 	}
 }
 
-impl<'a, Message> From<TraitsComponent<Message>> for Element<'a, Message>
+impl<'a, Message, Theme> From<TraitsComponent<Message>> for Element<'a, Message, Theme>
 where
 	Message: 'a,
+	Theme: text::StyleSheet + text_input::StyleSheet + 'static,
 {
-	fn from(info_bar: TraitsComponent<Message>) -> Self {
-		iced_lazy::component(info_bar)
+	fn from(traits_component: TraitsComponent<Message>) -> Self {
+		component(traits_component)
 	}
 }

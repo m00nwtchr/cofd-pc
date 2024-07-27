@@ -2,9 +2,16 @@ use iced::{
 	widget::{checkbox, column, pick_list, row, text, text_input, Column},
 	Alignment, Length,
 };
-use iced_lazy::Component;
 use std::{cell::RefCell, rc::Rc};
 
+use crate::component::{forms_component, list};
+use crate::widget::dots;
+use crate::{
+	fl,
+	i18n::{flt, Translated},
+	widget::dots::{Shape, SheetDots},
+	Element, H2_SIZE, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
+};
 use cofd::{
 	prelude::*,
 	splat::{
@@ -14,14 +21,7 @@ use cofd::{
 		Splat,
 	},
 };
-
-use crate::{
-	// component::{self, list},
-	fl,
-	i18n::{flt, Translated},
-	widget::dots::{Shape, SheetDots},
-	Element, H2_SIZE, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
-};
+use iced::widget::{button, component, container, overlay, scrollable, Component};
 
 fn func<C: Clone, T, Message>(
 	c: C,
@@ -67,9 +67,21 @@ impl SplatExtrasTab {
 	}
 }
 
-impl<Message> Component<Message, iced::Renderer> for SplatExtrasTab
+impl<Message, Theme> Component<Message, Theme> for SplatExtrasTab
 where
 	Message: Clone,
+	Theme: 'static
+		+ text::StyleSheet
+		+ text_input::StyleSheet
+		+ pick_list::StyleSheet
+		+ scrollable::StyleSheet
+		+ overlay::menu::StyleSheet
+		+ container::StyleSheet
+		+ dots::StyleSheet
+		+ checkbox::StyleSheet
+		+ button::StyleSheet
+		+ 'static,
+	<Theme as overlay::menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
 {
 	type State = ();
 
@@ -108,13 +120,15 @@ where
 			Event::Msg => {}
 			Event::RiteChanged(i, val) => {
 				if let Splat::Werewolf(.., data) = &mut character.splat {
-					if let Rite::_Custom(name) = &val && name.eq("") {
+					if let Rite::_Custom(name) = &val
+						&& name.eq("")
+					{
 						data.rites.remove(i);
 					} else if let Some(m) = data.rites.get_mut(i) {
-     								*m = val;
-     						} else {
-     							data.rites.push(val);
-     						}
+						*m = val;
+					} else {
+						data.rites.push(val);
+					}
 				}
 			}
 			Event::ContractChanged(i, rote) => {
@@ -129,11 +143,11 @@ where
 	}
 
 	#[allow(clippy::too_many_lines)]
-	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
+	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
 		let character = self.character.borrow();
 
-		let rotes: Element<Self::Event> = if let Splat::Mage(.., data) = &character.splat {
-			let col = |txt, ratio| -> Column<Event, iced::Renderer> {
+		let rotes: Element<Self::Event, Theme> = if let Splat::Mage(.., data) = &character.splat {
+			let col = |txt, ratio| -> Column<Event, Theme> {
 				column![text(txt)]
 					.align_items(Alignment::Center)
 					.width(Length::FillPortion(ratio))
@@ -153,7 +167,7 @@ where
 				arcanum = arcanum.push(
 					pick_list(
 						arcana.clone(),
-						Some(rote.arcanum.clone().into()),
+						Some::<Translated<Arcanum>>(rote.arcanum.clone().into()),
 						func(
 							rote.clone(),
 							|rote, val: Translated<Arcanum>| rote.arcanum = val.unwrap(),
@@ -162,37 +176,25 @@ where
 					)
 					.width(Length::Fill),
 				);
-				level = level.push(text_input(
-					"",
-					&rote.level.to_string(),
-					func(
-						rote.clone(),
-						|rote, val: String| rote.level = val.parse().unwrap_or(rote.level),
-						move |rote| Event::RoteChanged(i, rote),
-					),
-				));
-				spell = spell.push(text_input(
-					"",
-					&rote.spell,
-					func(
-						rote.clone(),
-						|rote, val| rote.spell = val,
-						move |rote| Event::RoteChanged(i, rote),
-					),
-				));
-				creator = creator.push(text_input(
-					"",
-					&rote.creator,
-					func(
-						rote.clone(),
-						|rote, val| rote.creator = val,
-						move |rote| Event::RoteChanged(i, rote),
-					),
-				));
+				level = level.push(text_input("", &rote.level.to_string()).on_input(func(
+					rote.clone(),
+					|rote, val: String| rote.level = val.parse().unwrap_or(rote.level),
+					move |rote| Event::RoteChanged(i, rote),
+				)));
+				spell = spell.push(text_input("", &rote.spell).on_input(func(
+					rote.clone(),
+					|rote, val| rote.spell = val,
+					move |rote| Event::RoteChanged(i, rote),
+				)));
+				creator = creator.push(text_input("", &rote.creator).on_input(func(
+					rote.clone(),
+					|rote, val| rote.creator = val,
+					move |rote| Event::RoteChanged(i, rote),
+				)));
 				rote_skill = rote_skill.push(
 					pick_list(
 						skills.clone(),
-						Some(rote.skill.into()),
+						Some::<Translated<Skill>>(rote.skill.into()),
 						func(
 							rote.clone(),
 							|rote, val: Translated<Skill>| rote.skill = val.unwrap(),
@@ -214,7 +216,7 @@ where
 			column![].into()
 		};
 
-		let forms = component::forms_component(self.character.clone(), Event::Msg);
+		let forms = forms_component(self.character.clone(), Event::Msg);
 
 		let gifts = if let Splat::Werewolf(auspice, _, _, data) = &character.splat {
 			let shadow_gifts: Vec<Translated<ShadowGift>> = ShadowGift::all()
@@ -236,9 +238,11 @@ where
 				{
 					let shadow_gifts = shadow_gifts;
 					move |i, val| {
-						pick_list(shadow_gifts.clone(), val.map(Into::into), move |val| {
-							Event::ShadowGiftChanged(i, val.unwrap())
-						})
+						pick_list(
+							shadow_gifts.clone(),
+							val.map(Into::<Translated<ShadowGift>>::into),
+							move |val| Event::ShadowGiftChanged(i, val.unwrap()),
+						)
 						.padding(INPUT_PADDING)
 						.into()
 					}
@@ -253,9 +257,11 @@ where
 				{
 					let wolf_gifts = wolf_gifts;
 					move |i, val| {
-						pick_list(wolf_gifts.clone(), val.map(Into::into), move |val| {
-							Event::WolfGiftChanged(i, val.unwrap())
-						})
+						pick_list(
+							wolf_gifts.clone(),
+							val.map(Into::<Translated<WolfGift>>::into),
+							move |val| Event::WolfGiftChanged(i, val.unwrap()),
+						)
 						.padding(INPUT_PADDING)
 						.into()
 					}
@@ -301,14 +307,13 @@ where
 				{
 					move |i, rite| {
 						if let Some(Rite::_Custom(name)) = rite {
-							text_input("", &name, move |val| {
-								Event::RiteChanged(i, Rite::_Custom(val))
-							})
-							.into()
+							text_input("", &name)
+								.on_input(move |val| Event::RiteChanged(i, Rite::_Custom(val)))
+								.into()
 						} else {
 							pick_list(
 								vec![Rite::_Custom(fl!("custom")).into()],
-								rite.map(Into::into),
+								rite.map(Into::<Translated<Rite>>::into),
 								move |val: Translated<Rite>| Event::RiteChanged(i, val.unwrap()),
 							)
 							.padding(INPUT_PADDING)
@@ -324,7 +329,7 @@ where
 		};
 
 		let contracts = if let Splat::Changeling(.., data) = &character.splat {
-			let col = |txt, ratio| -> Column<Event, iced::Renderer> {
+			let col = |txt, ratio| -> Column<Event, Theme> {
 				column![text(txt)]
 					.align_items(Alignment::Center)
 					.width(Length::FillPortion(ratio))
@@ -341,78 +346,47 @@ where
 			let mut seeming_benefit = col("Seeming Benefit", 3);
 
 			for (i, contract) in data.contracts.iter().enumerate() {
-				name = name.push(text_input(
-					"",
-					&contract.name,
-					func(
-						contract.clone(),
-						|contract, val| contract.name = val,
-						move |val| Event::ContractChanged(i, val),
-					),
-				));
-				goblin = goblin.push(checkbox(
-					"",
-					contract.goblin,
-					func(
-						contract.clone(),
-						|contract, val| contract.goblin = val,
-						move |val| Event::ContractChanged(i, val),
-					),
-				));
-				cost = cost.push(text_input(
-					"",
-					&contract.cost,
-					func(
-						contract.clone(),
-						|contract, val| contract.cost = val,
-						move |val| Event::ContractChanged(i, val),
-					),
-				));
-				dice = dice.push(text_input(
-					"",
-					&contract.dice,
-					func(
-						contract.clone(),
-						|contract, val| contract.dice = val,
-						move |val| Event::ContractChanged(i, val),
-					),
-				));
-				action = action.push(text_input(
-					"",
-					&contract.action,
-					func(
-						contract.clone(),
-						|contract, val| contract.action = val,
-						move |val| Event::ContractChanged(i, val),
-					),
-				));
-				duration = duration.push(text_input(
-					"",
-					&contract.duration,
-					func(
-						contract.clone(),
-						|contract, val| contract.duration = val,
-						move |val| Event::ContractChanged(i, val),
-					),
-				));
-				loophole = loophole.push(text_input(
-					"",
-					&contract.loophole,
-					func(
-						contract.clone(),
-						|contract, val| contract.loophole = val,
-						move |val| Event::ContractChanged(i, val),
-					),
-				));
-				seeming_benefit = seeming_benefit.push(text_input(
-					"",
-					&contract.seeming_benefit,
-					func(
+				name = name.push(text_input("", &contract.name).on_input(func(
+					contract.clone(),
+					|contract, val| contract.name = val,
+					move |val| Event::ContractChanged(i, val),
+				)));
+				goblin = goblin.push(checkbox("", contract.goblin).on_toggle(func(
+					contract.clone(),
+					|contract, val| contract.goblin = val,
+					move |val| Event::ContractChanged(i, val),
+				)));
+				cost = cost.push(text_input("", &contract.cost).on_input(func(
+					contract.clone(),
+					|contract, val| contract.cost = val,
+					move |val| Event::ContractChanged(i, val),
+				)));
+				dice = dice.push(text_input("", &contract.dice).on_input(func(
+					contract.clone(),
+					|contract, val| contract.dice = val,
+					move |val| Event::ContractChanged(i, val),
+				)));
+				action = action.push(text_input("", &contract.action).on_input(func(
+					contract.clone(),
+					|contract, val| contract.action = val,
+					move |val| Event::ContractChanged(i, val),
+				)));
+				duration = duration.push(text_input("", &contract.duration).on_input(func(
+					contract.clone(),
+					|contract, val| contract.duration = val,
+					move |val| Event::ContractChanged(i, val),
+				)));
+				loophole = loophole.push(text_input("", &contract.loophole).on_input(func(
+					contract.clone(),
+					|contract, val| contract.loophole = val,
+					move |val| Event::ContractChanged(i, val),
+				)));
+				seeming_benefit =
+					seeming_benefit.push(text_input("", &contract.seeming_benefit).on_input(func(
 						contract.clone(),
 						|contract, val| contract.seeming_benefit = val,
 						move |val| Event::ContractChanged(i, val),
-					),
-				));
+					)));
 			}
 
 			column![
@@ -463,6 +437,6 @@ where
 	Message: 'a + Clone,
 {
 	fn from(splat_extras_tab: SplatExtrasTab) -> Self {
-		iced_lazy::component(splat_extras_tab)
+		component(splat_extras_tab)
 	}
 }

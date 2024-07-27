@@ -1,15 +1,14 @@
+use std::{cell::RefCell, marker::PhantomData, rc::Rc};
+
+use super::overview::vec_changed;
+use crate::{Element, H2_SIZE, TITLE_SPACING};
 use closure::closure;
+use cofd::{character::Weapon, prelude::*};
+use iced::widget::{component, Component};
 use iced::{
 	widget::{column, row, text, text_input},
 	Alignment, Length,
 };
-use iced_lazy::Component;
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
-
-use cofd::{character::Weapon, prelude::*};
-
-use super::overview::vec_changed;
-use crate::{Element, H2_SIZE, TITLE_SPACING};
 
 pub struct EquipmentTab<Message> {
 	character: Rc<RefCell<Character>>,
@@ -38,15 +37,16 @@ impl<Message> EquipmentTab<Message> {
 	}
 }
 
-impl<Message> Component<Message, iced::Renderer> for EquipmentTab<Message>
+impl<Message, Theme> Component<Message, Theme> for EquipmentTab<Message>
 where
 	Message: Clone,
+	Theme: text::StyleSheet + text_input::StyleSheet + 'static,
 {
 	type State = ();
 
 	type Event = Event;
 
-	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
+	fn update(&mut self, _state: &mut Self::State, event: Event) -> Option<Message> {
 		let mut character = self.character.borrow_mut();
 
 		match event {
@@ -63,7 +63,7 @@ where
 	}
 
 	#[allow(clippy::too_many_lines)]
-	fn view(&self, _state: &Self::State) -> Element<Self::Event> {
+	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
 		let character = self.character.borrow();
 
 		let weapons = {
@@ -96,45 +96,35 @@ where
 			vec.push(Default::default());
 
 			for (i, weapon) in vec.into_iter().enumerate() {
-				name = name.push(text_input(
-					"",
-					&weapon.name,
+				name = name.push(text_input("", &weapon.name).on_input(
 					closure!(clone weapon, |val| {
 						let mut weapon = weapon.clone();
 						weapon.name = val;
 						Event::WeaponChanged(i, weapon)
 					}),
 				));
-				pool = pool.push(text_input(
-					"",
-					&weapon.dice_pool,
+				pool = pool.push(text_input("", &weapon.dice_pool).on_input(
 					closure!(clone weapon, |val| {
 						let mut weapon = weapon.clone();
 						weapon.dice_pool = val;
 						Event::WeaponChanged(i, weapon)
 					}),
 				));
-				damage = damage.push(text_input(
-					"",
-					&weapon.damage,
+				damage = damage.push(text_input("", &weapon.damage).on_input(
 					closure!(clone weapon, |val| {
 						let mut weapon = weapon.clone();
 						weapon.damage = val;
 						Event::WeaponChanged(i, weapon)
 					}),
 				));
-				range = range.push(text_input(
-					"",
-					&weapon.range,
+				range = range.push(text_input("", &weapon.range).on_input(
 					closure!(clone weapon, |val| {
 						let mut weapon = weapon.clone();
 						weapon.range = val;
 						Event::WeaponChanged(i, weapon)
 					}),
 				));
-				initative = initative.push(text_input(
-					"",
-					&weapon.initative.to_string(),
+				initative = initative.push(text_input("", &weapon.initative.to_string()).on_input(
 					closure!(clone weapon, |val| {
 						let mut weapon = weapon.clone();
 						if let Ok(val) = val.parse() {
@@ -143,9 +133,7 @@ where
 						Event::WeaponChanged(i, weapon)
 					}),
 				));
-				size = size.push(text_input(
-					"",
-					&weapon.size.to_string(),
+				size = size.push(text_input("", &weapon.size.to_string()).on_input(
 					closure!(clone weapon, |val| {
 						let mut weapon = weapon.clone();
 						if let Ok(val) = val.parse() {
@@ -175,6 +163,6 @@ where
 	Message: 'a + Clone,
 {
 	fn from(equipment_tab: EquipmentTab<Message>) -> Self {
-		iced_lazy::component(equipment_tab)
+		component(equipment_tab)
 	}
 }
