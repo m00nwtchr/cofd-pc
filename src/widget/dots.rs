@@ -1,10 +1,11 @@
+use std::array;
 use std::default::Default;
 
-use iced::advanced::layout::{self, Layout};
+use iced::advanced::layout::{self, Layout, Limits, Node};
 use iced::advanced::widget::{self, Widget};
 use iced::advanced::{renderer, Clipboard, Shell};
 use iced::widget::{text, Column, Row};
-use iced::{event, touch, Background, Theme};
+use iced::{event, touch, Background, Padding, Point, Theme};
 use iced::{mouse, Alignment, Border, Color, Element, Length, Rectangle, Size};
 
 pub struct SheetDots<'a, Message, Theme>
@@ -15,25 +16,14 @@ where
 	min: u16,
 	max: u16,
 	on_click: Box<dyn Fn(u16) -> Message + 'a>,
-	size: u16,
-	spacing: u16,
+	size: f32,
+	spacing: f32,
 	style: <Theme as StyleSheet>::Style,
 	shape: Shape,
 	row_count: Option<u16>,
 	axis: Axis,
 	width: Length,
-}
-
-fn iter<'a>(
-	layout: Layout<'a>,
-	axis: &Axis,
-) -> itertools::Either<impl Iterator<Item = Layout<'a>>, impl Iterator<Item = Layout<'a>>> {
-	let iter = layout.children().flat_map(Layout::children);
-	if let Axis::Horizontal = axis {
-		itertools::Either::Left(iter)
-	} else {
-		itertools::Either::Right(iter.collect::<Vec<Layout>>().into_iter().rev())
-	}
+	// child: Column<'a, Message, Theme>,
 }
 
 impl<'a, Message, Theme> SheetDots<'a, Message, Theme>
@@ -42,10 +32,10 @@ where
 	Theme: StyleSheet,
 {
 	/// The default size of a [`Radio`] button.
-	pub const DEFAULT_SIZE: u16 = 19;
+	pub const DEFAULT_SIZE: f32 = 19.0;
 
 	/// The default spacing of a [`Radio`] button.
-	pub const DEFAULT_SPACING: u16 = 2;
+	pub const DEFAULT_SPACING: f32 = 2.0;
 
 	pub fn new<F>(
 		value: u16,
@@ -64,12 +54,14 @@ where
 			max,
 			on_click: Box::new(f),
 			size: Self::DEFAULT_SIZE,
-			spacing: Self::DEFAULT_SPACING, //15
+			spacing: Self::DEFAULT_SPACING,
 			style: Default::default(),
 			shape,
 			row_count,
-			axis: Default::default(),
+			axis: Axis::Horizontal,
 			width: Length::Shrink,
+			//
+			// child:
 		}
 	}
 
@@ -83,7 +75,7 @@ where
 		self
 	}
 
-	pub fn spacing(mut self, spacing: u16) -> Self {
+	pub fn spacing(mut self, spacing: f32) -> Self {
 		self.spacing = spacing;
 		self
 	}
@@ -105,47 +97,60 @@ where
 
 	fn layout(
 		&self,
-		tree: &mut widget::Tree,
-		renderer: &Renderer,
-		limits: &layout::Limits,
+		_tree: &mut widget::Tree,
+		_renderer: &Renderer,
+		limits: &Limits,
 	) -> layout::Node {
-		let mut col = Column::new().spacing(self.spacing).width(self.width);
+		let limits = limits.width(self.width);
 
+		let is_vertical = matches!(self.axis, Axis::Vertical);
 		let per_row_count = self.row_count.unwrap_or(self.max);
+		let size = Size::new(self.size, self.size);
 
-		let new_row = || match self.axis {
-			Axis::Vertical => ColOrRow::Col(
-				Column::new()
-					.spacing(self.spacing)
-					.align_items(Alignment::Center),
-			),
-			Axis::Horizontal => ColOrRow::Row(
-				Row::new()
-					.spacing(self.spacing)
-					.align_items(Alignment::Center),
-			),
-		};
-
-		let mut col_or_row: ColOrRow<Message, Theme, Renderer> = new_row();
+		let mut nodes = Vec::new();
 
 		for i in 0..self.max {
-			col_or_row = col_or_row.push(Row::new().width(self.size).height(self.size));
+			let row = i / per_row_count;
+			let col = i % per_row_count;
 
-			if (i + 1) % per_row_count == 0 {
-				col = col.push(col_or_row);
-				col_or_row = new_row();
-			}
+			let (xi, yi) = if is_vertical {
+				(f32::from(row), f32::from(col))
+			} else {
+				(f32::from(col), f32::from(row))
+			};
+
+			let x = (self.size + self.spacing) * xi;
+			let y = (self.size + self.spacing) * yi;
+
+			nodes.push(Node::new(size).move_to(Point::new(x, y)));
 		}
 
-		if match &col_or_row {
-			ColOrRow::Col(e) => e.children().len(),
-			ColOrRow::Row(e) => e.children().len(),
-		} > 0
-		{
-			col = col.push(col_or_row);
+		let num_rows = if is_vertical {
+			per_row_count
+		} else {
+			(self.max + per_row_count - 1) / per_row_count
+		};
+		let num_cols = if is_vertical {
+			(self.max + per_row_count - 1) / per_row_count
+		} else {
+			per_row_count
+		};
+
+		let total_width = self.size * f32::from(num_cols) + self.spacing * f32::from(num_cols - 1);
+		let total_height = self.size * f32::from(num_rows) + self.spacing * f32::from(num_rows - 1);
+
+		if is_vertical {
+			nodes.reverse();
 		}
 
-		col.layout(tree, renderer, limits)
+		Node::with_children(
+			limits.resolve(
+				self.width,
+				Length::Shrink,
+				Size::new(total_width, total_height),
+			),
+			nodes,
+		)
 	}
 
 	fn draw(
@@ -158,8 +163,9 @@ where
 		cursor: mouse::Cursor,
 		_viewport: &Rectangle,
 	) {
+		let layout_bounds = layout.bounds();
 		let mut mouse_i = None;
-		for (i, layout) in iter(layout, &self.axis).enumerate() {
+		for (i, layout) in layout.children().enumerate() {
 			let bounds = layout.bounds();
 
 			if cursor.position_over(bounds).is_some() {
@@ -167,49 +173,39 @@ where
 			}
 		}
 
-		for (i, layout) in iter(layout, &self.axis).enumerate() {
-			let bounds = layout.bounds();
+		let active = theme.active(self.style);
+		let hovered = theme.hovered(self.style);
 
-			let custom_style = if mouse_i.is_some_and(|mouse_i| i <= mouse_i) {
-				theme.hovered(self.style)
+		for (i, dot_layout) in layout.children().enumerate() {
+			let bounds = dot_layout.bounds();
+
+			let style = if mouse_i.is_some_and(|mouse_i| i <= mouse_i) {
+				hovered
 			} else {
-				theme.active(self.style)
+				active
 			};
 
 			let size = bounds.width;
 			let dot_size = size / 2.0;
-
-			renderer.fill_quad(
-				renderer::Quad {
-					bounds,
-					border: Border {
-						radius: match self.shape {
-							Shape::Dots => (size / 2.0).into(),
-							Shape::Boxes => (0.0).into(),
-						},
-						width: custom_style.border_width,
-						color: custom_style.border_color,
-					},
-					..Default::default()
-				},
-				custom_style.background,
-			);
-
-			if self.value as usize > i {
+			if bounds.intersects(&layout_bounds) {
 				renderer.fill_quad(
 					renderer::Quad {
 						bounds,
 						border: Border {
 							radius: match self.shape {
 								Shape::Dots => dot_size.into(),
-								Shape::Boxes => (0.0).into(),
+								Shape::Boxes => 0.into(),
 							},
-							width: 0.0,
-							color: Color::TRANSPARENT,
+							width: style.border_width,
+							color: style.border_color,
 						},
 						..Default::default()
 					},
-					custom_style.dot_color,
+					if self.value as usize > i {
+						style.dot_color.into()
+					} else {
+						style.background
+					},
 				);
 			}
 		}
@@ -229,7 +225,7 @@ where
 		match event {
 			event::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
 			| event::Event::Touch(touch::Event::FingerPressed { .. }) => {
-				for (i, layout) in iter(layout, &self.axis).enumerate() {
+				for (i, layout) in layout.children().enumerate() {
 					if cursor.position_over(layout.bounds()).is_some() {
 						let i = if self.value as usize == i + 1 {
 							i
@@ -261,7 +257,6 @@ where
 	) -> mouse::Interaction {
 		if layout
 			.children()
-			.flat_map(Layout::children)
 			.any(|layout| cursor.position_over(layout.bounds()).is_some())
 		{
 			mouse::Interaction::Pointer
@@ -339,36 +334,4 @@ pub enum Axis {
 	Vertical,
 	#[default]
 	Horizontal,
-}
-
-pub enum ColOrRow<'a, Message, Theme, Renderer> {
-	Col(Column<'a, Message, Theme, Renderer>),
-	Row(Row<'a, Message, Theme, Renderer>),
-}
-
-impl<'a, Message, Theme, Renderer> ColOrRow<'a, Message, Theme, Renderer>
-where
-	Renderer: renderer::Renderer,
-{
-	pub fn push(self, child: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
-		match self {
-			ColOrRow::Col(col) => ColOrRow::Col(col.push(child)),
-			ColOrRow::Row(row) => ColOrRow::Row(row.push(child)),
-		}
-	}
-}
-
-impl<'a, Message, Theme, Renderer> From<ColOrRow<'a, Message, Theme, Renderer>>
-	for Element<'a, Message, Theme, Renderer>
-where
-	Message: 'a,
-	Renderer: 'a + renderer::Renderer,
-	Theme: 'static,
-{
-	fn from(val: ColOrRow<'a, Message, Theme, Renderer>) -> Self {
-		match val {
-			ColOrRow::Col(col) => col.into(),
-			ColOrRow::Row(row) => row.into(),
-		}
-	}
 }

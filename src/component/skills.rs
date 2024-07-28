@@ -39,10 +39,10 @@ pub fn skills_component<Message>(
 
 #[derive(Clone)]
 pub enum Event {
-	SkillChanged(u16, Skill),
-	RoteSkillChanged(Skill),
-	SpecialtyChanged(Skill, usize, String),
-	SpecialtySkillChanged(Skill),
+	Skill(u16, Skill),
+	RoteSkill(Skill),
+	Specialty(Skill, usize, String),
+	SpecialtySkill(Skill),
 }
 
 #[derive(Default, Clone)]
@@ -100,10 +100,7 @@ impl<Message> SkillsComponent<Message> {
 
 				col0 = col0.push(
 					checkbox("", flag)
-						.on_toggle({
-							let skill = skill;
-							move |_| Event::RoteSkillChanged(skill)
-						})
+						.on_toggle(move |_| Event::RoteSkill(skill))
 						.spacing(0),
 				);
 			}
@@ -119,15 +116,15 @@ impl<Message> SkillsComponent<Message> {
 
 			col1 = col1.push(
 				button(text(flt("skill", Some(skill.name())).unwrap()).style(
-					if !specialties.is_empty() {
-						theme::Text::Color(Color::from_rgb(0.0, 0.7, 0.0))
-					} else {
+					if specialties.is_empty() {
 						theme::Text::Default
+					} else {
+						theme::Text::Color(Color::from_rgb(0.0, 0.7, 0.0))
 					},
 				))
 				.padding(0)
 				.style(theme::Button::Text)
-				.on_press(Event::SpecialtySkillChanged(skill)),
+				.on_press(Event::SpecialtySkill(skill)),
 			);
 
 			let v = character.base_skills().get(skill);
@@ -140,7 +137,7 @@ impl<Message> SkillsComponent<Message> {
 				5,
 				Shape::Dots,
 				None,
-				move |val| Event::SkillChanged(val - mod_, skill),
+				move |val| Event::Skill(val - mod_, skill),
 			));
 
 			if let Some(specialty_skill) = state.specialty_skill {
@@ -152,7 +149,7 @@ impl<Message> SkillsComponent<Message> {
 						specialties.clone(),
 						closure!(clone skill, |i, val| {
 							text_input("", &val.unwrap_or_default())
-								.on_input(move |val| Event::SpecialtyChanged(skill, i, val))
+								.on_input(move |val| Event::Specialty(skill, i, val))
 								.padding(0)
 								.into()
 						}),
@@ -172,7 +169,7 @@ impl<Message> SkillsComponent<Message> {
 
 		column![
 			text(flt(cat.name(), None).unwrap()).size(H3_SIZE),
-			text(fl!("unskilled", num = cat.unskilled())).size(17),
+			text(fl!("unskilled", num = cat.unskilled())).size(13),
 			col
 		]
 		.spacing(TITLE_SPACING)
@@ -197,12 +194,12 @@ where
 
 	fn update(&mut self, state: &mut Self::State, event: Self::Event) -> Option<Message> {
 		match event {
-			Event::SkillChanged(val, skill) => Some((self.on_change)(val, skill)),
-			Event::RoteSkillChanged(skill) => Some((self.on_rote_change)(skill)),
-			Event::SpecialtyChanged(skill, i, val) => {
+			Event::Skill(val, skill) => Some((self.on_change)(val, skill)),
+			Event::RoteSkill(skill) => Some((self.on_rote_change)(skill)),
+			Event::Specialty(skill, i, val) => {
 				Some((self.on_specialty_change)(skill, i, val))
 			}
-			Event::SpecialtySkillChanged(skill) => {
+			Event::SpecialtySkill(skill) => {
 				if let Some(cur) = state.specialty_skill
 					&& cur == skill
 				{

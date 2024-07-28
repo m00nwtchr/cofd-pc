@@ -1,10 +1,10 @@
 use std::default::Default;
 
-use iced::advanced::layout::{self, Layout};
+use iced::advanced::layout::{self, Layout, Node};
 use iced::advanced::widget::{self, Widget};
 use iced::advanced::{renderer, Clipboard, Shell};
 use iced::widget::{text, Column, Row};
-use iced::{event, touch, Background, Theme};
+use iced::{event, touch, Background, Point, Theme};
 use iced::{mouse, Alignment, Border, Color, Element, Length, Rectangle, Size};
 
 use cofd::character::{Damage, Wound};
@@ -17,8 +17,8 @@ where
 	max: usize,
 	per_row_count: Option<usize>,
 	on_click: Box<dyn Fn(Wound) -> Message + 'a>,
-	size: u16,
-	spacing: u16,
+	size: f32,
+	spacing: f32,
 	style: <Theme as StyleSheet>::Style,
 }
 
@@ -28,10 +28,10 @@ where
 	Theme: StyleSheet,
 {
 	/// The default size of a [`Radio`] button.
-	pub const DEFAULT_SIZE: u16 = 19;
+	pub const DEFAULT_SIZE: f32 = 19.0;
 
 	/// The default spacing of a [`Radio`] button.
-	pub const DEFAULT_SPACING: u16 = 2;
+	pub const DEFAULT_SPACING: f32 = 2.0;
 
 	pub fn new<F>(damage: Damage, max: usize, f: F) -> Self
 	where
@@ -63,37 +63,42 @@ where
 		}
 	}
 
+	#[allow(clippy::cast_precision_loss)]
 	fn layout(
 		&self,
 		tree: &mut widget::Tree,
 		renderer: &Renderer,
 		limits: &layout::Limits,
 	) -> layout::Node {
-		let mut col: Column<Message, Theme, Renderer> =
-			Column::new().spacing(self.spacing).width(Length::Shrink);
-
+		let size = Size::new(self.size, self.size);
 		let per_row_count = self.per_row_count.unwrap_or(self.max);
 
-		let mut row = Row::new()
-			.spacing(self.spacing)
-			.align_items(Alignment::Center);
+		let mut nodes = Vec::new();
 
 		for i in 0..self.max {
-			row = row.push(Row::new().width(self.size).height(self.size));
+			let row = i / per_row_count;
+			let col = i % per_row_count;
 
-			if (i + 1) % per_row_count == 0 {
-				col = col.push(row);
-				row = Row::new()
-					.spacing(self.spacing)
-					.align_items(Alignment::Center);
-			}
+			let x = (self.size + self.spacing) * col as f32;
+			let y = (self.size + self.spacing) * row as f32;
+
+			nodes.push(Node::new(size).move_to(Point::new(x, y)));
 		}
 
-		if !row.children().is_empty() {
-			col = col.push(row);
-		}
+		let num_rows = (self.max + per_row_count - 1) / per_row_count;
 
-		col.layout(tree, renderer, limits)
+		let total_width =
+			self.size * per_row_count as f32 + self.spacing * per_row_count as f32 - 1f32;
+		let total_height = self.size * num_rows as f32 + self.spacing * num_rows as f32 - 1f32;
+
+		Node::with_children(
+			limits.resolve(
+				Length::Shrink,
+				Length::Shrink,
+				Size::new(total_width, total_height),
+			),
+			nodes,
+		)
 	}
 
 	fn draw(
@@ -103,10 +108,10 @@ where
 		theme: &Theme,
 		_style: &renderer::Style,
 		layout: Layout<'_>,
-		cursor: mouse::Cursor,
+		_cursor: mouse::Cursor,
 		_viewport: &Rectangle,
 	) {
-		for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
+		for (i, layout) in layout.children().enumerate() {
 			let bounds = layout.bounds();
 			let custom_style = theme.active(self.style);
 
@@ -146,7 +151,7 @@ where
 		match event {
 			event::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
 			| event::Event::Touch(touch::Event::FingerPressed { .. }) => {
-				for (i, layout) in layout.children().flat_map(Layout::children).enumerate() {
+				for (i, layout) in layout.children().enumerate() {
 					if cursor.position_over(layout.bounds()).is_some() {
 						let wound = self.damage.get_i(i);
 						shell.publish((self.on_click)(wound));
@@ -171,7 +176,6 @@ where
 	) -> mouse::Interaction {
 		if layout
 			.children()
-			.flat_map(Layout::children)
 			.any(|layout| cursor.position_over(layout.bounds()).is_some())
 		{
 			mouse::Interaction::Pointer

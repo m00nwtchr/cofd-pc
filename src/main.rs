@@ -14,7 +14,7 @@
 use iced::{
 	executor,
 	widget::{button, column, row, Column},
-	Alignment, Application, Command, Element, Length, Theme,
+	Alignment, Application, Command, Element, Length, Settings, Size, Theme,
 };
 #[cfg(target_arch = "wasm32")]
 use log::Level;
@@ -60,7 +60,7 @@ struct PlayerCompanionApp {
 const H2_SIZE: u16 = 25;
 const H3_SIZE: u16 = 20;
 
-const MAX_INPUT_WIDTH: u16 = 200;
+const MAX_INPUT_WIDTH: f32 = 200f32;
 pub const INPUT_PADDING: u16 = 1;
 
 const TITLE_SPACING: u16 = 2;
@@ -205,16 +205,14 @@ impl Application for PlayerCompanionApp {
 
 		#[cfg(target_arch = "wasm32")]
 		{
-			use iced_native::{command, window};
+			use iced::window;
+			use iced::window::Id;
 			let window = web_sys::window().unwrap();
 			let (width, height) = (
-				(window.inner_width().unwrap().as_f64().unwrap()) as u32,
-				(window.inner_height().unwrap().as_f64().unwrap()) as u32,
+				window.inner_width().unwrap().as_f64().unwrap() as f32,
+				window.inner_height().unwrap().as_f64().unwrap() as f32,
 			);
-			Command::single(command::Action::Window(window::Action::Resize {
-				width,
-				height,
-			}))
+			window::resize(Id::MAIN, Size { width, height })
 		}
 		#[cfg(not(target_arch = "wasm32"))]
 		Command::none()
@@ -285,9 +283,14 @@ fn main() -> anyhow::Result<()> {
 	#[cfg(not(target_arch = "wasm32"))]
 	env_logger::init();
 	#[cfg(target_arch = "wasm32")]
-	console_log::init_with_level(Level::Warn).map_err(|err| anyhow::anyhow!(err))?;
+	{
+		console_log::init_with_level(Level::Warn).map_err(|err| anyhow::anyhow!(err))?;
+		std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+	}
 
-	PlayerCompanionApp::run(Default::default())?;
+	PlayerCompanionApp::run(Settings {
+		..Settings::default()
+	})?;
 	Ok(())
 }
 

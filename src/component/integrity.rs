@@ -122,7 +122,7 @@ where
 						widget::dots::Axis::Horizontal
 					})
 					.spacing(if flag {
-						4
+						4f32
 					} else {
 						SheetDots::<Event, Theme>::DEFAULT_SPACING
 					}),
