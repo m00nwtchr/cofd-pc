@@ -1,2 +1,2 @@
-# cofd-pc-rs
-Chronicles of Darkness Player Companion (cofd-pc), rewritten in Rust.
+# Chronicles of Darkness Player Companion
+A standalone digital toolkit for the Chronicles of Darkness TTRPG game.
