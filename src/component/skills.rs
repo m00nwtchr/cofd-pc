@@ -1,25 +1,21 @@
 use std::{cell::RefCell, rc::Rc};
 
-use super::list;
-use crate::widget::dots;
-use crate::{
-	fl,
-	i18n::flt,
-	widget::dots::{Shape, SheetDots},
-	Element, H2_SIZE, H3_SIZE, TITLE_SPACING,
-};
-use closure::closure;
-use cofd::{
-	character::{modifier::ModifierTarget, traits::TraitCategory},
-	prelude::*,
-	splat::Splat,
-};
+use cofd::splat::mage::Mage;
+use cofd::{character::modifier::ModifierTarget, prelude::*, splat::Splat};
 use iced::widget::{component, Component};
 use iced::{
 	theme::{self},
 	widget::{button, checkbox, column, row, text, text_input, Column},
-	Alignment, Color, Length,
+	Alignment, Color, Element, Length,
 };
+
+use super::list;
+use crate::{
+	fl,
+	widget::dots::{self, Shape, SheetDots},
+	H2_SIZE, H3_SIZE, TITLE_SPACING,
+};
+use crate::i18n::Translate;
 
 pub struct SkillsComponent<Message> {
 	character: Rc<RefCell<Character>>,
@@ -69,7 +65,7 @@ impl<Message> SkillsComponent<Message> {
 		&self,
 		state: &State,
 		character: &Character,
-		cat: &TraitCategory,
+		category: TraitCategory,
 	) -> Element<Event, Theme>
 	where
 		Theme: 'static
@@ -90,8 +86,8 @@ impl<Message> SkillsComponent<Message> {
 			.width(Length::Fill)
 			.align_items(Alignment::End);
 
-		for skill in Skill::get(cat) {
-			if let Splat::Mage(_, order, _, _) = &character.splat {
+		for skill in Skill::get_by_category(category) {
+			if let Splat::Mage(Mage { order, .. }) = &character.splat {
 				let flag = if let Some(order) = order {
 					order.get_rote_skills().contains(&skill)
 				} else {
@@ -115,7 +111,7 @@ impl<Message> SkillsComponent<Message> {
 			};
 
 			col1 = col1.push(
-				button(text(flt("skill", Some(skill.name())).unwrap()).style(
+				button(text(skill.translated()).style(
 					if specialties.is_empty() {
 						theme::Text::Default
 					} else {
@@ -147,12 +143,12 @@ impl<Message> SkillsComponent<Message> {
 						Some(specialties.len() + 1),
 						None,
 						specialties.clone(),
-						closure!(clone skill, |i, val| {
+						move |i, val| {
 							text_input("", &val.unwrap_or_default())
 								.on_input(move |val| Event::Specialty(skill, i, val))
 								.padding(0)
 								.into()
-						}),
+						},
 					));
 
 					col0 = Column::new().spacing(3);
@@ -168,8 +164,8 @@ impl<Message> SkillsComponent<Message> {
 		col = col.push(row![col0, col1, col2].spacing(5));
 
 		column![
-			text(flt(cat.name(), None).unwrap()).size(H3_SIZE),
-			text(fl!("unskilled", num = cat.unskilled())).size(13),
+			text(category.translated()).size(H3_SIZE),
+			text(fl!("unskilled", num = category.unskilled())).size(13),
 			col
 		]
 		.spacing(TITLE_SPACING)
@@ -196,9 +192,7 @@ where
 		match event {
 			Event::Skill(val, skill) => Some((self.on_change)(val, skill)),
 			Event::RoteSkill(skill) => Some((self.on_rote_change)(skill)),
-			Event::Specialty(skill, i, val) => {
-				Some((self.on_specialty_change)(skill, i, val))
-			}
+			Event::Specialty(skill, i, val) => Some((self.on_specialty_change)(skill, i, val)),
 			Event::SpecialtySkill(skill) => {
 				if let Some(cur) = state.specialty_skill
 					&& cur == skill
@@ -218,9 +212,9 @@ where
 
 		column![
 			text(fl!("skills").to_uppercase()).size(H2_SIZE),
-			self.mk_skill_col(state, &character, &TraitCategory::Mental),
-			self.mk_skill_col(state, &character, &TraitCategory::Physical),
-			self.mk_skill_col(state, &character, &TraitCategory::Social),
+			self.mk_skill_col(state, &character, TraitCategory::Mental),
+			self.mk_skill_col(state, &character, TraitCategory::Physical),
+			self.mk_skill_col(state, &character, TraitCategory::Social),
 		]
 		.spacing(10)
 		// .padding(15)

@@ -2,13 +2,12 @@ use iced::{
 	widget::{column, row, text, text_input, Column},
 	Alignment, Length,
 };
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, ops::Deref, rc::Rc};
 
 use super::list;
 use crate::widget::{dots, track};
 use crate::{
 	fl,
-	i18n::flt,
 	widget::{
 		self,
 		dots::{Shape, SheetDots},
@@ -18,6 +17,7 @@ use crate::{
 };
 use cofd::{character::Wound, prelude::*, splat::Splat};
 use iced::widget::{component, Component};
+use crate::i18n::Translate;
 
 pub struct IntegrityComponent {
 	character: Rc<RefCell<Character>>,
@@ -53,12 +53,14 @@ where
 
 		match event {
 			Event::IntegrityChanged(val) => character.integrity = val,
-			Event::IntegrityDamage(wound) => if let Splat::Changeling(.., data) = &mut character.splat {
-   					data.clarity.poke(&wound);
-   					if let Wound::Lethal = wound {
-   						data.clarity.poke(&Wound::Aggravated);
-   					}
-   				},
+			Event::IntegrityDamage(wound) => {
+				if let Splat::Changeling(.., data) = &mut character.splat {
+					data.clarity.poke(&wound);
+					if let Wound::Lethal = wound {
+						data.clarity.poke(&Wound::Aggravated);
+					}
+				}
+			}
 			Event::TouchstoneChanged(i, val) => {
 				if let Some(touchstone) = character.touchstones.get_mut(i) {
 					*touchstone = val;
@@ -82,7 +84,7 @@ where
 		let dots: Element<Event, Theme> = if let Splat::Changeling(.., data) = &character.splat {
 			HealthTrack::new(
 				data.clarity.clone(),
-				data.max_clarity(&character) as usize,
+				data.max_clarity(&character.attributes()) as usize,
 				Event::IntegrityDamage,
 			)
 			.into()
@@ -140,13 +142,12 @@ where
 			.into()
 		};
 
-		let label = text(flt(character.splat.name(), Some(character.splat.integrity())).unwrap())
-			.size(H3_SIZE);
+		let label = text(character.splat.integrity().translated()).size(H3_SIZE);
 
 		if let Splat::Werewolf(..) = character.splat {
 			col = col.push(
 				column![
-					text(fl!("werewolf", "flesh-touchstone")).size(H3_SIZE),
+					text(fl!("flesh-touchstone")).size(H3_SIZE),
 					column![text_input(
 						"",
 						character.touchstones.first().unwrap_or(&String::new()),
@@ -170,7 +171,7 @@ where
 			Splat::Werewolf(..) => {
 				col = col.push(
 					column![
-						text(fl!("werewolf", "spirit-touchstone")).size(H3_SIZE),
+						text(fl!("spirit-touchstone")).size(H3_SIZE),
 						column![text_input(
 							"",
 							character.touchstones.get(1).unwrap_or(&String::new()),

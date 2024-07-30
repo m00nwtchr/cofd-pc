@@ -1,13 +1,13 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{i18n::flt, Element, INPUT_PADDING};
+use crate::{fl, i18n::Translate, Element, INPUT_PADDING};
 use cofd::{
-	character::{modifier::ModifierTarget, traits::Trait},
+	character::modifier::ModifierTarget,
 	prelude::*,
 	splat::{
 		werewolf::{get_form_trait, Form},
 		Splat,
-	},
+	}, traits::DerivedTrait,
 };
 use iced::widget::{component, Component};
 use iced::{
@@ -59,12 +59,12 @@ impl<Message> FormsComponent<Message> {
 		];
 
 		vec.extend(vec![
-			ModifierTarget::Trait(Trait::Size),
-			ModifierTarget::Trait(Trait::Defense),
-			ModifierTarget::Trait(Trait::Initative),
-			ModifierTarget::Trait(Trait::Speed),
+			ModifierTarget::Trait(Trait::DerivedTrait(DerivedTrait::Size)),
+			ModifierTarget::Trait(Trait::DerivedTrait(DerivedTrait::Defense)),
+			ModifierTarget::Trait(Trait::DerivedTrait(DerivedTrait::Initiative)),
+			ModifierTarget::Trait(Trait::DerivedTrait(DerivedTrait::Speed)),
 			// ModifierTarget::Trait(Trait::Armor(None)),
-			ModifierTarget::Trait(Trait::Perception),
+			ModifierTarget::Trait(Trait::DerivedTrait(DerivedTrait::Initiative)),
 		]);
 
 		for target in vec {
@@ -72,8 +72,8 @@ impl<Message> FormsComponent<Message> {
 				ModifierTarget::BaseAttribute(_)
 				| ModifierTarget::BaseSkill(_)
 				| ModifierTarget::Skill(_) => unreachable!(),
-				ModifierTarget::Attribute(attr) => flt("attribute", Some(attr.name())).unwrap(),
-				ModifierTarget::Trait(trait_) => flt(trait_.name().unwrap(), None).unwrap(),
+				ModifierTarget::Attribute(attr) => attr.translated(),
+				ModifierTarget::Trait(trait_) => trait_.translated(),
 			};
 
 			let val = get_form_trait(character, &form, &target);
@@ -88,7 +88,7 @@ impl<Message> FormsComponent<Message> {
 
 		column![
 			button(
-				text(flt("werewolf", Some(form.name())).unwrap())
+				text(form.translated())
 					.width(Length::Fill)
 					.horizontal_alignment(alignment::Horizontal::Center)
 			)

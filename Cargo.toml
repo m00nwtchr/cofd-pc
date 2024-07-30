@@ -35,7 +35,8 @@ inherits = "test"
 iced = { version = "0.12", features = ["lazy", "advanced"] }
 
 cofd = { git = "https://github.com/m00nwtchr/cofd.git" }
-codex-scraper = { git = "https://github.com/m00nwtchr/cofd-miner.git" }
+#cofd = { path = "../cofd/lib" }
+#codex-scraper = { git = "https://github.com/m00nwtchr/cofd-miner.git" }
 
 closure = "0.3"
 lazy_static = "1"

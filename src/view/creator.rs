@@ -6,7 +6,8 @@ use iced::{
 	Element, Length,
 };
 
-use crate::{i18n::Translated, INPUT_PADDING};
+use crate::{i18n::Translate, INPUT_PADDING};
+use crate::i18n::Translated;
 
 pub struct CreatorView<Message> {
 	on_done: Box<dyn Fn(Character) -> Message>,

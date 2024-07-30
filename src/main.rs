@@ -237,7 +237,7 @@ impl Application for PlayerCompanionApp {
 
 				let tab: Element<Self::Message, Self::Theme> = match active_tab {
 					Tab::Overview => view::overview_tab(character.clone()).into(),
-					Tab::Equipment => view::equipment_tab(character.clone()).into(),
+					Tab::Equipment => view::equipment_tab(character.clone(), Message::Msg).into(),
 
 					// Tab::Forms => {
 					// 	if let Splat::Werewolf(_, _, _, _) = brw.splat {
@@ -318,23 +318,22 @@ mod demo {
 		let character = Character::builder().build();
 
 		let vampire_character = Character::builder()
-			.with_splat(Splat::Vampire(
-				Clan::Ventrue,
-				Some(Covenant::OrdoDracul),
-				Some(Bloodline::_Custom(
-					"Dragolescu".to_string(),
-					Some([
-						Discipline::Animalism,
-						Discipline::Dominate,
-						Discipline::Resilience,
-						Discipline::Auspex,
-					]),
-				)),
-				Box::new(VampireData {
-					attr_bonus: Some(Attribute::Presence),
-					..Default::default()
-				}),
-			))
+			.with_splat(
+				Vampire::new(
+					Clan::Ventrue,
+					Some(Covenant::OrdoDracul),
+					Some(Bloodline::_Custom(
+						"Dragolescu".to_string(),
+						Some([
+							Discipline::Animalism,
+							Discipline::Dominate,
+							Discipline::Resilience,
+							Discipline::Auspex,
+						]),
+					)),
+				)
+				.with_attr_bonus(Attribute::Resolve),
+			)
 			.with_info(CharacterInfo {
 				name: String::from("Darren Webb"),
 				player: String::from("m00n"),
@@ -400,24 +399,29 @@ mod demo {
 			.build();
 
 		let werewolf_character = Character::builder()
-			.with_splat(Splat::Werewolf(
-				Some(Auspice::Rahu),
-				Some(Tribe::BloodTalons),
-				None,
-				Box::new(WerewolfData {
-					skill_bonus: Some(Skill::Brawl),
-					triggers: KuruthTriggers::Moon,
-					shadow_gifts: vec![
-						ShadowGift::Rage,     // Slaughterer (Purity)
-						ShadowGift::Strength, // Primal Strength (Purity)
-					],
-					wolf_gifts: vec![
-						WolfGift::Change, // Father's Form
-					],
-					rites: vec![Rite::SacredHunt],
-					..Default::default()
-				}),
-			))
+			.with_splat(
+				Werewolf::new()
+					.with_auspice(Auspice::Rahu)
+					.with_tribe(Tribe::BloodTalons),
+			)
+			// .with_splat(Splat::Werewolf(
+			// 	Some(Auspice::Rahu),
+			// 	Some(Tribe::BloodTalons),
+			// 	None,
+			// 	Box::new(WerewolfData {
+			// 		skill_bonus: Some(Skill::Brawl),
+			// 		triggers: KuruthTriggers::Moon,
+			// 		shadow_gifts: vec![
+			// 			ShadowGift::Rage,     // Slaughterer (Purity)
+			// 			ShadowGift::Strength, // Primal Strength (Purity)
+			// 		],
+			// 		wolf_gifts: vec![
+			// 			WolfGift::Change, // Father's Form
+			// 		],
+			// 		rites: vec![Rite::SacredHunt],
+			// 		..Default::default()
+			// 	}),
+			// ))
 			.with_info(CharacterInfo {
 				name: String::from("Amos Gray"),
 				player: String::from("m00n"),
@@ -464,38 +468,39 @@ mod demo {
 			.build();
 
 		let mut mage_character = Character::builder()
-			.with_splat(Splat::Mage(
-				Path::Mastigos,
-				Some(Order::Mysterium),
-				None,
-				Box::new(MageData {
-					attr_bonus: Some(Attribute::Resolve),
-					obsessions: vec!["Open the Gate".to_string()],
-					rotes: vec![
-						Rote {
-							arcanum: Arcanum::Space,
-							level: 3,
-							spell: "Co-Location".to_string(),
-							creator: String::new(),
-							skill: Skill::Occult,
-						},
-						Rote {
-							arcanum: Arcanum::Prime,
-							level: 2,
-							spell: "Supernal Veil".to_string(),
-							creator: String::new(),
-							skill: Skill::Occult,
-						},
-						Rote {
-							arcanum: Arcanum::Space,
-							level: 3,
-							spell: "Perfect Sympathy".to_string(),
-							creator: String::new(),
-							skill: Skill::Occult,
-						},
-					],
-				}),
-			))
+			.with_splat(Mage::new(Path::Mastigos).with_order(Order::Mysterium))
+			// .with_splat(Splat::Mage(
+			// 	Path::Mastigos,
+			// 	Some(Order::Mysterium),
+			// 	None,
+			// 	Box::new(Mage {
+			// 		attr_bonus: Some(Attribute::Resolve),
+			// 		obsessions: vec!["Open the Gate".to_string()],
+			// 		rotes: vec![
+			// 			Rote {
+			// 				arcanum: Arcanum::Space,
+			// 				level: 3,
+			// 				spell: "Co-Location".to_string(),
+			// 				creator: String::new(),
+			// 				skill: Skill::Occult,
+			// 			},
+			// 			Rote {
+			// 				arcanum: Arcanum::Prime,
+			// 				level: 2,
+			// 				spell: "Supernal Veil".to_string(),
+			// 				creator: String::new(),
+			// 				skill: Skill::Occult,
+			// 			},
+			// 			Rote {
+			// 				arcanum: Arcanum::Space,
+			// 				level: 3,
+			// 				spell: "Perfect Sympathy".to_string(),
+			// 				creator: String::new(),
+			// 				skill: Skill::Occult,
+			// 			},
+			// 		],
+			// 	}),
+			// ))
 			.with_info(CharacterInfo {
 				name: String::from("Polaris"),
 				player: String::from("m00n"),
@@ -563,17 +568,18 @@ mod demo {
 		mage_character.aspirations = vec!["Solve the Mentor's riddle (Long Term)".to_string()];
 
 		let changeling_character = Character::builder()
-			.with_splat(Splat::Changeling(
-				Seeming::Wizened,
-				Some(Court::Autumn),
-				None,
-				Box::new(ChangelingData {
-					attr_bonus: Some(Attribute::Dexterity),
-					regalia: Some(Regalia::Crown),
-					contracts: vec![Default::default()],
-					..Default::default()
-				}),
-			))
+			.with_splat(Changeling::new(Seeming::Wizened))
+			// .with_splat(Splat::Changeling(
+			// 	Seeming::Wizened,
+			// 	Some(Court::Autumn),
+			// 	None,
+			// 	Box::new(ChangelingData {
+			// 		attr_bonus: Some(Attribute::Dexterity),
+			// 		regalia: Some(Regalia::Crown),
+			// 		contracts: vec![Default::default()],
+			// 		..Default::default()
+			// 	}),
+			// ))
 			.with_info(CharacterInfo {
 				// name: String::from("Darren Webb"),
 				player: String::from("m00n"),
@@ -592,13 +598,18 @@ mod demo {
 			.build();
 
 		let bound_character = Character::builder()
-			.with_splat(Splat::Bound(
-				Burden::Bereaved,
-				Archetype::Mourners,
-				BoundData {
-					keys: vec![Key::Stillness],
-				},
-			))
+			// .with_splat(Splat::Bound(
+			// 	Burden::Bereaved,
+			// 	Archetype::Mourners,
+			// 	BoundData {
+			// 		keys: vec![Key::Stillness],
+			// 	},
+			// ))
+			.with_splat(Bound {
+				burden: Burden::Bereaved,
+				archetype: Archetype::Mourners,
+				keys: vec![Key::Stillness],
+			})
 			.with_info(CharacterInfo {
 				// name: String::from("Darren Webb"),
 				player: String::from("m00n"),

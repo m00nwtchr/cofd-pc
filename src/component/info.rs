@@ -5,15 +5,12 @@ use iced::{
 };
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{
-	fl,
-	i18n::{flt, Translated},
-	Element, INPUT_PADDING,
-};
+use crate::i18n::{Translate, Translated};
+use crate::{fl, i18n, Element, INPUT_PADDING};
 use cofd::{
 	character::InfoTrait,
 	prelude::*,
-	splat::{Splat, XSplat, YSplat, ZSplat},
+	splat::{Splat, SplatTrait, XSplat, YSplat, ZSplat},
 };
 use iced::overlay::menu;
 
@@ -61,31 +58,13 @@ impl<Message> InfoBar<Message> {
 			.align_items(Alignment::End);
 
 		for _trait in info {
-			let (msg, attribute) = match _trait {
-				InfoTrait::VirtueAnchor | InfoTrait::ViceAnchor => {
-					if character.splat.virtue_anchor() == "virtue" {
-						match _trait {
-							InfoTrait::VirtueAnchor => ("virtue", None),
-							InfoTrait::ViceAnchor => ("vice", None),
-							_ => unreachable!(),
-						}
-					} else {
-						match _trait {
-							InfoTrait::VirtueAnchor => (
-								character.splat.name(),
-								Some(character.splat.virtue_anchor()),
-							),
-							InfoTrait::ViceAnchor => {
-								(character.splat.name(), Some(character.splat.vice_anchor()))
-							}
-							_ => unreachable!(),
-						}
-					}
-				}
-				_ => (_trait.name(), None),
+			let str = match _trait {
+				InfoTrait::VirtueAnchor => character.splat.virtue_anchor().translated(),
+				InfoTrait::ViceAnchor => character.splat.vice_anchor().translated(),
+				_ => _trait.translated(),
 			};
 
-			col1 = col1.push(text(format!("{}:", flt(msg, attribute).unwrap())));
+			col1 = col1.push(text(format!("{}:", str)));
 			col2 = col2.push(
 				text_input("", character.info.get(_trait))
 					.on_input(move |val| Event::InfoTraitChanged(val, _trait))
@@ -152,7 +131,7 @@ where
 		let character = self.character.borrow();
 
 		let col3: Element<Event, Theme> = match character.splat {
-			Splat::Mortal => self.mk_info_col(
+			Splat::Mortal(..) => self.mk_info_col(
 				vec![InfoTrait::Age, InfoTrait::Faction, InfoTrait::GroupName],
 				&character,
 			),
@@ -257,20 +236,15 @@ where
 					.into()
 				};
 
+				let xsplat_name = character.splat.xsplat_name().map(|k| i18n::LANGUAGE_LOADER.get(k)).unwrap_or_default();
+				let ysplat_name = character.splat.ysplat_name().map(|k| i18n::LANGUAGE_LOADER.get(k)).unwrap_or_default();
+				let zsplat_name = character.splat.zsplat_name().map(|k| i18n::LANGUAGE_LOADER.get(k)).unwrap_or_default();
+
 				row![
 					column![
-						text(format!(
-							"{}:",
-							flt(character.splat.name(), character.splat.xsplat_name()).unwrap()
-						)),
-						text(format!(
-							"{}:",
-							flt(character.splat.name(), character.splat.ysplat_name()).unwrap()
-						)),
-						text(format!(
-							"{}:",
-							flt(character.splat.name(), character.splat.zsplat_name()).unwrap()
-						))
+						text(format!("{xsplat_name}:")),
+						text(format!("{ysplat_name}:")),
+						text(format!("{zsplat_name}:"))
 					]
 					.spacing(3),
 					column![xsplat, ysplat, zsplat]

@@ -1,16 +1,31 @@
-use std::{
-	fmt::{self},
-	sync::Arc,
-};
-
+use crate::i18n;
 use cfg_if::cfg_if;
-use cofd::splat::NameKey;
+use cofd::prelude::{Template, VariantName};
+use cofd::splat::ability::Ability;
+use cofd::splat::changeling::Regalia;
+use cofd::splat::werewolf::{HuntersAspect, KuruthTriggers, MoonGift, Rite, ShadowGift, WolfGift};
+use cofd::splat::{Merit, NameKey, Splat, XSplat, YSplat, ZSplat};
+use cofd::template::mage::Arcanum;
+use cofd::template::SupernaturalTolerance;
+use cofd::traits::TraitCategory;
+use cofd::{
+	character::InfoTrait,
+	splat::werewolf::Form,
+	template::{Anchor, Fuel, Integrity},
+	traits::{attribute::Attribute, skill::Skill, Trait},
+};
 use i18n_embed::{
 	fluent::{fluent_language_loader, FluentLanguageLoader},
 	DefaultLocalizer, LanguageLoader, LanguageRequester, Localizer,
 };
 use once_cell::sync::{Lazy, OnceCell};
 use rust_embed::RustEmbed;
+use std::fmt::Display;
+use std::ops::Deref;
+use std::{
+	fmt::{self},
+	sync::Arc,
+};
 
 #[derive(RustEmbed)]
 #[folder = "i18n"] // path to the compiled localization resources
@@ -35,30 +50,6 @@ macro_rules! fl {
     ($message_id:literal, $($args:expr),*) => {{
         i18n_embed_fl::fl!($crate::i18n::LANGUAGE_LOADER, $message_id, $($args), *)
     }};
-}
-
-pub fn flt(message_id: &str, attribute: Option<&str>) -> Option<String> {
-	let mut message = OnceCell::new();
-	LANGUAGE_LOADER.with_bundles_mut(|bundle| {
-		if message.get().is_none() {
-			if let Some(msg) = bundle.get_message(message_id) {
-				if let Some(pattern) = if let Some(attribute) = attribute {
-					msg.get_attribute(attribute).map(|v| v.value())
-				} else {
-					msg.value()
-				} {
-					message
-						.set(
-							bundle
-								.format_pattern(pattern, None, &mut vec![])
-								.to_string(),
-						)
-						.unwrap();
-				}
-			}
-		}
-	});
-	message.take()
 }
 
 // #[derive(Debug, Clone, PartialEq, Eq)]
@@ -104,36 +95,219 @@ pub fn setup() -> anyhow::Result<Box<dyn LanguageRequester<'static>>> {
 	Ok(language_requester)
 }
 
-#[derive(Clone, PartialEq, Eq)]
-pub struct Translated<T: NameKey>(T);
+pub trait Translate {
+	fn translated(&self) -> String;
+}
 
-impl<T: NameKey> Translated<T> {
+#[derive(Clone, Eq, PartialEq)]
+pub struct Translated<T: Translate>(T);
+
+impl<T: Translate> Translated<T> {
 	pub fn unwrap(self) -> T {
 		self.0
 	}
 }
 
-impl<T: NameKey> fmt::Display for Translated<T> {
+impl<T: Translate> Display for Translated<T> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		let name_key = self.0.name_key();
-		let mut iter = name_key.split('.');
-
-		let msg_id = iter.next().unwrap();
-		let attr = iter.next();
-		write!(
-			f,
-			"{}",
-			flt(msg_id, attr).unwrap_or_else(|| if let Some(name) = attr {
-				name.to_string()
-			} else {
-				name_key.to_string()
-			})
-		)
+		f.write_str(&self.0.translated())
 	}
 }
 
-impl<T: NameKey> From<T> for Translated<T> {
+impl<T: Translate> From<T> for Translated<T> {
 	fn from(t: T) -> Self {
 		Translated(t)
 	}
 }
+
+impl<T: Translate> Deref for Translated<T> {
+	type Target = T;
+
+	fn deref(&self) -> &Self::Target {
+		&self.0
+	}
+}
+
+impl Translate for Attribute {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Skill {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Trait {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Integrity {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Fuel {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Form {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Anchor {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for InfoTrait {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Regalia {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for KuruthTriggers {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name().unwrap_or("custom"))
+	}
+}
+
+impl Translate for SupernaturalTolerance {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Arcanum {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for XSplat {
+	fn translated(&self) -> String {
+		if self.is_custom() {
+			self.name().to_string()
+		} else {
+			LANGUAGE_LOADER.get(self.name())
+		}
+	}
+}
+
+impl Translate for YSplat {
+	fn translated(&self) -> String {
+		if self.is_custom() {
+			self.name().to_string()
+		} else {
+			LANGUAGE_LOADER.get(self.name())
+		}
+	}
+}
+
+impl Translate for ZSplat {
+	fn translated(&self) -> String {
+		if self.is_custom() {
+			self.name().to_string()
+		} else {
+			LANGUAGE_LOADER.get(self.name())
+		}
+	}
+}
+
+impl Translate for Merit {
+	fn translated(&self) -> String {
+		if let Self::_Custom(name) = &self {
+			name.clone()
+		} else {
+			LANGUAGE_LOADER.get(self.name())
+		}
+	}
+}
+
+impl Translate for TraitCategory {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Template {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Splat {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Ability {
+	fn translated(&self) -> String {
+		match self {
+			Self::Haunt(_) => LANGUAGE_LOADER.get_attr("haunts", self.name()),
+			Self::Renown(_) => LANGUAGE_LOADER.get_attr("renown", self.name()),
+			_ => LANGUAGE_LOADER.get(self.name())
+		}
+	}
+}
+
+impl Translate for HuntersAspect {
+	fn translated(&self) -> String {
+		if let Self::_Custom(name) = &self {
+			name.clone()
+		} else {
+			LANGUAGE_LOADER.get(self.name())
+		}
+	}
+}
+
+impl Translate for WolfGift {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for ShadowGift {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for MoonGift {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}
+
+impl Translate for Rite {
+	fn translated(&self) -> String {
+		if let Self::_Custom(name) = &self {
+			name.clone()
+		} else {
+			LANGUAGE_LOADER.get(self.name())
+		}
+	}
+}
+
+// impl<T: NameKey> Translate for T {
+// 	fn translated(&self) -> String {
+// 		fl!("app-name")
+// 	}
+// }

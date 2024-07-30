@@ -1,22 +1,16 @@
 use std::{cell::RefCell, rc::Rc};
 
-use cofd::{
-	character::{
-		modifier::ModifierTarget,
-		traits::{AttributeCategory, TraitCategory},
-	},
-	prelude::*,
-};
+use cofd::{character::modifier::ModifierTarget, prelude::TraitCategory, prelude::*};
 use iced::widget::{component, Component};
 use iced::{
 	widget::{column, row, text, Column},
 	Alignment, Length,
 };
 
+use crate::i18n::Translate;
 use crate::widget::dots;
 use crate::{
 	fl,
-	i18n::flt,
 	widget::dots::{Shape, SheetDots},
 	Element, H2_SIZE, TITLE_SPACING,
 };
@@ -51,7 +45,7 @@ impl<Message> AttributeBar<Message> {
 		}
 	}
 
-	fn mk_attr_col<Theme>(&self, character: &Character, cat: TraitCategory) -> Element<Event, Theme>
+	fn mk_attr_col<Theme>(&self, character: &Character, category: TraitCategory) -> Element<Event, Theme>
 	where
 		Theme: text::StyleSheet + dots::StyleSheet + 'static,
 	{
@@ -62,12 +56,12 @@ impl<Message> AttributeBar<Message> {
 			.align_items(Alignment::End);
 
 		let base_attributes = character.base_attributes();
-		for attr in Attribute::get(AttributeCategory::Trait(cat)) {
+		for attr in Attribute::get_by_category(category) {
 			let v = base_attributes.get(&attr);
 			let val = character._modified(ModifierTarget::BaseAttribute(attr));
 			let mod_ = val - v;
 
-			col1 = col1.push(text(flt("attribute", Some(attr.name())).unwrap()));
+			col1 = col1.push(text(attr.translated()));
 			col2 = col2.push(SheetDots::new(
 				val,
 				1 + mod_,
@@ -103,9 +97,9 @@ where
 			text(fl!("attributes")).size(H2_SIZE),
 			row![
 				column![
-					text(fl!("attribute", "power")),
-					text(fl!("attribute", "finesse")),
-					text(fl!("attribute", "resistance"))
+					text(fl!("power")),
+					text(fl!("finesse")),
+					text(fl!("resistance"))
 				]
 				.spacing(3)
 				.width(Length::Fill)

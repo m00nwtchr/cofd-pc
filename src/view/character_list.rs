@@ -1,6 +1,6 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, fmt::Write, rc::Rc};
 
-use crate::i18n::flt;
+use crate::i18n::Translate;
 use cofd::prelude::*;
 use iced::{
 	widget::{button, column, component, row, text, Column, Component},
@@ -39,18 +39,14 @@ impl<Message> CharacterList<Message> {
 	where
 		Theme: button::StyleSheet + text::StyleSheet + 'static,
 	{
-		let mut subtitle = flt(character.splat.name(), None).unwrap();
+		let mut subtitle = character.splat.translated();
 
 		if let Some(ysplat) = character.splat.ysplat() {
-			subtitle = subtitle
-				+ " " + &flt(character.splat.name(), Some(ysplat.name()))
-				.unwrap_or_else(|| ysplat.name().to_owned());
+			write!(subtitle, " {}", ysplat.translated()).unwrap();
 		}
 
 		if let Some(xsplat) = character.splat.xsplat() {
-			subtitle = subtitle
-				+ " " + &flt(character.splat.name(), Some(xsplat.name()))
-				.unwrap_or_else(|| xsplat.name().to_owned());
+			write!(subtitle, " {}", xsplat.translated()).unwrap();
 		}
 
 		let name = if character.info.name.is_empty() {

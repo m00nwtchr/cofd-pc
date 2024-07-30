@@ -5,10 +5,11 @@ use iced::{
 use std::{cell::RefCell, rc::Rc};
 
 use crate::component::{forms_component, list};
+use crate::i18n::Translated;
 use crate::widget::dots;
 use crate::{
 	fl,
-	i18n::{flt, Translated},
+	i18n::Translate,
 	widget::dots::{Shape, SheetDots},
 	Element, H2_SIZE, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
 };
@@ -160,8 +161,9 @@ where
 			let mut creator = col("Creator", 3);
 			let mut rote_skill = col("Rote Skill", 3);
 
-			let arcana: Vec<Translated<Arcanum>> = Vec::from(Arcanum::all().map(Into::into));
-			let skills = Vec::from(Skill::all().map(Into::<Translated<Skill>>::into));
+			let arcana: Vec<Translated<_>> =
+				Arcanum::all().iter().copied().map(Into::into).collect();
+			let skills: Vec<Translated<_>> = Skill::all().iter().copied().map(Into::into).collect();
 
 			for (i, rote) in data.rotes.iter().enumerate() {
 				arcanum = arcanum.push(
@@ -218,7 +220,7 @@ where
 
 		let forms = forms_component(self.character.clone(), Event::Msg);
 
-		let gifts = if let Splat::Werewolf(auspice, _, _, data) = &character.splat {
+		let gifts = if let Splat::Werewolf(data) = &character.splat {
 			let shadow_gifts: Vec<Translated<ShadowGift>> = ShadowGift::all()
 				.into_iter()
 				.filter(|g| !data.shadow_gifts.contains(g))
@@ -251,34 +253,31 @@ where
 				Some(data.wolf_gifts.len() + 1),
 				None,
 				data.wolf_gifts.clone(),
-				{
-					let wolf_gifts = wolf_gifts;
-					move |i, val| {
-						pick_list(
-							wolf_gifts.clone(),
-							val.map(Into::<Translated<WolfGift>>::into),
-							move |val| Event::WolfGiftChanged(i, val.unwrap()),
-						)
-						.padding(INPUT_PADDING)
-						.into()
-					}
+				move |i, val| {
+					pick_list(
+						wolf_gifts.clone(),
+						val.map(Into::<Translated<WolfGift>>::into),
+						move |val| Event::WolfGiftChanged(i, val.unwrap()),
+					)
+					.padding(INPUT_PADDING)
+					.into()
 				},
 			);
 
-			let m = if let Some(auspice) = auspice {
+			let m = if let Some(auspice) = &data.auspice {
 				// let moon_gifts = row![];
 
 				let gift = auspice.get_moon_gift();
 
-				let val = *character
+				let val = character
 					.abilities
-					.get(&auspice.get_renown().clone().into())
-					.unwrap();
+					.get(&auspice.get_renown().clone().into()).copied()
+					.unwrap_or_default();
 
 				column![
 					text(fl!("moon-gifts")).size(H3_SIZE),
 					row![
-						text(flt("moon-gifts", Some(gift.name())).unwrap()),
+						text(gift.translated()),
 						SheetDots::new(val, 0, 5, Shape::Dots, None, |_| Event::Msg)
 							.width(Length::Shrink)
 					]

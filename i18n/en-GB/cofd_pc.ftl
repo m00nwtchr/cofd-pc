@@ -1,11 +1,9 @@
-skill = Skill
-    .socialize = Socialise
+socialize = Socialise
 
 defense = Defence
 armor = Armour
 
-vampire = Vampire
-    .vigor = Vigour
+vigor = Vigour
 
-werewolf = Werewolf
+renown = Renown
     .honor = Honour

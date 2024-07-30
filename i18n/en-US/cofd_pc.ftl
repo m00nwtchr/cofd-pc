@@ -8,50 +8,52 @@ unskilled = (-{ $num } unskilled)
 
 attributes = Attributes
 attribute = Attribute
-    .power = Power
-    .finesse = Finesse
-    .resistance = Resistance
 
-    .intelligence = Intelligence
-    .wits = Wits
-    .resolve = Resolve
+power = Power
+finesse = Finesse
+resistance = Resistance
+
+intelligence = Intelligence
+wits = Wits
+resolve = Resolve
     
-    .strength = Strength
-    .dexterity = Dexterity
-    .stamina = Stamina
+strength = Strength
+dexterity = Dexterity
+stamina = Stamina
     
-    .presence = Presence
-    .manipulation = Manipulation
-    .composure = Composure
+presence = Presence
+manipulation = Manipulation
+composure = Composure
 
 skills = Skills
 skill = Skill
-    .academics = Academics
-    .computer = Computer
-    .crafts = Crafts
-    .investigation = Investigation
-    .medicine = Medicine
-    .occult = Occult
-    .politics = Politics
-    .science = Science
 
-    .athletics = Athletics
-    .brawl = Brawl
-    .drive = Drive
-    .firearms = Firearms
-    .larceny = Larceny
-    .stealth = Stealth
-    .survival = Survival
-    .weaponry = Weaponry
+academics = Academics
+computer = Computer
+crafts = Crafts
+investigation = Investigation
+medicine = Medicine
+occult = Occult
+politics = Politics
+science = Science
+
+athletics = Athletics
+brawl = Brawl
+drive = Drive
+firearms = Firearms
+larceny = Larceny
+stealth = Stealth
+survival = Survival
+weaponry = Weaponry
     
-    .animal_ken = Animal Ken
-    .empathy = Empathy
-    .expression = Expression
-    .intimidation = Intimidation
-    .persuasion = Persuasion
-    .socialize = Socialize
-    .streetwise = Streetwise
-    .subterfuge = Subterfuge
+animal-ken = Animal Ken
+empathy = Empathy
+expression = Expression
+intimidation = Intimidation
+persuasion = Persuasion
+socialize = Socialize
+streetwise = Streetwise
+subterfuge = Subterfuge
 
 name = Name
 player = Player
@@ -62,7 +64,7 @@ virtue = Virtue
 vice = Vice
 
 faction = Faction
-group_name = Group Name
+group-name = Group Name
 
 health = Health
 willpower = Willpower
@@ -73,7 +75,7 @@ size = Size
 speed = Speed
 defense = Defense
 armor = Armor
-initative = Initative
+initiative = Initative
 beats = Beats
 experience = Experience
 perception = Perception
@@ -84,256 +86,252 @@ aspirations = Aspirations
 custom = Custom
 
 mortal = Mortal
-    .integrity = Integrity
+integrity = Integrity
 
 vampire = Vampire
-    .mask = Mask
-    .dirge = Dirge
+mask = Mask
+dirge = Dirge
 
-    .clan = Clan
-    .covenant = Covenant
-    .bloodline = Bloodline
+clan = Clan
+covenant = Covenant
+bloodline = Bloodline
 
-    .disciplines = Disciplines
-    .devotions = Devotions
+disciplines = Disciplines
+devotions = Devotions
 
-    .beats = Blood { beats }
-    .experience = Blood { experience }
+blood-beats = Blood { beats }
+blood-experience = Blood { experience }
     
-    .blood_potency = Blood Potency
-    .vitae = Vitae
-    .humanity = Humanity
+blood-potency = Blood Potency
+vitae = Vitae
+humanity = Humanity
 
-    .banes = Banes
+banes = Banes
 
-    .animalism = Animalism
-    .auspex = Auspex
-    .celerity = Celerity
-    .dominate = Dominate
-    .majesty = Majesty
-    .nightmare = Nightmare
-    .obfuscate = Obfuscate
-    .protean = Protean
-    .resilience = Resilience
-    .vigor = Vigor
+animalism = Animalism
+auspex = Auspex
+celerity = Celerity
+dominate = Dominate
+majesty = Majesty
+nightmare = Nightmare
+obfuscate = Obfuscate
+protean = Protean
+resilience = Resilience
+vigor = Vigor
 
-    .daeva = Daeva
-    .gangrel = Gangrel
-    .mekhet = Mekhet
-    .nosferatu = Nosferatu
-    .ventrue = Ventrue
+daeva = Daeva
+gangrel = Gangrel
+mekhet = Mekhet
+nosferatu = Nosferatu
+ventrue = Ventrue
 
-    .carthian_movement = Carthian Movement
-    .circle_of_the_crone = Circle of the Crone
-    .invictus = Invictus
-    .lancea_et_sanctum = Lancea et Sanctum
-    .ordo_dracul = Ordo Dracul
+carthian-movement = Carthian Movement
+circle-of-the-crone = Circle of the Crone
+invictus = Invictus
+lancea-et-sanctum = Lancea et Sanctum
+ordo-dracul = Ordo Dracul
 
 mage = Mage
-    .shadow_name = Shadow Name
+shadow-name = Shadow Name
 
-    .path = Path
-    .order = Order
-    .legacy = Legacy
+path = Path
+order = Order
+legacy = Legacy
 
-    .arcana = Arcana
+arcana = Arcana
 
-    .beats = Arcane { beats }
-    .experience = Arcane { experience }
+arcane-beats = Arcane { beats }
+arcane-experience = Arcane { experience }
         
-    .gnosis = Gnosis
-    .mana = Mana
-    .wisdom = Wisdom
-    .obsessions = Obsessions
+gnosis = Gnosis
+mana = Mana
+wisdom = Wisdom
+obsessions = Obsessions
 
-    .death = Death
-    .fate = Fate
-    .forces = Forces
-    .life = Life
-    .matter = Matter
-    .mind = Mind
-    .prime = Prime
-    .space = Space
-    .spirit = Spirit
-    .time = Time
+death = Death
+fate = Fate
+forces = Forces
+life = Life
+matter = Matter
+mind = Mind
+prime = Prime
+space = Space
+spirit = Spirit
+time = Time
 
-    .acanthus = Acanthus
-    .mastigos = Mastigos
-    .moros = Moros
-    .obrimos = Obrimos
-    .thyrsus = Thyrsus
+acanthus = Acanthus
+mastigos = Mastigos
+moros = Moros
+obrimos = Obrimos
+thyrsus = Thyrsus
 
-    .adamantine_arrow = Adamantine Arrow
-    .guardians_of_the_veil = Guardians of the Veil
-    .mysterium = Mysterium
-    .silver_ladder = Silver Ladder
-    .free_council = Free Council
+adamantine-arrow = Adamantine Arrow
+guardians-of-the-veil = Guardians of the Veil
+mysterium = Mysterium
+silver-ladder = Silver Ladder
+free-council = Free Council
 
-    .seers_of_the_throne = Seers of the Throne
-    .hegemony = Hegemony
-    .panopticon = Panopticon
-    .paternoster = Paternoster
-    .praetorian = Praetorian
+seers-of-the-throne = Seers of the Throne
+hegemony = Hegemony
+panopticon = Panopticon
+paternoster = Paternoster
+praetorian = Praetorian
 
 werewolf = Werewolf
-    .blood = Blood
-    .bone = Bone
+blood = Blood
+bone = Bone
 
-    .auspice = Auspice
-    .tribe = Tribe
-    .lodge = Lodge
+auspice = Auspice
+tribe = Tribe
+lodge = Lodge
 
-    .renown = Renown
+hunters-aspect = Hunter's Aspect
     
-    .hunters_aspect = Hunter's Aspect
-    
-    .primal_urge = Primal Urge
-    .essence = Essence
-    .harmony = Harmony
+primal-urge = Primal Urge
+essence = Essence
+harmony = Harmony
 
-    .flesh-touchstone = Flesh Touchstone
-    .spirit-touchstone = Spirit Touchstone
+flesh-touchstone = Flesh Touchstone
+spirit-touchstone = Spirit Touchstone
 
-    .passive = Passive
-    .common = Common
-    .specific = Specific
+passive = Passive
+common = Common
+specific = Specific
 
+renown = Renown
     .cunning = Cunning
     .glory = Glory
     .honor = Honor
     .purity = Purity
     .wisdom = Wisdom
 
-    .cahalith = Cahalith
-    .elodoth = Elodoth
-    .irraka = Irraka
-    .ithaeur = Ithaeur
-    .rahu = Rahu
+cahalith = Cahalith
+elodoth = Elodoth
+irraka = Irraka
+ithaeur = Ithaeur
+rahu = Rahu
 
-    .blood_talons = Blood Talons
-    .bone_shadows = Bone Shadows
-    .hunters_in_darkness = Hunters in Darkness
-    .iron_masters = Iron Masters
-    .storm_lords = Storm Lords
-    .ghost_wolves = Ghost Wolves
+blood-talons = Blood Talons
+bone-shadows = Bone Shadows
+hunters-in-darkness = Hunters in Darkness
+iron-masters = Iron Masters
+storm-lords = Storm Lords
+ghost-wolves = Ghost Wolves
     
-    .fire_touched = Fire-Touched
-    .ivory_claws = Ivory Claws
-    .predator_kings = Predator Kings
+fire-touched = Fire-Touched
+ivory-claws = Ivory Claws
+predator-kings = Predator Kings
 
-    .monstrous = Monstrous
-    .isolating = Isolating
-    .blissful = Blissful
-    .mystic = Mystic
-    .dominant = Dominant
-    .fanatical = Fanatical
-    .frenzied = Frenzied
-    .agnoized = Agonized
-    .insidious = Insidious
-    .implacable = Implacable
-    .primal = Primal
+monstrous = Monstrous
+isolating = Isolating
+blissful = Blissful
+mystic = Mystic
+dominant = Dominant
+fanatical = Fanatical
+frenzied = Frenzied
+agnoized = Agonized
+insidious = Insidious
+implacable = Implacable
+primal = Primal
     
-    .hishu = Hishu
-    .dalu = Dalu
-    .gauru = Gauru
-    .urshul = Urshul
-    .urhan = Urhan
-    
-    .hishu-desc = Human
-    .dalu-desc = Near-Human
-    .gauru-desc = Wolf-Man
-    .urshul-desc = Near-Wolf
-    .urhan-desc = Wolf
+hishu = Hishu
+    .desc = Human
+dalu = Dalu
+    .desc = Near-Human
+gauru = Gauru
+    .desc = Wolf-Man
+urshul = Urshul
+    .desc = Near-Wolf
+urhan = Urhan
+    .desc = Wolf
 
 kuruth-triggers = Kuruth Triggers
-    .blood = Blood
-    .blood-passive  = Smelling human blood.
-    .blood-common   = Tasting human blood.
-    .blood-specific = Swallowing human blood.
+blood-trigger = Blood
+    .passive  = Smelling human blood.
+    .common   = Tasting human blood.
+    .specific = Swallowing human blood.
 
-    .moon = Moon
-    .moon-passive = Your auspice moon is in the sky.
-    .moon-common   = You witness your auspice moon in the sky.
-    .moon-specific = Hear a wolf or werewolf howl when your auspice moon is in the sky.
+moon-trigger = Moon
+    .passive = Your auspice moon is in the sky.
+    .common   = You witness your auspice moon in the sky.
+    .specific = Hear a wolf or werewolf howl when your auspice moon is in the sky.
     
-    .the_other = The Other
-    .the_other-passive  = You come within 10 yards of a supernatural creature.
-    .the_other-common   = You witness a supernatural creature doing something obviously inhuman.
-    .the_other-specific = You are the target of a supernatural power.
+the-other-trigger = The Other
+    .passive  = You come within 10 yards of a supernatural creature.
+    .common   = You witness a supernatural creature doing something obviously inhuman.
+    .specific = You are the target of a supernatural power.
 
-    .pack = Pack
-    .pack-passive  = A pack member takes lethal damage.
-    .pack-common   = Seeing someone attack a pack member.
-    .pack-specific = You cause lethal damage to a pack member.
+pack-trigger = Pack
+    .passive  = A pack member takes lethal damage.
+    .common   = Seeing someone attack a pack member.
+    .specific = You cause lethal damage to a pack member.
 
-    .territory = Territory
-    .territory-passive  = A werewolf you don't know enters your territory without permission.
-    .territory-common   = You see a werewolf you don't know in your territory.
-    .territory-specific = A werewolf you don't know challenges your pack's ability to do its duty.
+territory-trigger = Territory
+    .passive  = A werewolf you don't know enters your territory without permission.
+    .common   = You see a werewolf you don't know in your territory.
+    .specific = A werewolf you don't know challenges your pack's ability to do its duty.
 
-    .wound = Wound
-    .wound-passive  = Being in the area of a Wound.
-    .wound-common   = Interacting with a Wound-born spirit.
-    .wound-specific = Being attacked by a Wound-born spirit.
+wound-trigger = Wound
+    .passive  = Being in the area of a Wound.
+    .common   = Interacting with a Wound-born spirit.
+    .specific = Being attacked by a Wound-born spirit.
 
 moon-gifts = Moon Gifts
-    .crescent = Crescent Moon's Gift
-    .full = Full Moon's Gift
-    .gibbous = Gibbous Moon's Gift
-    .new = New Moon's Gift
+crescent = Crescent Moon's Gift
+full = Full Moon's Gift
+gibbous = Gibbous Moon's Gift
+new = New Moon's Gift
 shadow-gifts = Shadow Gifts
 wolf-gifts = Wolf Gifts
 rites = Rites
 
 changeling = Changeling
-    .needle = Needle
-    .thread = Thread
+needle = Needle
+thread = Thread
 
-    .seeming = Seeming
-    .court = Court
-    .kith = Kith
+seeming = Seeming
+court = Court
+kith = Kith
 
-    .regalia = Regalia
-    .frailties = Frailties
+regalia = Regalia
+frailties = Frailties
 
-    .wyrd = Wyrd
-    .glamour = Glamour
-    .clarity = Clarity
+wyrd = Wyrd
+glamour = Glamour
+clarity = Clarity
 
-    .crown = Crown
-    .jewels = Jewels
-    .mirror = Mirror
-    .shield = Shield
-    .steed = Steed
-    .sword = Sword
+crown = Crown
+jewels = Jewels
+mirror = Mirror
+shield = Shield
+steed = Steed
+sword = Sword
 
-    .beast = Beast
-    .darkling = Darkling
-    .elemental = Elemental
-    .fairest = Fairest
-    .ogre = Ogre
-    .wizened = Wizened
+beast = Beast
+darkling = Darkling
+elemental = Elemental
+fairest = Fairest
+ogre = Ogre
+wizened = Wizened
 
-    .spring = Spring
-    .summer = Summer
-    .autumn = Autumn
-    .winter = Winter
+spring = Spring
+summer = Summer
+autumn = Autumn
+winter = Winter
 
 favored-regalia = Favored Regalia
 
 bound = Bound
-    .root = Root
-    .bloom = Bloom
+root = Root
+bloom = Bloom
 
-    .burden = Burden
-    .archetype = Krewe Archetype
+burden = Burden
+archetype = Krewe Archetype
 
-    .haunts = Haunts
-    .keys = Keys
+synergy = Synergy
+plasm = Plasm
 
-    .synergy = Synergy
-    .plasm = Plasm
-
+haunts = Haunts
     .boneyard = Boneyard
     .caul = Caul
     .curse = Curse
@@ -345,26 +343,27 @@ bound = Bound
     .shroud = Shroud
     .tomb = Tomb
 
+keys = Keys
     .beasts = Beasts
     .blood = Blood
     .chance = Chance
-    .cold_wind = Cold Wind
+    .cold-wind = Cold Wind
     .disease = Disease
-    .grave_dirt = Grave-Dirt
-    .pyre_flame = Pyre-Flame
+    .grave-dirt = Grave-Dirt
+    .pyre-flame = Pyre-Flame
     .stillness = Stillness
 
-    .abiding = Abiding
-    .bereaved = Bereaved
-    .hungry = Hungry
-    .kindly = Kindly
-    .vengeful = Vengeful
+abiding = Abiding
+bereaved = Bereaved
+hungry = Hungry
+kindly = Kindly
+vengeful = Vengeful
 
-    .furies = Furies
-    .mourners = Mourners
-    .necropolitans = Necropolitans
-    .pilgrims = Pilgrims
-    .undertakers = Undertakers
+furies = Furies
+mourners = Mourners
+necropolitans = Necropolitans
+pilgrims = Pilgrims
+undertakers = Undertakers
 
 age = Age
 dob = Date of Birth
@@ -377,113 +376,113 @@ weight = Weight
 sex = Sex
 
 merits = Merit
-    .area_of_expertise = Area of Expertise
-    .common_sense = Common Sense
-    .danger_sense = Danger Sense
-    .direction_sense = Direction Sense
-    .eidetic_memory = Eidetic Memory
-    .encyclopedic_knowledge = Encyclopedic Knowledge
-    .eye_for_the_strange = Eye for the Strange
-    .fast_reflexes = Fast Reflexes
-    .good_time_management = Good Time Management
-    .holistic_awareness = Holistic Awareness
-    .human_prey = Human Prey
-    .hypervigilance = Hypervigilance
-    .indomitable = Indomitable
-    .interdiscilpinary_specialty = Interdisciplinary Specialty
-    .investigative_aide = Investigative Aide
-    .investigative_prodigy = Investigative Prodigy
-    .language = Language
-    .library = Library
-    .library_advanced = Library, Advanced
-    .lucid_dreamer = Lucid Dreamer
-    .meditative_mind = Meditative Mind
-    .multilingual = Multilingual
-    .object_fetishism = Object Fetishism
-    .patient = Patient
-    .renowned_artisan = Renowned Artisam
-    .scarred = Scarred
-    .tolerance_for_biology = Tolerance for Biology
-    .trained_observer = Trained Observer,
-    .vice_ridden = Vice-Ridden
-    .virtuous = Virtuous
+area-of-expertise = Area of Expertise
+common-sense = Common Sense
+danger-sense = Danger Sense
+direction-sense = Direction Sense
+eidetic-memory = Eidetic Memory
+encyclopedic-knowledge = Encyclopedic Knowledge
+eye-for-the-strange = Eye for the Strange
+fast-reflexes = Fast Reflexes
+good-time-management = Good Time Management
+holistic-awareness = Holistic Awareness
+human-prey = Human Prey
+hypervigilance = Hypervigilance
+indomitable = Indomitable
+interdisciplinary-specialty = Interdisciplinary Specialty
+investigative-aide = Investigative Aide
+investigative-prodigy = Investigative Prodigy
+language = Language
+library = Library
+library-advanced = Library, Advanced
+lucid-dreamer = Lucid Dreamer
+meditative-mind = Meditative Mind
+multilingual = Multilingual
+object-fetishism = Object Fetishism
+patient = Patient
+renowned-artisan = Renowned Artisam
+scarred = Scarred
+tolerance-for-biology = Tolerance for Biology
+trained-observer = Trained Observer,
+vice-ridden = Vice-Ridden
+virtuous = Virtuous
     
-    .ambidextrous = Ambidextrous
-    .automotive_genius = Automotive Genius
-    .covert_operative = Covert Operative
-    .crack_driver = Crack Driver
-    .demolisher = Demolisher
-    .double_jointed = Double Jointed
-    .fleet_of_foot = Fleet of Foot
-    .freediving = Freediving
-    .giant = Giant
-    .hardy = Hardy
-    .greyhound = Greyhound
-    .iron_skin = Iron Skin
-    .iron_stamina = Iron Stamina
-    .quick_draw = Quick Draw
-    .punch_drunk = Punch Drunk
-    .relentless = Relentless
-    .roadkill = Roadkill
-    .seizing_the_edge = Seizing the Edge
-    .sleight_of_hand = Sleight of Hand
-    .small_framed = Small Framed
-    .survivalist = Survivalist
+ambidextrous = Ambidextrous
+automotive-genius = Automotive Genius
+covert-operative = Covert Operative
+crack-driver = Crack Driver
+demolisher = Demolisher
+double-jointed = Double Jointed
+fleet-of-foot = Fleet of Foot
+freediving = Freediving
+giant = Giant
+hardy = Hardy
+greyhound = Greyhound
+iron-skin = Iron Skin
+iron-stamina = Iron Stamina
+quick-draw = Quick Draw
+punch-drunk = Punch Drunk
+relentless = Relentless
+roadkill = Roadkill
+seizing-the-edge = Seizing the Edge
+sleight-of-hand = Sleight of Hand
+small-framed = Small Framed
+survivalist = Survivalist
     
-    .air_of_menace = Air of Menace
-    .allies = Allies
-    .alternate_identity = Alternate Identity
-    .anonymity = Anonymity
-    .barfly = Barfly
-    .closed_book = Closed Book
-    .cohesive_unit = Cohesive Unit
-    .contacts = Contacts
-    .defender = Defender
-    .empath = Empath
-    .fame = Fame
-    .fixer = Fixer
-    .hobbyist_clique = Hobbyist Clique
-    .inspiring = Inspiring
-    .iron_will = Iron Will
-    .mentor = Mentor
-    .peacemaker = Peacemaker
-    .pusher = Pusher
-    .resources = Resources
-    .retainer = Retainer
-    .safe_place = Safe Place
-    .small_unit_tactics = Small Unit Tactics
-    .spin_doctor = Spin Doctor
-    .staff = Staff
-    .status = Status
-    .striking_looks = Striking Looks
-    .support_network = Support Network
-    .sympathetic = Sympathetic
-    .table_turner = Table Turner
-    .takes_one_to_know_one = Takes One to Know One
-    .taste = Taste
-    .true_friend = True Friend
-    .untouchable = Untouchable
+air-of-menace = Air of Menace
+allies = Allies
+alternate-identity = Alternate Identity
+anonymity = Anonymity
+barfly = Barfly
+closed-book = Closed Book
+cohesive-unit = Cohesive Unit
+contacts = Contacts
+defender = Defender
+empath = Empath
+fame = Fame
+fixer = Fixer
+hobbyist-clique = Hobbyist Clique
+inspiring = Inspiring
+iron-will = Iron Will
+mentor = Mentor
+peacemaker = Peacemaker
+pusher = Pusher
+resources = Resources
+retainer = Retainer
+safe-place = Safe Place
+small-unit-tactics = Small Unit Tactics
+spin-doctor = Spin Doctor
+staff = Staff
+status = Status
+striking-looks = Striking Looks
+support-network = Support Network
+sympathetic = Sympathetic
+table-turner = Table Turner
+takes-one-to-know-one = Takes One to Know One
+taste = Taste
+true-friend = True Friend
+untouchable = Untouchable
     
-    .professional_training = Professional Training
-    .aggressive_driving = Aggressive Driving
-    .drone_control = Drone Control
-    .falconry = Falconry
-    .k9 = K9
-    .parkour = Parkour
-    .stunt_driver = Stunt Driver
+professional-training = Professional Training
+aggressive-driving = Aggressive Driving
+drone-control = Drone Control
+falconry = Falconry
+k9 = K9
+parkour = Parkour
+stunt-driver = Stunt Driver
     
-    .etiquette = Etiquette
-    .fast_talking = Fast Talking
-    .mystery_cult_initation = Mystery Cult Initation
-    .scorpion_cult_initation = Scorpion Cult Initation
+etiquette = Etiquette
+fast-talking = Fast Talking
+mystery-cult-initation = Mystery Cult Initation
+scorpion-cult-initation = Scorpion Cult Initation
     
-    .defensive_combat = Defensive Combat
+defensive-combat = Defensive Combat
     
-    .relentless_assault = Relentless Assault
+relentless-assault = Relentless Assault
     
-    .high_speech = High Speech
+high-speech = High Speech
     
     
     
-    .efficient_killer = Efficient Killer
-    .totem = Totem
+efficient-killer = Efficient Killer
+totem = Totem

@@ -1,6 +1,9 @@
 use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use closure::closure;
+use cofd::splat::mage::Mage;
+use cofd::splat::werewolf::Auspice;
+use cofd::traits::DerivedTrait;
 use cofd::{
 	character::Wound,
 	prelude::*,
@@ -15,17 +18,19 @@ use cofd::{
 use iced::overlay::menu;
 use iced::widget::{button, container, scrollable};
 use iced::{
+	theme,
 	widget::{column, component, pick_list, row, text, text_input, Column, Component},
 	Alignment, Element, Length,
 };
 
+use crate::i18n::Translated;
 use crate::{
 	component::{
 		attribute_bar, info_bar, integrity_component, list, merit_component, skills_component,
 		traits_component,
 	},
-	fl,
-	i18n::{flt, Translated},
+	fl, i18n,
+	i18n::Translate,
 	widget::{dots, dots::Shape, dots::SheetDots, track, track::HealthTrack},
 	COMPONENT_SPACING, H2_SIZE, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
 };
@@ -98,8 +103,6 @@ impl<Message> OverviewTab<Message> {
 			+ container::StyleSheet,
 		<Theme as menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
 	{
-		let splat_name = character.splat.name();
-
 		let mut col = Column::new()
 			.align_items(Alignment::Center)
 			.spacing(TITLE_SPACING);
@@ -117,7 +120,7 @@ impl<Message> OverviewTab<Message> {
 				for ability in abilities {
 					let val = character.get_ability_value(&ability).unwrap_or(&0);
 
-					col1 = col1.push(text(flt(splat_name, Some(ability.name())).unwrap()));
+					col1 = col1.push(text(ability.translated()));
 					col2 = col2.push(SheetDots::new(*val, 0, 5, Shape::Dots, None, move |val| {
 						Event::AbilityValChanged(ability.clone(), val)
 					}));
@@ -184,7 +187,7 @@ impl<Message> OverviewTab<Message> {
 
 			if let Some(name) = character.splat.ability_name() {
 				col = col
-					.push(text(flt(splat_name, Some(name)).unwrap()).size(H3_SIZE))
+					.push(text(i18n::LANGUAGE_LOADER.get(name)).size(H3_SIZE))
 					.push(column![row![col1, col2], new]);
 			}
 		}
@@ -211,8 +214,6 @@ where
 	#[allow(clippy::too_many_lines)]
 	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
 		let mut character = self.character.borrow_mut();
-
-		let res = None;
 
 		match event {
 			Event::AttrChanged(val, attr) => *character.base_attributes_mut().get_mut(&attr) = val,
@@ -272,8 +273,10 @@ where
 				}
 			}
 			Event::TraitChanged(val, _trait) => match _trait {
-				Trait::Size => {
-					character.base_size = (val as i16 - character.get_modifier(Trait::Size)) as u16;
+				Trait::DerivedTrait(DerivedTrait::Size) => {
+					character.base_size = (val as i16
+						- character.get_modifier(Trait::DerivedTrait(DerivedTrait::Size)))
+						as u16;
 				}
 				Trait::Willpower => character.willpower = val,
 				Trait::Power => character.power = val,
@@ -323,15 +326,14 @@ where
 				_ => (),
 			},
 			Event::RoteSkillChanged(skill) => {
-				if let Splat::Mage(
-					_,
-					Some(
-						Order::_Custom(_, rote_skills)
-						| Order::SeersOfTheThrone(Some(Ministry::_Custom(_, rote_skills))),
-					),
-					_,
-					_,
-				) = &mut character.splat
+				if let Splat::Mage(Mage {
+					order:
+						Some(
+							Order::_Custom(_, rote_skills)
+							| Order::SeersOfTheThrone(Some(Ministry::_Custom(_, rote_skills))),
+						),
+					..
+				}) = &mut character.splat
 				{
 					if !rote_skills.contains(&skill) {
 						rote_skills.rotate_left(1);
@@ -340,8 +342,8 @@ where
 				}
 			}
 			Event::RegaliaChanged(regalia) => {
-				if let Splat::Changeling(_seeming, .., data) = &mut character.splat {
-					data.regalia = Some(regalia);
+				if let Splat::Changeling(data) = &mut character.splat {
+					data.regalia = regalia;
 				}
 			}
 
@@ -363,19 +365,17 @@ where
 				}
 			}
 			Event::HuntersAspectChanged(val) => {
-				if let Splat::Werewolf(.., data) = &mut character.splat {
-					if let HuntersAspect::_Custom(name) = &val
-						&& name.eq("")
-					{
-						data.hunters_aspect = None;
-					} else {
-						data.hunters_aspect = Some(val);
+				if let Splat::Werewolf(data) = &mut character.splat {
+					if let Some(Auspice::_Custom(.., hunters_aspect)) = &mut data.auspice {
+						if let HuntersAspect::_Custom(_) = &val {
+							*hunters_aspect = val;
+						}
 					}
 				}
 			}
 		}
 
-		res
+		None
 	}
 
 	#[allow(clippy::too_many_lines)]
@@ -420,12 +420,9 @@ where
 				Event::TraitChanged(val, Trait::Power)
 			});
 
-			column![
-				text(flt(character.splat.name(), Some(st)).unwrap()).size(H3_SIZE),
-				dots
-			]
-			.spacing(TITLE_SPACING)
-			.align_items(Alignment::Center)
+			column![text(st.translated()).size(H3_SIZE), dots]
+				.spacing(TITLE_SPACING)
+				.align_items(Alignment::Center)
 		} else {
 			column![]
 		};
@@ -440,12 +437,9 @@ where
 				|val| Event::TraitChanged(val, Trait::Fuel),
 			);
 
-			column![
-				text(flt(character.splat.name(), Some(fuel)).unwrap()).size(H3_SIZE),
-				boxes
-			]
-			.spacing(TITLE_SPACING)
-			.align_items(Alignment::Center)
+			column![text(fuel.translated()).size(H3_SIZE), boxes]
+				.spacing(TITLE_SPACING)
+				.align_items(Alignment::Center)
 		} else {
 			column![]
 		};
@@ -482,7 +476,7 @@ where
 
 		let obsessions = if let Splat::Mage(.., data) = &character.splat {
 			column![list(
-				flt("mage", Some("obsessions")).unwrap(),
+				fl!("obsessions"),
 				Some(1),
 				Some(match character.power {
 					1..=2 => 1,
@@ -536,9 +530,9 @@ where
 			} else {
 				let name = data.triggers.name().unwrap();
 
-				let passive = flt("kuruth-triggers", Some(&format!("{name}-passive"))).unwrap();
-				let common = flt("kuruth-triggers", Some(&format!("{name}-common"))).unwrap();
-				let specific = flt("kuruth-triggers", Some(&format!("{name}-specific"))).unwrap();
+				let passive = i18n::LANGUAGE_LOADER.get_attr(name, "passive");
+				let common = i18n::LANGUAGE_LOADER.get_attr(name, "common");
+				let specific = i18n::LANGUAGE_LOADER.get_attr(name, "specific");
 
 				(
 					text(passive).into(),
@@ -550,7 +544,9 @@ where
 			let vec: Vec<Translated<KuruthTriggers>> =
 				KuruthTriggers::all().into_iter().map(Into::into).collect();
 
+			let txt = text(fl!("passive")).style(theme::Text::default());
 			column![
+				txt,
 				text(fl!("kuruth-triggers")),
 				column![
 					pick_list(
@@ -560,11 +556,11 @@ where
 					)
 					.width(Length::Fill)
 					.padding(INPUT_PADDING),
-					text(fl!("werewolf", "passive")),
+					text(fl!("passive")).style(theme::Text::default()),
 					passive,
-					text(fl!("werewolf", "common")),
+					text(fl!("common")),
 					common,
-					text(fl!("werewolf", "specific")),
+					text(fl!("specific")),
 					specific
 				]
 				.align_items(Alignment::Center)
@@ -580,35 +576,35 @@ where
 		let merits = merit_component(self.character.clone(), Event::MeritChanged);
 		let traits = traits_component(&character, Event::TraitChanged);
 
-		let regalia = if let Splat::Changeling(seeming, .., data) = &character.splat {
-			let sg = seeming.get_favored_regalia();
+		let regalia = if let Splat::Changeling(data) = &character.splat {
+			let favoured_regalia = data.seeming.get_favored_regalia();
 			let all_regalia: Vec<Regalia> = Regalia::all().to_vec();
 
-			let seeming_regalia = text(flt(character.splat.name(), Some(sg.name())).unwrap());
+			let seeming_regalia = text(favoured_regalia.translated());
 
-			let regalia: Element<Self::Event, Theme> =
-				if let Some(Regalia::_Custom(name)) = &data.regalia {
-					text_input("", name)
-						.on_input(|val| Event::RegaliaChanged(Regalia::_Custom(val)))
-						.width(Length::Fill)
-						.padding(INPUT_PADDING)
-						.into()
-				} else {
-					let reg: Vec<Translated<Regalia>> = all_regalia
-						.iter()
-						.filter(|&reg| reg != sg)
-						.cloned()
-						.map(Into::into)
-						.collect();
-
-					pick_list(
-						reg,
-						data.regalia.clone().map(Into::<Translated<Regalia>>::into),
-						|val| Event::RegaliaChanged(val.unwrap()),
-					)
+			let regalia: Element<Self::Event, Theme> = if let Regalia::_Custom(name) = &data.regalia
+			{
+				text_input("", name)
+					.on_input(|val| Event::RegaliaChanged(Regalia::_Custom(val)))
 					.width(Length::Fill)
+					.padding(INPUT_PADDING)
 					.into()
-				};
+			} else {
+				let reg: Vec<Translated<Regalia>> = all_regalia
+					.iter()
+					.filter(|&regalia| regalia != favoured_regalia)
+					.cloned()
+					.map(Into::into)
+					.collect();
+
+				pick_list(
+					reg,
+					Some::<Translated<Regalia>>(data.regalia.clone().into()),
+					|val| Event::RegaliaChanged(val.unwrap()),
+				)
+				.width(Length::Fill)
+				.into()
+			};
 
 			column![
 				text(fl!("favored-regalia")).size(H3_SIZE),
@@ -623,7 +619,7 @@ where
 		let frailties: Element<Self::Event, Theme> =
 			if let Splat::Changeling(.., data) = &character.splat {
 				list(
-					fl!("changeling", "frailties"),
+					fl!("frailties"),
 					Some(3),
 					Some(3),
 					data.frailties.clone(),
@@ -642,7 +638,7 @@ where
 		let banes: Element<Self::Event, Theme> = if let Splat::Vampire(.., data) = &character.splat
 		{
 			list(
-				fl!("vampire", "banes"),
+				fl!("banes"),
 				Some(3),
 				Some(3),
 				data.banes.clone(),
@@ -658,53 +654,52 @@ where
 			column![].into()
 		};
 
-		let hunters_aspect: Element<Self::Event, Theme> =
-			if let Splat::Werewolf(auspice, tribe, _, data) = &character.splat {
-				let mut vec: Vec<Translated<HuntersAspect>> = if let Some(auspice) = auspice {
-					vec![auspice.get_hunters_aspect().clone().into()]
-				} else if let Some(Tribe::Pure(tribe)) = tribe {
-					tribe
-						.get_hunters_aspects()
-						.iter()
-						.cloned()
-						.map(Into::into)
-						.collect()
-				} else {
-					Vec::new()
-				};
-
-				vec.push(HuntersAspect::_Custom(fl!("custom")).into());
-
-				let mut col = column![text(fl!("werewolf", "hunters_aspect")),]
-					.align_items(Alignment::Center)
-					.spacing(TITLE_SPACING);
-
-				if let Some(HuntersAspect::_Custom(name)) = &data.hunters_aspect {
-					col = col.push(
-						text_input("", name)
-							.on_input(|val| {
-								Event::HuntersAspectChanged(HuntersAspect::_Custom(val))
-							})
-							.padding(INPUT_PADDING),
-					);
-				} else {
-					col = col.push(
-						pick_list(
-							vec,
-							data.hunters_aspect
-								.clone()
-								.map(Into::<Translated<HuntersAspect>>::into),
-							|val| Event::HuntersAspectChanged(val.unwrap()),
-						)
-						.width(Length::Fill)
-						.padding(INPUT_PADDING),
-					);
-				}
-
-				col.into()
+		let hunters_aspect: Element<Self::Event, Theme> = if let Splat::Werewolf(data) =
+			&character.splat
+		{
+			let mut vec: Vec<Translated<HuntersAspect>> = if let Some(auspice) = &data.auspice {
+				vec![auspice.get_hunters_aspect().clone().into()]
+			} else if let Some(Tribe::Pure(tribe)) = &data.tribe {
+				tribe
+					.get_hunters_aspects()
+					.iter()
+					.cloned()
+					.map(Into::into)
+					.collect()
 			} else {
-				column![].into()
+				Vec::new()
 			};
+
+			vec.push(HuntersAspect::_Custom(fl!("custom")).into());
+
+			let mut col = column![text(fl!("hunters-aspect")),]
+				.align_items(Alignment::Center)
+				.spacing(TITLE_SPACING);
+
+			if let Some(HuntersAspect::_Custom(name)) = &data.hunters_aspect {
+				col = col.push(
+					text_input("", name)
+						.on_input(|val| Event::HuntersAspectChanged(HuntersAspect::_Custom(val)))
+						.padding(INPUT_PADDING),
+				);
+			} else {
+				col = col.push(
+					pick_list(
+						vec,
+						data.hunters_aspect
+							.clone()
+							.map(Into::<Translated<HuntersAspect>>::into),
+						|val| Event::HuntersAspectChanged(val.unwrap()),
+					)
+					.width(Length::Fill)
+					.padding(INPUT_PADDING),
+				);
+			}
+
+			col.into()
+		} else {
+			column![].into()
+		};
 
 		let mut col1: Column<Event, Theme> = Column::new()
 			.align_items(Alignment::Center)
@@ -719,7 +714,7 @@ where
 			.width(Length::Fill);
 
 		match &character.splat {
-			Splat::Mortal => {}
+			Splat::Mortal(..) => {}
 			Splat::Bound(..) => {
 				col2 = col2.push(fuel);
 			}

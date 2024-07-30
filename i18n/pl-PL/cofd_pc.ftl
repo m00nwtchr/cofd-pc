@@ -8,50 +8,56 @@ unskilled = (-{ $num } niebiegły)
 
 attributes = Atrybuty
 attribute = Atrybut
-    .power = Moc
-    .finesse = Finezja
-    .resistance = Odporność
+
+power = Moc
+finesse = Finezja
+resistance = Odporność
     
-    .intelligence = Inteligencja
-    .wits = Rozum
-    .resolve = Przekonanie
+intelligence = Inteligencja
+wits = Rozum
+resolve = Przekonanie
     
-    .strength = Siła
-    .dexterity = Zręczność
-    .stamina = Wytrzymałość
+strength = Siła
+dexterity = Zręczność
+stamina = Wytrzymałość
     
-    .presence = Prezencja
-    .manipulation = Manipulacja
-    .composure = Opanowanie
+presence = Prezencja
+manipulation = Manipulacja
+composure = Opanowanie
+
+##
 
 skills = Zdolności
 skill = Zdolność
-    .academics = Wykształcenie
-    .computer = Komputer
-    .crafts = Rzemieślnictwo
-    .investigation = Śledztwo
-    .medicine = Medycyna
-    .occult = Okultyzm
-    .politics = Polityka
-    .science = Nauka
 
-    .athletics = Atletyka
-    .brawl = Bijatyka
-    .drive = Prowadzenie
-    .firearms = Broń palna
-    .larceny = Kradzież
-    .stealth = Skradanie
-    .survival = Przetrwanie
-    .weaponry = Broń
+academics = Wykształcenie
+computer = Komputer
+crafts = Rzemieślnictwo
+investigation = Śledztwo
+medicine = Medycyna
+occult = Okultyzm
+politics = Polityka
+science = Nauka
+
+athletics = Atletyka
+brawl = Bijatyka
+drive = Prowadzenie
+firearms = Broń palna
+larceny = Kradzież
+stealth = Skradanie
+survival = Przetrwanie
+weaponry = Broń
     
-    .animal_ken = Oswajanie
-    .empathy = Empatia
-    .expression = Ekspresja
-    .intimidation = Zastraszanie
-    .persuasion = Perswazja
-    .socialize = Etykieta
-    .streetwise = Zn. półświatka
-    .subterfuge = Podstęp
+animal-ken = Oswajanie
+empathy = Empatia
+expression = Ekspresja
+intimidation = Zastraszanie
+persuasion = Perswazja
+socialize = Etykieta
+streetwise = Zn. półświatka
+subterfuge = Podstęp
+
+##
 
 name = Imie
 player = Gracz
@@ -62,7 +68,7 @@ virtue = Cnota
 vice = Wada
 
 faction = Frakcja
-group_name = Nazwa grupy
+group-name = Nazwa grupy
 
 health = Zdrowie
 willpower = Siła woli
@@ -71,7 +77,7 @@ size = Rozmiar
 speed = Prędkość
 defense = Obrona
 armor = Zbroja
-initative = Inicjatywa
+initiative = Inicjatywa
 beats = Beats
 experience = Doświadczenie
 perception = Percepcja
@@ -82,173 +88,185 @@ aspirations = Aspiracje
 custom = Własne
 
 mortal = Śmiertelnik
-    .integrity = Integralność
+integrity = Integralność
 
 vampire = Wampir
-    .mask = Maska
-    .dirge = Lament
+mask = Maska
+dirge = Lament
 
-    .clan = Klan
-    .covenant = Przymierze
-    .bloodline = Rodowód
+clan = Klan
+covenant = Przymierze
+bloodline = Rodowód
 
-    .disciplines = Dyscypliny
+disciplines = Dyscypliny
 
-    .blood_potency = Moc Krwi
-    .vitae = Żywot
-    .humanity = Człowieczeństwo
+blood-potency = Moc Krwi
+vitae = Żywot
+humanity = Człowieczeństwo
 
-    .banes = Zguby
+banes = Zguby
     
-    .animalism = Animalizm
-    .auspex = Nadwrażliwość
-    .celerity = Przyspieszenie
-    .dominate = Dominacja
-    .majesty = Majestat
-    .nightmare = Koszmar
-    .obfuscate = Niewidoczność
-    .protean = Transformacja
-    .resilience = Odporność
-    .vigor = Wigor
+animalism = Animalizm
+auspex = Nadwrażliwość
+celerity = Przyspieszenie
+dominate = Dominacja
+majesty = Majestat
+nightmare = Koszmar
+obfuscate = Niewidoczność
+protean = Transformacja
+resilience = Odporność
+vigor = Wigor
 
-    .carthian_movement = Ruch Kartów
-    .circle_of_the_crone = Krąg Wiedźmy
+carthian-movement = Ruch Kartów
+circle-of-the-crone = Krąg Wiedźmy
 
 mage = Mag
-    .shadow_name = Imię cienia
+shadow-name = Imię cienia
     
-    .path = Ścieżka
-    .order = Zakon
-    .legacy = Dziedzictwo
+path = Ścieżka
+order = Zakon
+legacy = Dziedzictwo
 
-    .arcana = Arkana
-    
-    .beats = Tajemne { beats }
-    .experience Tajemne { experience }
-    
-    .gnosis = Gnoza
-    .wisdom = Mądrość
-    .obsessions = Obsesje
-    
+arcana = Arkana
 
-    .death = Śmierć
-    .fate = Los
-    .forces = Siły
-    .life = Życie
-    .matter = Materia
-    .mind = Umysł
-    .prime = Pierwsza
-    .space = Przestrzeń
-    .spirit = Duch
-    .time = Czas
+arcane-beats = Tajemne { beats }
+arcane-experience = Tajemne { experience }
 
-    .adamantine_arrow = Adamantowa Strzała
-    .silver_ladder = Srebrna Drabina
-    .free_council = Wolna Rada
+gnosis = Gnoza
+wisdom = Mądrość
+obsessions = Obsesje
 
-    .seers_of_the_throne = Jasnowidze Tronu
-    .hegemony = Hegemonia
-    .panopticon = Panoptykon
+death = Śmierć
+fate = Los
+forces = Siły
+life = Życie
+matter = Materia
+mind = Umysł
+prime = Pierwsza
+space = Przestrzeń
+spirit = Duch
+time = Czas
+
+adamantine-arrow = Adamantowa Strzała
+silver-ladder = Srebrna Drabina
+free-council = Wolna Rada
+
+seers-of-the-throne = Jasnowidze Tronu
+hegemony = Hegemonia
+panopticon = Panoptykon
 
 werewolf = Wilkołak
-    .blood = Krew
-    .bone = Kość
+blood = Krew
+bone = Kość
 
-    .auspice = Łaska
-    .tribe = Plemię
-    .lodge = Loża
+auspice = Łaska
+tribe = Plemię
+lodge = Loża
 
-    .renown = Renoma
-    
-    .primal_urge = Pierwotny Instynkt
-    .essence = Esencja
-    .harmony = Harmoniia
+hunters-aspect = Aspekt Łowcy
 
-    .passive = Pasywne
-    .common = Zwyczajne
-    .specific = Specyficzne
+primal-urge = Pierwotny Instynkt
+essence = Esencja
+harmony = Harmoniia
 
+passive = Pasywne
+common = Zwyczajne
+specific = Specyficzne
+
+renown = Renoma
     .cunning = Podstęp
-    .glory = Chwała
-    .purity = Czystość
-    .wisdom = Mądrość
+    .glory   = Chwała
+    .purity  = Czystość
+    .wisdom  = Mądrość
 
-    .blood_talons = Krwawe Szpony
-    .bone_shadows = Cienie Kości
-    .hunters_in_darkness = Łowcy w Ciemności
-    .iron_masters = Żelazni Mistrzowie
-    .storm_lords = Władcy Burzy
-    .ghost_wolves = Widmowe Wilki
+blood-talons = Krwawe Szpony
+bone-shadows = Cienie Kości
+hunters-in-darkness = Łowcy w Ciemności
+iron-masters = Żelazni Mistrzowie
+storm-lords = Władcy Burzy
+ghost-wolves = Widmowe Wilki
     
-    .fire_touched = Dotknięci Ogniem
-    .predator_kings = Królowie Drapieżników
+fire-touched = Dotknięci Ogniem
+predator-kings = Królowie Drapieżników
 
-    .hishu-desc = Człowiek
-    .dalu-desc = Prawie-Człowiek
-    .gauru-desc = Człowiek-Wilk
-    .urshul-desc = Prawie-Wilk
-    .urhan-desc = Wilk
+hishu = Hishu
+    .desc = Człowiek
+dalu = Dalu
+    .desc = Prawie-Człowiek
+gauru = Gauru
+    .desc = Człowiek-Wilk
+urshul = Urshul
+    .desc = Prawie-Wilk
+urhan = Urhan
+    .desc = Wilk
 
 kuruth-triggers = Kuruth Triggers
-    .blood-passive  = Smelling human blood.
-    .blood-common   = Tasting human blood.
-    .blood-specific = Połykanie ludzkiej krwi.
+blood-trigger = Krew
+    .passive   = Smelling human blood.
+    .common    = Tasting human blood.
+    .specific  = Połykanie ludzkiej krwi.
 
-    .moon-passive = Księżyc twojej łaski jest na niebie.
-    .moon-common  = Widzisz księźyc twojej łaski na niebie.
-    .moon-specific = Słysysz wycie wilka lub wilkołaka, gdy księżyc twojej łaski jest na niebie.
+moon-trigger = Księżyc
+    .passive  = Księżyc twojej łaski jest na niebie.
+    .common   = Widzisz księźyc twojej łaski na niebie.
+    .specific = Słysysz wycie wilka lub wilkołaka, gdy księżyc twojej łaski jest na niebie.
     
-    .theother-passive   = Zbliżasz się w odległości 10 metrów od nadprzyrodzonej istoty.
-    .theother-common   = Widzisz, jak nadprzyrodzona istota robi coś wyraźnie nieludzkiego.
-    .theother-specific = Jesteś celem nadprzyrodzonej mocy.
+the-other-trigger = Oni
+    .passive  = Zbliżasz się w odległości 10 metrów od nadprzyrodzonej istoty.
+    .common   = Widzisz, jak nadprzyrodzona istota robi coś wyraźnie nieludzkiego.
+    .specific = Jesteś celem nadprzyrodzonej mocy.
 
-    .pack-passive  = Członek stada odnosi śmiertelne obrażenia.
-    .pack-common   = Widzisz, jak ktoś atakuje członka stada.
-    .pack-specific = Zadajesz śmiertelne obrażenia członkowi stada.
+pack-trigger = Wataha
+    .passive  = Członek watahy odnosi śmiertelne obrażenia.
+    .common   = Widzisz, jak ktoś atakuje członka watahy.
+    .specific = Zadajesz śmiertelne obrażenia członkowi watahy.
 
-    .territory-passive  = Wilkołak, którego nie znasz, wkracza na twoje terytorium bez pozwolenia.
-    .territory-common   = Na swoim terytorium widzisz wilkołaka, którego nie znasz.
-    .territory-specific = Nieznany wilkołak stawia w wątpliwość zdolność twojego stada do wypełniania swoich obowiązków.
+territory-trigger = Terytorium
+    .passive  = Wilkołak, którego nie znasz, wkracza na twoje terytorium bez pozwolenia.
+    .common   = Na swoim terytorium widzisz wilkołaka, którego nie znasz.
+    .specific = Nieznany wilkołak stawia w wątpliwość zdolność twojego stada do wypełniania swoich obowiązków.
 
-    .wound-passive  = Przebywanie w okolicy Rany.
-    .wound-common   = Interakcja z duchem zrodzonym z Rany.
-    .wound-specific = Bycie zaatakowanym przez ducha zrodzonego z Rany.
+wound-trigger = Rana
+    .passive  = Przebywanie w okolicy Rany.
+    .common   = Interakcja z duchem zrodzonym z Rany.
+    .specific = Bycie zaatakowanym przez ducha zrodzonego z Rany.
 
 moon-gifts = Dary Księżyca
-    .full = Dar Pełnego Księżyca
+
+full = Dar Pełnego Księżyca
 
 shadow-gifts = Dary Cienia
 wolf-gifts = Dary Wilka
 
 changeling = Podmieńca
-    .needle = Igła
-    .thread = Nić
+needle = Igła
+thread = Nić
 
-    .seeming = Pozór
-    .court = Dwór
+seeming = Pozór
+court = Dwór
 
-    .frailties = Słabości
+frailties = Słabości
     
-    .glamour = Urok
-    .clarity = Klarowność
+glamour = Urok
+clarity = Klarowność
     
-    .crown = Korona
-    .jewels = Klejnoty
-    .mirror = Lustro
-    .shield = Tarcza
-    .steed = Rumak
-    .sword = Miecz
+crown = Korona
+jewels = Klejnoty
+mirror = Lustro
+shield = Tarcza
+steed = Rumak
+sword = Miecz
 
-    .beast = Bestia
-    .darkling = Ciemniak
-    .elemental = Żywiołak
-    .fairest = Piękny
-    .ogre = Ogr
+beast = Bestia
+darkling = Ciemniak
+elemental = Żywiołak
+fairest = Piękny
+ogre = Ogr
 
-    .spring = Wiosna
-    .summer = Lato
-    .autumn = Jesień
-    .winter = Zima
+spring = Wiosna
+summer = Lato
+autumn = Jesień
+winter = Zima
 
 favored-regalia = Regalia
 
@@ -262,6 +280,5 @@ height = Wysokość
 weight = Waga
 sex = Płeć
 
-
 merits = Talenty
-    .giant = Gigant
+giant = Gigant

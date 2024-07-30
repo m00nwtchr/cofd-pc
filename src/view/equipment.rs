@@ -10,13 +10,15 @@ use iced::{
 	Alignment, Length,
 };
 
+use crate::fl;
+
 pub struct EquipmentTab<Message> {
 	character: Rc<RefCell<Character>>,
-	phantom: PhantomData<Message>,
+	message: Message,
 }
 
-pub fn equipment_tab<Message>(character: Rc<RefCell<Character>>) -> EquipmentTab<Message> {
-	EquipmentTab::new(character)
+pub fn equipment_tab<Message: Clone>(character: Rc<RefCell<Character>>, message: Message) -> EquipmentTab<Message> {
+	EquipmentTab::new(character, message)
 }
 
 #[derive(Clone)]
@@ -25,15 +27,8 @@ pub enum Event {
 }
 
 impl<Message> EquipmentTab<Message> {
-	pub fn new(character: Rc<RefCell<Character>>) -> Self {
-		Self {
-			character,
-			phantom: PhantomData,
-		}
-	}
-
-	fn abilities(&self, _character: &Character) -> Element<Event> {
-		todo!()
+	pub fn new(character: Rc<RefCell<Character>>, message: Message) -> Self {
+		Self { character, message }
 	}
 }
 
@@ -57,7 +52,7 @@ where
 					vec_changed(i, weapon, &mut character.weapons);
 				}
 
-				None
+				Some(self.message.clone())
 			}
 		}
 	}
@@ -83,11 +78,11 @@ where
 				.width(Length::Fill)
 				.align_items(Alignment::Center)
 				.spacing(3);
-			let mut initative = column![text("Initative")]
+			let mut initative = column![text(fl!("initiative"))]
 				.width(Length::Fill)
 				.align_items(Alignment::Center)
 				.spacing(3);
-			let mut size = column![text("Size")]
+			let mut size = column![text(fl!("size"))]
 				.width(Length::Fill)
 				.align_items(Alignment::Center)
 				.spacing(3);

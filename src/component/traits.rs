@@ -1,4 +1,4 @@
-use crate::{fl, i18n::flt, Element, INPUT_PADDING};
+use crate::{fl, Element, INPUT_PADDING};
 use cofd::{character::ArmorStruct, prelude::*};
 use iced::widget::{component, Component};
 use iced::{
@@ -51,7 +51,8 @@ impl<Message> TraitsComponent<Message> {
 				alternate_experience: character.alternate_experience(),
 				armor: character.armor(),
 
-				alt_opt: character.splat.alternate_beats_optional(),
+				// alt_opt: character.splat.alternate_beats_optional(),
+				alt_opt: true, //TODO: FIX
 				splat: character.splat.name().to_string(),
 				// alt_name: character.splat.alternate_beats().map(|el| el.to_string()),
 			},
@@ -82,25 +83,28 @@ where
 		let alternate_beats = if self.traits.alt_opt {
 			row![]
 		} else {
+			// TODO: Fix
 			row![
-				text(format!(
-					"{}:",
-					flt(&self.traits.splat, Some("beats")).unwrap()
-				)),
-				text_input("", &format!("{}", self.traits.alternate_beats))
-					.on_input(|val| { Event(val.parse().unwrap_or(0), Trait::AlternateBeats) })
-					.padding(INPUT_PADDING)
+				// text(format!(
+				// 	"{}:",
+				// 	flt(&self.traits.splat, Some("beats")).unwrap()
+				// )),
+				// text_input("", &format!("{}", self.traits.alternate_beats))
+				// 	.on_input(|val| { Event(val.parse().unwrap_or(0), Trait::AlternateBeats) })
+				// 	.padding(INPUT_PADDING)
 			]
 		};
 
 		let alternate_xp = if self.traits.alt_opt {
 			row![]
 		} else {
-			row![text(format!(
-				"{}: {}",
-				flt(&self.traits.splat, Some("experience")).unwrap(),
-				self.traits.alternate_experience
-			)),]
+			row![
+			// 	text(format!(
+			// 	"{}: {}",
+			// 	flt(&self.traits.splat, Some("experience")).unwrap(),
+			// 	self.traits.alternate_experience
+			// )),
+			]
 		};
 
 		column![
@@ -138,7 +142,7 @@ where
 				// })
 			],
 			row![
-				text(format!("{}: {}", fl!("initative"), self.traits.initiative)),
+				text(format!("{}: {}", fl!("initiative"), self.traits.initiative)),
 				// text(self.traits.initative)
 			],
 			beats,

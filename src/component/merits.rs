@@ -4,14 +4,18 @@ use iced::{
 };
 use std::{cell::RefCell, rc::Rc};
 
+use crate::i18n::Translated;
 use crate::widget::dots;
 use crate::{
-	fl,
-	i18n::{flt, Translated},
+	fl, i18n,
+	i18n::Translate,
 	widget::dots::{Shape, SheetDots},
 	Element, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
 };
-use cofd::{prelude::*, splat::Merit};
+use cofd::{
+	prelude::*,
+	splat::{Merit, SplatTrait},
+};
 use iced::widget::{component, container, overlay, scrollable, Component};
 
 pub struct MeritComponent<Message> {
@@ -88,7 +92,7 @@ where
 
 		vec.push(Merit::_Custom(format!(
 			"--- {} Merits ---",
-			flt(character.splat.name(), None).unwrap()
+			i18n::LANGUAGE_LOADER.get(character.splat.name())
 		)));
 		vec.extend(character.splat.merits());
 
