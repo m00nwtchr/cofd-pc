@@ -1,4 +1,3 @@
-use crate::{fl, i18n::Translate, Element, INPUT_PADDING};
 use cofd::{
 	character::modifier::ModifierTarget,
 	prelude::*,
@@ -13,6 +12,8 @@ use iced::{
 	widget::{button, column, row, text, text_input, Column, Row},
 	Length,
 };
+
+use crate::{i18n::Translate, Element, INPUT_PADDING};
 
 #[derive(Debug, Clone)]
 pub struct FormsComponent;
@@ -46,7 +47,7 @@ impl FormsComponent {
 
 		if let Splat::Werewolf(..) = &character.splat {
 			for form in Form::all() {
-				row = row.push(self.mk_col(form, &character));
+				row = row.push(self.mk_col(form, character));
 			}
 		}
 

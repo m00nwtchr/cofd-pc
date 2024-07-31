@@ -1,19 +1,19 @@
+use cofd::{character::Wound, prelude::*, splat::Splat};
+use iced::{
+	widget::{column, row, text, text_input, Column},
+	Alignment, Length,
+};
+
 use super::list;
-use crate::i18n::Translate;
-use crate::widget::{dots, track};
 use crate::{
 	fl,
+	i18n::Translate,
 	widget::{
 		self,
 		dots::{Shape, SheetDots},
 		track::HealthTrack,
 	},
 	Element, COMPONENT_SPACING, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
-};
-use cofd::{character::Wound, prelude::*, splat::Splat};
-use iced::{
-	widget::{column, row, text, text_input, Column},
-	Alignment, Length,
 };
 
 #[derive(Debug, Clone)]

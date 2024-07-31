@@ -1,13 +1,17 @@
 use std::default::Default;
 
-use iced::advanced::layout::{self, Layout, Node};
-use iced::advanced::widget::{self, Widget};
-use iced::advanced::{renderer, Clipboard, Shell};
-use iced::widget::{text, Column, Row};
-use iced::{event, touch, Background, Point, Theme};
-use iced::{mouse, Alignment, Border, Color, Element, Length, Rectangle, Size};
-
 use cofd::character::{Damage, Wound};
+use iced::{
+	advanced::{
+		layout::{self, Layout, Node},
+		renderer,
+		widget::{self, Widget},
+		Clipboard, Shell,
+	},
+	event, mouse, touch,
+	widget::text,
+	Background, Border, Color, Element, Length, Point, Rectangle, Size, Theme,
+};
 
 pub struct HealthTrack<'a, Message, Theme>
 where

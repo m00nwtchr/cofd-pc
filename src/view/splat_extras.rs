@@ -1,12 +1,3 @@
-use crate::component::{forms, list, FormsComponent};
-use crate::i18n::Translated;
-use crate::widget::dots;
-use crate::{
-	fl,
-	i18n::Translate,
-	widget::dots::{Shape, SheetDots},
-	Element, H2_SIZE, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
-};
 use cofd::{
 	prelude::*,
 	splat::{
@@ -16,10 +7,17 @@ use cofd::{
 		Splat,
 	},
 };
-use iced::widget::{button, component, container, overlay, scrollable, Component};
 use iced::{
 	widget::{checkbox, column, pick_list, row, text, text_input, Column},
 	Alignment, Length,
+};
+
+use crate::{
+	component::{forms, list, FormsComponent},
+	fl,
+	i18n::{Translate, Translated},
+	widget::dots::{Shape, SheetDots},
+	Element, H2_SIZE, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
 };
 
 fn func<C: Clone, T, Message>(
@@ -258,7 +256,7 @@ impl SplatExtrasTab {
 					arcanum = arcanum.push(
 						pick_list(
 							arcana.clone(),
-							Some::<Translated<Arcanum>>(rote.arcanum.clone().into()),
+							Some::<Translated<Arcanum>>(rote.arcanum.into()),
 							func(
 								rote.clone(),
 								|rote, val: Translated<Arcanum>| rote.arcanum = val.unwrap(),

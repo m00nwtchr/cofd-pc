@@ -1,6 +1,5 @@
-use iced::widget::{component, Component};
 use iced::{
-	widget::{text, Column},
+	widget::{component, text, Column, Component},
 	Alignment, Element, Pixels,
 };
 

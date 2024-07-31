@@ -1,9 +1,10 @@
-use std::cell::{Ref, RefMut};
+use cofd::character::Character;
+use iced::{
+	widget::{button, column, row},
+	Element, Length,
+};
 
 use super::*;
-use cofd::character::Character;
-use iced::widget::{button, column, row, Column, Component};
-use iced::{Element, Length};
 
 #[derive(Debug, Clone)]
 pub enum Tab {
@@ -29,6 +30,12 @@ pub enum Message {
 	SelectOverview,
 	SelectEquipment,
 	SelectSplatExtras,
+}
+
+impl Default for SheetView {
+	fn default() -> Self {
+		Self::new()
+	}
 }
 
 impl SheetView {

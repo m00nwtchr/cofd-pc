@@ -1,22 +1,18 @@
-use iced::{
-	widget::{column, pick_list, row, text, text_input, Column},
-	Alignment, Length,
-};
-use std::{cell::RefCell, rc::Rc};
-
-use crate::i18n::Translated;
-use crate::widget::dots;
-use crate::{
-	fl, i18n,
-	i18n::Translate,
-	widget::dots::{Shape, SheetDots},
-	Element, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
-};
 use cofd::{
 	prelude::*,
 	splat::{Merit, SplatTrait},
 };
-use iced::widget::{component, container, overlay, scrollable, Component};
+use iced::{
+	widget::{column, pick_list, row, text, text_input, Column},
+	Alignment, Length,
+};
+
+use crate::{
+	fl, i18n,
+	i18n::Translated,
+	widget::dots::{Shape, SheetDots},
+	Element, H3_SIZE, INPUT_PADDING, TITLE_SPACING,
+};
 
 #[derive(Debug, Clone)]
 pub struct MeritComponent;
@@ -96,7 +92,7 @@ impl MeritComponent {
 					.merits
 					.iter()
 					.filter(|(merit, _)| *merit == *e)
-					.count() == 0 && e.is_available(&character, attributes, skills)
+					.count() == 0 && e.is_available(character, attributes, skills)
 			})
 			.cloned()
 			.map(Into::into)

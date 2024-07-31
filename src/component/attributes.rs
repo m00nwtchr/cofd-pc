@@ -1,13 +1,15 @@
+use cofd::{
+	character::modifier::ModifierTarget,
+	prelude::{TraitCategory, *},
+};
 use iced::{
 	widget::{column, row, text, Column},
 	Alignment, Length,
 };
 
-use cofd::{character::modifier::ModifierTarget, prelude::TraitCategory, prelude::*};
-
-use crate::i18n::Translate;
 use crate::{
 	fl,
+	i18n::Translate,
 	widget::dots::{Shape, SheetDots},
 	Element, H2_SIZE, TITLE_SPACING,
 };
@@ -15,7 +17,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct AttributeBar;
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Message(u16, Attribute);
 
 impl AttributeBar {
@@ -40,9 +42,9 @@ impl AttributeBar {
 				.spacing(3)
 				.width(Length::Fill)
 				.align_items(Alignment::End),
-				self.mk_attr_col(&character, TraitCategory::Mental),
-				self.mk_attr_col(&character, TraitCategory::Physical),
-				self.mk_attr_col(&character, TraitCategory::Social),
+				self.mk_attr_col(character, TraitCategory::Mental),
+				self.mk_attr_col(character, TraitCategory::Physical),
+				self.mk_attr_col(character, TraitCategory::Social),
 				column![].width(Length::Fill)
 			]
 			.spacing(10)

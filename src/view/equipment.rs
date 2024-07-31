@@ -1,16 +1,12 @@
-use super::overview::vec_changed;
-use crate::{Element, H2_SIZE, TITLE_SPACING};
 use closure::closure;
 use cofd::{character::Weapon, prelude::*};
-use iced::widget::{component, Component};
 use iced::{
 	widget::{column, row, text, text_input},
 	Alignment, Length,
 };
-use std::cell::{Ref, RefMut};
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
-use crate::fl;
+use super::overview::vec_changed;
+use crate::{fl, Element, H2_SIZE, TITLE_SPACING};
 
 #[derive(Debug, Clone)]
 pub struct EquipmentTab;

@@ -9,7 +9,6 @@ mod traits;
 
 pub use attributes::AttributeBar;
 pub use forms::FormsComponent;
-pub use info::InfoBar;
 pub use integrity::IntegrityComponent;
 pub use list::list;
 pub use merits::MeritComponent;

@@ -1,16 +1,22 @@
-use cofd::prelude::{Template, VariantName};
-use cofd::splat::ability::Ability;
-use cofd::splat::changeling::Regalia;
-use cofd::splat::werewolf::{HuntersAspect, KuruthTriggers, MoonGift, Rite, ShadowGift, WolfGift};
-use cofd::splat::{Merit, NameKey, Splat, SplatKind, XSplat, YSplat, ZSplat};
-use cofd::template::mage::Arcanum;
-use cofd::template::SupernaturalTolerance;
-use cofd::traits::TraitCategory;
+use std::{
+	fmt::{
+		Display, {self},
+	},
+	ops::Deref,
+	sync::Arc,
+};
+
 use cofd::{
 	character::InfoTrait,
-	splat::werewolf::Form,
-	template::{Anchor, Fuel, Integrity},
-	traits::{attribute::Attribute, skill::Skill, Trait},
+	prelude::{Template, VariantName},
+	splat::{
+		ability::Ability,
+		changeling::Regalia,
+		werewolf::{Form, HuntersAspect, KuruthTriggers, MoonGift, Rite, ShadowGift, WolfGift},
+		Merit, Splat, SplatKind, XSplat, YSplat, ZSplat,
+	},
+	template::{mage::Arcanum, Anchor, Fuel, Integrity, SupernaturalTolerance},
+	traits::{attribute::Attribute, skill::Skill, Trait, TraitCategory},
 };
 use i18n_embed::{
 	fluent::{fluent_language_loader, FluentLanguageLoader},
@@ -18,12 +24,6 @@ use i18n_embed::{
 };
 use once_cell::sync::Lazy;
 use rust_embed::RustEmbed;
-use std::fmt::Display;
-use std::ops::Deref;
-use std::{
-	fmt::{self},
-	sync::Arc,
-};
 
 #[derive(RustEmbed)]
 #[folder = "i18n"] // path to the compiled localization resources

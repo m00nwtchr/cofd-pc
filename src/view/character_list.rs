@@ -1,11 +1,12 @@
 use std::fmt::Write;
 
-use crate::i18n::Translate;
 use cofd::prelude::*;
 use iced::{
-	widget::{button, column, row, Column, text},
+	widget::{button, column, row, text, Column},
 	Alignment, Element, Length,
 };
+
+use crate::i18n::Translate;
 
 pub struct CharacterList;
 
@@ -16,6 +17,12 @@ pub enum Action {
 #[derive(Clone, Copy)]
 pub enum Message {
 	PickCharacter(usize),
+}
+
+impl Default for CharacterList {
+	fn default() -> Self {
+		Self::new()
+	}
 }
 
 impl CharacterList {

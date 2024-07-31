@@ -1,18 +1,18 @@
-use iced::widget::{component, container, scrollable, Component};
-use iced::{
-	widget::{column, pick_list, row, text, text_input, Column},
-	Alignment, Length,
-};
-use std::{cell::RefCell, rc::Rc};
-
-use crate::i18n::{Translate, Translated};
-use crate::{fl, i18n, Element, INPUT_PADDING};
 use cofd::{
 	character::InfoTrait,
 	prelude::*,
 	splat::{Splat, SplatTrait, XSplat, YSplat, ZSplat},
 };
-use iced::overlay::menu;
+use iced::{
+	widget::{column, pick_list, row, text, text_input, Column},
+	Alignment, Length,
+};
+
+use crate::{
+	fl, i18n,
+	i18n::{Translate, Translated},
+	Element, INPUT_PADDING,
+};
 
 #[derive(Debug, Clone)]
 pub struct InfoBar;
@@ -69,7 +69,7 @@ impl InfoBar {
 		let col3: Element<Message> = match character.splat {
 			Splat::Mortal(..) => self.mk_info_col(
 				vec![InfoTrait::Age, InfoTrait::Faction, InfoTrait::GroupName],
-				&character,
+				character,
 			),
 			_ => {
 				let mut xsplats = character.splat.xsplats();
@@ -208,7 +208,7 @@ impl InfoBar {
 		row![
 			self.mk_info_col(
 				vec![InfoTrait::Name, InfoTrait::Player, InfoTrait::Chronicle],
-				&character
+				character
 			),
 			self.mk_info_col(
 				vec![
@@ -216,7 +216,7 @@ impl InfoBar {
 					InfoTrait::ViceAnchor,
 					InfoTrait::Concept
 				],
-				&character
+				character
 			),
 			col3,
 		]
@@ -239,7 +239,7 @@ impl InfoBar {
 				_ => _trait.translated(),
 			};
 
-			col1 = col1.push(text(format!("{}:", str)));
+			col1 = col1.push(text(format!("{str}:")));
 			col2 = col2.push(
 				text_input("", character.info.get(_trait))
 					.on_input(move |val| Message::InfoTraitChanged(val, _trait))

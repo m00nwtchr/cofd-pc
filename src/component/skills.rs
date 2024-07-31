@@ -1,8 +1,11 @@
-use std::{cell::RefCell, rc::Rc};
-
-use cofd::splat::mage::{Mage, Ministry, Order};
-use cofd::{character::modifier::ModifierTarget, prelude::*, splat::Splat};
-use iced::widget::{component, Component};
+use cofd::{
+	character::modifier::ModifierTarget,
+	prelude::*,
+	splat::{
+		mage::{Mage, Ministry, Order},
+		Splat,
+	},
+};
 use iced::{
 	theme::{self},
 	widget::{button, checkbox, column, row, text, text_input, Column},
@@ -10,11 +13,11 @@ use iced::{
 };
 
 use super::list;
-use crate::i18n::Translate;
-use crate::view::overview::vec_changed;
 use crate::{
 	fl,
-	widget::dots::{self, Shape, SheetDots},
+	i18n::Translate,
+	view::overview::vec_changed,
+	widget::dots::{Shape, SheetDots},
 	H2_SIZE, H3_SIZE, TITLE_SPACING,
 };
 
@@ -83,9 +86,9 @@ impl SkillsComponent {
 	pub fn view(&self, character: &Character) -> Element<Message> {
 		column![
 			text(fl!("skills").to_uppercase()).size(H2_SIZE),
-			self.mk_skill_col(&character, TraitCategory::Mental),
-			self.mk_skill_col(&character, TraitCategory::Physical),
-			self.mk_skill_col(&character, TraitCategory::Social),
+			self.mk_skill_col(character, TraitCategory::Mental),
+			self.mk_skill_col(character, TraitCategory::Physical),
+			self.mk_skill_col(character, TraitCategory::Social),
 		]
 		.spacing(10)
 		// .padding(15)

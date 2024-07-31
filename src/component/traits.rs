@@ -1,10 +1,10 @@
-use crate::{fl, Element, INPUT_PADDING};
 use cofd::{character::ArmorStruct, prelude::*};
-use iced::widget::{component, Component};
 use iced::{
-	widget::{column, row, text, text_input},
+	widget::{column, component, row, text, text_input, Component},
 	Length,
 };
+
+use crate::{fl, Element, INPUT_PADDING};
 
 struct Traits {
 	size: u16,

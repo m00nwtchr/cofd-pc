@@ -1,12 +1,16 @@
-use std::array;
 use std::default::Default;
 
-use iced::advanced::layout::{self, Layout, Limits, Node};
-use iced::advanced::widget::{self, Widget};
-use iced::advanced::{renderer, Clipboard, Shell};
-use iced::widget::{text, Column, Row};
-use iced::{event, touch, Background, Padding, Point, Theme};
-use iced::{mouse, Alignment, Border, Color, Element, Length, Rectangle, Size};
+use iced::{
+	advanced::{
+		layout::{self, Layout, Limits, Node},
+		renderer,
+		widget::{self, Widget},
+		Clipboard, Shell,
+	},
+	event, mouse, touch,
+	widget::text,
+	Background, Border, Color, Element, Length, Point, Rectangle, Size, Theme,
+};
 
 pub struct SheetDots<'a, Message, Theme = iced::Theme>
 where

@@ -11,17 +11,19 @@
 	clippy::default_trait_access
 )]
 
+use std::{
+	fmt::{Debug, Formatter},
+	mem,
+};
+
 use cofd::prelude::*;
 use iced::{
 	executor,
-	widget::{button, column, row, Column},
-	Alignment, Application, Command, Element, Length, Settings, Size, Theme,
+	widget::{button, column},
+	Alignment, Application, Command, Element, Length, Settings, Theme,
 };
 #[cfg(target_arch = "wasm32")]
 use log::Level;
-use std::cell::{Ref, RefMut};
-use std::fmt::{Debug, Formatter};
-use std::{cell::RefCell, mem, rc::Rc};
 
 mod component;
 mod i18n;
@@ -29,10 +31,9 @@ mod store;
 mod view;
 mod widget;
 
-use crate::view::character_list::CharacterList;
-use crate::view::sheet::SheetView;
-use crate::view::*;
 use store::Store;
+
+use crate::view::{character_list::CharacterList, sheet::SheetView, *};
 
 const H2_SIZE: u16 = 25;
 const H3_SIZE: u16 = 20;
@@ -188,8 +189,7 @@ impl Application for PlayerCompanionApp {
 
 		#[cfg(target_arch = "wasm32")]
 		{
-			use iced::window;
-			use iced::window::Id;
+			use iced::{window, window::Id};
 			let window = web_sys::window().unwrap();
 			let (width, height) = (
 				window.inner_width().unwrap().as_f64().unwrap() as f32,
@@ -238,7 +238,7 @@ mod demo {
 	use cofd::{
 		character::CharacterInfo,
 		prelude::*,
-		splat::{changeling::*, geist::*, mage::*, vampire::*, werewolf::*, Merit, Splat},
+		splat::{changeling::*, geist::*, mage::*, vampire::*, werewolf::*, Merit},
 	};
 
 	#[allow(unused_imports)]
@@ -569,7 +569,6 @@ mod demo {
 				presence: 2,
 				manipulation: 3,
 				composure: 2,
-				..Default::default()
 			})
 			.with_skills(Skills {
 				academics: 1,

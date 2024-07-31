@@ -1,35 +1,34 @@
 use closure::closure;
-use cofd::splat::mage::Mage;
-use cofd::splat::werewolf::Auspice;
-use cofd::traits::DerivedTrait;
 use cofd::{
 	character::Wound,
 	prelude::*,
 	splat::{
 		ability::Ability,
 		changeling::Regalia,
-		mage::{Ministry, Order},
-		werewolf::{HuntersAspect, KuruthTrigger, KuruthTriggerSet, KuruthTriggers, Tribe},
-		Merit, Splat,
+		werewolf::{
+			Auspice, HuntersAspect, KuruthTrigger, KuruthTriggerSet, KuruthTriggers, Tribe,
+		},
+		Splat,
 	},
+	traits::DerivedTrait,
 };
-use iced::widget::{button, container, scrollable};
 use iced::{
 	theme,
-	widget::{column, component, pick_list, row, text, text_input, Column, Component},
+	widget::{column, pick_list, row, text, text_input, Column},
 	Alignment, Element, Length,
 };
 
-use crate::component::info::InfoBar;
-use crate::component::{
-	attributes, info, integrity, merits, skills, AttributeBar, MeritComponent, SkillsComponent,
-};
-use crate::i18n::Translated;
 use crate::{
-	component::{list, traits_component, IntegrityComponent},
+	component::{
+		attributes, info, info::InfoBar, integrity, list, merits, skills, traits_component,
+		AttributeBar, IntegrityComponent, MeritComponent, SkillsComponent,
+	},
 	fl, i18n,
-	i18n::Translate,
-	widget::{dots, dots::Shape, dots::SheetDots, track, track::HealthTrack},
+	i18n::{Translate, Translated},
+	widget::{
+		dots::{Shape, SheetDots},
+		track::HealthTrack,
+	},
 	COMPONENT_SPACING, H2_SIZE, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
 };
 
