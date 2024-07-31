@@ -168,7 +168,7 @@ impl IntegrityComponent {
 						fl!("touchstones"),
 						Some(10),
 						Some(10),
-						character.touchstones.clone() as Vec<String>,
+						character.touchstones.clone(),
 						|i, val| {
 							text_input("", &val.unwrap_or_default())
 								.on_input(move |val| Message::TouchstoneChanged(i, val))

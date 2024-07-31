@@ -119,14 +119,11 @@ impl SkillsComponent {
 				);
 			}
 
-			let specialties = if let Some(specialties) = character.specialties.get(&skill) {
-				specialties
-			} else {
-				lazy_static::lazy_static! {
-					static ref DEFAULT: Vec<String> = vec![];
-				}
-				&DEFAULT
-			};
+			let specialties = character
+				.specialties
+				.get(&skill)
+				.cloned()
+				.unwrap_or_default();
 
 			col1 = col1.push(
 				button(text(skill.translated()).style(if specialties.is_empty() {
@@ -158,7 +155,7 @@ impl SkillsComponent {
 						String::new(),
 						Some(specialties.len() + 1),
 						None,
-						specialties.clone(),
+						specialties,
 						move |i, val| {
 							text_input("", &val.unwrap_or_default())
 								.on_input(move |val| Message::Specialty(skill, i, val))

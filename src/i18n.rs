@@ -1,5 +1,3 @@
-use crate::i18n;
-use cfg_if::cfg_if;
 use cofd::prelude::{Template, VariantName};
 use cofd::splat::ability::Ability;
 use cofd::splat::changeling::Regalia;
@@ -18,7 +16,7 @@ use i18n_embed::{
 	fluent::{fluent_language_loader, FluentLanguageLoader},
 	DefaultLocalizer, LanguageLoader, LanguageRequester, Localizer,
 };
-use once_cell::sync::{Lazy, OnceCell};
+use once_cell::sync::Lazy;
 use rust_embed::RustEmbed;
 use std::fmt::Display;
 use std::ops::Deref;
@@ -77,15 +75,10 @@ pub fn setup() -> anyhow::Result<Box<dyn LanguageRequester<'static>>> {
 	let localizer: Arc<dyn Localizer> =
 		Arc::new(DefaultLocalizer::new(&*LANGUAGE_LOADER, &Localizations));
 
-	let mut language_requester = Box::new({
-		cfg_if! {
-			if #[cfg(target_arch = "wasm32")] {
-				i18n_embed::WebLanguageRequester::new()
-			} else {
-				i18n_embed::DesktopLanguageRequester::new()
-			}
-		}
-	});
+	#[cfg(not(target_arch = "wasm32"))]
+	let mut language_requester = Box::new(i18n_embed::DesktopLanguageRequester::new());
+	#[cfg(target_arch = "wasm32")]
+	let mut language_requester = Box::new(i18n_embed::WebLanguageRequester::new());
 
 	language_requester.add_listener(Arc::downgrade(&localizer));
 	language_requester.poll()?;

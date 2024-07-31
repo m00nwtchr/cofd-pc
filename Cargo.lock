@@ -526,7 +526,6 @@ name = "cofd-pc"
 version = "1.0.0"
 dependencies = [
  "anyhow",
- "cfg-if",
  "closure",
  "cofd",
  "console_error_panic_hook",
@@ -537,8 +536,6 @@ dependencies = [
  "i18n-embed",
  "i18n-embed-fl",
  "iced",
- "itertools 0.13.0",
- "lazy_static",
  "log",
  "once_cell",
  "ron",
