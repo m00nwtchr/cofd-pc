@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use cofd::splat::mage::Mage;
+use cofd::splat::mage::{Mage, Ministry, Order};
 use cofd::{character::modifier::ModifierTarget, prelude::*, splat::Splat};
 use iced::widget::{component, Component};
 use iced::{
@@ -10,73 +10,91 @@ use iced::{
 };
 
 use super::list;
+use crate::i18n::Translate;
+use crate::view::overview::vec_changed;
 use crate::{
 	fl,
 	widget::dots::{self, Shape, SheetDots},
 	H2_SIZE, H3_SIZE, TITLE_SPACING,
 };
-use crate::i18n::Translate;
 
-pub struct SkillsComponent<Message> {
-	character: Rc<RefCell<Character>>,
-	on_change: Box<dyn Fn(u16, Skill) -> Message>,
-	on_rote_change: Box<dyn Fn(Skill) -> Message>,
-	on_specialty_change: Box<dyn Fn(Skill, usize, String) -> Message>,
-}
-
-pub fn skills_component<Message>(
-	character: Rc<RefCell<Character>>,
-	on_change: impl Fn(u16, Skill) -> Message + 'static,
-	on_rote_change: impl Fn(Skill) -> Message + 'static,
-	on_specialty_change: impl Fn(Skill, usize, String) -> Message + 'static,
-) -> SkillsComponent<Message> {
-	SkillsComponent::new(character, on_change, on_rote_change, on_specialty_change)
+#[derive(Debug, Clone)]
+pub struct SkillsComponent {
+	specialty_skill: Option<Skill>,
 }
 
 #[derive(Clone)]
-pub enum Event {
+pub enum Message {
 	Skill(u16, Skill),
 	RoteSkill(Skill),
 	Specialty(Skill, usize, String),
 	SpecialtySkill(Skill),
 }
 
-#[derive(Default, Clone)]
-pub struct State {
-	specialty_skill: Option<Skill>,
-}
-
-impl<Message> SkillsComponent<Message> {
-	fn new(
-		character: Rc<RefCell<Character>>,
-		on_change: impl Fn(u16, Skill) -> Message + 'static,
-		on_rote_change: impl Fn(Skill) -> Message + 'static,
-		on_specialty_change: impl Fn(Skill, usize, String) -> Message + 'static,
-	) -> Self {
+impl SkillsComponent {
+	pub fn new() -> Self {
 		Self {
-			character,
-			on_change: Box::new(on_change),
-			on_rote_change: Box::new(on_rote_change),
-			on_specialty_change: Box::new(on_specialty_change),
+			specialty_skill: None,
 		}
 	}
 
-	fn mk_skill_col<Theme>(
-		&self,
-		state: &State,
-		character: &Character,
-		category: TraitCategory,
-	) -> Element<Event, Theme>
-	where
-		Theme: 'static
-			+ button::StyleSheet
-			+ dots::StyleSheet
-			+ text::StyleSheet
-			+ text_input::StyleSheet
-			+ checkbox::StyleSheet,
-		<Theme as text::StyleSheet>::Style: From<theme::Text>,
-		<Theme as button::StyleSheet>::Style: From<theme::Button>,
-	{
+	pub fn update(&mut self, message: Message, character: &mut Character) {
+		match message {
+			Message::Skill(val, skill) => *character.base_skills_mut().get_mut(skill) = val,
+			Message::RoteSkill(skill) => {
+				if let Splat::Mage(Mage {
+					order:
+						Some(
+							Order::_Custom(_, rote_skills)
+							| Order::SeersOfTheThrone(Some(Ministry::_Custom(_, rote_skills))),
+						),
+					..
+				}) = &mut character.splat
+				{
+					if !rote_skills.contains(&skill) {
+						rote_skills.rotate_left(1);
+						rote_skills[2] = skill;
+					}
+				}
+			}
+			Message::Specialty(skill, i, val) => {
+				if let Some(vec) = character.specialties.get_mut(&skill) {
+					if val.is_empty() {
+						vec.remove(i);
+					} else {
+						vec_changed(i, val, vec);
+					}
+				} else {
+					character.specialties.insert(skill, vec![val]);
+				}
+			}
+			Message::SpecialtySkill(skill) => {
+				if let Some(cur) = self.specialty_skill
+					&& cur == skill
+				{
+					self.specialty_skill = None;
+				} else {
+					self.specialty_skill = Some(skill);
+				}
+			}
+		}
+	}
+
+	pub fn view(&self, character: &Character) -> Element<Message> {
+		column![
+			text(fl!("skills").to_uppercase()).size(H2_SIZE),
+			self.mk_skill_col(&character, TraitCategory::Mental),
+			self.mk_skill_col(&character, TraitCategory::Physical),
+			self.mk_skill_col(&character, TraitCategory::Social),
+		]
+		.spacing(10)
+		// .padding(15)
+		.align_items(Alignment::Center)
+		.width(Length::Fill)
+		.into()
+	}
+
+	fn mk_skill_col(&self, character: &Character, category: TraitCategory) -> Element<Message> {
 		let mut col = Column::new();
 
 		let mut col0 = Column::new().spacing(3);
@@ -96,7 +114,7 @@ impl<Message> SkillsComponent<Message> {
 
 				col0 = col0.push(
 					checkbox("", flag)
-						.on_toggle(move |_| Event::RoteSkill(skill))
+						.on_toggle(move |_| Message::RoteSkill(skill))
 						.spacing(0),
 				);
 			}
@@ -111,16 +129,14 @@ impl<Message> SkillsComponent<Message> {
 			};
 
 			col1 = col1.push(
-				button(text(skill.translated()).style(
-					if specialties.is_empty() {
-						theme::Text::Default
-					} else {
-						theme::Text::Color(Color::from_rgb(0.0, 0.7, 0.0))
-					},
-				))
+				button(text(skill.translated()).style(if specialties.is_empty() {
+					theme::Text::Default
+				} else {
+					theme::Text::Color(Color::from_rgb(0.0, 0.7, 0.0))
+				}))
 				.padding(0)
 				.style(theme::Button::Text)
-				.on_press(Event::SpecialtySkill(skill)),
+				.on_press(Message::SpecialtySkill(skill)),
 			);
 
 			let v = character.base_skills().get(skill);
@@ -133,10 +149,10 @@ impl<Message> SkillsComponent<Message> {
 				5,
 				Shape::Dots,
 				None,
-				move |val| Event::Skill(val - mod_, skill),
+				move |val| Message::Skill(val - mod_, skill),
 			));
 
-			if let Some(specialty_skill) = state.specialty_skill {
+			if let Some(specialty_skill) = self.specialty_skill {
 				if skill.eq(&specialty_skill) {
 					col = col.push(row![col0, col1, col2].spacing(5)).push(list(
 						String::new(),
@@ -145,7 +161,7 @@ impl<Message> SkillsComponent<Message> {
 						specialties.clone(),
 						move |i, val| {
 							text_input("", &val.unwrap_or_default())
-								.on_input(move |val| Event::Specialty(skill, i, val))
+								.on_input(move |val| Message::Specialty(skill, i, val))
 								.padding(0)
 								.into()
 						},
@@ -171,72 +187,5 @@ impl<Message> SkillsComponent<Message> {
 		.spacing(TITLE_SPACING)
 		.align_items(Alignment::Center)
 		.into()
-	}
-}
-
-impl<Message, Theme> Component<Message, Theme> for SkillsComponent<Message>
-where
-	Theme: 'static
-		+ button::StyleSheet
-		+ dots::StyleSheet
-		+ text::StyleSheet
-		+ text_input::StyleSheet
-		+ checkbox::StyleSheet,
-	<Theme as text::StyleSheet>::Style: From<theme::Text>,
-	<Theme as button::StyleSheet>::Style: From<theme::Button>,
-{
-	type State = State;
-	type Event = Event;
-
-	fn update(&mut self, state: &mut Self::State, event: Self::Event) -> Option<Message> {
-		match event {
-			Event::Skill(val, skill) => Some((self.on_change)(val, skill)),
-			Event::RoteSkill(skill) => Some((self.on_rote_change)(skill)),
-			Event::Specialty(skill, i, val) => Some((self.on_specialty_change)(skill, i, val)),
-			Event::SpecialtySkill(skill) => {
-				if let Some(cur) = state.specialty_skill
-					&& cur == skill
-				{
-					state.specialty_skill = None;
-					None
-				} else {
-					state.specialty_skill = Some(skill);
-					None
-				}
-			}
-		}
-	}
-
-	fn view(&self, state: &Self::State) -> Element<Event, Theme> {
-		let character = self.character.borrow();
-
-		column![
-			text(fl!("skills").to_uppercase()).size(H2_SIZE),
-			self.mk_skill_col(state, &character, TraitCategory::Mental),
-			self.mk_skill_col(state, &character, TraitCategory::Physical),
-			self.mk_skill_col(state, &character, TraitCategory::Social),
-		]
-		.spacing(10)
-		// .padding(15)
-		.align_items(Alignment::Center)
-		.width(Length::Fill)
-		.into()
-	}
-}
-
-impl<'a, Message, Theme> From<SkillsComponent<Message>> for Element<'a, Message, Theme>
-where
-	Message: 'a,
-	Theme: 'static
-		+ button::StyleSheet
-		+ dots::StyleSheet
-		+ text::StyleSheet
-		+ text_input::StyleSheet
-		+ checkbox::StyleSheet,
-	<Theme as text::StyleSheet>::Style: From<theme::Text>,
-	<Theme as button::StyleSheet>::Style: From<theme::Button>,
-{
-	fn from(info_bar: SkillsComponent<Message>) -> Self {
-		component(info_bar)
 	}
 }

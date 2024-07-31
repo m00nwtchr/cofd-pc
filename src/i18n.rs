@@ -4,7 +4,7 @@ use cofd::prelude::{Template, VariantName};
 use cofd::splat::ability::Ability;
 use cofd::splat::changeling::Regalia;
 use cofd::splat::werewolf::{HuntersAspect, KuruthTriggers, MoonGift, Rite, ShadowGift, WolfGift};
-use cofd::splat::{Merit, NameKey, Splat, XSplat, YSplat, ZSplat};
+use cofd::splat::{Merit, NameKey, Splat, SplatKind, XSplat, YSplat, ZSplat};
 use cofd::template::mage::Arcanum;
 use cofd::template::SupernaturalTolerance;
 use cofd::traits::TraitCategory;
@@ -263,7 +263,7 @@ impl Translate for Ability {
 		match self {
 			Self::Haunt(_) => LANGUAGE_LOADER.get_attr("haunts", self.name()),
 			Self::Renown(_) => LANGUAGE_LOADER.get_attr("renown", self.name()),
-			_ => LANGUAGE_LOADER.get(self.name())
+			_ => LANGUAGE_LOADER.get(self.name()),
 		}
 	}
 }
@@ -311,3 +311,8 @@ impl Translate for Rite {
 // 		fl!("app-name")
 // 	}
 // }
+impl Translate for SplatKind {
+	fn translated(&self) -> String {
+		LANGUAGE_LOADER.get(self.name())
+	}
+}

@@ -1,3 +1,6 @@
+use crate::i18n::Translated;
+use crate::{i18n::Translate, INPUT_PADDING};
+use cofd::splat::SplatKind;
 use cofd::{prelude::*, splat::Splat};
 use iced::overlay::menu;
 use iced::widget::{container, scrollable};
@@ -6,12 +9,9 @@ use iced::{
 	Element, Length,
 };
 
-use crate::{i18n::Translate, INPUT_PADDING};
-use crate::i18n::Translated;
-
 pub struct CreatorView<Message> {
 	on_done: Box<dyn Fn(Character) -> Message>,
-	splat: Splat,
+	splat: SplatKind,
 }
 
 pub fn creator_view<Message>(
@@ -22,7 +22,7 @@ pub fn creator_view<Message>(
 
 #[derive(Clone)]
 pub enum Event {
-	SplatChanged(Splat), // TODO: Switch to using a unit-varianted "SplatKind" enum here
+	SplatChanged(SplatKind),
 	Done,
 }
 
@@ -30,7 +30,7 @@ impl<Message> CreatorView<Message> {
 	pub fn new(on_done: impl Fn(Character) -> Message + 'static) -> Self {
 		Self {
 			on_done: Box::new(on_done),
-			splat: Splat::default(),
+			splat: SplatKind::Mortal,
 		}
 	}
 
@@ -43,9 +43,13 @@ impl<Message> CreatorView<Message> {
 			+ 'static,
 		<Theme as menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
 	{
-		let splats: Vec<Translated<Splat>> = Splat::all().into_iter().map(Into::into).collect();
+		let splats: Vec<Translated<SplatKind>> = SplatKind::all()
+			.into_iter()
+			.copied()
+			.map(Into::into)
+			.collect();
 
-		let splat: Translated<Splat> = self.splat.clone().into();
+		let splat: Translated<SplatKind> = self.splat.clone().into();
 		pick_list(splats, Some(splat), |val| Event::SplatChanged(val.unwrap()))
 			.padding(INPUT_PADDING)
 			.width(Length::Fill)
@@ -70,7 +74,7 @@ where
 				None
 			}
 			Event::Done => Some((self.on_done)(
-				Character::builder().with_splat(self.splat.clone()).build(),
+				Character::builder().with_splat(self.splat).build(),
 			)),
 		}
 	}

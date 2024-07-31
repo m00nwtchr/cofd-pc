@@ -11,6 +11,7 @@
 	clippy::default_trait_access
 )]
 
+use cofd::prelude::*;
 use iced::{
 	executor,
 	widget::{button, column, row, Column},
@@ -18,9 +19,9 @@ use iced::{
 };
 #[cfg(target_arch = "wasm32")]
 use log::Level;
+use std::cell::{Ref, RefMut};
+use std::fmt::{Debug, Formatter};
 use std::{cell::RefCell, mem, rc::Rc};
-
-use cofd::prelude::*;
 
 mod component;
 mod i18n;
@@ -28,34 +29,10 @@ mod store;
 mod view;
 mod widget;
 
+use crate::view::character_list::CharacterList;
+use crate::view::sheet::SheetView;
+use crate::view::*;
 use store::Store;
-
-#[derive(Debug, Clone)]
-pub enum Tab {
-	Overview,
-	Equipment,
-	// Forms,
-	SplatExtras,
-}
-
-pub enum State {
-	CharacterList,
-	CharacterCreator,
-	Sheet {
-		active_tab: Tab,
-		character: Rc<RefCell<Character>>,
-	},
-}
-
-struct PlayerCompanionApp {
-	state: State,
-	prev_state: Option<State>,
-	characters: Vec<Rc<RefCell<Character>>>,
-
-	store: Store,
-	// locale: Locale,
-	// language_requester: Box<dyn LanguageRequester<'static>>,
-}
 
 const H2_SIZE: u16 = 25;
 const H3_SIZE: u16 = 20;
@@ -66,44 +43,50 @@ pub const INPUT_PADDING: u16 = 1;
 const TITLE_SPACING: u16 = 2;
 const COMPONENT_SPACING: u16 = 8;
 
-// const LANGS: [Locale; 4] = [
-// 	Locale::System,
-// 	Locale::Lang(langid!("en-GB")),
-// 	Locale::Lang(langid!("en-US")),
-// 	Locale::Lang(langid!("pl-PL")),
-// ];
+pub enum View {
+	CharacterList(character_list::CharacterList),
+	CharacterCreator,
+	Sheet(sheet::SheetView, usize),
+}
 
-#[derive(Debug, Clone)]
+struct PlayerCompanionApp {
+	view: View,
+	prev_view: Option<View>,
+	characters: Vec<Character>,
+
+	store: Store,
+	// locale: Locale,
+	// language_requester: Box<dyn LanguageRequester<'static>>,
+}
+
+#[derive(Clone)]
 enum Message {
-	TabSelected(Tab),
-	PickCharacter(usize),
 	AddCharacter(Character),
 	NewCharacter,
-	Previous,
-	Msg,
 
-	Save,
+	CharacterList(character_list::Message),
+	Sheet(sheet::Message),
+}
+
+impl Debug for Message {
+	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+		write!(f, "")
+	}
 }
 
 impl PlayerCompanionApp {
 	pub fn prev(&mut self) {
-		if let Some(state) = self.prev_state.take() {
-			self.state = state;
+		if let Some(state) = self.prev_view.take() {
+			self.view = state;
 		}
 	}
-	pub fn next(&mut self, mut state: State) {
-		mem::swap(&mut self.state, &mut state);
-		self.prev_state = Some(state);
+	pub fn next(&mut self, mut state: View) {
+		mem::swap(&mut self.view, &mut state);
+		self.prev_view = Some(state);
 	}
 
 	pub fn save(&self) -> anyhow::Result<()> {
-		let vec: Vec<Character> = self
-			.characters
-			.iter()
-			.map(|rip| rip.borrow().clone())
-			.collect();
-
-		self.store.set("characters", &vec)?;
+		self.store.set("characters", &self.characters)?;
 		Ok(())
 	}
 
@@ -118,7 +101,6 @@ impl PlayerCompanionApp {
 			.inspect(|val| {
 				val.calc_mod_map();
 			})
-			.map(|val| Rc::new(RefCell::new(val)))
 			.collect();
 
 		Ok(())
@@ -141,9 +123,9 @@ impl Application for PlayerCompanionApp {
 		let store = Store::new().expect("Data store not available");
 
 		let mut self_ = Self {
-			state: State::CharacterList,
+			view: View::CharacterList(CharacterList::new()),
 			// state: State::CharacterCreator,
-			prev_state: Default::default(),
+			prev_view: Default::default(),
 			characters: Vec::new(),
 			store,
 			// custom_xsplats: vec![
@@ -174,33 +156,34 @@ impl Application for PlayerCompanionApp {
 
 	fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
 		match message {
-			Message::TabSelected(tab) => {
-				if let State::Sheet { active_tab, .. } = &mut self.state {
-					*active_tab = tab;
+			Message::CharacterList(message) => {
+				if let View::CharacterList(view) = &mut self.view {
+					let character_list::Action::PickCharacter(i) = view.update(message);
+					self.next(View::Sheet(SheetView::new(), i));
 				}
 			}
-			Message::PickCharacter(i) => {
-				self.next(State::Sheet {
-					active_tab: Tab::Overview,
-					character: self.characters.get(i).unwrap().clone(),
-				});
-			}
-			Message::AddCharacter(character) => {
-				self.characters.push(Rc::new(RefCell::new(character)));
-				self.next(State::CharacterList);
-			}
-			Message::NewCharacter => {
-				self.next(State::CharacterCreator);
-			}
-			Message::Previous => self.prev(),
-			Message::Msg => {}
 
-			Message::Save => match self.save() {
+			Message::Sheet(sheet::Message::Back) => self.prev(),
+			Message::Sheet(sheet::Message::Save) => match self.save() {
 				Ok(()) => {}
 				Err(err) => {
 					log::error!("{}", err);
 				}
 			},
+
+			Message::Sheet(message) => {
+				if let View::Sheet(view, character) = &mut self.view {
+					view.update(message, self.characters.get_mut(*character).unwrap());
+				}
+			}
+
+			Message::AddCharacter(character) => {
+				self.characters.push(character);
+				self.next(View::CharacterList(CharacterList::new()));
+			}
+			Message::NewCharacter => {
+				self.next(View::CharacterCreator);
+			}
 		}
 
 		#[cfg(target_arch = "wasm32")]
@@ -219,62 +202,19 @@ impl Application for PlayerCompanionApp {
 	}
 
 	fn view(&self) -> Element<Self::Message, Self::Theme> {
-		match &self.state {
-			State::CharacterList => column![
-				view::character_list(self.characters.clone(), Message::PickCharacter),
+		match &self.view {
+			View::CharacterList(view) => column![
+				view.view(&self.characters).map(Message::CharacterList),
 				button("New Character").on_press(Message::NewCharacter)
 			]
 			.width(Length::Fill)
 			.align_items(Alignment::Center)
 			.into(),
 
-			State::CharacterCreator => view::creator_view(Message::AddCharacter).into(),
-			State::Sheet {
-				active_tab,
-				character,
-			} => {
-				let _brw = character.borrow();
-
-				let tab: Element<Self::Message, Self::Theme> = match active_tab {
-					Tab::Overview => view::overview_tab(character.clone()).into(),
-					Tab::Equipment => view::equipment_tab(character.clone(), Message::Msg).into(),
-
-					// Tab::Forms => {
-					// 	if let Splat::Werewolf(_, _, _, _) = brw.splat {
-					// 		view::werewolf::form_tab(character.clone(), Message::Msg).into()
-					// 	} else {
-					// 		unreachable!()
-					// 	}
-					// }
-					Tab::SplatExtras => view::splat_extras_tab(character.clone()).into(),
-				};
-
-				// let mut row = row![
-				// 	button("Back").on_press(Message::Previous),
-				// 	button("Save").on_press(Message::Save),
-				// 	button("Home").on_press(Message::TabSelected(Tab::Overview)),
-				// 	button("Splat").on_press(Message::TabSelected(Tab::SplatExtras)),
-				// ];
-
-				// if let Splat::Werewolf(_, _, _, data) = &brw.splat {
-				// 	row = row.push(button("Forms").on_press(Message::TabSelected(Tab::Forms)));
-				// }
-
-				// row = row.push(button("Equipment").on_press(Message::TabSelected(Tab::Equipment)));
-
-				Column::new()
-					.push(row![
-						button("Back").on_press(Message::Previous),
-						button("Save").on_press(Message::Save),
-						button("Home").on_press(Message::TabSelected(Tab::Overview)),
-						button("Equipment").on_press(Message::TabSelected(Tab::Equipment)),
-						button("Splat").on_press(Message::TabSelected(Tab::SplatExtras)),
-					])
-					.push(tab)
-					.width(Length::Fill)
-					.spacing(1)
-					.into()
-			}
+			View::CharacterCreator => view::creator_view(Message::AddCharacter).into(),
+			View::Sheet(view, character) => view
+				.view(self.characters.get(*character).unwrap())
+				.map(Message::Sheet),
 		}
 	}
 }

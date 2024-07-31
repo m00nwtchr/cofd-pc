@@ -18,61 +18,49 @@ use cofd::{
 };
 use iced::widget::{component, container, overlay, scrollable, Component};
 
-pub struct MeritComponent<Message> {
-	character: Rc<RefCell<Character>>,
-	on_change: Box<dyn Fn(usize, Merit, u16) -> Message>,
-}
-
-pub fn merit_component<Message>(
-	character: Rc<RefCell<Character>>,
-	on_change: impl Fn(usize, Merit, u16) -> Message + 'static,
-) -> MeritComponent<Message> {
-	MeritComponent::new(character, on_change)
-}
+#[derive(Debug, Clone)]
+pub struct MeritComponent;
 
 #[derive(Clone)]
-pub struct Event(usize, Merit, u16);
+pub struct Message(usize, Merit, u16);
 
-impl<Message> MeritComponent<Message> {
-	fn new(
-		character: Rc<RefCell<Character>>,
-		on_change: impl Fn(usize, Merit, u16) -> Message + 'static,
-	) -> Self {
-		Self {
-			character,
-			on_change: Box::new(on_change),
-		}
+impl MeritComponent {
+	pub fn new() -> Self {
+		Self
 	}
-}
 
-impl<Message, Theme> Component<Message, Theme> for MeritComponent<Message>
-where
-	Theme: text::StyleSheet
-		+ dots::StyleSheet
-		+ text_input::StyleSheet
-		+ pick_list::StyleSheet
-		+ scrollable::StyleSheet
-		+ overlay::menu::StyleSheet
-		+ container::StyleSheet
-		+ 'static,
-	<Theme as overlay::menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
-{
-	type State = ();
-	type Event = Event;
-
-	fn update(&mut self, _state: &mut Self::State, event: Event) -> Option<Message> {
-		if let Merit::_Custom(str) = &event.1 {
+	pub fn update(&mut self, message: Message, character: &mut Character) {
+		let Message(i, ability, val) = message;
+		if let Merit::_Custom(str) = &ability {
 			if str.contains("---") {
-				return None;
+				return;
 			}
 		}
 
-		Some((self.on_change)(event.0, event.1, event.2))
+		let mut flag = false;
+
+		if character.merits.len() == i {
+			if !ability.get_modifiers(val).is_empty() {
+				flag = true;
+			}
+			character.merits.push((ability, val));
+		} else {
+			let old = character.merits.remove(i);
+			if old.0.get_modifiers(old.1) != ability.get_modifiers(val) {
+				flag = true;
+			}
+
+			if !ability.name().is_empty() {
+				character.merits.insert(i, (ability, val));
+			}
+		}
+
+		if flag {
+			character.calc_mod_map();
+		}
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
-		let character = self.character.borrow();
-
+	pub fn view(&self, character: &Character) -> Element<Message> {
 		let mut col1 = Column::new().spacing(3).width(Length::FillPortion(3));
 		let mut col2 = Column::new()
 			.spacing(4)
@@ -118,7 +106,7 @@ where
 			if let Merit::_Custom(str) = &merit {
 				col1 = col1.push(
 					text_input("", str)
-						.on_input(move |key| Event(i, Merit::_Custom(key), val))
+						.on_input(move |key| Message(i, Merit::_Custom(key), val))
 						.padding(INPUT_PADDING),
 				);
 			} else {
@@ -127,7 +115,7 @@ where
 						pick_list(
 							vec.clone(),
 							Some::<Translated<Merit>>(merit.clone().into()),
-							move |key| Event(i, key.unwrap(), val),
+							move |key| Message(i, key.unwrap(), val),
 						)
 						.padding(INPUT_PADDING)
 						.text_size(20)
@@ -138,12 +126,13 @@ where
 
 			col2 = col2.push(SheetDots::new(val, 0, 5, Shape::Dots, None, {
 				let merit = merit.clone();
-				move |val| Event(i, merit.clone(), val)
+				move |val| Message(i, merit.clone(), val)
 			}));
 		}
 
-		let new = pick_list(vec, None::<Translated<Merit>>, |key| {
-			Event(self.character.borrow().merits.len(), key.unwrap(), 0)
+		let new = pick_list(vec, None::<Translated<Merit>>, {
+			let len = character.merits.len();
+			move |key| Message(len, key.unwrap(), 0)
 		})
 		.padding(INPUT_PADDING)
 		.text_size(20)
@@ -156,23 +145,5 @@ where
 		.spacing(TITLE_SPACING)
 		.align_items(Alignment::Center)
 		.into()
-	}
-}
-
-impl<'a, Message, Theme> From<MeritComponent<Message>> for Element<'a, Message, Theme>
-where
-	Message: 'a,
-	Theme: text::StyleSheet
-		+ dots::StyleSheet
-		+ text_input::StyleSheet
-		+ pick_list::StyleSheet
-		+ scrollable::StyleSheet
-		+ overlay::menu::StyleSheet
-		+ container::StyleSheet
-		+ 'static,
-	<Theme as overlay::menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
-{
-	fn from(info_bar: MeritComponent<Message>) -> Self {
-		component(info_bar)
 	}
 }

@@ -1,11 +1,12 @@
-mod character_list;
-mod creator;
-mod equipment;
-mod overview;
-mod splat_extras;
+pub mod character_list;
+pub mod creator;
+pub mod equipment;
+pub mod overview;
+pub mod splat_extras;
+pub mod sheet;
 
-pub use character_list::character_list;
+pub use character_list::CharacterList;
 pub use creator::creator_view;
-pub use equipment::equipment_tab;
-pub use overview::overview_tab;
-pub use splat_extras::splat_extras_tab;
+// pub use equipment::EquipmentTab;
+// pub use overview::OverviewTab;
+// pub use splat_extras::SplatExtrasTab;

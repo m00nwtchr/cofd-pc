@@ -1,10 +1,5 @@
-use iced::{
-	widget::{column, row, text, text_input, Column},
-	Alignment, Length,
-};
-use std::{cell::RefCell, ops::Deref, rc::Rc};
-
 use super::list;
+use crate::i18n::Translate;
 use crate::widget::{dots, track};
 use crate::{
 	fl,
@@ -16,44 +11,30 @@ use crate::{
 	Element, COMPONENT_SPACING, H3_SIZE, INPUT_PADDING, MAX_INPUT_WIDTH, TITLE_SPACING,
 };
 use cofd::{character::Wound, prelude::*, splat::Splat};
-use iced::widget::{component, Component};
-use crate::i18n::Translate;
+use iced::{
+	widget::{column, row, text, text_input, Column},
+	Alignment, Length,
+};
 
-pub struct IntegrityComponent {
-	character: Rc<RefCell<Character>>,
-}
-
-pub fn integrity_component(character: Rc<RefCell<Character>>) -> IntegrityComponent {
-	IntegrityComponent::new(character)
-}
+#[derive(Debug, Clone)]
+pub struct IntegrityComponent;
 
 #[derive(Clone)]
-pub enum Event {
+pub enum Message {
 	IntegrityChanged(u16),
 	IntegrityDamage(Wound),
 	TouchstoneChanged(usize, String),
 }
 
 impl IntegrityComponent {
-	fn new(character: Rc<RefCell<Character>>) -> Self {
-		Self { character }
+	pub fn new() -> Self {
+		Self
 	}
-}
 
-impl<Message, Theme> Component<Message, Theme> for IntegrityComponent
-where
-	Theme:
-		text::StyleSheet + text_input::StyleSheet + dots::StyleSheet + track::StyleSheet + 'static,
-{
-	type State = ();
-	type Event = Event;
-
-	fn update(&mut self, _state: &mut Self::State, event: Event) -> Option<Message> {
-		let mut character = self.character.borrow_mut();
-
+	pub fn update(&mut self, event: Message, character: &mut Character) {
 		match event {
-			Event::IntegrityChanged(val) => character.integrity = val,
-			Event::IntegrityDamage(wound) => {
+			Message::IntegrityChanged(val) => character.integrity = val,
+			Message::IntegrityDamage(wound) => {
 				if let Splat::Changeling(.., data) = &mut character.splat {
 					data.clarity.poke(&wound);
 					if let Wound::Lethal = wound {
@@ -61,7 +42,7 @@ where
 					}
 				}
 			}
-			Event::TouchstoneChanged(i, val) => {
+			Message::TouchstoneChanged(i, val) => {
 				if let Some(touchstone) = character.touchstones.get_mut(i) {
 					*touchstone = val;
 				} else {
@@ -70,22 +51,19 @@ where
 				}
 			}
 		}
-		None
 	}
 
 	#[allow(clippy::too_many_lines)]
-	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
-		let character = self.character.borrow();
-
-		let mut col = Column::<Event, Theme>::new()
+	pub fn view(&self, character: &Character) -> Element<Message> {
+		let mut col = Column::<Message>::new()
 			.align_items(Alignment::Center)
 			.spacing(COMPONENT_SPACING);
 
-		let dots: Element<Event, Theme> = if let Splat::Changeling(.., data) = &character.splat {
+		let dots: Element<Message> = if let Splat::Changeling(.., data) = &character.splat {
 			HealthTrack::new(
 				data.clarity.clone(),
 				data.max_clarity(&character.attributes()) as usize,
-				Event::IntegrityDamage,
+				Message::IntegrityDamage,
 			)
 			.into()
 		} else {
@@ -104,10 +82,10 @@ where
 							"",
 							character.touchstones.get(i).unwrap_or(&String::new()),
 						)
-						.on_input(move |val| Event::TouchstoneChanged(i, val))
+						.on_input(move |val| Message::TouchstoneChanged(i, val))
 						.padding(INPUT_PADDING)]
 						.max_width(
-							MAX_INPUT_WIDTH - SheetDots::<Event, Theme>::DEFAULT_SIZE, // - SheetDots::<Event, Renderer>::DEFAULT_SPACING,
+							MAX_INPUT_WIDTH - SheetDots::<Message>::DEFAULT_SIZE, // - SheetDots::<Event, Renderer>::DEFAULT_SPACING,
 						),
 					);
 				}
@@ -116,7 +94,7 @@ where
 			row![
 				column![
 					SheetDots::new(character.integrity, 1, 10, Shape::Dots, None, |val| {
-						Event::IntegrityChanged(val)
+						Message::IntegrityChanged(val)
 					})
 					.axis(if flag {
 						widget::dots::Axis::Vertical
@@ -126,7 +104,7 @@ where
 					.spacing(if flag {
 						4f32
 					} else {
-						SheetDots::<Event, Theme>::DEFAULT_SPACING
+						SheetDots::<Message>::DEFAULT_SPACING
 					}),
 				]
 				.align_items(if flag {
@@ -152,7 +130,7 @@ where
 						"",
 						character.touchstones.first().unwrap_or(&String::new()),
 					)
-					.on_input(|str| Event::TouchstoneChanged(0, str),)
+					.on_input(|str| Message::TouchstoneChanged(0, str),)
 					.padding(INPUT_PADDING)]
 					.max_width(MAX_INPUT_WIDTH),
 				]
@@ -176,7 +154,7 @@ where
 							"",
 							character.touchstones.get(1).unwrap_or(&String::new()),
 						)
-						.on_input(|str| Event::TouchstoneChanged(1, str),)
+						.on_input(|str| Message::TouchstoneChanged(1, str),)
 						.padding(INPUT_PADDING)]
 						.max_width(MAX_INPUT_WIDTH),
 					]
@@ -193,7 +171,7 @@ where
 						character.touchstones.clone() as Vec<String>,
 						|i, val| {
 							text_input("", &val.unwrap_or_default())
-								.on_input(move |val| Event::TouchstoneChanged(i, val))
+								.on_input(move |val| Message::TouchstoneChanged(i, val))
 								.padding(INPUT_PADDING)
 								.into()
 						},
@@ -205,16 +183,5 @@ where
 		}
 
 		col.into()
-	}
-}
-
-impl<'a, Message, Theme> From<IntegrityComponent> for Element<'a, Message, Theme>
-where
-	Message: 'a,
-	Theme:
-		text::StyleSheet + text_input::StyleSheet + dots::StyleSheet + track::StyleSheet + 'static,
-{
-	fn from(integrity: IntegrityComponent) -> Self {
-		component(integrity)
 	}
 }

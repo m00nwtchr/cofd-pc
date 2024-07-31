@@ -8,7 +8,7 @@ use iced::widget::{text, Column, Row};
 use iced::{event, touch, Background, Padding, Point, Theme};
 use iced::{mouse, Alignment, Border, Color, Element, Length, Rectangle, Size};
 
-pub struct SheetDots<'a, Message, Theme>
+pub struct SheetDots<'a, Message, Theme = iced::Theme>
 where
 	Theme: StyleSheet,
 {

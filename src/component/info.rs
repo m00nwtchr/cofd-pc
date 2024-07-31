@@ -14,87 +14,27 @@ use cofd::{
 };
 use iced::overlay::menu;
 
-pub struct InfoBar<Message> {
-	character: Rc<RefCell<Character>>,
-	on_change: Box<dyn Fn() -> Message>,
-}
-
-pub fn info_bar<Message>(
-	character: Rc<RefCell<Character>>,
-	on_change: impl Fn() -> Message + 'static,
-) -> InfoBar<Message> {
-	InfoBar::new(character, on_change)
-}
+#[derive(Debug, Clone)]
+pub struct InfoBar;
 
 #[derive(Clone)]
 #[allow(clippy::enum_variant_names)]
-pub enum Event {
+pub enum Message {
 	InfoTraitChanged(String, InfoTrait),
 	XSplatChanged(XSplat),
 	YSplatChanged(YSplat),
 	ZSplatChanged(ZSplat),
 }
 
-impl<Message> InfoBar<Message> {
-	fn new(character: Rc<RefCell<Character>>, on_change: impl Fn() -> Message + 'static) -> Self {
-		Self {
-			character,
-			on_change: Box::new(on_change),
-		}
+impl InfoBar {
+	pub fn new() -> Self {
+		Self
 	}
 
-	fn mk_info_col<Theme>(
-		&self,
-		info: Vec<InfoTrait>,
-		character: &Character,
-	) -> Element<Event, Theme>
-	where
-		Theme: text_input::StyleSheet + text::StyleSheet + 'static,
-	{
-		let mut col1 = Column::new().spacing(3);
-		let mut col2 = Column::new()
-			.spacing(3)
-			.width(Length::Fill)
-			.align_items(Alignment::End);
-
-		for _trait in info {
-			let str = match _trait {
-				InfoTrait::VirtueAnchor => character.splat.virtue_anchor().translated(),
-				InfoTrait::ViceAnchor => character.splat.vice_anchor().translated(),
-				_ => _trait.translated(),
-			};
-
-			col1 = col1.push(text(format!("{}:", str)));
-			col2 = col2.push(
-				text_input("", character.info.get(_trait))
-					.on_input(move |val| Event::InfoTraitChanged(val, _trait))
-					.padding(INPUT_PADDING),
-			);
-		}
-
-		row![col1, col2].width(Length::Fill).spacing(5).into()
-	}
-}
-
-impl<Message, Theme> Component<Message, Theme> for InfoBar<Message>
-where
-	Theme: text_input::StyleSheet + text::StyleSheet,
-	Theme: pick_list::StyleSheet
-		+ scrollable::StyleSheet
-		+ menu::StyleSheet
-		+ container::StyleSheet
-		+ 'static,
-	<Theme as menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
-{
-	type State = ();
-	type Event = Event;
-
-	fn update(&mut self, _state: &mut Self::State, event: Event) -> Option<Message> {
-		let mut character = self.character.borrow_mut();
-
-		match event {
-			Event::InfoTraitChanged(val, _trait) => *character.info.get_mut(_trait) = val,
-			Event::XSplatChanged(xsplat) => {
+	pub fn update(&mut self, message: Message, character: &mut Character) {
+		match message {
+			Message::InfoTraitChanged(val, _trait) => *character.info.get_mut(_trait) = val,
+			Message::XSplatChanged(xsplat) => {
 				if xsplat.name().eq("") {
 					character.splat.set_xsplat(None);
 				} else {
@@ -102,7 +42,7 @@ where
 				}
 				character.calc_mod_map();
 			}
-			Event::YSplatChanged(ysplat) => {
+			Message::YSplatChanged(ysplat) => {
 				if ysplat.name().eq("") {
 					character.splat.set_ysplat(None);
 				} else {
@@ -110,7 +50,7 @@ where
 				}
 				//character.calc_mod_map();
 			}
-			Event::ZSplatChanged(zsplat) => {
+			Message::ZSplatChanged(zsplat) => {
 				if zsplat.name().eq("") {
 					character.splat.set_zsplat(None);
 				} else {
@@ -118,8 +58,6 @@ where
 				}
 			}
 		}
-
-		Some((self.on_change)())
 	}
 
 	#[allow(
@@ -127,10 +65,8 @@ where
 		clippy::single_match_else,
 		clippy::too_many_lines
 	)]
-	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
-		let character = self.character.borrow();
-
-		let col3: Element<Event, Theme> = match character.splat {
+	pub fn view(&self, character: &Character) -> Element<Message> {
+		let col3: Element<Message> = match character.splat {
 			Splat::Mortal(..) => self.mk_info_col(
 				vec![InfoTrait::Age, InfoTrait::Faction, InfoTrait::GroupName],
 				&character,
@@ -161,7 +97,7 @@ where
 				let ysplat = character.splat.ysplat();
 				let zsplat = character.splat.zsplat();
 
-				let xsplat: Element<Event, Theme> = if let Some(xsplat) = xsplat.clone()
+				let xsplat: Element<Message> = if let Some(xsplat) = xsplat.clone()
 					&& xsplat.is_custom()
 				{
 					text_input("", xsplat.name())
@@ -170,7 +106,7 @@ where
 							move |val| {
 								let mut xsplat = xsplat.clone();
 								*xsplat.name_mut().unwrap() = val;
-								Event::XSplatChanged(xsplat)
+								Message::XSplatChanged(xsplat)
 							}
 						})
 						.padding(INPUT_PADDING)
@@ -179,14 +115,14 @@ where
 					pick_list(
 						xsplats,
 						xsplat.map(Into::<Translated<XSplat>>::into),
-						|val| Event::XSplatChanged(val.unwrap()),
+						|val| Message::XSplatChanged(val.unwrap()),
 					)
 					.padding(INPUT_PADDING)
 					.width(Length::Fill)
 					.into()
 				};
 
-				let ysplat: Element<Event, Theme> = if let Some(ysplat) = ysplat.clone()
+				let ysplat: Element<Message> = if let Some(ysplat) = ysplat.clone()
 					&& ysplat.is_custom()
 				{
 					text_input("", ysplat.name())
@@ -195,7 +131,7 @@ where
 							move |val| {
 								let mut ysplat = ysplat.clone();
 								*ysplat.name_mut().unwrap() = val;
-								Event::YSplatChanged(ysplat)
+								Message::YSplatChanged(ysplat)
 							}
 						})
 						.padding(INPUT_PADDING)
@@ -204,14 +140,14 @@ where
 					pick_list(
 						ysplats,
 						ysplat.map(Into::<Translated<YSplat>>::into),
-						|val| Event::YSplatChanged(val.unwrap()),
+						|val| Message::YSplatChanged(val.unwrap()),
 					)
 					.padding(INPUT_PADDING)
 					.width(Length::Fill)
 					.into()
 				};
 
-				let zsplat: Element<Event, Theme> = if let Some(zsplat) = zsplat.clone()
+				let zsplat: Element<Message> = if let Some(zsplat) = zsplat.clone()
 					&& zsplat.is_custom()
 				{
 					text_input("", zsplat.name())
@@ -220,7 +156,7 @@ where
 							move |val| {
 								let mut zsplat = zsplat.clone();
 								*zsplat.name_mut().unwrap() = val;
-								Event::ZSplatChanged(zsplat)
+								Message::ZSplatChanged(zsplat)
 							}
 						})
 						.padding(INPUT_PADDING)
@@ -229,16 +165,28 @@ where
 					pick_list(
 						zsplats,
 						zsplat.map(Into::<Translated<ZSplat>>::into),
-						|val| Event::ZSplatChanged(val.unwrap()),
+						|val| Message::ZSplatChanged(val.unwrap()),
 					)
 					.padding(INPUT_PADDING)
 					.width(Length::Fill)
 					.into()
 				};
 
-				let xsplat_name = character.splat.xsplat_name().map(|k| i18n::LANGUAGE_LOADER.get(k)).unwrap_or_default();
-				let ysplat_name = character.splat.ysplat_name().map(|k| i18n::LANGUAGE_LOADER.get(k)).unwrap_or_default();
-				let zsplat_name = character.splat.zsplat_name().map(|k| i18n::LANGUAGE_LOADER.get(k)).unwrap_or_default();
+				let xsplat_name = character
+					.splat
+					.xsplat_name()
+					.map(|k| i18n::LANGUAGE_LOADER.get(k))
+					.unwrap_or_default();
+				let ysplat_name = character
+					.splat
+					.ysplat_name()
+					.map(|k| i18n::LANGUAGE_LOADER.get(k))
+					.unwrap_or_default();
+				let zsplat_name = character
+					.splat
+					.zsplat_name()
+					.map(|k| i18n::LANGUAGE_LOADER.get(k))
+					.unwrap_or_default();
 
 				row![
 					column![
@@ -276,20 +224,29 @@ where
 		.spacing(10)
 		.into()
 	}
-}
 
-impl<'a, Message, Theme> From<InfoBar<Message>> for Element<'a, Message, Theme>
-where
-	Message: 'a,
-	Theme: text_input::StyleSheet + text::StyleSheet,
-	Theme: pick_list::StyleSheet
-		+ scrollable::StyleSheet
-		+ menu::StyleSheet
-		+ container::StyleSheet
-		+ 'static,
-	<Theme as menu::StyleSheet>::Style: From<<Theme as pick_list::StyleSheet>::Style>,
-{
-	fn from(info_bar: InfoBar<Message>) -> Self {
-		component(info_bar)
+	fn mk_info_col(&self, info: Vec<InfoTrait>, character: &Character) -> Element<Message> {
+		let mut col1 = Column::new().spacing(3);
+		let mut col2 = Column::new()
+			.spacing(3)
+			.width(Length::Fill)
+			.align_items(Alignment::End);
+
+		for _trait in info {
+			let str = match _trait {
+				InfoTrait::VirtueAnchor => character.splat.virtue_anchor().translated(),
+				InfoTrait::ViceAnchor => character.splat.vice_anchor().translated(),
+				_ => _trait.translated(),
+			};
+
+			col1 = col1.push(text(format!("{}:", str)));
+			col2 = col2.push(
+				text_input("", character.info.get(_trait))
+					.on_input(move |val| Message::InfoTraitChanged(val, _trait))
+					.padding(INPUT_PADDING),
+			);
+		}
+
+		row![col1, col2].width(Length::Fill).spacing(5).into()
 	}
 }

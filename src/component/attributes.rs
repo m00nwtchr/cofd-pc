@@ -1,98 +1,34 @@
-use std::{cell::RefCell, rc::Rc};
-
-use cofd::{character::modifier::ModifierTarget, prelude::TraitCategory, prelude::*};
-use iced::widget::{component, Component};
 use iced::{
 	widget::{column, row, text, Column},
 	Alignment, Length,
 };
 
+use cofd::{character::modifier::ModifierTarget, prelude::TraitCategory, prelude::*};
+
 use crate::i18n::Translate;
-use crate::widget::dots;
 use crate::{
 	fl,
 	widget::dots::{Shape, SheetDots},
 	Element, H2_SIZE, TITLE_SPACING,
 };
 
-pub struct AttributeBar<Message> {
-	// attributes: Attributes,
-	character: Rc<RefCell<Character>>,
-	on_change: Box<dyn Fn(u16, Attribute) -> Message>,
-}
-
-pub fn attribute_bar<Message>(
-	// attributes: Attributes,
-	character: Rc<RefCell<Character>>,
-	on_change: impl Fn(u16, Attribute) -> Message + 'static,
-) -> AttributeBar<Message> {
-	AttributeBar::new(character, on_change)
-}
+#[derive(Debug, Clone)]
+pub struct AttributeBar;
 
 #[derive(Clone)]
-pub struct Event(u16, Attribute);
+pub struct Message(u16, Attribute);
 
-impl<Message> AttributeBar<Message> {
-	fn new(
-		// attributes: Attributes,
-		character: Rc<RefCell<Character>>,
-		on_change: impl Fn(u16, Attribute) -> Message + 'static,
-	) -> Self {
-		Self {
-			// attributes,
-			character,
-			on_change: Box::new(on_change),
-		}
+impl AttributeBar {
+	pub fn new() -> Self {
+		Self
 	}
 
-	fn mk_attr_col<Theme>(&self, character: &Character, category: TraitCategory) -> Element<Event, Theme>
-	where
-		Theme: text::StyleSheet + dots::StyleSheet + 'static,
-	{
-		let mut col1 = Column::new().spacing(3);
-		let mut col2 = Column::new()
-			.spacing(5)
-			.width(Length::Fill)
-			.align_items(Alignment::End);
-
-		let base_attributes = character.base_attributes();
-		for attr in Attribute::get_by_category(category) {
-			let v = base_attributes.get(&attr);
-			let val = character._modified(ModifierTarget::BaseAttribute(attr));
-			let mod_ = val - v;
-
-			col1 = col1.push(text(attr.translated()));
-			col2 = col2.push(SheetDots::new(
-				val,
-				1 + mod_,
-				5,
-				Shape::Dots,
-				None,
-				move |val| Event(val - mod_, attr),
-			));
-		}
-
-		row![col1, col2]
-			.width(Length::FillPortion(2))
-			.spacing(5)
-			.into()
-	}
-}
-
-impl<Message, Theme> Component<Message, Theme> for AttributeBar<Message>
-where
-	Theme: text::StyleSheet + dots::StyleSheet + 'static,
-{
-	type State = ();
-	type Event = Event;
-
-	fn update(&mut self, _state: &mut Self::State, event: Self::Event) -> Option<Message> {
-		Some((self.on_change)(event.0, event.1))
+	pub fn update(&mut self, message: Message, character: &mut Character) {
+		let Message(val, attr) = message;
+		*character.base_attributes_mut().get_mut(&attr) = val;
 	}
 
-	fn view(&self, _state: &Self::State) -> Element<Event, Theme> {
-		let character = self.character.borrow();
-
+	pub fn view(&self, character: &Character) -> Element<Message> {
 		column![
 			text(fl!("attributes")).size(H2_SIZE),
 			row![
@@ -115,14 +51,34 @@ where
 		.align_items(Alignment::Center)
 		.into()
 	}
-}
 
-impl<'a, Message, Theme> From<AttributeBar<Message>> for Element<'a, Message, Theme>
-where
-	Message: 'a,
-	Theme: text::StyleSheet + dots::StyleSheet + 'static,
-{
-	fn from(info_bar: AttributeBar<Message>) -> Self {
-		component(info_bar)
+	fn mk_attr_col(&self, character: &Character, category: TraitCategory) -> Element<Message> {
+		let mut col1 = Column::new().spacing(3);
+		let mut col2 = Column::new()
+			.spacing(5)
+			.width(Length::Fill)
+			.align_items(Alignment::End);
+
+		let base_attributes = character.base_attributes();
+		for attr in Attribute::get_by_category(category) {
+			let v = base_attributes.get(&attr);
+			let val = character._modified(ModifierTarget::BaseAttribute(attr));
+			let mod_ = val - v;
+
+			col1 = col1.push(text(attr.translated()));
+			col2 = col2.push(SheetDots::new(
+				val,
+				1 + mod_,
+				5,
+				Shape::Dots,
+				None,
+				move |val| Message(val - mod_, attr),
+			));
+		}
+
+		row![col1, col2]
+			.width(Length::FillPortion(2))
+			.spacing(5)
+			.into()
 	}
 }
