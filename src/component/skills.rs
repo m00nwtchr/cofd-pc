@@ -8,7 +8,7 @@ use cofd::{
 };
 use iced::{
 	theme::{self},
-	widget::{button, checkbox, column, row, text, text_input, Column},
+	widget::{button, checkbox, column, row, text, text_input, Column, Row},
 	Alignment, Color, Element, Length,
 };
 
@@ -98,16 +98,11 @@ impl SkillsComponent {
 	}
 
 	fn mk_skill_col(&self, character: &Character, category: TraitCategory) -> Element<Message> {
-		let mut col = Column::new();
-
-		let mut col0 = Column::new().spacing(3);
-		let mut col1 = Column::new().width(Length::Fill).spacing(3);
-		let mut col2 = Column::new()
-			.spacing(4)
-			.width(Length::Fill)
-			.align_items(Alignment::End);
+		let mut col = Column::new().spacing(3);
 
 		for skill in Skill::get_by_category(category) {
+			let mut row = Row::new().spacing(5).width(Length::Fill);
+
 			if let Splat::Mage(Mage { order, .. }) = &character.splat {
 				let flag = if let Some(order) = order {
 					order.get_rote_skills().contains(&skill)
@@ -115,7 +110,7 @@ impl SkillsComponent {
 					false
 				};
 
-				col0 = col0.push(
+				row = row.push(
 					checkbox("", flag)
 						.on_toggle(move |_| Message::RoteSkill(skill))
 						.spacing(0),
@@ -128,12 +123,13 @@ impl SkillsComponent {
 				.cloned()
 				.unwrap_or_default();
 
-			col1 = col1.push(
+			row = row.push(
 				button(text(skill.translated()).style(if specialties.is_empty() {
 					theme::Text::Default
 				} else {
 					theme::Text::Color(Color::from_rgb(0.0, 0.7, 0.0))
 				}))
+				.width(Length::Fill)
 				.padding(0)
 				.style(theme::Button::Text)
 				.on_press(Message::SpecialtySkill(skill)),
@@ -143,7 +139,7 @@ impl SkillsComponent {
 			let val = character._modified(ModifierTarget::BaseSkill(skill));
 			let mod_ = val - v;
 
-			col2 = col2.push(SheetDots::new(
+			row = row.push(SheetDots::new(
 				val,
 				mod_,
 				5,
@@ -154,7 +150,7 @@ impl SkillsComponent {
 
 			if let Some(specialty_skill) = self.specialty_skill {
 				if skill.eq(&specialty_skill) {
-					col = col.push(row![col0, col1, col2].spacing(5)).push(list(
+					col = col.push(Column::new().push(row).push(list(
 						String::new(),
 						Some(specialties.len() + 1),
 						None,
@@ -165,19 +161,14 @@ impl SkillsComponent {
 								.padding(0)
 								.into()
 						},
-					));
-
-					col0 = Column::new().spacing(3);
-					col1 = Column::new().width(Length::Fill).spacing(3);
-					col2 = Column::new()
-						.spacing(4)
-						.width(Length::Fill)
-						.align_items(Alignment::End);
+					)));
+				} else {
+					col = col.push(row);
 				}
+			} else {
+				col = col.push(row);
 			}
 		}
-
-		col = col.push(row![col0, col1, col2].spacing(5));
 
 		column![
 			text(category.translated()).size(H3_SIZE),

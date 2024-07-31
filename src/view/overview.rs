@@ -14,7 +14,7 @@ use cofd::{
 };
 use iced::{
 	theme,
-	widget::{column, pick_list, row, text, text_input, Column},
+	widget::{column, pick_list, row, text, text_input, Column, Row},
 	Alignment, Element, Length,
 };
 
@@ -644,27 +644,20 @@ impl OverviewTab {
 	}
 
 	fn abilities(&self, character: &Character) -> Element<Message> {
-		let mut col = Column::new()
-			.align_items(Alignment::Center)
-			.spacing(TITLE_SPACING);
+		let mut col = Column::new().spacing(3);
 
 		if let Some(abilities) = character.splat.all_abilities() {
-			let mut col1 = Column::new().spacing(3).width(Length::FillPortion(3));
-			let mut col2 = Column::new()
-				.spacing(4)
-				.width(Length::FillPortion(2))
-				.align_items(Alignment::End);
-
-			let mut new = Column::new().width(Length::Fill);
-
 			if character.splat.are_abilities_finite() {
 				for ability in abilities {
 					let val = character.get_ability_value(&ability).unwrap_or(&0);
 
-					col1 = col1.push(text(ability.translated()));
-					col2 = col2.push(SheetDots::new(*val, 0, 5, Shape::Dots, None, move |val| {
-						Message::AbilityValChanged(ability.clone(), val)
-					}));
+					col = col.push(
+						Row::new()
+							.push(text(ability.translated()).width(Length::Fill))
+							.push(SheetDots::new(*val, 0, 5, Shape::Dots, None, move |val| {
+								Message::AbilityValChanged(ability.clone(), val)
+							})),
+					);
 				}
 			} else {
 				let mut vec = abilities.clone();
@@ -681,42 +674,41 @@ impl OverviewTab {
 					.collect();
 
 				for (ability, val) in &character.abilities {
-					if ability.is_custom() {
-						col1 = col1.push(
-							text_input("", ability.name())
-								.on_input(closure!(clone ability, |val| {
-									let mut new = ability.clone();
-									*new.name_mut().unwrap() = val;
-									Message::AbilityChanged(ability.clone(), new)
-								}))
-								.padding(INPUT_PADDING),
-						);
+					let item: Element<Message> = if ability.is_custom() {
+						text_input("", ability.name())
+							.on_input(closure!(clone ability, |val| {
+								let mut new = ability.clone();
+								*new.name_mut().unwrap() = val;
+								Message::AbilityChanged(ability.clone(), new)
+							}))
+							.width(Length::Fill)
+							.padding(INPUT_PADDING)
+							.into()
 					} else {
-						col1 = col1
-							.push(
-								pick_list(
-									vec.clone(),
-									Some::<Translated<Ability>>(ability.clone().into()),
-									closure!(clone ability, |val| Message::AbilityChanged(ability.clone(), val.unwrap())),
-								)
-								.width(Length::Fill)
-								.padding(INPUT_PADDING)
-								.text_size(20),
-							)
-							.spacing(1);
-					}
+						pick_list(
+							vec.clone(),
+							Some::<Translated<Ability>>(ability.clone().into()),
+							closure!(clone ability, |val| Message::AbilityChanged(ability.clone(), val.unwrap())),
+						)
+						.width(Length::Fill)
+						.padding(INPUT_PADDING)
+						.text_size(20)
+						.into()
+					};
 
-					col2 = col2.push(SheetDots::new(
+					let dots = SheetDots::new(
 						*val,
 						0,
 						5,
 						Shape::Dots,
 						None,
 						closure!(clone ability, |val| Message::AbilityValChanged(ability.clone(), val)),
-					));
+					);
+
+					col = col.push(row![item, dots]);
 				}
 
-				new = new.push(
+				col = col.push(
 					pick_list(vec, None::<Translated<Ability>>, |key| {
 						Message::NewAbility(key.unwrap())
 					})
@@ -725,14 +717,20 @@ impl OverviewTab {
 					.text_size(20),
 				);
 			}
-
-			if let Some(name) = character.splat.ability_name() {
-				col = col
-					.push(text(i18n::LANGUAGE_LOADER.get(name)).size(H3_SIZE))
-					.push(column![row![col1, col2], new]);
-			}
 		}
 
-		col.into()
+		Column::new()
+			.align_items(Alignment::Center)
+			.spacing(TITLE_SPACING)
+			.push(
+				text(if let Some(name) = character.splat.ability_name() {
+					i18n::LANGUAGE_LOADER.get(name)
+				} else {
+					String::new()
+				})
+				.size(H3_SIZE),
+			)
+			.push(col)
+			.into()
 	}
 }

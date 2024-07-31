@@ -3,7 +3,7 @@ use cofd::{
 	splat::{Merit, SplatTrait},
 };
 use iced::{
-	widget::{column, pick_list, row, text, text_input, Column},
+	widget::{column, pick_list, row, text, text_input, Column, Row},
 	Alignment, Length,
 };
 
@@ -57,14 +57,7 @@ impl MeritComponent {
 	}
 
 	pub fn view(&self, character: &Character) -> Element<Message> {
-		let mut col1 = Column::new().spacing(3).width(Length::FillPortion(3));
-		let mut col2 = Column::new()
-			.spacing(4)
-			.width(Length::FillPortion(2))
-			.align_items(Alignment::End);
-
 		let mut vec = Vec::new();
-
 		vec.push(Merit::_Custom(String::from("--- Mental Merits ---")));
 		vec.extend(Merit::mental());
 
@@ -98,48 +91,47 @@ impl MeritComponent {
 			.map(Into::into)
 			.collect();
 
+		let mut col = Column::new().spacing(3);
 		for (i, (merit, val)) in character.merits.iter().cloned().enumerate() {
-			if let Merit::_Custom(str) = &merit {
-				col1 = col1.push(
-					text_input("", str)
-						.on_input(move |key| Message(i, Merit::_Custom(key), val))
-						.padding(INPUT_PADDING),
-				);
+			let item: Element<Message> = if let Merit::_Custom(str) = &merit {
+				text_input("", str)
+					.on_input(move |key| Message(i, Merit::_Custom(key), val))
+					.width(Length::Fill)
+					.padding(INPUT_PADDING)
+					.into()
 			} else {
-				col1 = col1
-					.push(
-						pick_list(
-							vec.clone(),
-							Some::<Translated<Merit>>(merit.clone().into()),
-							move |key| Message(i, key.unwrap(), val),
-						)
-						.padding(INPUT_PADDING)
-						.text_size(20)
-						.width(Length::Fill),
-					)
-					.spacing(1);
-			}
+				pick_list(
+					vec.clone(),
+					Some::<Translated<Merit>>(merit.clone().into()),
+					move |key| Message(i, key.unwrap(), val),
+				)
+				.padding(INPUT_PADDING)
+				.text_size(20)
+				.width(Length::Fill)
+				.into()
+			};
 
-			col2 = col2.push(SheetDots::new(val, 0, 5, Shape::Dots, None, {
+			let dots = SheetDots::new(val, 0, 5, Shape::Dots, None, {
 				let merit = merit.clone();
 				move |val| Message(i, merit.clone(), val)
-			}));
+			});
+
+			col = col.push(row![item, dots]);
 		}
 
-		let new = pick_list(vec, None::<Translated<Merit>>, {
-			let len = character.merits.len();
-			move |key| Message(len, key.unwrap(), 0)
-		})
-		.padding(INPUT_PADDING)
-		.text_size(20)
-		.width(Length::Fill);
+		col = col.push(
+			pick_list(vec, None::<Translated<Merit>>, {
+				let len = character.merits.len();
+				move |key| Message(len, key.unwrap(), 0)
+			})
+			.padding(INPUT_PADDING)
+			.text_size(20)
+			.width(Length::Fill),
+		);
 
-		column![
-			text(fl!("merits")).size(H3_SIZE),
-			column![row![col1, col2], new]
-		]
-		.spacing(TITLE_SPACING)
-		.align_items(Alignment::Center)
-		.into()
+		column![text(fl!("merits")).size(H3_SIZE), col]
+			.spacing(TITLE_SPACING)
+			.align_items(Alignment::Center)
+			.into()
 	}
 }

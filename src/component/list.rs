@@ -75,9 +75,13 @@ where
 			col = col.push((self.f)(i, val));
 		}
 
-		Column::new()
-			.push(text(self.str.clone()).size(H3_SIZE))
-			.push(col)
+		let mut out = Column::new();
+
+		if !self.str.is_empty() {
+			out = out.push(text(self.str.clone()).size(H3_SIZE));
+		}
+
+		out.push(col)
 			.spacing(TITLE_SPACING)
 			.align_items(Alignment::Center)
 			.max_width(self.max_width)
