@@ -24,6 +24,10 @@ pub enum Message {
 	XSplatChanged(XSplat),
 	YSplatChanged(YSplat),
 	ZSplatChanged(ZSplat),
+
+	XSplatNameChanged(String),
+	YSplatNameChanged(String),
+	ZSplatNameChanged(String),
 }
 
 impl InfoBar {
@@ -35,26 +39,45 @@ impl InfoBar {
 		match message {
 			Message::InfoTraitChanged(val, _trait) => *character.info.get_mut(_trait) = val,
 			Message::XSplatChanged(xsplat) => {
-				if xsplat.name().eq("") {
-					character.splat.set_xsplat(None);
-				} else {
-					character.splat.set_xsplat(Some(xsplat));
-				}
+				character.splat.set_xsplat(Some(xsplat));
 				character.calc_mod_map();
 			}
 			Message::YSplatChanged(ysplat) => {
-				if ysplat.name().eq("") {
-					character.splat.set_ysplat(None);
-				} else {
-					character.splat.set_ysplat(Some(ysplat));
-				}
+				character.splat.set_ysplat(Some(ysplat));
 				//character.calc_mod_map();
 			}
 			Message::ZSplatChanged(zsplat) => {
-				if zsplat.name().eq("") {
+				character.splat.set_zsplat(Some(zsplat));
+			}
+
+			Message::XSplatNameChanged(name) => {
+				if name.is_empty() {
+					character.splat.set_xsplat(None);
+				} else if let Some(mut xsplat) = character.splat.xsplat() {
+					if let Some(xsplat_name) = xsplat.name_mut() {
+						*xsplat_name = name;
+						character.splat.set_xsplat(Some(xsplat));
+					}
+				}
+			}
+			Message::YSplatNameChanged(name) => {
+				if name.is_empty() {
+					character.splat.set_ysplat(None);
+				} else if let Some(mut ysplat) = character.splat.ysplat() {
+					if let Some(ysplat_name) = ysplat.name_mut() {
+						*ysplat_name = name;
+						character.splat.set_ysplat(Some(ysplat));
+					}
+				}
+			}
+			Message::ZSplatNameChanged(name) => {
+				if name.is_empty() {
 					character.splat.set_zsplat(None);
-				} else {
-					character.splat.set_zsplat(Some(zsplat));
+				} else if let Some(mut zsplat) = character.splat.zsplat() {
+					if let Some(zsplat_name) = zsplat.name_mut() {
+						*zsplat_name = name;
+						character.splat.set_zsplat(Some(zsplat));
+					}
 				}
 			}
 		}
@@ -97,18 +120,11 @@ impl InfoBar {
 				let ysplat = character.splat.ysplat();
 				let zsplat = character.splat.zsplat();
 
-				let xsplat: Element<Message> = if let Some(xsplat) = xsplat.clone()
+				let xsplat: Element<Message> = if let Some(xsplat) = &xsplat
 					&& xsplat.is_custom()
 				{
 					text_input("", xsplat.name())
-						.on_input({
-							let xsplat = xsplat.clone();
-							move |val| {
-								let mut xsplat = xsplat.clone();
-								*xsplat.name_mut().unwrap() = val;
-								Message::XSplatChanged(xsplat)
-							}
-						})
+						.on_input(Message::XSplatNameChanged)
 						.padding(INPUT_PADDING)
 						.into()
 				} else {
@@ -122,18 +138,11 @@ impl InfoBar {
 					.into()
 				};
 
-				let ysplat: Element<Message> = if let Some(ysplat) = ysplat.clone()
+				let ysplat: Element<Message> = if let Some(ysplat) = &ysplat
 					&& ysplat.is_custom()
 				{
 					text_input("", ysplat.name())
-						.on_input({
-							let ysplat = ysplat.clone();
-							move |val| {
-								let mut ysplat = ysplat.clone();
-								*ysplat.name_mut().unwrap() = val;
-								Message::YSplatChanged(ysplat)
-							}
-						})
+						.on_input(Message::YSplatNameChanged)
 						.padding(INPUT_PADDING)
 						.into()
 				} else {
@@ -147,18 +156,11 @@ impl InfoBar {
 					.into()
 				};
 
-				let zsplat: Element<Message> = if let Some(zsplat) = zsplat.clone()
+				let zsplat: Element<Message> = if let Some(zsplat) = &zsplat
 					&& zsplat.is_custom()
 				{
 					text_input("", zsplat.name())
-						.on_input({
-							let zsplat = zsplat.clone();
-							move |val| {
-								let mut zsplat = zsplat.clone();
-								*zsplat.name_mut().unwrap() = val;
-								Message::ZSplatChanged(zsplat)
-							}
-						})
+						.on_input(Message::ZSplatNameChanged)
 						.padding(INPUT_PADDING)
 						.into()
 				} else {

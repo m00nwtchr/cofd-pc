@@ -20,8 +20,8 @@ use iced::{
 
 use crate::{
 	component::{
-		attributes, info, info::InfoBar, integrity, list, merits, skills, traits_component,
-		AttributeBar, IntegrityComponent, MeritComponent, SkillsComponent,
+		attributes, info, info::InfoBar, integrity, list, merits, skills, traits, AttributeBar,
+		IntegrityComponent, MeritComponent, SkillsComponent, TraitsComponent,
 	},
 	fl, i18n,
 	i18n::{Translate, Translated},
@@ -38,12 +38,12 @@ pub struct OverviewTab {
 	attribute_bar: AttributeBar,
 	skills_component: SkillsComponent,
 	merit_component: MeritComponent,
+	traits_component: TraitsComponent,
 	integrity_component: IntegrityComponent,
 }
 
 #[derive(Clone)]
 pub enum Message {
-	TraitChanged(u16, Trait),
 	// InfoTraitChanged(String, InfoTrait),
 	// XSplatChanged(XSplat),
 	// YSplatChanged(YSplat),
@@ -53,6 +53,10 @@ pub enum Message {
 
 	// CustomAbilityChanged(Ability, String),
 	HealthChanged(Wound),
+	WillpowerChanged(u16),
+	PowerChanged(u16),
+	FuelChanged(u16),
+
 	// IntegrityDamage(SplatType, Wound),
 	// TouchstoneChanged(usize, String),
 	ConditionChanged(usize, String),
@@ -69,6 +73,7 @@ pub enum Message {
 	AttributeBar(attributes::Message),
 	SkillComponent(skills::Message),
 	MeritComponent(merits::Message),
+	TraitsComponent(traits::Message),
 	IntegrityComponent(integrity::Message),
 }
 
@@ -88,6 +93,7 @@ impl OverviewTab {
 			attribute_bar: AttributeBar::new(),
 			skills_component: SkillsComponent::new(),
 			merit_component: MeritComponent::new(),
+			traits_component: TraitsComponent::new(),
 			integrity_component: IntegrityComponent::new(),
 		}
 	}
@@ -115,21 +121,12 @@ impl OverviewTab {
 					character.add_ability(ability, 0);
 				}
 			}
-			Message::TraitChanged(val, _trait) => match _trait {
-				Trait::DerivedTrait(DerivedTrait::Size) => {
-					character.base_size = (val as i16
-						- character.get_modifier(Trait::DerivedTrait(DerivedTrait::Size)))
-						as u16;
-				}
-				Trait::Willpower => character.willpower = val,
-				Trait::Power => character.power = val,
-				Trait::Fuel => character.fuel = val,
-				Trait::Integrity => character.integrity = val,
-				Trait::Beats => character.beats = val,
-				Trait::AlternateBeats => character.alternate_beats = val,
-				_ => {}
-			},
+
 			Message::HealthChanged(wound) => character.health_mut().poke(&wound),
+			Message::WillpowerChanged(willpower) => character.willpower = willpower,
+			Message::PowerChanged(power) => character.power = power,
+			Message::FuelChanged(fuel) => character.fuel = fuel,
+
 			Message::ConditionChanged(i, val) => {
 				if val.is_empty() {
 					character.conditions.remove(i);
@@ -204,6 +201,7 @@ impl OverviewTab {
 			Message::AttributeBar(message) => self.attribute_bar.update(message, character),
 			Message::SkillComponent(message) => self.skills_component.update(message, character),
 			Message::MeritComponent(message) => self.merit_component.update(message, character),
+			Message::TraitsComponent(message) => self.traits_component.update(message, character),
 			Message::IntegrityComponent(message) => {
 				self.integrity_component.update(message, character);
 			}
@@ -237,7 +235,7 @@ impl OverviewTab {
 				character.max_willpower(),
 				Shape::Dots,
 				None,
-				|val| Message::TraitChanged(val, Trait::Willpower),
+				Message::WillpowerChanged,
 			);
 
 			column![text(fl!("willpower")).size(H3_SIZE), dots]
@@ -246,9 +244,14 @@ impl OverviewTab {
 		};
 
 		let st = if let Some(st) = character.splat.supernatural_tolerance() {
-			let dots = SheetDots::new(character.power, 1, 10, Shape::Dots, None, |val| {
-				Message::TraitChanged(val, Trait::Power)
-			});
+			let dots = SheetDots::new(
+				character.power,
+				1,
+				10,
+				Shape::Dots,
+				None,
+				Message::PowerChanged,
+			);
 
 			column![text(st.translated()).size(H3_SIZE), dots]
 				.spacing(TITLE_SPACING)
@@ -264,7 +267,7 @@ impl OverviewTab {
 				character.max_fuel(),
 				Shape::Boxes,
 				Some(10),
-				|val| Message::TraitChanged(val, Trait::Fuel),
+				Message::FuelChanged,
 			);
 
 			column![text(fuel.translated()).size(H3_SIZE), boxes]
@@ -410,7 +413,10 @@ impl OverviewTab {
 			.merit_component
 			.view(character)
 			.map(Message::MeritComponent);
-		let traits = traits_component(character, Message::TraitChanged);
+		let traits = self
+			.traits_component
+			.view(character)
+			.map(Message::TraitsComponent);
 
 		let regalia = if let Splat::Changeling(data) = &character.splat {
 			let favoured_regalia = data.seeming.get_favored_regalia();

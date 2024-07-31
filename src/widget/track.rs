@@ -70,8 +70,8 @@ where
 	#[allow(clippy::cast_precision_loss)]
 	fn layout(
 		&self,
-		tree: &mut widget::Tree,
-		renderer: &Renderer,
+		_tree: &mut widget::Tree,
+		_renderer: &Renderer,
 		limits: &layout::Limits,
 	) -> layout::Node {
 		let size = Size::new(self.size, self.size);
