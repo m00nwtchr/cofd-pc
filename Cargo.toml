@@ -6,6 +6,9 @@ edition = "2021"
 license = "MPL"
 publish = false
 
+[features]
+save_demo_characters = []
+
 [profile.dev]
 incremental = false
 

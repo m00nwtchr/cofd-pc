@@ -245,6 +245,7 @@ mod demo {
 	use crate::store::Store;
 
 	#[test]
+	#[cfg(feature = "save_demo_characters")]
 	pub fn save() -> anyhow::Result<()> {
 		let vec = characters();
 		let store = Store::new().unwrap();
